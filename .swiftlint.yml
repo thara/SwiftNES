@@ -1,0 +1,18 @@
+disabled_rules:
+- conditional_returns_on_newline
+- discouraged_optional_collection
+- file_header
+- strict_fileprivate
+- switch_case_on_newline
+
+included:
+- Sources/SwiftNES
+
+file_length:
+- 120
+- 200
+
+function_body_length:
+- 100
+- 200
+
