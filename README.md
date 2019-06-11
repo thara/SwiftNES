@@ -1,3 +1,3 @@
 # SwiftNES
 
-A description of this package.
+[WIP] NES Emulator written by Swift
