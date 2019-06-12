@@ -5,7 +5,7 @@ protocol Memory {
     func write(addr: UInt16, data: UInt8)
 }
 
-class AddressSpace : Memory {
+class AddressSpace: Memory {
     private var memory: NSMutableArray
     private var wram: WRAM
 
@@ -36,7 +36,7 @@ class AddressSpace : Memory {
     }
 }
 
-class WRAM : Memory {
+class WRAM: Memory {
     private var data: NSMutableArray
 
     init(memory: NSMutableArray) {
