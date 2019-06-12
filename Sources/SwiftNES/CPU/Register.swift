@@ -1,17 +1,16 @@
-/// Register List
-enum Register {
+struct Registers {
     /// Accumulator
-    case A
+    var A: UInt8
     /// Index register
-    case X
+    var X: UInt8
     /// Index register
-    case Y
+    var Y: UInt8
     /// Stack pointer
-    case S
+    var S: UInt8
     /// Status register
-    case P
+    var P: UInt8
     /// Program Counter
-    case PC
+    var PC: UInt16
 }
 
 /// Status register details
