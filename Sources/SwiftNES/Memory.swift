@@ -3,6 +3,14 @@ import Foundation
 protocol Memory {
     func read(addr: UInt16) -> UInt8
     func write(addr: UInt16, data: UInt8)
+
+    func readWord(addr: UInt16) -> UInt16
+}
+
+extension Memory {
+    func readWord(addr: UInt16) -> UInt16 {
+        return UInt16(read(addr: addr)) | (UInt16(read(addr: addr + 1)) << 8)
+    }
 }
 
 class AddressSpace: Memory {

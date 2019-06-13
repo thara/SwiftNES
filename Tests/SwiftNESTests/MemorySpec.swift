@@ -36,5 +36,25 @@ class MemorySpec: QuickSpec {
                 expect(mem.read(addr: 2049)).to(equal(0))
             }
         }
+
+        describe("readWord") {
+
+            let mem = AddressSpace()
+
+            it("read 1 word") {
+                mem.write(addr: 128, data: 1)
+                mem.write(addr: 129, data: 1)
+
+                expect(mem.readWord(addr: 128)).to(equal(0b0000000100000001))
+
+                mem.write(addr: 10, data: 64)
+                mem.write(addr: 11, data: 32)
+                mem.write(addr: 12, data: 255)
+
+                expect(mem.readWord(addr: 10)).to(equal(0b0010000001000000))
+                expect(mem.readWord(addr: 11)).to(equal(0b1111111100100000))
+                expect(mem.readWord(addr: 12)).to(equal(0b0000000011111111))
+            }
+        }
     }
 }
