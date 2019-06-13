@@ -41,3 +41,10 @@ extension UInt8 {
         return self & s.rawValue >= 1
     }
 }
+
+
+extension Sequence where Element == Status {
+    func toBits() -> UInt8 {
+        return reduce(0) { acc, e in acc + e.rawValue }
+    }
+}
