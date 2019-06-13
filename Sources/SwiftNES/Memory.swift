@@ -48,7 +48,7 @@ class WRAM: Memory {
     }
 
     func write(addr: UInt16, data: UInt8) {
-        data[Int(addr)] = data
+        self.data[Int(addr)] = data
     }
 }
 
