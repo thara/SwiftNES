@@ -28,12 +28,28 @@ class MemorySpec: QuickSpec {
                 expect(mem.read(addr: 256)).to(equal(87))
                 expect(mem.read(addr: 257)).to(equal(0))
             }
+        }
 
-            it("Out of region") {
-                expect(mem.read(addr: 2049)).to(equal(0))
+        describe("ROM") {
 
-                mem.write(addr: 2049, data: 100)
-                expect(mem.read(addr: 2049)).to(equal(0))
+            it("load Program") {
+                let mem = AddressSpace()
+
+                var program: [UInt8]  = Array(repeating: 0, count: 0x4000)
+                program[0x0000] = 1
+                program[0x0100] = 2
+                program[0x1000] = 3
+
+                mem.loadProgram(index: 0, data: program)
+                mem.loadProgram(index: 1, data: program)
+
+                expect(mem.read(addr: 0x8000)).to(equal(1))
+                expect(mem.read(addr: 0x8100)).to(equal(2))
+                expect(mem.read(addr: 0x9000)).to(equal(3))
+
+                expect(mem.read(addr: 0xC000)).to(equal(1))
+                expect(mem.read(addr: 0xC100)).to(equal(2))
+                expect(mem.read(addr: 0xD000)).to(equal(3))
             }
         }
 
