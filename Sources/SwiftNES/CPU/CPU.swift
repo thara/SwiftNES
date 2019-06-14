@@ -1,5 +1,7 @@
-struct OpCode {}
-struct Instruction {}
+enum OpCode {
+    case byte(data: UInt8)
+    case word(data: UInt16)
+}
 
 protocol CPU {
     func fetch() -> OpCode
@@ -37,12 +39,12 @@ class CPUEmulator : CPU {
 
     func fetch() -> OpCode {
         //FIXME Not implemented
-        return OpCode()
+        return .byte(data: 0x0000)
     }
 
     func decode(_ opcode: OpCode) -> Instruction {
         //FIXME Not implemented
-        return Instruction()
+        return Instruction(operation: .LDA, addressingMode: .immediate)
     }
 
     func execute(_ instraction: Instruction) {
