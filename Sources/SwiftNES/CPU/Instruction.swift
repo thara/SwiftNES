@@ -19,7 +19,7 @@ enum AddressingMode {
 }
 
 // http://obelisk.me.uk/6502/reference.html
-enum Operation {
+enum Mnemonic {
     // MARK: - Load/Store Operations
 
     /// Load Accumulator
