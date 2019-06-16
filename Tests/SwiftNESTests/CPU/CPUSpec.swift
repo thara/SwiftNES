@@ -6,6 +6,27 @@ import Nimble
 class CPUSpec: QuickSpec {
     override func spec() {
 
+        describe("fetch") {
+            it("read opcode at address indicated by PC") {
+                let cpu = CPUEmulator()
+
+                var mem: [UInt8] = Array(repeating: 0, count: 0x4000)
+                mem[0x9051 - 0x8000] = 0x90
+                mem[0x9052 - 0x8000] = 0x3F
+                mem[0x9053 - 0x8000] = 0x81
+                mem[0x9054 - 0x8000] = 0x90
+                cpu.memory.loadProgram(index: 0, data: mem)
+
+                cpu.registers.PC = 0x9052
+
+                var opcode = cpu.fetch()
+                expect(opcode).to(equal(0x3F))
+
+                opcode = cpu.fetch()
+                expect(opcode).to(equal(0x81))
+            }
+        }
+
         describe("reset") {
             it("reset registers & memory state") {
                 let cpu = CPUEmulator()

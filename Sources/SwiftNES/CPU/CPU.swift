@@ -1,7 +1,4 @@
-enum OpCode {
-    case byte(data: UInt8)
-    case word(data: UInt16)
-}
+typealias OpCode = UInt8
 
 protocol CPU {
     func fetch() -> OpCode
@@ -38,8 +35,9 @@ class CPUEmulator : CPU {
     }
 
     func fetch() -> OpCode {
-        //FIXME Not implemented
-        return .byte(data: 0x0000)
+        let opcode = memory.read(addr: registers.PC)
+        registers.PC += 1
+        return opcode
     }
 
     func decode(_ opcode: OpCode) -> Instruction {
