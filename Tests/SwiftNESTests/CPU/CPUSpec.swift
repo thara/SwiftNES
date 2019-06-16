@@ -27,6 +27,28 @@ class CPUSpec: QuickSpec {
             }
         }
 
+        describe("decode") {
+            let cpu = CPUEmulator()
+
+            context("If passed opcode is supported") {
+                it("select an instruction by opcode") {
+                    let instruction = cpu.decode(0x24)
+                    expect(instruction.mnemonic).to(equal(.BIT))
+                    expect(instruction.addressing).to(equal(.zeroPage))
+                    expect(instruction.cycle).to(equal(3))
+                }
+            }
+
+            context("If passed opcode is not supported") {
+                it("return NOP instruction") {
+                    let instruction = cpu.decode(0x02)
+                    expect(instruction.mnemonic).to(equal(Instruction.NOP.mnemonic))
+                    expect(instruction.addressing).to(equal(Instruction.NOP.addressing))
+                    expect(instruction.cycle).to(equal(Instruction.NOP.cycle))
+                }
+            }
+        }
+
         describe("reset") {
             it("reset registers & memory state") {
                 let cpu = CPUEmulator()

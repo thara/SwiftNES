@@ -1,26 +1,32 @@
 typealias OpCode = UInt8
 
-protocol CPU {
+protocol CPU: class {
+    var registers: Registers { get set }
+    var memory: AddressSpace { get }
+
     func fetch() -> OpCode
     func decode(_ opcode: OpCode) -> Instruction
-    func execute(_ instraction: Instruction)
+    func execute(_ instraction: Instruction) -> UInt
 
     /// Reset registers & memory state
     func reset()
 }
 
 extension CPU {
-    func run() {
+    func run() -> UInt {
         let opcode = fetch()
         let instruction = decode(opcode)
-        execute(instruction)
+        let cycle = execute(instruction)
+        return cycle
     }
 }
 
-class CPUEmulator : CPU {
+class CPUEmulator: CPU {
 
     var registers: Registers
     var memory: AddressSpace
+
+    var instructions: [Instruction?]
 
     init() {
         registers = Registers(
@@ -32,6 +38,8 @@ class CPUEmulator : CPU {
             PC: 0x00
         )
         memory = AddressSpace()
+        instructions = []  // Need all properties are initialized because 'self' is used in 'buildInstructionTable'
+        instructions = buildInstructionTable()
     }
 
     func fetch() -> OpCode {
@@ -41,12 +49,17 @@ class CPUEmulator : CPU {
     }
 
     func decode(_ opcode: OpCode) -> Instruction {
-        //FIXME Not implemented
-        return Instruction(operation: .LDA, addressingMode: .immediate)
+        if let ins = instructions[Int(opcode)] {
+            return ins
+        }
+        return Instruction.NOP
     }
 
-    func execute(_ instraction: Instruction) {
-        //FIXME Not implemented
+    func execute(_ inst: Instruction) -> UInt {
+        let operand = fetchOperand(addressingMode: inst.addressing)
+        let count = inst.exec?(operand) ?? 1
+        registers.PC += count
+        return inst.cycle
     }
 
     func reset() {
