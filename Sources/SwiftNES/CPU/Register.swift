@@ -1,6 +1,12 @@
 struct Registers {
     /// Accumulator
-    var A: UInt8
+    var A: UInt8 {
+        didSet {
+            if A & 0x80 != 0 {
+                P.formUnion(.N)
+            }
+        }
+    }
     /// Index register
     var X: UInt8
     /// Index register
@@ -41,7 +47,6 @@ extension UInt8 {
         return self & s.rawValue >= 1
     }
 }
-
 
 extension Sequence where Element == Status {
     func toBits() -> UInt8 {
