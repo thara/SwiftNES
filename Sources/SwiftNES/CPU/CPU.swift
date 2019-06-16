@@ -31,7 +31,7 @@ class CPUEmulator : CPU {
             X: 0x00,
             Y: 0x00,
             S: 0x00,
-            P: [Status.R, Status.B, Status.I].toBits(),
+            P: [Status.R, Status.B, Status.I],
             PC: 0x00
         )
         memory = AddressSpace()

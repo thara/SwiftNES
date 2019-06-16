@@ -8,7 +8,7 @@ struct Registers {
     /// Stack pointer
     var S: UInt8
     /// Status register
-    var P: UInt8
+    var P: Status
     /// Program Counter
     var PC: UInt16
 }

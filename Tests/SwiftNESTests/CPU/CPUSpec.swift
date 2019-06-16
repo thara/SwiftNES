@@ -15,7 +15,7 @@ class CPUSpec: QuickSpec {
                     X: 0x1F,
                     Y: 0x59,
                     S: 0x37,
-                    P: [Status.N, Status.V].toBits(),
+                    P: [Status.N, Status.V],
                     PC: 0b0101011010001101
                 )
 
@@ -35,7 +35,7 @@ class CPUSpec: QuickSpec {
                 expect(cpu.registers.X).to(equal(0x0000))
                 expect(cpu.registers.Y).to(equal(0x0000))
                 expect(cpu.registers.S).to(equal(0x00FF))
-                expect(cpu.registers.P).to(equal([Status.N, Status.V].toBits()))
+                expect(cpu.registers.P).to(equal([Status.N, Status.V]))
                 expect(cpu.registers.PC).to(equal(0b0111111100100000))
             }
         }
