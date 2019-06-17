@@ -10,6 +10,9 @@ protocol CPU: class {
 
     /// Reset registers & memory state
     func reset()
+
+    func pushStack(data: UInt8)
+    func pullStack() -> UInt8
 }
 
 extension CPU {
@@ -18,6 +21,16 @@ extension CPU {
         let instruction = decode(opcode)
         let cycle = execute(instruction)
         return cycle
+    }
+
+    func pushStack(data: UInt8) {
+        memory.write(addr: UInt16(registers.S) + 0x100, data: data)
+        registers.S -= 1
+    }
+
+    func pullStack() -> UInt8 {
+        registers.S += 1
+        return memory.read(addr: UInt16(registers.S) + 0x100)
     }
 }
 

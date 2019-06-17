@@ -2,15 +2,24 @@ struct Registers {
     /// Accumulator
     var A: UInt8 {
         didSet {
-            if A & 0x80 != 0 {
-                P.formUnion(.N)
-            }
+            if A == 0 { P.formUnion(.Z) }
+            if A & 0x80 != 0 { P.formUnion(.N) }
         }
     }
     /// Index register
-    var X: UInt8
+    var X: UInt8 {
+        didSet {
+            if X == 0 { P.formUnion(.Z) }
+            if X & 0x80 != 0 { P.formUnion(.N) }
+        }
+    }
     /// Index register
-    var Y: UInt8
+    var Y: UInt8 {
+        didSet {
+            if Y == 0 { P.formUnion(.Z) }
+            if Y & 0x80 != 0 { P.formUnion(.N) }
+        }
+    }
     /// Stack pointer
     var S: UInt8
     /// Status register
@@ -45,11 +54,5 @@ extension UInt8 {
     /// Return whether a bit flagged at specified status as status register value
     func flagged(_ s: Status) -> Bool {
         return self & s.rawValue >= 1
-    }
-}
-
-extension Sequence where Element == Status {
-    func toBits() -> UInt8 {
-        return reduce(0) { acc, e in acc + e.rawValue }
     }
 }
