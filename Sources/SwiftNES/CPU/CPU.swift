@@ -12,7 +12,9 @@ protocol CPU: class {
     func reset()
 
     func pushStack(data: UInt8)
+    func pushStack(word: UInt16)
     func pullStack() -> UInt8
+    func pullStack() -> UInt16
 }
 
 extension CPU {
@@ -28,9 +30,20 @@ extension CPU {
         registers.S -= 1
     }
 
+    func pushStack(word: UInt16) {
+        pushStack(data: UInt8(word >> 8))
+        pushStack(data: UInt8(word & 0xFF))
+    }
+
     func pullStack() -> UInt8 {
         registers.S += 1
         return memory.read(addr: UInt16(registers.S) + 0x100)
+    }
+
+    func pullStack() -> UInt16 {
+        let lo: UInt8 = pullStack()
+        let ho: UInt8 = pullStack()
+        return UInt16(ho) << 8 & UInt16(lo)
     }
 }
 
@@ -70,8 +83,7 @@ class CPUEmulator: CPU {
 
     func execute(_ inst: Instruction) -> UInt {
         let operand = fetchOperand(addressingMode: inst.addressing)
-        let count = inst.exec?(operand) ?? 1
-        registers.PC += count
+        registers.PC = inst.exec?(operand) ?? registers.PC + 1
         return inst.cycle
     }
 

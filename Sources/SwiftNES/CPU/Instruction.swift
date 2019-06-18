@@ -6,7 +6,7 @@ struct Instruction {
     let cycle: UInt
     let exec: ((Operand?) -> UInt16)?
 
-    static let NOP = Instruction(mnemonic: .NOP, addressing: .implicit, cycle: 2) { _ in 1 }
+    static let NOP = Instruction(mnemonic: .NOP, addressing: .implicit, cycle: 2, exec: nil)
 }
 
 extension CPU {
@@ -252,7 +252,7 @@ extension CPU {
         case 0x1E:
             return Instruction(mnemonic: .ASL, addressing: .absoluteX, cycle: 7, exec: arithmeticShiftLeft)
         case 0x4A:
-            return Instruction(mnemonic: .LSR, addressing: .accumulator, cycle: 2, exec: logicalShiftRight)
+            return Instruction(mnemonic: .LSR, addressing: .accumulator, cycle: 2, exec: logicalShiftRightForAccumulator)
         case 0x46:
             return Instruction(mnemonic: .LSR, addressing: .zeroPage, cycle: 5, exec: logicalShiftRight)
         case 0x56:
@@ -262,7 +262,7 @@ extension CPU {
         case 0x5E:
             return Instruction(mnemonic: .LSR, addressing: .absoluteX, cycle: 7, exec: logicalShiftRight)
         case 0x2A:
-            return Instruction(mnemonic: .ROL, addressing: .accumulator, cycle: 2, exec: rotateLeft)
+            return Instruction(mnemonic: .ROL, addressing: .accumulator, cycle: 2, exec: rotateLeftForAccumulator)
         case 0x26:
             return Instruction(mnemonic: .ROL, addressing: .zeroPage, cycle: 5, exec: rotateLeft)
         case 0x36:
@@ -272,7 +272,7 @@ extension CPU {
         case 0x3E:
             return Instruction(mnemonic: .ROL, addressing: .absoluteX, cycle: 7, exec: rotateLeft)
         case 0x6A:
-            return Instruction(mnemonic: .ROR, addressing: .accumulator, cycle: 2, exec: rotateRight)
+            return Instruction(mnemonic: .ROR, addressing: .accumulator, cycle: 2, exec: rotateRightForAccumulator)
         case 0x66:
             return Instruction(mnemonic: .ROR, addressing: .zeroPage, cycle: 5, exec: rotateRight)
         case 0x76:

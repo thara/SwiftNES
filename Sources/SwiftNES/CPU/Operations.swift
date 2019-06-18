@@ -5,37 +5,37 @@ extension CPU {
     /// LDA
     func loadAccumulator(operand: Operand?) -> UInt16 {
         registers.A = memory.read(addr: operand!)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// LDX
     func loadXRegister(operand: Operand?) -> UInt16 {
         registers.X = memory.read(addr: operand!)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// LDY
     func loadYRegister(operand: Operand?) -> UInt16 {
         registers.Y = memory.read(addr: operand!)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// STA
     func storeAccumulator(operand: Operand?) -> UInt16 {
         memory.write(addr: operand!, data: registers.A)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// STX
     func storeXRegister(operand: Operand?) -> UInt16 {
         memory.write(addr: operand!, data: registers.X)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// STY
     func storeYRegister(operand: Operand?) -> UInt16 {
         memory.write(addr: operand!, data: registers.Y)
-        return 1
+        return registers.PC &+ 1
     }
 
     // MARK: - Register Operations
@@ -43,25 +43,25 @@ extension CPU {
     /// TAX
     func transferAccumulatorToX(operand: Operand?) -> UInt16 {
         registers.X = registers.A
-        return 1
+        return registers.PC &+ 1
     }
 
     /// TAY
     func transferAccumulatorToY(operand: Operand?) -> UInt16 {
         registers.Y = registers.A
-        return 1
+        return registers.PC &+ 1
     }
 
     /// TXA
     func transferXtoAccumulator(operand: Operand?) -> UInt16 {
         registers.A = registers.X
-        return 1
+        return registers.PC &+ 1
     }
 
     /// TYA
     func transferYtoAccumulator(operand: Operand?) -> UInt16 {
         registers.A = registers.Y
-        return 1
+        return registers.PC &+ 1
     }
 
     // MARK: - Stack instructions
@@ -69,25 +69,25 @@ extension CPU {
     /// PHA
     func pushAccumulator(operand: Operand?) -> UInt16 {
         pushStack(data: registers.A)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// PHP
     func pushProcessorStatus(operand: Operand?) -> UInt16 {
         pushStack(data: registers.P.rawValue)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// PLA
     func pullAccumulator(operand: Operand?) -> UInt16 {
         registers.A = pullStack()
-        return 1
+        return registers.PC &+ 1
     }
 
     /// PLP
     func pullProcessorStatus(operand: Operand?) -> UInt16 {
         registers.P = Status(rawValue: pullStack())
-        return 1
+        return registers.PC &+ 1
     }
 
     // MARK: - Logical instructions
@@ -95,19 +95,19 @@ extension CPU {
     /// AND
     func bitwiseANDwithAccumulator(operand: Operand?) -> UInt16 {
         registers.A &= memory.read(addr: operand!)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// EOR
     func bitwiseExclusiveOR(operand: Operand?) -> UInt16 {
         registers.A ^= memory.read(addr: operand!)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// ORA
     func bitwiseORwithAccumulator(operand: Operand?) -> UInt16 {
         registers.A |= memory.read(addr: operand!)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// BIT
@@ -117,7 +117,7 @@ extension CPU {
         if data == 0 { registers.P.formUnion(.Z) }
         if data & 0x40 != 0 { registers.P.formUnion(.V) }
         if data & 0x80 != 0 { registers.P.formUnion(.N) }
-        return 1
+        return registers.PC &+ 1
     }
 
     // MARK: - Arithmetic instructions
@@ -135,7 +135,7 @@ extension CPU {
             registers.P.formUnion(.V)
         }
         registers.A = UInt8(result & 0xFF)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// SBC
@@ -151,7 +151,7 @@ extension CPU {
             registers.P.formUnion(.V)
         }
         registers.A = UInt8(result & 0xFF)
-        return 1
+        return registers.PC &+ 1
     }
 
     /// CMP
@@ -163,7 +163,7 @@ extension CPU {
         if cmp & 0x80 != 0 { registers.P.formUnion(.N) }
         if 0 < cmp { registers.P.formUnion(.C) }
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// CPX
@@ -175,7 +175,7 @@ extension CPU {
         if cmp & 0x80 != 0 { registers.P.formUnion(.N) }
         if 0 < cmp { registers.P.formUnion(.C) }
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// CPY
@@ -187,7 +187,7 @@ extension CPU {
         if cmp & 0x80 != 0 { registers.P.formUnion(.N) }
         if 0 < cmp { registers.P.formUnion(.C) }
 
-        return 1
+        return registers.PC &+ 1
     }
 
     // MARK: - Increment/Decrement instructions
@@ -201,7 +201,7 @@ extension CPU {
 
         memory.write(addr: operand!, data: result)
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// INX
@@ -213,7 +213,7 @@ extension CPU {
 
         registers.X = result
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// INY
@@ -225,7 +225,7 @@ extension CPU {
 
         registers.Y = result
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// DEC
@@ -237,7 +237,7 @@ extension CPU {
 
         memory.write(addr: operand!, data: result)
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// DEX
@@ -249,7 +249,7 @@ extension CPU {
 
         registers.X = result
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// DEY
@@ -261,7 +261,7 @@ extension CPU {
 
         registers.X = result
 
-        return 1
+        return registers.PC &+ 1
     }
 
     // MARK: - Shift instructions
@@ -280,7 +280,7 @@ extension CPU {
 
         memory.write(addr: operand!, data: data)
 
-        return 1
+        return registers.PC &+ 1
     }
 
     func arithmeticShiftLeftForAccumulator(operand: Operand?) -> UInt16 {
@@ -289,7 +289,7 @@ extension CPU {
 
         registers.A = (registers.A << 1) & 0xFF
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// LSR
@@ -306,7 +306,7 @@ extension CPU {
 
         memory.write(addr: operand!, data: data)
 
-        return 1
+        return registers.PC &+ 1
     }
 
     func logicalShiftRightForAccumulator(operand: Operand?) -> UInt16 {
@@ -315,146 +315,209 @@ extension CPU {
 
         registers.A >>= 1
 
-        return 1
+        return registers.PC &+ 1
     }
 
     /// ROL
     func rotateLeft(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        var data = memory.read(addr: operand!)
+        let c = data & 0x80
+
+        data <<= 1
+        if registers.P.contains(.C) { data |= 0x01 }
+
+        registers.P.remove([.C, .Z, .N])
+        if c == 1 { registers.P.formUnion(.C) }
+
+        memory.write(addr: operand!, data: data)
+        return registers.PC &+ 1
+    }
+
+    func rotateLeftForAccumulator(_: Operand?) -> UInt16 {
+        let c = registers.A & 0x80
+
+        var a = registers.A << 1
+        if registers.P.contains(.C) { a |= 0x01 }
+
+        registers.P.remove([.C, .Z, .N])
+        if c == 1 { registers.P.formUnion(.C) }
+
+        registers.A = a
+        return registers.PC &+ 1
     }
 
     /// ROR
     func rotateRight(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        var data = memory.read(addr: operand!)
+        let c = data & 0x01
+
+        data >>= 1
+        if registers.P.contains(.C) { data |= 0x80 }
+
+        registers.P.remove([.C, .Z, .N])
+        if c == 1 { registers.P.formUnion(.C) }
+
+        memory.write(addr: operand!, data: data)
+        return registers.PC &+ 1
+    }
+
+    func rotateRightForAccumulator(operand: Operand?) -> UInt16 {
+        let c = registers.A & 0x01
+
+        var a = registers.A >> 1
+        if registers.P.contains(.C) { a |= 0x80 }
+
+        registers.P.remove([.C, .Z, .N])
+        if c == 1 { registers.P.formUnion(.C) }
+
+        registers.A = a
+        return registers.PC &+ 1
     }
 
     // MARK: - Jump instructions
 
     /// JMP
     func jump(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.PC = operand!
+        return registers.PC &+ 1
     }
 
     /// JSR
     func jumpToSubroutine(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        pushStack(word: registers.PC &- 1)
+        registers.PC = operand!
+        return registers.PC &+ 1
     }
 
     /// RTS
     func returnFromSubroutine(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.PC = pullStack()
+        registers.PC += 1
+        return registers.PC &+ 1
     }
 
     /// RTI
     func returnFromInterrupt(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P = Status(rawValue: pullStack())
+        registers.PC = pullStack()
+        return registers.PC &+ 1
     }
 
     // MARK: - Branch instructions
 
     /// BCC
     func branchIfCarryClear(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        if !registers.P.contains(.C) {
+            registers.PC = operand!
+        }
+        return registers.PC &+ 1
     }
 
     /// BCS
     func branchIfCarrySet(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        if registers.P.contains(.C) {
+            return operand!
+        }
+        return registers.PC &+ 1
     }
 
     /// BEQ
     func branchIfEqual(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        if registers.P.contains(.Z) {
+            return operand!
+        }
+        return registers.PC &+ 1
     }
 
     /// BMI
     func branchIfMinus(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        if registers.P.contains(.N) {
+            return operand!
+        }
+        return registers.PC &+ 1
     }
 
     /// BNE
     func branchIfNotEqual(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        if !registers.P.contains(.Z) {
+            return operand!
+        }
+        return registers.PC &+ 1
     }
 
     /// BPL
     func branchIfPlus(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        if !registers.P.contains(.N) {
+            return operand!
+        }
+        return registers.PC &+ 1
     }
 
     /// BVC
     func branchIfOverflowClear(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        if !registers.P.contains(.V) {
+            return operand!
+        }
+        return registers.PC &+ 1
     }
 
     /// BVS
     func branchIfOverflowSet(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        if registers.P.contains(.V) {
+            return operand!
+        }
+        return registers.PC &+ 1
     }
 
     // MARK: - Flag control instructions
 
     /// CLC
     func clearCarry(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P.remove(.C)
+        return registers.PC &+ 1
     }
 
     /// CLD
     func clearDecimal(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P.remove(.D)
+        return registers.PC &+ 1
     }
 
     /// CLI
     func clearInterrupt(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P.remove(.I)
+        return registers.PC &+ 1
     }
 
     /// CLV
     func clearOverflow(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P.remove(.V)
+        return registers.PC &+ 1
     }
 
     /// SEC
     func setCarryFlag(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P.formUnion(.C)
+        return registers.PC &+ 1
     }
 
     /// SED
     func setDecimalFlag(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P.formUnion(.D)
+        return registers.PC &+ 1
     }
 
     /// SEI
     func setInterruptDisable(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P.formUnion(.I)
+        return registers.PC &+ 1
     }
 
     // MARK: - Misc
 
     /// BRK
     func forceInterrupt(operand: Operand?) -> UInt16 {
-        //TODO
-        return 1
+        registers.P.formUnion(.B)
+        return registers.PC &+ 1
     }
 }
