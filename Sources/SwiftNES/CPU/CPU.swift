@@ -7,9 +7,7 @@ protocol CPU: class {
     func fetch() -> OpCode
     func decode(_ opcode: OpCode) -> Instruction
     func execute(_ instraction: Instruction) -> UInt
-
-    /// Reset registers & memory state
-    func reset()
+    func step() -> UInt
 
     func pushStack(data: UInt8)
     func pushStack(word: UInt16)
@@ -51,6 +49,7 @@ class CPUEmulator: CPU {
 
     var registers: Registers
     var memory: AddressSpace
+    var interrupt: Interrupt?
 
     var instructions: [Instruction?]
 
@@ -87,11 +86,18 @@ class CPUEmulator: CPU {
         return inst.cycle
     }
 
-    func reset() {
-        registers.A = 0x00
-        registers.X = 0x00
-        registers.Y = 0x00
-        registers.S = 0xff
-        registers.PC = memory.readWord(addr: 0xFFFC)
+    func step() -> UInt {
+        switch interrupt {
+        case .RESET?:
+            return reset()
+        case .NMI?:
+            return handleNMI()
+        case .IRQ?:
+            return handleIMQ() ?? run()
+        case .BRK?:
+            return handleBRQ() ?? run()
+        default:
+            return run()
+        }
     }
 }
