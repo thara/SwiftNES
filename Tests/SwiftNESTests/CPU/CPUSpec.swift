@@ -72,13 +72,13 @@ class CPUSpec: QuickSpec {
                 program2[0xFFFE - 0xC000] = 64
                 cpu.memory.loadProgram(index: 1, data: program2)
 
-                cpu.reset()
+                _ = cpu.reset()
 
                 expect(cpu.registers.A).to(equal(0x0000))
                 expect(cpu.registers.X).to(equal(0x0000))
                 expect(cpu.registers.Y).to(equal(0x0000))
                 expect(cpu.registers.S).to(equal(0x00FF))
-                expect(cpu.registers.P).to(equal([Status.N, Status.V]))
+                expect(cpu.registers.P).to(equal([Status.N, Status.V, Status.Z, Status.I]))
                 expect(cpu.registers.PC).to(equal(0b0111111100100000))
             }
         }
