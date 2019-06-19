@@ -1,4 +1,5 @@
 disabled_rules:
+- identifier_name
 - conditional_returns_on_newline
 - discouraged_optional_collection
 - file_header
