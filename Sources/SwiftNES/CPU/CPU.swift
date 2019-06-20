@@ -24,7 +24,7 @@ extension CPU {
     }
 
     func pushStack(data: UInt8) {
-        memory.write(addr: UInt16(registers.S) + 0x100, data: data)
+        memory.write(addr: registers.S.u16 + 0x100, data: data)
         registers.S -= 1
     }
 
@@ -35,13 +35,13 @@ extension CPU {
 
     func pullStack() -> UInt8 {
         registers.S += 1
-        return memory.read(addr: UInt16(registers.S) + 0x100)
+        return memory.read(addr: registers.S.u16 + 0x100)
     }
 
     func pullStack() -> UInt16 {
         let lo: UInt8 = pullStack()
         let ho: UInt8 = pullStack()
-        return UInt16(ho) << 8 & UInt16(lo)
+        return ho.u16 << 8 & lo.u16
     }
 }
 

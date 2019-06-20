@@ -9,7 +9,7 @@ protocol Memory {
 
 extension Memory {
     func readWord(addr: UInt16) -> UInt16 {
-        return UInt16(read(addr: addr)) | (UInt16(read(addr: addr + 1)) << 8)
+        return read(addr: addr).u16 | (read(addr: addr + 1).u16 << 8)
     }
 }
 

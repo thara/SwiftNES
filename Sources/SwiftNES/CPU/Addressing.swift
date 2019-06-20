@@ -21,38 +21,38 @@ extension CPU {
         case .implicit:
             return (nil, 0)
         case .accumulator:
-            return (UInt16(registers.A), 0)
+            return (registers.A.u16, 0)
         case .immediate:
             return (registers.PC, 1)
         case .zeroPage:
-            return (UInt16(memory.read(addr: registers.PC)) & 0xFF, 1)
+            return (memory.read(addr: registers.PC).u16 & 0xFF, 1)
         case .zeroPageX:
-            return ((UInt16(memory.read(addr: registers.PC)) + UInt16(registers.X)) & 0xFF, 1)
+            return ((memory.read(addr: registers.PC).u16 + registers.X.u16) & 0xFF, 1)
         case .zeroPageY:
-            return ((UInt16(memory.read(addr: registers.PC)) + UInt16(registers.Y)) & 0xFF, 1)
+            return ((memory.read(addr: registers.PC).u16 + registers.Y.u16) & 0xFF, 1)
         case .absolute:
             return (memory.readWord(addr: registers.PC), 2)
         case .absoluteX:
-            return (memory.readWord(addr: registers.PC) + UInt16(registers.X) & 0xFFFF, 2)
+            return (memory.readWord(addr: registers.PC) + registers.X.u16 & 0xFFFF, 2)
         case .absoluteY:
-            return (memory.readWord(addr: registers.PC) + UInt16(registers.Y) & 0xFFFF, 2)
+            return (memory.readWord(addr: registers.PC) + registers.Y.u16 & 0xFFFF, 2)
         case .relative:
-            let data = Int8(bitPattern: memory.read(addr: registers.PC))
-            let result = Int16(bitPattern: registers.PC) + Int16(data)
-            return (UInt16(bitPattern: result), 1)
+            let data = memory.read(addr: registers.PC).i16
+            let result = registers.PC.i16 + data
+            return (result.u16, 1)
         case .indirect:
             let low = memory.readWord(addr: registers.PC)
             let high = low & 0xFF00 + ((low + 1) & 0x00FF)  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-            return (UInt16(memory.read(addr: low)) + UInt16(memory.read(addr: high)) << 8, 2)
+            return (memory.read(addr: low).u16 + memory.read(addr: high).u16 << 8, 2)
         case .indexedIndirect:
-            let low = (UInt16(memory.read(addr: registers.PC)) + UInt16(registers.X)) & 0x00FF
+            let low = (memory.read(addr: registers.PC).u16 + registers.X.u16) & 0x00FF
             let high = (low + 1) & 0x00FF  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-            return (UInt16(memory.read(addr: low)) + UInt16(memory.read(addr: high)) << 8, 1)
+            return (memory.read(addr: low).u16 + memory.read(addr: high).u16 << 8, 1)
         case .indirectIndexed:
-            let low = UInt16(memory.read(addr: registers.PC))
+            let low = memory.read(addr: registers.PC).u16
             let high = (low + 1) & 0x00FF  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-            let base = UInt16(memory.read(addr: low)) + UInt16(memory.read(addr: high)) << 8
-            return (base + UInt16(registers.Y), 1)
+            let base = memory.read(addr: low).u16 + memory.read(addr: high).u16 << 8
+            return (base + registers.Y.u16, 1)
         }
     }
 }
