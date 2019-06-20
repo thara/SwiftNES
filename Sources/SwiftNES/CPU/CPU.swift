@@ -81,8 +81,12 @@ class CPUEmulator: CPU {
     }
 
     func execute(_ inst: Instruction) -> UInt {
-        let operand = fetchOperand(addressingMode: inst.addressing)
-        registers.PC = inst.exec?(operand) ?? registers.PC + 1
+        let (operand, pc) = fetchOperand(addressingMode: inst.addressing)
+        if let addr = inst.exec(operand) {
+            registers.PC = addr
+        } else {
+            registers.PC += pc
+        }
         return inst.cycle
     }
 

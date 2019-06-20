@@ -4,9 +4,9 @@ struct Instruction {
     let mnemonic: Mnemonic
     let addressing: AddressingMode
     let cycle: UInt
-    let exec: ((Operand?) -> UInt16)?
+    let exec: ((Operand?) -> UInt16?)
 
-    static let NOP = Instruction(mnemonic: .NOP, addressing: .implicit, cycle: 2, exec: nil)
+    static let NOP = Instruction(mnemonic: .NOP, addressing: .implicit, cycle: 2, exec: { _ in nil })
 }
 
 extension CPU {
