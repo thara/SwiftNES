@@ -1,12 +1,18 @@
 typealias Operand = UInt16
+typealias Operation = ((Operand?) -> PCUpdate)
+
+enum PCUpdate {
+    case jump(addr: UInt16)
+    case next
+}
 
 struct Instruction {
     let mnemonic: Mnemonic
     let addressing: AddressingMode
     let cycle: UInt
-    let exec: ((Operand?) -> UInt16?)
+    let exec: Operation
 
-    static let NOP = Instruction(mnemonic: .NOP, addressing: .implicit, cycle: 2, exec: { _ in nil })
+    static let NOP = Instruction(mnemonic: .NOP, addressing: .implicit, cycle: 2, exec: { _ in .next })
 }
 
 extension CPU {
