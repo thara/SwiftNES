@@ -5,11 +5,12 @@ import Nimble
 
 class InstructionSpec: QuickSpec {
     override func spec() {
+        var cpu: CPU!
+        beforeEach {
+            cpu = CPUEmulator()
+        }
+
         describe("LDA") {
-            var cpu: CPU!
-            beforeEach {
-                cpu = CPUEmulator()
-            }
 
             describe("immediate") {
                 it("load accumulator") {
@@ -161,10 +162,6 @@ class InstructionSpec: QuickSpec {
         }
 
         describe("LDX") {
-            var cpu: CPU!
-            beforeEach {
-                cpu = CPUEmulator()
-            }
 
             describe("immediate") {
                 it("load X register") {
@@ -239,10 +236,6 @@ class InstructionSpec: QuickSpec {
         // skip LDY because of similar specifications to LDA or LDX
 
         describe("STA") {
-            var cpu: CPU!
-            beforeEach {
-                cpu = CPUEmulator()
-            }
 
             describe("zeroPage") {
                 it("Store accumulator") {
@@ -255,7 +248,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.memory.read(addr: 0x00F8)).to(equal(cpu.registers.A))
+                    expect(cpu.memory.read(addr: 0x00F8)).to(equal(0x93))
                     expect(cpu.registers.PC).to(equal(0x0304))
                     expect(cycle).to(equal(3))
                 }
@@ -273,7 +266,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.memory.read(addr: 0x0087)).to(equal(cpu.registers.A))
+                    expect(cpu.memory.read(addr: 0x0087)).to(equal(0x32))
                     expect(cpu.registers.PC).to(equal(0x0304))
                     expect(cycle).to(equal(4))
                 }
@@ -291,7 +284,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.memory.read(addr: 0x07F8)).to(equal(cpu.registers.A))
+                    expect(cpu.memory.read(addr: 0x07F8)).to(equal(0x19))
                     expect(cpu.registers.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
@@ -310,7 +303,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.memory.read(addr: 0x07FA)).to(equal(cpu.registers.A))
+                    expect(cpu.memory.read(addr: 0x07FA)).to(equal(0x24))
                     expect(cpu.registers.PC).to(equal(0x0305))
                     expect(cycle).to(equal(5))
                 }
@@ -330,7 +323,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.memory.read(addr: 0x07FA)).to(equal(cpu.registers.A))
+                    expect(cpu.memory.read(addr: 0x07FA)).to(equal(0x23))
                     expect(cpu.registers.PC).to(equal(0x0305))
                     expect(cycle).to(equal(5))
                 }
@@ -352,7 +345,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.memory.read(addr: 0x0423)).to(equal(cpu.registers.A))
+                    expect(cpu.memory.read(addr: 0x0423)).to(equal(0xF1))
                     expect(cpu.registers.PC).to(equal(0x0304))
                     expect(cycle).to(equal(6))
                 }
@@ -373,11 +366,107 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.memory.read(addr: 0x0773)).to(equal(cpu.registers.A))
+                    expect(cpu.memory.read(addr: 0x0773)).to(equal(0xF2))
                     expect(cpu.registers.PC).to(equal(0x0304))
                     expect(cycle).to(equal(6))
                 }
             }
         }
+
+        // skip STX/STY because of similar specifications to STA
+
+        describe("TAX") {
+            describe("implicit") {
+                it("transfer Accumulator to X register") {
+                    let opcode: UInt8 = 0xAA
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0xF2
+                    cpu.registers.X = 0x32
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.X).to(equal(0xF2))
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("TAY") {
+            describe("implicit") {
+                it("transfer Accumulator to Y register") {
+                    let opcode: UInt8 = 0xA8
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0xF2
+                    cpu.registers.Y = 0x32
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.Y).to(equal(0xF2))
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("TXA") {
+            describe("implicit") {
+                it("transfer X register to accumulator") {
+                    let opcode: UInt8 = 0x8A
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0xF2
+                    cpu.registers.X = 0x32
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0x32))
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("TYA") {
+            describe("implicit") {
+                it("transfer Y register to accumulator") {
+                    let opcode: UInt8 = 0x98
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0xF2
+                    cpu.registers.Y = 0x32
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0x32))
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+//         describe("PHA") {
+//             describe("implicit") {
+//                 it("push accumulator to stack") {
+//                     let opcode: UInt8 = 0x48
+
+//                     cpu.memory.write(addr: 0x0302, data: opcode)
+//                     cpu.registers.PC = 0x0302
+//                     cpu.registers.A = 0xF2
+
+//                     let cycle = cpu.run()
+
+//                     expect(cpu.pullStack() as UInt16).to(equal(0xF2))
+//                     expect(cpu.registers.PC).to(equal(0x0303))
+//                     expect(cycle).to(equal(3))
+//                 }
+//             }
+//         }
     }
 }
