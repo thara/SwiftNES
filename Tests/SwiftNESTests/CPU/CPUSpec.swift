@@ -82,5 +82,30 @@ class CPUSpec: QuickSpec {
                 expect(cpu.registers.PC).to(equal(0b0111111100100000))
             }
         }
+
+        describe("stack") {
+
+            it("push data, and pull the same") {
+                let cpu = CPUEmulator()
+                cpu.registers.S = 0xFF
+
+                cpu.pushStack(data: 0x83)
+                cpu.pushStack(data: 0x14)
+
+                expect(cpu.pullStack() as UInt8).to(equal(0x14))
+                expect(cpu.pullStack() as UInt8).to(equal(0x83))
+            }
+
+            it("push word, and pull the same") {
+                let cpu = CPUEmulator()
+                cpu.registers.S = 0xFF
+
+                cpu.pushStack(word: 0x98AF)
+                cpu.pushStack(word: 0x003A)
+
+                expect(cpu.pullStack() as UInt16).to(equal(0x003A))
+                expect(cpu.pullStack() as UInt16).to(equal(0x98AF))
+            }
+        }
     }
 }

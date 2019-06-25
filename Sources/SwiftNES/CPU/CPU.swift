@@ -41,7 +41,7 @@ extension CPU {
     func pullStack() -> UInt16 {
         let lo: UInt8 = pullStack()
         let ho: UInt8 = pullStack()
-        return ho.u16 << 8 & lo.u16
+        return ho.u16 << 8 | lo.u16
     }
 }
 
