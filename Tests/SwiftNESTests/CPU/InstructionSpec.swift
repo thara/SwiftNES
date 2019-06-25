@@ -529,5 +529,144 @@ class InstructionSpec: QuickSpec {
                 }
             }
         }
+
+        describe("AND") {
+            describe("absolute") {
+                it("performe logical AND on the accumulator") {
+                    let opcode: UInt8 = 0x2D
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 0b01011100)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0b11011011
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0b01011000))
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(4))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("EOR") {
+            describe("absolute") {
+                it("performe exclusive OR on the accumulator") {
+                    let opcode: UInt8 = 0x4D
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 0b01011100)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0b11011011
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0b10000111))
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(4))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("ORA") {
+            describe("absolute") {
+                it("performe OR on the accumulator") {
+                    let opcode: UInt8 = 0x0D
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 0b01011100)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0b11011011
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0b11011111))
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(4))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("BIT") {
+            describe("absolute") {
+
+                context("if zero") {
+                    it("set zero status") {
+                        let opcode: UInt8 = 0x2C
+
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x30)
+                        cpu.memory.write(addr: 0x0304, data: 0x01)
+                        cpu.memory.write(addr: 0x0130, data: 0b10011100)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.A = 0b01000011
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.P.contains(.Z)).to(beTruthy())
+                        expect(cpu.registers.P.contains(.V)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                        expect(cpu.registers.PC).to(equal(0x0305))
+                        expect(cycle).to(equal(4))
+                    }
+                }
+
+                context("if overflow") {
+                    it("set overflow status") {
+                        let opcode: UInt8 = 0x2C
+
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x30)
+                        cpu.memory.write(addr: 0x0304, data: 0x01)
+                        cpu.memory.write(addr: 0x0130, data: 0b01011100)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.A = 0b11011011
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.P.contains(.Z)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.V)).to(beTruthy())
+                        expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                        expect(cpu.registers.PC).to(equal(0x0305))
+                        expect(cycle).to(equal(4))
+                    }
+                }
+
+                context("if negative") {
+                    it("set negative status") {
+                        let opcode: UInt8 = 0x2C
+
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x30)
+                        cpu.memory.write(addr: 0x0304, data: 0x01)
+                        cpu.memory.write(addr: 0x0130, data: 0b10011100)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.A = 0b10011011
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.P.contains(.Z)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.V)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                        expect(cpu.registers.PC).to(equal(0x0305))
+                        expect(cycle).to(equal(4))
+                    }
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
     }
 }
