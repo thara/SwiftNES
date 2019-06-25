@@ -451,22 +451,83 @@ class InstructionSpec: QuickSpec {
             }
         }
 
-//         describe("PHA") {
-//             describe("implicit") {
-//                 it("push accumulator to stack") {
-//                     let opcode: UInt8 = 0x48
+        describe("PHA") {
+            describe("implicit") {
+                it("push accumulator to stack") {
+                    let opcode: UInt8 = 0x48
 
-//                     cpu.memory.write(addr: 0x0302, data: opcode)
-//                     cpu.registers.PC = 0x0302
-//                     cpu.registers.A = 0xF2
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.S = 0xFF
+                    cpu.registers.A = 0xF2
 
-//                     let cycle = cpu.run()
+                    let cycle = cpu.run()
 
-//                     expect(cpu.pullStack() as UInt16).to(equal(0xF2))
-//                     expect(cpu.registers.PC).to(equal(0x0303))
-//                     expect(cycle).to(equal(3))
-//                 }
-//             }
-//         }
+                    expect(cpu.pullStack() as UInt8).to(equal(0xF2))
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(3))
+                }
+            }
+        }
+
+        describe("PHP") {
+            describe("implicit") {
+                it("push processor status to stack") {
+                    let opcode: UInt8 = 0x08
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.S = 0xFF
+                    cpu.registers.P = [.N, .B, .I, .Z, .C]
+
+                    let cycle = cpu.run()
+
+                    expect(Status(rawValue: cpu.pullStack())).to(equal(cpu.registers.P))
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(3))
+                }
+            }
+        }
+
+        describe("PLA") {
+            describe("implicit") {
+                it("pull stack and write accumulator") {
+                    let opcode: UInt8 = 0x68
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.S = 0xFF
+                    cpu.registers.A = 0xF2
+                    cpu.pushStack(data: 0xA2)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0xA2))
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(3))
+                }
+            }
+        }
+
+        describe("PLP") {
+            describe("implicit") {
+                it("pull stack and write processor status") {
+                    let opcode: UInt8 = 0x28
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.S = 0xFF
+
+                    let status: Status = [.N, .R, .Z, .C]
+                    cpu.pushStack(data: status.rawValue)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P).to(equal(status))
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(4))
+                }
+            }
+        }
     }
 }
