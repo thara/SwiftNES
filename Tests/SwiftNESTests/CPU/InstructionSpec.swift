@@ -668,5 +668,172 @@ class InstructionSpec: QuickSpec {
 
             // skip other addressing mode because of similar specifications to the above.
         }
+
+        describe("ADC") {
+            describe("absolute") {
+                it("add with carry") {
+                    let opcode: UInt8 = 0x6D
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 30)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 12
+                    cpu.registers.P.formUnion(.C)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(43))
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(4))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("SBC") {
+            describe("absolute") {
+                it("subtract with carry") {
+                    let opcode: UInt8 = 0xED
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 30)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 42
+                    cpu.registers.P.formUnion(.C)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(11))
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(4))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("CMP") {
+            describe("absolute") {
+                let opcode: UInt8 = 0xCD
+
+                context("A == M") {
+                    it("set Zero flag") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x30)
+                        cpu.memory.write(addr: 0x0304, data: 0x01)
+                        cpu.memory.write(addr: 0x0130, data: 97)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.A = 97
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.P.contains(.C)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.Z)).to(beTruthy())
+                        expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                        expect(cpu.registers.PC).to(equal(0x0305))
+                        expect(cycle).to(equal(4))
+                    }
+                }
+
+                context("A >= M") {
+                    it("set Zero flag") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x30)
+                        cpu.memory.write(addr: 0x0304, data: 0x01)
+                        cpu.memory.write(addr: 0x0130, data: 97)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.A = 98
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                        expect(cpu.registers.P.contains(.Z)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                        expect(cpu.registers.PC).to(equal(0x0305))
+                        expect(cycle).to(equal(4))
+                    }
+                }
+
+                context("A < M") {
+                    it("set Zero flag") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x30)
+                        cpu.memory.write(addr: 0x0304, data: 0x01)
+                        cpu.memory.write(addr: 0x0130, data: 97)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.A = 96
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.P.contains(.C)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.Z)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                        expect(cpu.registers.PC).to(equal(0x0305))
+                        expect(cycle).to(equal(4))
+                    }
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        // skip CPX/CPY because of similar specifications to the CMP.
+
+        describe("INC") {
+            describe("absolute") {
+                it("increment carry") {
+                    let opcode: UInt8 = 0xEE
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 254)
+                    cpu.registers.PC = 0x0302
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.memory.read(addr: 0x0130)).to(equal(255))
+                    expect(cpu.registers.P.contains(.Z)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(6))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        // skip INX/INY because of similar specifications to the INC.
+
+        describe("DEC") {
+            describe("absolute") {
+                it("decrement carry") {
+                    let opcode: UInt8 = 0xCE
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 254)
+                    cpu.registers.PC = 0x0302
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.memory.read(addr: 0x0130)).to(equal(253))
+                    expect(cpu.registers.P.contains(.Z)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(6))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        // skip DEX/DEY because of similar specifications to the INC.
     }
 }
