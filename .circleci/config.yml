@@ -1,0 +1,25 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: swift:5.0.1
+    working_directory: ~/src
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore build artifacts
+          key: swiftpm-{{ checksum "Package.resolved" }}
+      - run:
+          name: Run test
+          command: swift test -v -Xswiftc "-j1"
+      - save_cache:
+          name: Cache build artifacts
+          key: swiftpm-{{ checksum "Package.resolved" }}
+          paths:
+            - ~/src/.build
+
+workflows:
+  test:
+    jobs:
+      - test
