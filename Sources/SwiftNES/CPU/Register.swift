@@ -49,10 +49,3 @@ struct Status: OptionSet {
     /// Carry
     static let C = Status(rawValue: 1 << 0)
 }
-
-extension UInt8 {
-    /// Return whether a bit flagged at specified status as status register value
-    func flagged(_ s: Status) -> Bool {
-        return self & s.rawValue >= 1
-    }
-}
