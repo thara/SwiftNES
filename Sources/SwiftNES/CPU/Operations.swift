@@ -270,10 +270,10 @@ extension CPU {
     func arithmeticShiftLeft(operand: Operand?) -> PCUpdate {
         var data = memory.read(addr: operand!)
 
-        registers.P.remove(.C)
+        registers.P.remove([.C, .Z, .N])
         if data & 0x80 != 0 { registers.P.formUnion(.C) }
 
-        data = (data << 1) & 0xFF
+        data <<= 1
 
         if data == 0 { registers.P.formUnion(.Z) }
         if data & 0x80 != 0 { registers.P.formUnion(.N) }
@@ -284,10 +284,10 @@ extension CPU {
     }
 
     func arithmeticShiftLeftForAccumulator(operand: Operand?) -> PCUpdate {
-        registers.P.remove(.C)
+        registers.P.remove([.C, .Z, .N])
         if registers.A & 0x80 != 0 { registers.P.formUnion(.C) }
 
-        registers.A = (registers.A << 1) & 0xFF
+        registers.A <<= 1
 
         return .next
     }
@@ -296,7 +296,7 @@ extension CPU {
     func logicalShiftRight(operand: Operand?) -> PCUpdate {
         var data = memory.read(addr: operand!)
 
-        registers.P.remove(.C)
+        registers.P.remove([.C, .Z, .N])
         if data & 0x80 != 0 { registers.P.formUnion(.C) }
 
         data >>= 1
@@ -310,7 +310,7 @@ extension CPU {
     }
 
     func logicalShiftRightForAccumulator(operand: Operand?) -> PCUpdate {
-        registers.P.remove(.C)
+        registers.P.remove([.C, .Z, .N])
         if registers.A & 0x80 != 0 { registers.P.formUnion(.C) }
 
         registers.A >>= 1
@@ -327,9 +327,13 @@ extension CPU {
         if registers.P.contains(.C) { data |= 0x01 }
 
         registers.P.remove([.C, .Z, .N])
-        if c == 1 { registers.P.formUnion(.C) }
+        if c == 0x80 { registers.P.formUnion(.C) }
+
+        if data == 0 { registers.P.formUnion(.Z) }
+        if data & 0x80 != 0 { registers.P.formUnion(.N) }
 
         memory.write(addr: operand!, data: data)
+
         return .next
     }
 
@@ -340,7 +344,7 @@ extension CPU {
         if registers.P.contains(.C) { a |= 0x01 }
 
         registers.P.remove([.C, .Z, .N])
-        if c == 1 { registers.P.formUnion(.C) }
+        if c == 0x80 { registers.P.formUnion(.C) }
 
         registers.A = a
         return .next
@@ -356,6 +360,9 @@ extension CPU {
 
         registers.P.remove([.C, .Z, .N])
         if c == 1 { registers.P.formUnion(.C) }
+
+        if data == 0 { registers.P.formUnion(.Z) }
+        if data & 0x80 != 0 { registers.P.formUnion(.N) }
 
         memory.write(addr: operand!, data: data)
         return .next

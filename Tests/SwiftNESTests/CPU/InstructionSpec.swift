@@ -835,5 +835,175 @@ class InstructionSpec: QuickSpec {
         }
 
         // skip DEX/DEY because of similar specifications to the INC.
+
+        describe("ASL") {
+            describe("accumulator") {
+                it("shift left bits of the accumulator") {
+                    let opcode: UInt8 = 0x0A
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0b11001011
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0b10010110))
+                    expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+
+            describe("absolute") {
+                it("shift left bits on memory") {
+                    let opcode: UInt8 = 0x0E
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 0b11101110)
+                    cpu.registers.PC = 0x0302
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.memory.read(addr: 0x0130)).to(equal(0b11011100))
+                    expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(6))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("LSR") {
+            describe("accumulator") {
+                it("shift right bits of the accumulator") {
+                    let opcode: UInt8 = 0x4A
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0b11001011
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0b01100101))
+                    expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+
+            describe("absolute") {
+                it("shift right bits of memory") {
+                    let opcode: UInt8 = 0x4E
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 0b11101110)
+                    cpu.registers.PC = 0x0302
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.memory.read(addr: 0x0130)).to(equal(0b01110111))
+                    expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(6))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("ROL") {
+            describe("accumulator") {
+                it("rotate left") {
+                    let opcode: UInt8 = 0x2A
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0b11001011
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0b10010110))
+                    expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+
+            describe("absolute") {
+                it("rotate left") {
+                    let opcode: UInt8 = 0x2E
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 0b11101110)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.formUnion(.C)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.memory.read(addr: 0x0130)).to(equal(0b11011101))
+                    expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(6))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("ROR") {
+            describe("accumulator") {
+                it("rotate right") {
+                    let opcode: UInt8 = 0x6A
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.A = 0b11001011
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.A).to(equal(0b01100101))
+                    expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+
+            describe("absolute") {
+                it("rotate right") {
+                    let opcode: UInt8 = 0x6E
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.memory.write(addr: 0x0130, data: 0b11101110)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.formUnion(.C)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.memory.read(addr: 0x0130)).to(equal(0b11110111))
+                    expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                    expect(cpu.registers.P.contains(.C)).to(beFalsy())
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(6))
+                }
+            }
+
+            // skip other addressing mode because of similar specifications to the above.
+        }
     }
 }
