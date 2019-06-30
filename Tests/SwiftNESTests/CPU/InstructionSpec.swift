@@ -677,14 +677,18 @@ class InstructionSpec: QuickSpec {
                     cpu.memory.write(addr: 0x0302, data: opcode)
                     cpu.memory.write(addr: 0x0303, data: 0x30)
                     cpu.memory.write(addr: 0x0304, data: 0x01)
-                    cpu.memory.write(addr: 0x0130, data: 30)
+                    cpu.memory.write(addr: 0x0130, data: 255)
                     cpu.registers.PC = 0x0302
                     cpu.registers.A = 12
                     cpu.registers.P.formUnion(.C)
 
                     let cycle = cpu.run()
 
-                    expect(cpu.registers.A).to(equal(43))
+                    expect(cpu.registers.A).to(equal(12))
+                    expect(cpu.registers.P.contains(.Z)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.V)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
                     expect(cpu.registers.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
@@ -701,14 +705,18 @@ class InstructionSpec: QuickSpec {
                     cpu.memory.write(addr: 0x0302, data: opcode)
                     cpu.memory.write(addr: 0x0303, data: 0x30)
                     cpu.memory.write(addr: 0x0304, data: 0x01)
-                    cpu.memory.write(addr: 0x0130, data: 30)
+                    cpu.memory.write(addr: 0x0130, data: 42)
                     cpu.registers.PC = 0x0302
-                    cpu.registers.A = 42
+                    cpu.registers.A = 30
                     cpu.registers.P.formUnion(.C)
 
                     let cycle = cpu.run()
 
-                    expect(cpu.registers.A).to(equal(11))
+                    expect(cpu.registers.A).to(equal(243))
+                    expect(cpu.registers.P.contains(.Z)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.V)).to(beFalsy())
+                    expect(cpu.registers.P.contains(.N)).to(beTruthy())
+                    expect(cpu.registers.P.contains(.C)).to(beFalsy())
                     expect(cpu.registers.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }

@@ -130,8 +130,9 @@ extension CPU {
         if registers.P.contains(.C) { result += 1 }
 
         registers.P.remove([.C, .Z, .V, .N])
-        if result & 0x100 == 1 { registers.P.formUnion(.C)}
-        if (a ^ val) & 0x80 == 0 && (val ^ result) & 0x80 == 1 {
+        if result & 0x100 == 0x100 { registers.P.formUnion(.C)}
+        // same sign -> different sign
+        if (a ^ val) & 0x80 != 0x80 && (a ^ result) & 0x80 == 0x80 {
             registers.P.formUnion(.V)
         }
         registers.A = UInt8(result & 0xFF)
@@ -146,8 +147,9 @@ extension CPU {
         if registers.P.contains(.C) { result -= 1 }
 
         registers.P.remove([.C, .Z, .V, .N])
-        if result & 0x100 == 1 { registers.P.formUnion(.C)}
-        if (a ^ val) & 0x80 == 0 && (val ^ result) & 0x80 == 1 {
+        if result & 0x100 != 0x100 { registers.P.formUnion(.C)}
+        // different sign -> same sign
+        if (a ^ val) & 0x80 == 0x80 && (a ^ result) & 0x80 != 0x80 {
             registers.P.formUnion(.V)
         }
         registers.A = UInt8(result & 0xFF)
