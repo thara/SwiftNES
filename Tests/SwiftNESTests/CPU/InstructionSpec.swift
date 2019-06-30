@@ -1490,5 +1490,33 @@ class InstructionSpec: QuickSpec {
                 }
             }
         }
+
+        describe("BRK") {
+            describe("implicit") {
+                it("force interrupt") {
+                    let opcode: UInt8 = 0x00
+
+                    var program: [UInt8]  = Array(repeating: 0, count: 0x4000)
+                    program[0xFFFE - 0xC000] = 0x70
+                    program[0xFFFF - 0xC000] = 0x81
+                    cpu.memory.loadProgram(index: 1, data: program)
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.S = 0xFF
+
+                    let status: Status = [.N, .R, .Z, .C]
+                    cpu.registers.P = status
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P.contains(.B)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x8170))
+                    expect(cpu.pullStack() as UInt8).to(equal(status.rawValue))
+                    expect(cpu.pullStack() as UInt16).to(equal(0x0303))
+                    expect(cycle).to(equal(7))
+                }
+            }
+        }
     }
 }

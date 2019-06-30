@@ -521,6 +521,9 @@ extension CPU {
 
     /// BRK
     func forceInterrupt(operand: Operand?) -> PCUpdate {
+        pushStack(word: registers.PC)
+        pushStack(data: registers.P.rawValue)
+        registers.PC = memory.readWord(addr: 0xFFFE)
         registers.P.formUnion(.B)
         return .next
     }

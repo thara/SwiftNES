@@ -334,7 +334,7 @@ extension CPU {
             return Instruction(mnemonic: .SEI, addressing: .implicit, cycle: 2, exec: setInterruptDisable)
 
         case 0x00:
-            return Instruction(mnemonic: .BRK, addressing: .implicit, cycle: 2, exec: forceInterrupt)
+            return Instruction(mnemonic: .BRK, addressing: .implicit, cycle: 7, exec: forceInterrupt)
         case 0xEA:
             return .NOP
 
