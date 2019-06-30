@@ -83,11 +83,12 @@ class CPUEmulator: CPU {
     func execute(_ inst: Instruction) -> UInt {
         let (operand, pc) = fetchOperand(addressingMode: inst.addressing)
 
+        registers.PC += pc
         switch inst.exec(operand) {
         case .jump(let addr):
             registers.PC = addr
         case .next:
-            registers.PC += pc
+            break // NOP
         }
 
         return inst.cycle

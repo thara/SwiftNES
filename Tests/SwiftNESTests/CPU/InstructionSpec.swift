@@ -1013,5 +1013,84 @@ class InstructionSpec: QuickSpec {
 
             // skip other addressing mode because of similar specifications to the above.
         }
+
+        describe("JMP") {
+            describe("absolute") {
+                it("jump") {
+                    let opcode: UInt8 = 0x4C
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.registers.PC = 0x0302
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.PC).to(equal(0x0130))
+                    expect(cycle).to(equal(3))
+                }
+            }
+            // skip other addressing mode because of similar specifications to the above.
+        }
+
+        describe("JSR") {
+            describe("implicit") {
+                it("jump to subroutine") {
+                    let opcode: UInt8 = 0x20
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.memory.write(addr: 0x0303, data: 0x30)
+                    cpu.memory.write(addr: 0x0304, data: 0x01)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.S = 0xFF
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.PC).to(equal(0x0130))
+                    expect(cpu.pullStack() as UInt16).to(equal(0x0304))
+                    expect(cycle).to(equal(6))
+                }
+            }
+        }
+
+        describe("RTS") {
+            describe("implicit") {
+                it("return from subroutine") {
+                    let opcode: UInt8 = 0x60
+
+                    cpu.memory.write(addr: 0x0130, data: opcode)
+                    cpu.registers.PC = 0x0130
+                    cpu.registers.S = 0xFF
+                    cpu.pushStack(word: 0x0304)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.PC).to(equal(0x0305))
+                    expect(cycle).to(equal(6))
+                }
+            }
+        }
+
+        describe("RTI") {
+            describe("implicit") {
+                it("return from interrupt") {
+                    let opcode: UInt8 = 0x40
+
+                    cpu.memory.write(addr: 0x0130, data: opcode)
+                    cpu.registers.PC = 0x0130
+                    cpu.registers.S = 0xFF
+
+                    cpu.pushStack(word: 0x0401)
+                    let status: Status = [.N, .Z, .C]
+                    cpu.pushStack(data: status.rawValue)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.PC).to(equal(0x0401))
+                    expect(cpu.registers.P).to(equal(status))
+                    expect(cycle).to(equal(6))
+                }
+            }
+        }
     }
 }
