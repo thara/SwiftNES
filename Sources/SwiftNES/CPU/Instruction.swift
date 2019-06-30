@@ -3,6 +3,7 @@ typealias Operation = ((Operand?) -> PCUpdate)
 
 enum PCUpdate {
     case jump(addr: UInt16)
+    case branch(offset: UInt16)
     case next
 }
 

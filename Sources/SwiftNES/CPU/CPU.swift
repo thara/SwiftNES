@@ -87,6 +87,9 @@ class CPUEmulator: CPU {
         switch inst.exec(operand) {
         case .jump(let addr):
             registers.PC = addr
+        case .branch(let offset):
+            registers.PC &+= offset
+            return inst.cycle + 1
         case .next:
             break // NOP
         }

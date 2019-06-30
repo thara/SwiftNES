@@ -1092,5 +1092,403 @@ class InstructionSpec: QuickSpec {
                 }
             }
         }
+
+        describe("BCC") {
+            describe("relative") {
+                let opcode: UInt8 = 0x90
+
+                context("if carray flag is clear") {
+                    it("add the relative displacement to the PC") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.remove(.C)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0307))
+                        expect(cycle).to(equal(3))
+                    }
+                }
+
+                context("if carray flag is set") {
+                    it("NOP") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.formUnion(.C)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0304))
+                        expect(cycle).to(equal(2))
+                    }
+                }
+            }
+        }
+
+        describe("BCS") {
+            describe("relative") {
+                let opcode: UInt8 = 0xB0
+
+                context("if carray flag is clear") {
+                    it("NOP") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.remove(.C)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0304))
+                        expect(cycle).to(equal(2))
+                    }
+                }
+
+                context("if carray flag is set") {
+                    it("add the relative displacement to the PC") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.formUnion(.C)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0307))
+                        expect(cycle).to(equal(3))
+                    }
+                }
+            }
+        }
+
+        describe("BEQ") {
+            describe("relative") {
+                let opcode: UInt8 = 0xF0
+
+                context("if zero flag is clear") {
+                    it("NOP") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.remove(.Z)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0304))
+                        expect(cycle).to(equal(2))
+                    }
+                }
+
+                context("if zero flag is set") {
+                    it("add the relative displacement to the PC") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.formUnion(.Z)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0307))
+                        expect(cycle).to(equal(3))
+                    }
+                }
+            }
+        }
+
+        describe("BMI") {
+            describe("relative") {
+                let opcode: UInt8 = 0x30
+
+                context("if negative flag is clear") {
+                    it("NOP") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.remove(.N)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0304))
+                        expect(cycle).to(equal(2))
+                    }
+                }
+
+                context("if negative flag is set") {
+                    it("add the relative displacement to the PC") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.formUnion(.N)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0307))
+                        expect(cycle).to(equal(3))
+                    }
+                }
+            }
+        }
+
+        describe("BNE") {
+            describe("relative") {
+                let opcode: UInt8 = 0xD0
+
+                context("if zero flag is clear") {
+                    it("add the relative displacement to the PC") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.remove(.Z)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0307))
+                        expect(cycle).to(equal(3))
+                    }
+                }
+
+                context("if zero flag is set") {
+                    it("NOP") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.formUnion(.Z)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0304))
+                        expect(cycle).to(equal(2))
+                    }
+                }
+            }
+        }
+
+        describe("BPL") {
+            describe("relative") {
+                let opcode: UInt8 = 0x10
+
+                context("if negative flag is clear") {
+                    it("add the relative displacement to the PC") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.remove(.N)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0307))
+                        expect(cycle).to(equal(3))
+                    }
+                }
+
+                context("if negative flag is set") {
+                    it("NOP") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.formUnion(.N)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0304))
+                        expect(cycle).to(equal(2))
+                    }
+                }
+            }
+        }
+
+        describe("BVC") {
+            describe("relative") {
+                let opcode: UInt8 = 0x50
+
+                context("if overflow flag is clear") {
+                    it("add the relative displacement to the PC") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.remove(.V)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0307))
+                        expect(cycle).to(equal(3))
+                    }
+                }
+
+                context("if overflow flag is set") {
+                    it("NOP") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.formUnion(.V)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0304))
+                        expect(cycle).to(equal(2))
+                    }
+                }
+            }
+        }
+
+        describe("BVS") {
+            describe("relative") {
+                let opcode: UInt8 = 0x70
+
+                context("if overflow flag is clear") {
+                    it("NOP") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.remove(.V)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0304))
+                        expect(cycle).to(equal(2))
+                    }
+                }
+
+                context("if overflow flag is set") {
+                    it("add the relative displacement to the PC") {
+                        cpu.memory.write(addr: 0x0302, data: opcode)
+                        cpu.memory.write(addr: 0x0303, data: 0x03)
+                        cpu.registers.PC = 0x0302
+                        cpu.registers.P.formUnion(.V)
+
+                        let cycle = cpu.run()
+
+                        expect(cpu.registers.PC).to(equal(0x0307))
+                        expect(cycle).to(equal(3))
+                    }
+                }
+            }
+        }
+
+        describe("CLC") {
+            describe("implicit") {
+                it("clear carry flag") {
+                    let opcode: UInt8 = 0x18
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.formUnion(.C)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P.contains(.C)).to(beFalsy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("CLD") {
+            describe("implicit") {
+                it("clear decimal mode") {
+                    let opcode: UInt8 = 0xD8
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.formUnion(.D)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P.contains(.D)).to(beFalsy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("CLI") {
+            describe("implicit") {
+                it("clear interrupt disable") {
+                    let opcode: UInt8 = 0x58
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.formUnion(.I)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P.contains(.I)).to(beFalsy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("CLV") {
+            describe("implicit") {
+                it("clear overflow flag") {
+                    let opcode: UInt8 = 0xB8
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.formUnion(.V)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P.contains(.V)).to(beFalsy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("SEC") {
+            describe("implicit") {
+                it("set carray flag") {
+                    let opcode: UInt8 = 0x38
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.remove(.C)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("SED") {
+            describe("implicit") {
+                it("set decimal flag") {
+                    let opcode: UInt8 = 0xF8
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.remove(.D)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P.contains(.D)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
+
+        describe("SEI") {
+            describe("implicit") {
+                it("set interrupt disable") {
+                    let opcode: UInt8 = 0x78
+
+                    cpu.memory.write(addr: 0x0302, data: opcode)
+                    cpu.registers.PC = 0x0302
+                    cpu.registers.P.remove(.I)
+
+                    let cycle = cpu.run()
+
+                    expect(cpu.registers.P.contains(.I)).to(beTruthy())
+                    expect(cpu.registers.PC).to(equal(0x0303))
+                    expect(cycle).to(equal(2))
+                }
+            }
+        }
     }
 }

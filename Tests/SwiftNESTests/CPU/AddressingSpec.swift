@@ -97,21 +97,12 @@ class AddressingSpec: QuickSpec {
             }
 
             context("relative") {
-                it("return PC + offset") {
+                it("return offset") {
                     cpu.registers.PC = 0x50
                     cpu.memory.write(addr: 0x50, data: 120)
 
                     let (operand, pc) = cpu.fetchOperand(addressingMode: .relative)
-                    expect(operand).to(equal(0x50 + 120))
-                    expect(pc).to(equal(1))
-                }
-
-                it("return PC - offset") {
-                    cpu.registers.PC = 0xFF
-                    cpu.memory.write(addr: 0xFF, data: UInt8(bitPattern: -120))
-
-                    let (operand, pc) = cpu.fetchOperand(addressingMode: .relative)
-                    expect(operand).to(equal(0xFF - 120))
+                    expect(operand).to(equal(120))
                     expect(pc).to(equal(1))
                 }
             }

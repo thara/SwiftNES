@@ -37,9 +37,7 @@ extension CPU {
         case .absoluteY:
             return (memory.readWord(addr: registers.PC) + registers.Y.u16 & 0xFFFF, 2)
         case .relative:
-            let data = memory.read(addr: registers.PC).i16
-            let result = registers.PC.i16 + data
-            return (result.u16, 1)
+            return (memory.read(addr: registers.PC).u16, 1)
         case .indirect:
             let low = memory.readWord(addr: registers.PC)
             let high = low & 0xFF00 + ((low + 1) & 0x00FF)  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
