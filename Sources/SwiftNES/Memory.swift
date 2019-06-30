@@ -65,7 +65,7 @@ class WRAM: Memory {
     }
 
     func read(addr: UInt16) -> UInt8 {
-        return data[Int(addr)] as! UInt8
+        return data[Int(addr)] as! UInt8 // swiftlint:disable:this force_cast
     }
 
     func write(addr: UInt16, data: UInt8) {
@@ -81,7 +81,7 @@ class ROM: Memory {
     }
 
     func read(addr: UInt16) -> UInt8 {
-        return data[Int(addr)] as! UInt8
+        return data[Int(addr)] as! UInt8 // swiftlint:disable:this force_cast
     }
 
     func write(addr: UInt16, data: UInt8) {

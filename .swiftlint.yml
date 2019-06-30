@@ -5,16 +5,23 @@ disabled_rules:
 - file_header
 - strict_fileprivate
 - switch_case_on_newline
+- file_length
+- function_body_length
+- type_body_length
 
 included:
 - Sources/SwiftNES
 - Tests/SwiftNESTests
 
 file_length:
-- 120
-- 200
+  warning: 120
+  error: 200
+  excluded: "Tests/*/.*Spec\\.swift"
 
 function_body_length:
-- 100
-- 200
+  warning: 100
+  error: 200
+  excluded: "Tests/*/.*Spec\\.swift"
 
+type_body_length:
+  excluded: "Tests/*/.*Spec\\.swift"

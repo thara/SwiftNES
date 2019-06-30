@@ -16,6 +16,7 @@ enum AddressingMode {
 
 extension CPU {
 
+    // swiftlint:disable cyclomatic_complexity
     func fetchOperand(addressingMode: AddressingMode) -> (operand: UInt16?, pc: UInt16) {
         switch addressingMode {
         case .implicit:
@@ -53,4 +54,5 @@ extension CPU {
             return (base + registers.Y.u16, 1)
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 }
