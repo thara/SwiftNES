@@ -1,0 +1,18 @@
+#!/bin/bash
+
+export SCRIPT_DIR=$(dirname "$0")
+
+mkdir -p $SCRIPT_DIR/src
+rm -rf $SCRIPT_DIR/src/SwiftLint
+
+mkdir -p $SCRIPT_DIR/bin
+rm -rf $SCRIPT_DIR/bin/swiftlint
+
+cd $SCRIPT_DIR/src
+
+git clone https://github.com/realm/SwiftLint
+cd SwiftLint
+
+make
+
+mv .build/x86_64-unknown-linux/release/swiftlint $SCRIPT_DIR/bin/swiftlint
