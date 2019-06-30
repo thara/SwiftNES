@@ -19,7 +19,7 @@ class AddressSpace: Memory {
     private var programROM: ROM
 
     init() {
-        memory = NSMutableArray(array: Array(repeating: 0, count: 65535))
+        memory = NSMutableArray(array: Array(repeating: 0, count: 65536))
         wram = WRAM(memory: memory)
         programROM = ROM(memory: memory)
     }
