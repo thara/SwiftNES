@@ -3,7 +3,7 @@ import Nimble
 
 @testable import SwiftNES
 
-class MemorySpec: QuickSpec {
+class CPUAddressSpaceSpec: QuickSpec {
     override func spec() {
         describe("WRAM") {
             var data: [UInt8] = Array(repeating: 0, count: 2049)  // 2048 + 1
@@ -11,7 +11,7 @@ class MemorySpec: QuickSpec {
             data[1024] = 52
             data[2048] = 127
 
-            let mem = AddressSpace(initial: data)
+            let mem = CPUAddressSpace(initial: data)
 
             it("Read") {
                 expect(mem.read(addr: 0)).to(equal(1))
@@ -33,7 +33,7 @@ class MemorySpec: QuickSpec {
         describe("ROM") {
 
             it("load Program") {
-                let mem = AddressSpace()
+                let mem = CPUAddressSpace()
 
                 var program: [UInt8]  = Array(repeating: 0, count: 0x4000)
                 program[0x0000] = 1
@@ -55,7 +55,7 @@ class MemorySpec: QuickSpec {
 
         describe("readWord") {
 
-            let mem = AddressSpace()
+            let mem = CPUAddressSpace()
 
             it("read 1 word") {
                 mem.write(addr: 128, data: 1)

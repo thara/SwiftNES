@@ -2,7 +2,7 @@ typealias OpCode = UInt8
 
 protocol CPU: class {
     var registers: Registers { get set }
-    var memory: AddressSpace { get }
+    var memory: CPUAddressSpace { get }
 
     func fetch() -> OpCode
     func decode(_ opcode: OpCode) -> Instruction
@@ -48,7 +48,7 @@ extension CPU {
 class CPUEmulator: CPU {
 
     var registers: Registers
-    var memory: AddressSpace
+    var memory: CPUAddressSpace
     var interrupt: Interrupt?
 
     var instructions: [Instruction?]
@@ -62,7 +62,7 @@ class CPUEmulator: CPU {
             P: [Status.R, Status.B, Status.I],
             PC: 0x00
         )
-        memory = AddressSpace()
+        memory = CPUAddressSpace()
         instructions = []  // Need all properties are initialized because 'self' is used in 'buildInstructionTable'
         instructions = buildInstructionTable()
     }
