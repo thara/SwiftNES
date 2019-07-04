@@ -9,4 +9,5 @@ QCKMain([
     CPUAddressSpaceSpec.self,
     InstructionSpec.self,
     RegisterSpec.self,
+    NESFileSpec.self,
 ])
