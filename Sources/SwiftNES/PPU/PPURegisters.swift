@@ -1,10 +1,10 @@
 struct PPURegisters {
     /// PPUCTRL
-    var controller: UInt8
+    var controller: PPUController
     /// PPUMASK
-    var mask: UInt8
+    var mask: PPUMask
     /// PPUSTATUS
-    var status: UInt8
+    var status: PPUStatus
     /// OAMADDR
     var objectAttributeMemoryAddress: UInt8
     /// OAMDATA
@@ -19,48 +19,70 @@ struct PPURegisters {
     var objectAttributeMemoryDMA: UInt8
 }
 
-protocol PPUIORegister {
-    func read(addr: UInt16) -> UInt8?
-    mutating func write(addr: UInt16, data: UInt8)
+struct PPUController: OptionSet {
+    let rawValue: UInt8
+
+    /// NMI
+    static let nmi = PPUStatus(rawValue: 1 << 7)
+    /// PPU master/slave (0: master, 1: slave)
+    static let slave = PPUStatus(rawValue: 1 << 6)
+    /// Sprite size
+    static let spriteSize = PPUStatus(rawValue: 1 << 5)
+    /// Background pattern table address
+    static let bgTableAddr = PPUStatus(rawValue: 1 << 4)
+    /// Sprite pattern table address for 8x8 sprites
+    static let spriteTableAddr = PPUStatus(rawValue: 1 << 3)
+    /// VRAM address increment
+    static let vramAddrIncr = PPUStatus(rawValue: 1 << 2)
+    /// Base nametable address
+    static let nameTableAddrHigh = PPUStatus(rawValue: 1 << 1)
+    static let nameTableAddrLow = PPUStatus(rawValue: 1)
+
+    var baseNameTableAddr: UInt16 {
+        let bits = rawValue & 0b0011
+        switch bits {
+        case 0:
+            return 0x2000
+        case 1:
+            return 0x2400
+        case 2:
+            return 0x2800
+        case 3:
+            return 0x2C00
+        default:
+            fatalError("PPUController.baseNameTableAddr - unexpected bits: \(bits)")
+        }
+    }
 }
 
-extension PPURegisters: PPUIORegister {
+struct PPUMask: OptionSet {
+    let rawValue: UInt8
 
-    func read(addr: UInt16) -> UInt8? {
-        switch addr {
-        case 0x2002:
-            // TODO clear bit 7 and also the address latch used by PPUSCROLL and PPUADDR
-            return status
-        case 0x2004:
-            return objectAttributeMemoryData
-        case 0x2007:
-            return data
-        default:
-            return nil
-        }
-    }
+    /// Emphasize blue
+    static let blue = PPUStatus(rawValue: 1 << 7)
+    /// Emphasize green
+    static let green = PPUStatus(rawValue: 1 << 6)
+    /// Emphasize red
+    static let red = PPUStatus(rawValue: 1 << 5)
+    /// Show sprite
+    static let sprite = PPUStatus(rawValue: 1 << 4)
+    /// Show background
+    static let background = PPUStatus(rawValue: 1 << 3)
+    /// Show sprite in leftmost 8 pixels
+    static let spriteLeft = PPUStatus(rawValue: 1 << 2)
+    /// Show background in leftmost 8 pixels
+    static let backgroundLeft = PPUStatus(rawValue: 1 << 1)
+    /// Greyscale
+    static let greyscale = PPUStatus(rawValue: 1)
+}
 
-    mutating func write(addr: UInt16, data: UInt8) {
-        switch addr {
-        case 0x2000:
-            controller = data
-        case 0x2001:
-            mask = data
-        case 0x2003:
-            objectAttributeMemoryAddress = data
-        case 0x2004:
-            objectAttributeMemoryData = data
-        case 0x2005:
-            scroll = data
-        case 0x2006:
-            address = data
-        case 0x2007:
-            self.data = data
-        case 0x4014:
-            self.objectAttributeMemoryDMA = data
-        default:
-            break
-            // NOP
-        }
-    }
+struct PPUStatus: OptionSet {
+    let rawValue: UInt8
+
+    /// In vblank?
+    static let vblank = PPUStatus(rawValue: 1 << 7)
+    /// Sprite 0 Hit
+    static let spriteZeroHit = PPUStatus(rawValue: 1 << 6)
+    /// Sprite overflow
+    static let spriteOverflow = PPUStatus(rawValue: 1 << 5)
 }
