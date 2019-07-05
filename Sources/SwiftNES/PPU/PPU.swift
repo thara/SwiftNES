@@ -21,32 +21,24 @@ protocol PPU {
     /// OAMDMA
     var objectAttributeMemoryDMA: UInt8 { get set }
 
-    var latch: Bool { get set }
-
-    func run(cycle: Int)
-
-    func render()
+    func step()
 }
 
-extension PPU {
-
-    func run(cycle: Int) {
-        //TODO
-    }
-
-    func render() {
-        //TODO
-    }
-}
+private let maxDot: UInt16 = 341
+private let maxLine: UInt16 = 261
 
 class PPUEmulator {
-    var registers: PPURegisters
+    fileprivate var registers: PPURegisters
 
     var latch: Bool = false
     var memory: Memory
 
     var currentAddress: UInt16 = 0x00
     var scrollPosition: ScrollPosition = ScrollPosition(x: 0x00, y: 0x00)
+
+    // MARK: - Rendering counters
+    var dot: UInt16 = 0
+    var scanline: UInt16 = 0
 
     init(memory: Memory) {
         registers = PPURegisters(
@@ -62,6 +54,35 @@ class PPUEmulator {
         )
         self.memory = memory
     }
+
+    func step() {
+        switch scanline {
+        case 0...239:
+            //TODO visible scanline
+            break
+        case 240:
+            //TODO post render scanline
+            break
+        case 241...260:
+            //TODO vertical blanking line
+            break
+        case 261:
+            //TODO pre-render scanline
+            break
+        default:
+            fatalError("Unexpected scanline")
+        }
+        dot += 1
+        if maxDot <= dot {
+            dot %= 341
+            scanline += 1
+            if maxLine < scanline {
+                scanline = 0
+                //TODO frame odd
+            }
+        }
+    }
+
 }
 
 // MARK: - Delegate to PPURegisters
