@@ -28,7 +28,7 @@ private let maxDot: UInt16 = 341
 private let maxLine: UInt16 = 261
 
 class PPUEmulator {
-    fileprivate var registers: PPURegisters
+    var registers: PPURegisters
 
     var latch: Bool = false
     var memory: Memory
@@ -99,9 +99,10 @@ extension PPUEmulator: PPU {
     }
 
     var status: PPUStatus {
+        let s = registers.status
         registers.status.remove(.vblank)
         latch = false
-        return registers.status
+        return s
     }
 
     var objectAttributeMemoryAddress: UInt8 {
@@ -132,13 +133,14 @@ extension PPUEmulator: PPU {
         set {
             registers.address = newValue
             if !latch {
-                currentAddress = (currentAddress & 0xFF00) | newValue.u16
-            } else {
                 currentAddress = newValue.u16 << 8 | (currentAddress & 0x00FF)
+            } else {
+                currentAddress = (currentAddress & 0xFF00) | newValue.u16
             }
             latch = !latch
         }
     }
+
     var data: UInt8 {
         get { return registers.data }
         set {

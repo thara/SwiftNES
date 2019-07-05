@@ -10,4 +10,5 @@ QCKMain([
     InstructionSpec.self,
     RegisterSpec.self,
     NESFileSpec.self,
+    PPUSpec.self,
 ])
