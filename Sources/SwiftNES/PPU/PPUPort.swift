@@ -71,8 +71,8 @@ extension PPUEmulator: PPU {
 
     /// OAMDATA
     var objectAttributeMemoryData: UInt8 {
-        get { return oam.read(addr: registers.objectAttributeMemoryAddress.u16) }
-        set { oam.write(addr: registers.objectAttributeMemoryAddress.u16, data: newValue) }
+        get { return oam[Int(registers.objectAttributeMemoryAddress)] }
+        set { oam[Int(registers.objectAttributeMemoryAddress.u16)] = newValue }
     }
 
     /// PPUSCROLL

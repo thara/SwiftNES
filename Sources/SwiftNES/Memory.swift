@@ -20,8 +20,8 @@ class RAM: Memory {
         self.rawData = rawData
     }
 
-    convenience init(data: UInt8, count: UInt) {
-        self.init(rawData: NSMutableArray(array: Array(repeating: data, count: Int(count))))
+    convenience init(data: UInt8, count: Int) {
+        self.init(rawData: NSMutableArray(array: Array(repeating: data, count: count)))
     }
 
     func read(addr: UInt16) -> UInt8 {

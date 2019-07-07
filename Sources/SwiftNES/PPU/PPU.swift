@@ -11,8 +11,15 @@ class PPUEmulator {
     var registers: PPURegisters
 
     var latch: Bool = false
+
     var memory: Memory
-    let oam: Memory
+
+    /// Primary OAM
+    var oam: [UInt8]
+    /// Secondary OAM
+    var secondaryOAM: [UInt8]
+    /// Sprites
+    var sprites: [Sprite]
 
     var currentAddress: UInt16 = 0x00
     var scrollPosition: ScrollPosition = ScrollPosition(x: 0x00, y: 0x00)
@@ -33,7 +40,11 @@ class PPUEmulator {
             address: 0x00
         )
         self.memory = memory
-        self.oam = RAM(data: 0x00, count: 4 * 64)
+
+        self.oam = [UInt8](repeating: 0x00, count: spriteSize * spriteCount)
+        self.secondaryOAM = [UInt8](repeating: 0x00, count: spriteSize * spriteCount)
+        self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIdx: 0x00, attr: [], x: 0x00), count: spriteLimit)
+
         self.sendNMI = sendNMI
     }
 

@@ -1,4 +1,3 @@
-
 enum Scanline {
     case preRender
     case visible
@@ -24,14 +23,24 @@ enum Scanline {
 extension PPUEmulator {
     func process(scanline: Scanline) {
         switch scanline {
-        case .preRender:
-            registers.status.remove(.vblank)
-            // Prepare line 0 rendering
-            fallthrough
-        case .visible:
+        case .preRender, .visible:
+            let preRendering = scanline == .preRender
+
             // Sprites
+            switch dot {
+            case 1:
+                clearSecondaryOAM()
+                if preRendering {
+                    registers.status.remove([.spriteOverflow, .spriteZeroHit])
+                }
+            case 257:
+                evalSprites()
+            case 321:
+                loadSprites()
+            default:
+                break
+            }
             // Background
-            break
         case .postRender:
             // Idling
             break
