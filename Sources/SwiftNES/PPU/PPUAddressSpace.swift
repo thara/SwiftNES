@@ -10,7 +10,7 @@ class PPUAddressSpace: Memory {
         case 0x0000...0x1FFF:
             return patternTable[Int(addr)]
         case 0x2000...0x3EFF:
-            return patternTable[Int(addr - 0x2000)]
+            return nameTable[Int(addr - 0x2000)]
         case 0x3F00...0x3F1F:
             return paletteRAMIndexes[Int(addr - 0x3F00)]
         default:
@@ -23,7 +23,7 @@ class PPUAddressSpace: Memory {
         case 0x0000...0x1FFF:
             patternTable[Int(addr)] = data
         case 0x2000...0x3EFF:
-            patternTable[Int(addr - 0x2000)] = data
+            nameTable[Int(addr - 0x2000)] = data
         case 0x3F00...0x3F1F:
             paletteRAMIndexes[Int(addr - 0x3F00)] = data
         default:
