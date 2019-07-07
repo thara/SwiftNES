@@ -7,14 +7,14 @@ class CPUAddressSpace: Memory {
 
     init() {
         memory = NSMutableArray(array: Array(repeating: 0, count: 65536))
-        wram = RAM(memory: memory)
-        programROM = ROM(memory: memory)
+        wram = RAM(rawData: memory)
+        programROM = ROM(rawData: memory)
     }
 
     init(initial: [UInt8]) {
         memory = NSMutableArray(array: initial)
-        wram = RAM(memory: memory)
-        programROM = ROM(memory: memory)
+        wram = RAM(rawData: memory)
+        programROM = ROM(rawData: memory)
     }
 
     private func selectRegion(_ addr: UInt16) -> Memory {

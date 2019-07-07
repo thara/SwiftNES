@@ -14,30 +14,34 @@ extension Memory {
 }
 
 class RAM: Memory {
-    private var data: NSMutableArray
+    private var rawData: NSMutableArray
 
-    init(memory: NSMutableArray) {
-        self.data = memory
+    init(rawData: NSMutableArray) {
+        self.rawData = rawData
+    }
+
+    convenience init(data: UInt8, count: UInt) {
+        self.init(rawData: NSMutableArray(array: Array(repeating: data, count: Int(count))))
     }
 
     func read(addr: UInt16) -> UInt8 {
-        return data[Int(addr)] as! UInt8 // swiftlint:disable:this force_cast
+        return rawData[Int(addr)] as! UInt8 // swiftlint:disable:this force_cast
     }
 
     func write(addr: UInt16, data: UInt8) {
-        self.data[Int(addr)] = data
+        rawData[Int(addr)] = data
     }
 }
 
 class ROM: Memory {
-    private var data: NSMutableArray
+    private var rawData: NSMutableArray
 
-    init(memory: NSMutableArray) {
-        self.data = memory
+    init(rawData: NSMutableArray) {
+        self.rawData = rawData
     }
 
     func read(addr: UInt16) -> UInt8 {
-        return data[Int(addr)] as! UInt8 // swiftlint:disable:this force_cast
+        return rawData[Int(addr)] as! UInt8 // swiftlint:disable:this force_cast
     }
 
     func write(addr: UInt16, data: UInt8) {
