@@ -7,16 +7,11 @@ struct PPURegisters {
     var status: PPUStatus
     /// OAMADDR
     var objectAttributeMemoryAddress: UInt8
-    /// OAMDATA
-    var objectAttributeMemoryData: UInt8
+
     /// PPUSCROLL
     var scroll: UInt8
     /// PPUADDR
     var address: UInt8
-    /// PPUDATA
-    var data: UInt8
-    /// OAMDMA
-    var objectAttributeMemoryDMA: UInt8
 }
 
 struct PPUController: OptionSet {
