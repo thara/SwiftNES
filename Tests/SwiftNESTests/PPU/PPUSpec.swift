@@ -8,7 +8,7 @@ class PPUSpec: QuickSpec {
     override func spec() {
         var ppu: PPUEmulator!
         beforeEach {
-            ppu = PPUEmulator(memory: RAM(memory: NSMutableArray(array: Array(repeating: 0, count: 65536))))
+            ppu = PPUEmulator(memory: RAM(memory: NSMutableArray(array: Array(repeating: 0, count: 65536))), sendNMI: {})
         }
 
         describe("read status") {

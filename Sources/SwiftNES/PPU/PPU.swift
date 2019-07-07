@@ -27,6 +27,8 @@ protocol PPU {
 private let maxDot: UInt16 = 341
 private let maxLine: UInt16 = 261
 
+typealias SendNMI = (() -> Void)
+
 class PPUEmulator {
     var registers: PPURegisters
 
@@ -38,9 +40,11 @@ class PPUEmulator {
 
     // MARK: - Rendering counters
     var dot: UInt16 = 0
-    var scanline: UInt16 = 0
+    var lineNumber: UInt16 = 0
 
-    init(memory: Memory) {
+    let sendNMI: SendNMI
+
+    init(memory: Memory, sendNMI: @escaping SendNMI) {
         registers = PPURegisters(
             controller: [],
             mask: [],
@@ -53,36 +57,25 @@ class PPUEmulator {
             objectAttributeMemoryDMA: 0x00
         )
         self.memory = memory
+        self.sendNMI = sendNMI
     }
 
     func step() {
-        switch scanline {
-        case 0...239:
-            //TODO visible scanline
-            break
-        case 240:
-            //TODO post render scanline
-            break
-        case 241...260:
-            //TODO vertical blanking line
-            break
-        case 261:
-            //TODO pre-render scanline
-            break
-        default:
-            fatalError("Unexpected scanline")
+        guard let scanline = Scanline(lineNumber: lineNumber) else {
+            fatalError("Unexpected lineNumber")
         }
+        process(scanline: scanline)
+
         dot += 1
         if maxDot <= dot {
             dot %= 341
-            scanline += 1
-            if maxLine < scanline {
-                scanline = 0
+            lineNumber += 1
+            if maxLine < lineNumber {
+                lineNumber = 0
                 //TODO frame odd
             }
         }
     }
-
 }
 
 // MARK: - Delegate to PPURegisters
