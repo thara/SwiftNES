@@ -23,20 +23,20 @@ struct PPUController: OptionSet {
     let rawValue: UInt8
 
     /// NMI
-    static let nmi = PPUStatus(rawValue: 1 << 7)
+    static let nmi = PPUController(rawValue: 1 << 7)
     /// PPU master/slave (0: master, 1: slave)
-    static let slave = PPUStatus(rawValue: 1 << 6)
+    static let slave = PPUController(rawValue: 1 << 6)
     /// Sprite size
-    static let spriteSize = PPUStatus(rawValue: 1 << 5)
+    static let spriteSize = PPUController(rawValue: 1 << 5)
     /// Background pattern table address
-    static let bgTableAddr = PPUStatus(rawValue: 1 << 4)
+    static let bgTableAddr = PPUController(rawValue: 1 << 4)
     /// Sprite pattern table address for 8x8 sprites
-    static let spriteTableAddr = PPUStatus(rawValue: 1 << 3)
+    static let spriteTableAddr = PPUController(rawValue: 1 << 3)
     /// VRAM address increment
-    static let vramAddrIncr = PPUStatus(rawValue: 1 << 2)
+    static let vramAddrIncr = PPUController(rawValue: 1 << 2)
     /// Base nametable address
-    static let nameTableAddrHigh = PPUStatus(rawValue: 1 << 1)
-    static let nameTableAddrLow = PPUStatus(rawValue: 1)
+    static let nameTableAddrHigh = PPUController(rawValue: 1 << 1)
+    static let nameTableAddrLow = PPUController(rawValue: 1)
 
     var baseNameTableAddr: UInt16 {
         let bits = rawValue & 0b0011
@@ -59,21 +59,21 @@ struct PPUMask: OptionSet {
     let rawValue: UInt8
 
     /// Emphasize blue
-    static let blue = PPUStatus(rawValue: 1 << 7)
+    static let blue = PPUMask(rawValue: 1 << 7)
     /// Emphasize green
-    static let green = PPUStatus(rawValue: 1 << 6)
+    static let green = PPUMask(rawValue: 1 << 6)
     /// Emphasize red
-    static let red = PPUStatus(rawValue: 1 << 5)
+    static let red = PPUMask(rawValue: 1 << 5)
     /// Show sprite
-    static let sprite = PPUStatus(rawValue: 1 << 4)
+    static let sprite = PPUMask(rawValue: 1 << 4)
     /// Show background
-    static let background = PPUStatus(rawValue: 1 << 3)
+    static let background = PPUMask(rawValue: 1 << 3)
     /// Show sprite in leftmost 8 pixels
-    static let spriteLeft = PPUStatus(rawValue: 1 << 2)
+    static let spriteLeft = PPUMask(rawValue: 1 << 2)
     /// Show background in leftmost 8 pixels
-    static let backgroundLeft = PPUStatus(rawValue: 1 << 1)
+    static let backgroundLeft = PPUMask(rawValue: 1 << 1)
     /// Greyscale
-    static let greyscale = PPUStatus(rawValue: 1)
+    static let greyscale = PPUMask(rawValue: 1)
 }
 
 struct PPUStatus: OptionSet {
