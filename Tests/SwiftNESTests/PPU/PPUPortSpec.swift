@@ -7,7 +7,7 @@ class PPUPortSpec: QuickSpec {
     override func spec() {
         var ppu: PPUEmulator!
         beforeEach {
-            ppu = PPUEmulator(memory: RAM(data: 0x00, count: 65536), sendNMI: {})
+            ppu = PPUEmulator(sendNMI: {})
         }
 
         describe("PPUCTRL") {
@@ -123,12 +123,12 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("write data at currentAddress in memory") {
-                    ppu.write(addr: 0x2006, data: 0xF0)
+                    ppu.write(addr: 0x2006, data: 0x0F)
                     ppu.write(addr: 0x2006, data: 0x11)
 
                     ppu.write(addr: address, data: 0x83)
 
-                    expect(ppu.memory.read(addr: 0xF011)).to(equal(0x83))
+                    expect(ppu.memory.read(addr: 0x0F11)).to(equal(0x83))
                 }
             }
         }

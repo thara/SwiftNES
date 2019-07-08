@@ -34,6 +34,22 @@ struct SpriteAttribute: OptionSet {
 
 extension PPUEmulator {
 
+    func updateSprites(preRendering: Bool) {
+        switch dot {
+        case 1:
+            clearSecondaryOAM()
+            if preRendering {
+                registers.status.remove([.spriteOverflow, .spriteZeroHit])
+            }
+        case 257:
+            evalSprites()
+        case 321:
+            loadSprites()
+        default:
+            break
+        }
+    }
+
     func clearSecondaryOAM() {
         for i in 0..<secondaryOAM.count {
             secondaryOAM[i] = 0xFF

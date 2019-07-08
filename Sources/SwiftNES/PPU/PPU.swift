@@ -10,9 +10,13 @@ typealias SendNMI = (() -> Void)
 class PPUEmulator {
     var registers: PPURegisters
 
+    var currentAddress: UInt16 = 0x00
+    var scrollPosition: ScrollPosition = ScrollPosition(x: 0x00, y: 0x00)
     var latch: Bool = false
 
     var memory: Memory
+
+    var background: Background
 
     /// Primary OAM
     var oam: [UInt8]
@@ -21,16 +25,15 @@ class PPUEmulator {
     /// Sprites
     var sprites: [Sprite]
 
-    var currentAddress: UInt16 = 0x00
-    var scrollPosition: ScrollPosition = ScrollPosition(x: 0x00, y: 0x00)
-
     // MARK: - Rendering counters
     var dot: UInt16 = 0
     var lineNumber: UInt16 = 0
 
     let sendNMI: SendNMI
 
-    init(memory: Memory, sendNMI: @escaping SendNMI) {
+    var lineBuffer: [UInt8]
+
+    init(sendNMI: @escaping SendNMI) {
         registers = PPURegisters(
             controller: [],
             mask: [],
@@ -39,11 +42,14 @@ class PPUEmulator {
             scroll: 0x00,
             address: 0x00
         )
-        self.memory = memory
+        self.memory = PPUAddressSpace()
+        self.background = Background()
 
         self.oam = [UInt8](repeating: 0x00, count: spriteSize * spriteCount)
         self.secondaryOAM = [UInt8](repeating: 0x00, count: spriteSize * spriteCount)
         self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIdx: 0x00, attr: [], x: 0x00), count: spriteLimit)
+
+        self.lineBuffer = [UInt8](repeating: 0x00, count: Int(maxDot))
 
         self.sendNMI = sendNMI
     }

@@ -26,21 +26,12 @@ extension PPUEmulator {
         case .preRender, .visible:
             let preRendering = scanline == .preRender
 
-            // Sprites
-            switch dot {
-            case 1:
-                clearSecondaryOAM()
-                if preRendering {
-                    registers.status.remove([.spriteOverflow, .spriteZeroHit])
-                }
-            case 257:
-                evalSprites()
-            case 321:
-                loadSprites()
-            default:
-                break
-            }
-            // Background
+            updateSprites(preRendering: preRendering)
+
+            updateBackground(preRendering: preRendering)
+
+            updateLineBuffer()
+
         case .postRender:
             // Idling
             break
@@ -54,4 +45,33 @@ extension PPUEmulator {
             }
         }
     }
+
+    func updateLineBuffer() {
+        // let bgPixel: UInt8 = 0
+        // if registers.mask.contains(.background) {
+
+        // }
+        // let paletteIdx = 
+        // let color = memory.read(addr: 0x3F00 + paletteIdx)
+        // lineBuffer[dot] = pallete[Int(color)]
+    }
+
+    func getRenderingPriority(bgPixel: UInt8, spritePixel: UInt8, sprite: Sprite) -> RenderingPriority {
+        switch (1 <= bgPixel && bgPixel <= 3, 1 <= spritePixel && spritePixel <= 3, sprite.attr.contains(.behindBackground)) {
+        case (false, false, _):
+            return .background
+        case (false, true, _):
+            return .sprite
+        case (true, false, _):
+            return .background
+        case (true, true, false):
+            return .sprite
+        case (true, true, true):
+            return .background
+        }
+    }
+}
+
+enum RenderingPriority {
+    case background, sprite
 }
