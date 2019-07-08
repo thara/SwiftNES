@@ -1,4 +1,3 @@
-
 struct Background {
     var nameTableEntry: UInt8 = 0x00
     var attrTableEntry: UInt8 = 0x00
@@ -28,9 +27,8 @@ extension PPUEmulator {
     }
 
     var attrTableAddr: UInt16 {
-        let nameTableNo = (0x2000 + currentAddress.nameTableSelect)
         // Translate currentAddress for attribute table(8 x 8) from name table(16x15)
-        return attrTableFirstAddr | (nameTableNo & (currentAddress.attrY << 3) & currentAddress.attrX)
+        return attrTableFirstAddr | (currentAddress.nameTableSelect & (currentAddress.attrY << 3) & currentAddress.attrX)
     }
 }
 
