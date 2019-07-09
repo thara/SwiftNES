@@ -41,11 +41,11 @@ class PPUPortSpec: QuickSpec {
             let address: UInt16 = 0x2002
 
             context("read") {
-                it("read status and clear vblank and latch") {
+                it("read status and clear vblank and write toggle") {
                     ppu.registers.status = [.vblank, .spriteZeroHit]
-                    ppu.latch = true
+                    ppu.registers.writeToggle = true
                     expect(ppu.read(addr: address)).to(equal(0b11000000))
-                    expect(ppu.latch).to(beFalsy())
+                    expect(ppu.registers.writeToggle).to(beFalsy())
 
                     expect(ppu.read(addr: address)).to(equal(0b01000000))
                 }
@@ -91,10 +91,10 @@ class PPUPortSpec: QuickSpec {
             context("write") {
                 it("set scroll position by two write") {
                     ppu.write(addr: address, data: 0x3F)
-                    expect(ppu.latch).to(beTruthy())
+                    expect(ppu.registers.writeToggle).to(beTruthy())
 
                     ppu.write(addr: address, data: 0x91)
-                    expect(ppu.latch).to(beFalsy())
+                    expect(ppu.registers.writeToggle).to(beFalsy())
 
                     expect(ppu.scrollPosition.x).to(equal(0x3F))
                     expect(ppu.scrollPosition.y).to(equal(0x91))
@@ -108,12 +108,12 @@ class PPUPortSpec: QuickSpec {
             context("write") {
                 it("set current address by two write") {
                     ppu.write(addr: address, data: 0x3F)
-                    expect(ppu.latch).to(beTruthy())
+                    expect(ppu.registers.writeToggle).to(beTruthy())
 
                     ppu.write(addr: address, data: 0x91)
-                    expect(ppu.latch).to(beFalsy())
+                    expect(ppu.registers.writeToggle).to(beFalsy())
 
-                    expect(ppu.currentAddress).to(equal(0x3F91))
+                    expect(ppu.registers.vramAddr).to(equal(0x3F91))
                 }
             }
         }

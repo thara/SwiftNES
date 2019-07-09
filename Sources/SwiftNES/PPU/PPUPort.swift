@@ -59,7 +59,7 @@ extension PPUEmulator: PPU {
     var status: PPUStatus {
         let s = registers.status
         registers.status.remove(.vblank)
-        latch = false
+        registers.writeToggle = false
         return s
     }
 
@@ -80,12 +80,12 @@ extension PPUEmulator: PPU {
         get { return registers.scroll }
         set {
             registers.scroll = newValue
-            if !latch {
+            if !registers.writeToggle {
                 scrollPosition.x = newValue
             } else {
                 scrollPosition.y = newValue
             }
-            latch = !latch
+            registers.writeToggle = !registers.writeToggle
         }
     }
 
@@ -94,20 +94,20 @@ extension PPUEmulator: PPU {
         get { return registers.address }
         set {
             registers.address = newValue
-            if !latch {
-                currentAddress = newValue.u16 << 8 | (currentAddress & 0x00FF)
+            if !registers.writeToggle {
+                registers.vramAddr = newValue.u16 << 8 | (registers.vramAddr & 0x00FF)
             } else {
-                currentAddress = (currentAddress & 0xFF00) | newValue.u16
+                registers.vramAddr = (registers.vramAddr & 0xFF00) | newValue.u16
             }
-            latch = !latch
+            registers.writeToggle = !registers.writeToggle
         }
     }
 
     /// PPUDATA
     var data: UInt8 {
-        get { return memory.read(addr: currentAddress) }
+        get { return memory.read(addr: registers.vramAddr) }
         set {
-            memory.write(addr: currentAddress, data: newValue)
+            memory.write(addr: registers.vramAddr, data: newValue)
         }
     }
 }

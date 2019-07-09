@@ -12,6 +12,11 @@ struct PPURegisters {
     var scroll: UInt8
     /// PPUADDR
     var address: UInt8
+
+    /// current VRAM address
+    var vramAddr: UInt16 = 0x00
+
+    var writeToggle: Bool = false
 }
 
 struct PPUController: OptionSet {

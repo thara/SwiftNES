@@ -10,9 +10,7 @@ typealias SendNMI = (() -> Void)
 class PPUEmulator {
     var registers: PPURegisters
 
-    var currentAddress: UInt16 = 0x00
     var scrollPosition: ScrollPosition = ScrollPosition(x: 0x00, y: 0x00)
-    var latch: Bool = false
 
     var memory: Memory
 

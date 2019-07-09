@@ -23,12 +23,12 @@ extension PPUEmulator {
     }
 
     var nameTableAddr: UInt16 {
-        return nameTableFirstAddr | (currentAddress & 0xFFF)
+        return nameTableFirstAddr | (registers.vramAddr & 0xFFF)
     }
 
     var attrTableAddr: UInt16 {
-        // Translate currentAddress for attribute table(8 x 8) from name table(16x15)
-        return attrTableFirstAddr | (currentAddress.nameTableSelect & (currentAddress.attrY << 3) & currentAddress.attrX)
+        // Translate current VRAM address for attribute table(8 x 8) from name table(16x15)
+        return attrTableFirstAddr | (registers.vramAddr.nameTableSelect & (registers.vramAddr.attrY << 3) & registers.vramAddr.attrX)
     }
 }
 
