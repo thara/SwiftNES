@@ -87,8 +87,16 @@ extension BinaryInteger {
         return self & Self(0b110000000000)
     }
 
+    var nameTableNo: Self {
+        return nameTableSelect >> 10
+    }
+
+    var fineY: Self {
+        return Self(self & Self(0b111000000000000))
+    }
+
     var fineYScroll: UInt8 {
-        return UInt8(self & Self(0b111000000000000) >> 12)
+        return UInt8((self & Self(0b111000000000000)) >> 12)
     }
 }
 

@@ -16,28 +16,36 @@ let tileHeight: UInt8 = 8
 extension PPUEmulator {
 
     func updateBackground(preRendering: Bool = false) {
-        switch dot % 8 {
-        // name table
-        case 1:
-            background.tempTableAddr = nameTableAddr
-        case 2:
-            background.nameTableEntry = memory.read(addr: background.tempTableAddr)
-        // attribute table
-        case 3:
-            background.tempTableAddr = attrTableAddr
-        case 4:
-            background.attrTableEntry = memory.read(addr: background.tempTableAddr)
-        // tile bitmap low
-        case 5:
-            background.tempTableAddr = bgPatternTableAddr
-        case 6:
-            background.tileBitmapLow = memory.read(addr: background.tempTableAddr)
-        // tile bitmap high
-        case 7:
-            background.tempTableAddr += tileHeight.u16
-        case 0:
+        switch dot {
+        case 1...255:
+            switch dot % 8 {
+            // name table
+            case 1:
+                background.tempTableAddr = nameTableAddr
+            case 2:
+                background.nameTableEntry = memory.read(addr: background.tempTableAddr)
+            // attribute table
+            case 3:
+                background.tempTableAddr = attrTableAddr
+            case 4:
+                background.attrTableEntry = memory.read(addr: background.tempTableAddr)
+            // tile bitmap low
+            case 5:
+                background.tempTableAddr = bgPatternTableAddr
+            case 6:
+                background.tileBitmapLow = memory.read(addr: background.tempTableAddr)
+            // tile bitmap high
+            case 7:
+                background.tempTableAddr += tileHeight.u16
+            case 0:
+                background.tileBitmapHigh = memory.read(addr: background.tempTableAddr)
+                incrCoarseX()
+            default:
+                break
+            }
+        case 256:
             background.tileBitmapHigh = memory.read(addr: background.tempTableAddr)
-            incrCoarseX()
+            incrY()
         default:
             break
         }
@@ -59,9 +67,29 @@ extension PPUEmulator {
     func incrCoarseX() {
         if registers.vramAddr.coarseXScroll == 31 {
             registers.vramAddr &= ~0b11111 // coarse X = 0
-            registers.vramAddr ^= 0b10000000000  // switch horizontal nametable
+            registers.vramAddr ^= 0x0400  // switch horizontal nametable
         } else {
             registers.vramAddr += 1
+        }
+    }
+
+    func incrY() {
+        if registers.vramAddr.fineYScroll < 7 {
+            registers.vramAddr += 0x1000
+        } else {
+            registers.vramAddr &= ~0x7000 // fine Y = 0
+
+            var y = registers.vramAddr.coarseYScroll
+            if y == 29 {
+                y = 0
+                registers.vramAddr ^= 0x0800  // switch vertical nametable
+            } else if y == 31 {
+                y = 0
+            } else {
+                y += 1
+            }
+
+            registers.vramAddr = (registers.vramAddr & ~0x03E0) | (y << 5)
         }
     }
 }

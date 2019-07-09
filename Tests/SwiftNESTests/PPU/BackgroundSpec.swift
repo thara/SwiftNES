@@ -51,6 +51,80 @@ class BackgroundSpec: QuickSpec {
             }
         }
 
+        describe("incrCoarseX") {
+            it("increment coarse X") {
+                ppu.registers.vramAddr = 0b1101101100111101
+                expect(ppu.registers.vramAddr.coarseX).to(equal(29))
+
+                ppu.incrCoarseX()
+                expect(ppu.registers.vramAddr.coarseX).to(equal(30))
+            }
+
+            context("the next tile is reached") {
+                it("switch horizontal nametable") {
+                    ppu.registers.vramAddr = 0b1101101100111111
+                    expect(ppu.registers.vramAddr.coarseX).to(equal(31))
+                    expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
+
+                    ppu.incrCoarseX()
+
+                    expect(ppu.registers.vramAddr.coarseX).to(equal(0))
+                    expect(ppu.registers.vramAddr.nameTableNo).to(equal(3))
+                }
+            }
+        }
+
+        describe("incrY") {
+            it("increment fine Y") {
+                ppu.registers.vramAddr = 0b0101101010111101
+                ppu.incrY()
+                expect(ppu.registers.vramAddr).to(equal(0b0110101010111101))
+            }
+
+            context("if fine Y == 7") {
+                context("the last row of tiles in a nametable") {
+                    it("switch vertical nametable") {
+                        ppu.registers.vramAddr = 0b0111101110111101
+                        expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
+                        expect(ppu.registers.vramAddr.fineYScroll).to(equal(7))
+                        expect(ppu.registers.vramAddr.coarseYScroll).to(equal(29))
+
+                        ppu.incrY()
+                        expect(ppu.registers.vramAddr.nameTableNo).to(equal(0))
+                        expect(ppu.registers.vramAddr.fineYScroll).to(equal(0))
+                        expect(ppu.registers.vramAddr.coarseYScroll).to(equal(0))
+                    }
+                }
+
+                context("out of range") {
+                    it("clear coarse Y") {
+                        ppu.registers.vramAddr = 0b0111101111111101
+                        expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
+                        expect(ppu.registers.vramAddr.fineYScroll).to(equal(7))
+                        expect(ppu.registers.vramAddr.coarseYScroll).to(equal(31))
+
+                        ppu.incrY()
+                        expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
+                        expect(ppu.registers.vramAddr.fineYScroll).to(equal(0))
+                        expect(ppu.registers.vramAddr.coarseYScroll).to(equal(0))
+                    }
+                }
+
+                it("increment coarse Y") {
+                    ppu.registers.vramAddr = 0b0111100101111101
+                    expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
+                    expect(ppu.registers.vramAddr.fineYScroll).to(equal(7))
+                    expect(ppu.registers.vramAddr.coarseYScroll).to(equal(11))
+
+                    ppu.incrY()
+                    expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
+                    expect(ppu.registers.vramAddr.fineYScroll).to(equal(0))
+                    expect(ppu.registers.vramAddr.coarseYScroll).to(equal(12))
+                }
+            }
+
+        }
+
         describe("updateBackground") {
 
             beforeEach {
@@ -96,21 +170,6 @@ class BackgroundSpec: QuickSpec {
                 ppu.dot += 1
                 ppu.updateBackground()
                 expect(ppu.background.tileBitmapHigh).to(equal(0x81))
-
-                expect(ppu.registers.vramAddr).to(equal(0b1101101100111110))
-            }
-
-            context("next tile reached") {
-                it("switch horizontal nametable") {
-                    ppu.registers.vramAddr = 0b1101101100111111
-                    expect(ppu.registers.vramAddr.nameTableSelect).to(equal(0b0000100000000000))
-
-                    ppu.dot = 8
-                    ppu.updateBackground()
-
-                    expect(ppu.registers.vramAddr).to(equal(0b1101111100100000))
-                    expect(ppu.registers.vramAddr.nameTableSelect).to(equal(0b0000110000000000))
-                }
             }
         }
     }
