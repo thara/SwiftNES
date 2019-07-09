@@ -31,28 +31,3 @@ extension PPUEmulator {
         return attrTableFirstAddr | (registers.vramAddr.nameTableSelect & (registers.vramAddr.attrY << 3) & registers.vramAddr.attrX)
     }
 }
-
-private extension UInt16 {
-
-    var coarseX: UInt16 {
-        return self & UInt16(0b11111)
-    }
-
-    /// Translate index of attribute table from name table
-    var attrX: UInt16 {
-        return coarseX / 4
-    }
-
-    var coarseY: UInt16 {
-        return (self & UInt16(0b1111100000)) >> 5
-    }
-
-    /// Translate index of attribute table from name table
-    var attrY: UInt16 {
-        return coarseY / 4
-    }
-
-    var nameTableSelect: UInt16 {
-        return self & UInt16(0b110000000000)
-    }
-}

@@ -1,22 +1,87 @@
 struct PPURegisters {
     /// PPUCTRL
-    var controller: PPUController
+    var controller: PPUController = []
     /// PPUMASK
-    var mask: PPUMask
+    var mask: PPUMask = []
     /// PPUSTATUS
-    var status: PPUStatus
+    var status: PPUStatus = []
     /// OAMADDR
-    var objectAttributeMemoryAddress: UInt8
+    var objectAttributeMemoryAddress: UInt8 = 0x00
 
     /// PPUSCROLL
-    var scroll: UInt8
+    var scroll: UInt8 = 0x00
     /// PPUADDR
-    var address: UInt8
+    var address: UInt8 = 0x00
 
     /// current VRAM address
     var vramAddr: UInt16 = 0x00
+    /// temporary VRAM address
+    var tempAddr: UInt16 = 0x00
+    /// Fine X scroll
+    var fineX: UInt8 = 0x00
 
     var writeToggle: Bool = false
+
+    mutating func readStatus() -> UInt8 {
+        let s = status
+        status.remove(.vblank)
+        writeToggle = false
+        return s.rawValue
+    }
+
+    mutating func writeScroll(position: UInt8) {
+        if !writeToggle {
+            tempAddr = (tempAddr & 0b111111111100000) | position.coarseX.u16
+        } else {
+            tempAddr = (tempAddr & 0b111110000011111) | (position.u16 << 5)
+            fineX = position & 0b111
+        }
+        writeToggle = !writeToggle
+    }
+
+    mutating func writeVRAMAddress(addr: UInt8) {
+        if !writeToggle {
+            tempAddr = addr.u16 << 8 | (tempAddr & 0x00FF)
+        } else {
+            tempAddr = (tempAddr & 0xFF00) | addr.u16
+            vramAddr = tempAddr
+        }
+        writeToggle = !writeToggle
+    }
+}
+
+/// Extension for VRAM address
+extension BinaryInteger {
+
+    var coarseX: Self {
+        return self & Self(0b11111)
+    }
+
+    var coarseXScroll: Self {
+        return self & Self(0b11111)
+    }
+
+    /// Translate index of attribute table from name table
+    var attrX: Self {
+        return coarseX / 4
+    }
+
+    var coarseY: Self {
+        return self & Self(0b1111100000)
+    }
+
+    var coarseYScroll: Self {
+        return coarseY >> 5
+    }
+
+    /// Translate index of attribute table from name table
+    var attrY: Self {
+        return coarseYScroll / 4
+    }
+
+    var nameTableSelect: Self {
+        return self & Self(0b110000000000)
+    }
 }
 
 struct PPUController: OptionSet {

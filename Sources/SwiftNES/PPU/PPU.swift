@@ -10,8 +10,6 @@ typealias SendNMI = (() -> Void)
 class PPUEmulator {
     var registers: PPURegisters
 
-    var scrollPosition: ScrollPosition = ScrollPosition(x: 0x00, y: 0x00)
-
     var memory: Memory
 
     var background: Background
@@ -32,14 +30,7 @@ class PPUEmulator {
     var lineBuffer: [UInt8]
 
     init(sendNMI: @escaping SendNMI) {
-        registers = PPURegisters(
-            controller: [],
-            mask: [],
-            status: [],
-            objectAttributeMemoryAddress: 0x00,
-            scroll: 0x00,
-            address: 0x00
-        )
+        self.registers = PPURegisters()
         self.memory = PPUAddressSpace()
         self.background = Background()
 
@@ -67,15 +58,5 @@ class PPUEmulator {
                 //TODO frame odd
             }
         }
-    }
-}
-
-struct ScrollPosition {
-    var x: UInt8
-    var y: UInt8
-
-    mutating func reset() {
-        x = 0x00
-        y = 0x00
     }
 }

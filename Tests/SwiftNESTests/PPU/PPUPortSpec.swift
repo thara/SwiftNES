@@ -90,14 +90,15 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("set scroll position by two write") {
-                    ppu.write(addr: address, data: 0x3F)
+                    ppu.write(addr: address, data: 0x1F)
                     expect(ppu.registers.writeToggle).to(beTruthy())
+                    expect(ppu.registers.tempAddr.coarseXScroll).to(equal(0x1F))
+                    expect(ppu.registers.fineX).to(equal(0x00))
 
-                    ppu.write(addr: address, data: 0x91)
+                    ppu.write(addr: address, data: 0x0E)
                     expect(ppu.registers.writeToggle).to(beFalsy())
-
-                    expect(ppu.scrollPosition.x).to(equal(0x3F))
-                    expect(ppu.scrollPosition.y).to(equal(0x91))
+                    expect(ppu.registers.tempAddr.coarseYScroll).to(equal(0x0E))
+                    expect(ppu.registers.fineX).to(equal(0x0E & 0b111))
                 }
             }
         }
@@ -114,6 +115,7 @@ class PPUPortSpec: QuickSpec {
                     expect(ppu.registers.writeToggle).to(beFalsy())
 
                     expect(ppu.registers.vramAddr).to(equal(0x3F91))
+                    expect(ppu.registers.tempAddr).to(equal(0x3F91))
                 }
             }
         }
