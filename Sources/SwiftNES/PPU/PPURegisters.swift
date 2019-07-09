@@ -53,6 +53,10 @@ struct PPURegisters {
 /// Extension for VRAM address
 extension BinaryInteger {
 
+    var nameTableIdx: UInt16 {
+        return UInt16(self & Self(0b111111111111))
+    }
+
     var coarseX: Self {
         return self & Self(0b11111)
     }
@@ -82,6 +86,10 @@ extension BinaryInteger {
     var nameTableSelect: Self {
         return self & Self(0b110000000000)
     }
+
+    var fineYScroll: UInt8 {
+        return UInt8(self & Self(0b111000000000000) >> 12)
+    }
 }
 
 struct PPUController: OptionSet {
@@ -102,6 +110,10 @@ struct PPUController: OptionSet {
     /// Base nametable address
     static let nameTableAddrHigh = PPUController(rawValue: 1 << 1)
     static let nameTableAddrLow = PPUController(rawValue: 1)
+
+    var bgPatternTableAddrBase: UInt16 {
+        return contains(.bgTableAddr) ? 0x1000 : 0x0000
+    }
 
     var baseNameTableAddr: UInt16 {
         let bits = rawValue & 0b0011
