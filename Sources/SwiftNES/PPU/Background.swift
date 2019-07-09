@@ -37,6 +37,7 @@ extension PPUEmulator {
             background.tempTableAddr += tileHeight.u16
         case 0:
             background.tileBitmapHigh = memory.read(addr: background.tempTableAddr)
+            incrCoarseX()
         default:
             break
         }
@@ -53,5 +54,14 @@ extension PPUEmulator {
 
     var bgPatternTableAddr: UInt16 {
         return registers.controller.bgPatternTableAddrBase + (background.nameTableEntry * tileHeight * 2 + registers.vramAddr.fineYScroll).u16
+    }
+
+    func incrCoarseX() {
+        if registers.vramAddr.coarseXScroll == 31 {
+            registers.vramAddr &= ~0b11111 // coarse X = 0
+            registers.vramAddr ^= 0b10000000000  // switch horizontal nametable
+        } else {
+            registers.vramAddr += 1
+        }
     }
 }
