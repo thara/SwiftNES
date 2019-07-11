@@ -46,6 +46,12 @@ extension PPUEmulator {
         case 256:
             background.tileBitmapHigh = memory.read(addr: background.tempTableAddr)
             incrY()
+        case 257:
+            updateHorizontalPosition()
+        case 280...304:
+            if preRendering {
+                updateVerticalPosition()
+            }
         default:
             break
         }
@@ -91,5 +97,13 @@ extension PPUEmulator {
 
             registers.vramAddr = (registers.vramAddr & ~0x03E0) | (y << 5)
         }
+    }
+
+    func updateHorizontalPosition() {
+        registers.vramAddr = (registers.vramAddr & ~0b010000011111) | (registers.tempAddr & 0b010000011111)
+    }
+
+    func updateVerticalPosition() {
+        registers.vramAddr = (registers.vramAddr & ~0b101111100000) | (registers.tempAddr & 0b101111100000)
     }
 }

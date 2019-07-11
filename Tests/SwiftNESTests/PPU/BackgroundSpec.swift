@@ -125,6 +125,46 @@ class BackgroundSpec: QuickSpec {
 
         }
 
+        describe("updateHorizontalPosition") {
+            it("update coarse X and name table select of VRAM address") {
+                ppu.registers.vramAddr = 0b100101111101
+                expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
+                expect(ppu.registers.vramAddr.coarseXScroll).to(equal(29))
+                expect(ppu.registers.vramAddr.coarseYScroll).to(equal(11))
+
+                ppu.registers.tempAddr = 0b110101000101
+                expect(ppu.registers.tempAddr.nameTableNo).to(equal(3))
+                expect(ppu.registers.tempAddr.coarseXScroll).to(equal(5))
+                expect(ppu.registers.tempAddr.coarseYScroll).to(equal(10))
+
+                ppu.updateHorizontalPosition()
+
+                expect(ppu.registers.vramAddr.nameTableNo).to(equal(3))
+                expect(ppu.registers.vramAddr.coarseXScroll).to(equal(5))
+                expect(ppu.registers.vramAddr.coarseYScroll).to(equal(11))
+            }
+        }
+
+        describe("updateVerticalPosition") {
+            it("update coarse Y and name table select of VRAM address") {
+                ppu.registers.vramAddr = 0b100101111101
+                expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
+                expect(ppu.registers.vramAddr.coarseXScroll).to(equal(29))
+                expect(ppu.registers.vramAddr.coarseYScroll).to(equal(11))
+
+                ppu.registers.tempAddr = 0b010101000101
+                expect(ppu.registers.tempAddr.nameTableNo).to(equal(1))
+                expect(ppu.registers.tempAddr.coarseXScroll).to(equal(5))
+                expect(ppu.registers.tempAddr.coarseYScroll).to(equal(10))
+
+                ppu.updateVerticalPosition()
+
+                expect(ppu.registers.vramAddr.nameTableNo).to(equal(0))
+                expect(ppu.registers.vramAddr.coarseXScroll).to(equal(29))
+                expect(ppu.registers.vramAddr.coarseYScroll).to(equal(10))
+            }
+        }
+
         describe("updateBackground") {
 
             beforeEach {
