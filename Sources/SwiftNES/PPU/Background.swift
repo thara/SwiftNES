@@ -17,7 +17,12 @@ extension PPUEmulator {
 
     func updateBackground(preRendering: Bool = false) {
         switch dot {
-        case 1...255:
+        case 1:
+            background.tempTableAddr = nameTableAddr
+            if preRendering {
+                registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
+            }
+        case 2...255, 321...336:
             switch dot % 8 {
             // name table
             case 1:
@@ -51,6 +56,19 @@ extension PPUEmulator {
         case 280...304:
             if preRendering {
                 updateVerticalPosition()
+            }
+        // Unused name table fetches
+        case 337:
+            background.tempTableAddr = nameTableAddr
+        case 338:
+            background.nameTableEntry = memory.read(addr: background.tempTableAddr)
+        case 339:
+            background.tempTableAddr = nameTableAddr
+        case 340:
+            background.nameTableEntry = memory.read(addr: background.tempTableAddr)
+            if preRendering && renderingEnabled && frames.isOdd {
+                // Skip 0 cycle on visible frame
+                dot += 1
             }
         default:
             break

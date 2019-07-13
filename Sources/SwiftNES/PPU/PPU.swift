@@ -25,6 +25,8 @@ class PPUEmulator {
     var dot: UInt16 = 0
     var lineNumber: UInt16 = 0
 
+    var frames: UInt = 0
+
     let sendNMI: SendNMI
 
     var lineBuffer: [UInt8]
@@ -55,7 +57,7 @@ class PPUEmulator {
             lineNumber += 1
             if maxLine < lineNumber {
                 lineNumber = 0
-                //TODO frame odd
+                frames &+= 1
             }
         }
     }

@@ -2,6 +2,9 @@ extension BinaryInteger {
     func radix16() -> String {
         return String(self, radix: 16)
     }
+
+    @inline(__always)
+    var isOdd: Bool { return self.magnitude % 2 != 0 }
 }
 
 extension UInt8 {
