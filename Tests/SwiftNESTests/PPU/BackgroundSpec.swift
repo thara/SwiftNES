@@ -217,7 +217,7 @@ class BackgroundSpec: QuickSpec {
 
                 ppu.dot += 1
                 ppu.updateBackground()
-                expect(ppu.background.tileBitmapLow).to(equal(0x11))
+                expect(ppu.background.tempTileFirst).to(equal(0x11))
 
                 ppu.dot += 1
                 ppu.updateBackground()
@@ -225,7 +225,7 @@ class BackgroundSpec: QuickSpec {
 
                 ppu.dot += 1
                 ppu.updateBackground()
-                expect(ppu.background.tileBitmapHigh).to(equal(0x81))
+                expect(ppu.background.tempTileSecond).to(equal(0x81))
             }
         }
     }

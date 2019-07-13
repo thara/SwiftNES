@@ -1,11 +1,41 @@
 struct Background {
+    /// value of name table
     var nameTableEntry: UInt8 = 0x00
+    /// value of attribute table
     var attrTableEntry: UInt8 = 0x00
 
-    var tileBitmapLow: UInt8 = 0x00
-    var tileBitmapHigh: UInt8 = 0x00
+    /// 2 planes of 1 tile pattern
+    var tempTileFirst: UInt8 = 0x00
+    var tempTileSecond: UInt8 = 0x00
 
+    /// general temporary address
     var tempTableAddr: UInt16 = 0x00
+
+    /// 2 planes of 1 tile pattern
+    var tilePatternFirst: UInt16 = 0x00
+    var tilePatternSecond: UInt16 = 0x00
+
+    var tileAttrLow: UInt8 = 0x00
+    var tileAttrHigh: UInt8 = 0x00
+
+    /// 1 quadrant of attrTableEntry
+    var tileAttrLowLatch: Bool = false
+    var tileAttrHighLatch: Bool = false
+
+    mutating func shift() {
+        tilePatternFirst <<= 1
+        tilePatternSecond <<= 1
+        tileAttrLow = (tileAttrLow << 1) | unsafeBitCast(tileAttrLowLatch, to: UInt8.self)
+        tileAttrHigh = (tileAttrHigh << 1) | unsafeBitCast(tileAttrHighLatch, to: UInt8.self)
+    }
+
+    mutating func reloadShift() {
+        tilePatternFirst = (tilePatternFirst & 0xFF00) | tempTileFirst.u16
+        tilePatternSecond = (tilePatternSecond & 0xFF00) | tempTileSecond.u16
+
+        tileAttrLowLatch = (attrTableEntry & 0x01) == 1
+        tileAttrHighLatch = (attrTableEntry & 0x10) == 0x10
+    }
 }
 
 let nameTableFirstAddr: UInt16 = 0x2000
@@ -22,11 +52,15 @@ extension PPUEmulator {
             if preRendering {
                 registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
             }
-        case 2...255, 321...336:
+        case 321:
+            // No reload shift
+            background.tempTableAddr = nameTableAddr
+        case 2...255, 322...336:
             switch dot % 8 {
             // name table
             case 1:
                 background.tempTableAddr = nameTableAddr
+                background.reloadShift()
             case 2:
                 background.nameTableEntry = memory.read(addr: background.tempTableAddr)
             // attribute table
@@ -34,25 +68,36 @@ extension PPUEmulator {
                 background.tempTableAddr = attrTableAddr
             case 4:
                 background.attrTableEntry = memory.read(addr: background.tempTableAddr)
+
+                if registers.vramAddr.coarseXScroll & UInt16(0b10) == 0b10 {
+                    // top right
+                    background.attrTableEntry <<= 2
+                }
+                if registers.vramAddr.coarseYScroll & UInt16(0b10)  == 0b10 {
+                    // buttom left
+                    background.attrTableEntry <<= 4
+                }
+
             // tile bitmap low
             case 5:
                 background.tempTableAddr = bgPatternTableAddr
             case 6:
-                background.tileBitmapLow = memory.read(addr: background.tempTableAddr)
+                background.tempTileFirst = memory.read(addr: background.tempTableAddr)
             // tile bitmap high
             case 7:
                 background.tempTableAddr += tileHeight.u16
             case 0:
-                background.tileBitmapHigh = memory.read(addr: background.tempTableAddr)
+                background.tempTileSecond = memory.read(addr: background.tempTableAddr)
                 incrCoarseX()
             default:
                 break
             }
         case 256:
-            background.tileBitmapHigh = memory.read(addr: background.tempTableAddr)
+            background.tempTileSecond = memory.read(addr: background.tempTableAddr)
             incrY()
         case 257:
             updateHorizontalPosition()
+            background.reloadShift()
         case 280...304:
             if preRendering {
                 updateVerticalPosition()
@@ -73,6 +118,13 @@ extension PPUEmulator {
         default:
             break
         }
+    }
+
+    func getBackgroundPaletteIndex() -> Int {
+        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
+        let pixel = ((background.tilePatternSecond >> (15 - registers.fineX)) << 1) | (background.tilePatternFirst >> (15 - registers.fineX))
+        let pallete = ((background.tileAttrHigh.u16 >> (7 - registers.fineX)) << 1) | (background.tileAttrLow.u16 >> (7 - registers.fineX))
+        return Int(pixel | (pallete << 2))
     }
 
     var nameTableAddr: UInt16 {
