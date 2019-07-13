@@ -71,6 +71,8 @@ extension PPUEmulator {
     }
 
     func incrCoarseX() {
+        guard renderingEnabled else { return }
+
         if registers.vramAddr.coarseXScroll == 31 {
             registers.vramAddr &= ~0b11111 // coarse X = 0
             registers.vramAddr ^= 0x0400  // switch horizontal nametable
@@ -80,6 +82,8 @@ extension PPUEmulator {
     }
 
     func incrY() {
+        guard renderingEnabled else { return }
+
         if registers.vramAddr.fineYScroll < 7 {
             registers.vramAddr += 0x1000
         } else {
@@ -100,10 +104,18 @@ extension PPUEmulator {
     }
 
     func updateHorizontalPosition() {
+        guard renderingEnabled else { return }
+
         registers.vramAddr = (registers.vramAddr & ~0b010000011111) | (registers.tempAddr & 0b010000011111)
     }
 
     func updateVerticalPosition() {
+        guard renderingEnabled else { return }
+
         registers.vramAddr = (registers.vramAddr & ~0b101111100000) | (registers.tempAddr & 0b101111100000)
+    }
+
+    var renderingEnabled: Bool {
+        return registers.mask.contains(.sprite) || registers.mask.contains(.background)
     }
 }

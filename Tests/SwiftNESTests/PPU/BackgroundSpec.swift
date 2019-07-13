@@ -52,6 +52,10 @@ class BackgroundSpec: QuickSpec {
         }
 
         describe("incrCoarseX") {
+            beforeEach {
+                ppu.registers.mask = [.background]
+            }
+
             it("increment coarse X") {
                 ppu.registers.vramAddr = 0b1101101100111101
                 expect(ppu.registers.vramAddr.coarseX).to(equal(29))
@@ -75,6 +79,10 @@ class BackgroundSpec: QuickSpec {
         }
 
         describe("incrY") {
+            beforeEach {
+                ppu.registers.mask = [.background]
+            }
+
             it("increment fine Y") {
                 ppu.registers.vramAddr = 0b0101101010111101
                 ppu.incrY()
@@ -126,6 +134,10 @@ class BackgroundSpec: QuickSpec {
         }
 
         describe("updateHorizontalPosition") {
+            beforeEach {
+                ppu.registers.mask = [.background]
+            }
+
             it("update coarse X and name table select of VRAM address") {
                 ppu.registers.vramAddr = 0b100101111101
                 expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
@@ -146,6 +158,10 @@ class BackgroundSpec: QuickSpec {
         }
 
         describe("updateVerticalPosition") {
+            beforeEach {
+                ppu.registers.mask = [.background]
+            }
+
             it("update coarse Y and name table select of VRAM address") {
                 ppu.registers.vramAddr = 0b100101111101
                 expect(ppu.registers.vramAddr.nameTableNo).to(equal(2))
