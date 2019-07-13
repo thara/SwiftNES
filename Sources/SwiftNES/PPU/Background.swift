@@ -45,6 +45,7 @@ let tileHeight: UInt8 = 8
 
 extension PPUEmulator {
 
+    // swiftlint:disable cyclomatic_complexity
     func updateBackground(preRendering: Bool = false) {
         switch dot {
         case 1:
@@ -119,6 +120,7 @@ extension PPUEmulator {
             break
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 
     func getBackgroundPaletteIndex() -> Int {
         // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
