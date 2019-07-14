@@ -36,7 +36,7 @@ struct PPURegisters {
             tempAddr = (tempAddr & 0b111110000011111) | (position.u16 << 5)
             fineX = position & 0b111
         }
-        writeToggle = !writeToggle
+        writeToggle.toggle()
     }
 
     mutating func writeVRAMAddress(addr: UInt8) {
@@ -46,7 +46,7 @@ struct PPURegisters {
             tempAddr = (tempAddr & 0xFF00) | addr.u16
             vramAddr = tempAddr
         }
-        writeToggle = !writeToggle
+        writeToggle.toggle()
     }
 }
 
