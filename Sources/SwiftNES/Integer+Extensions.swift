@@ -7,9 +7,7 @@ extension BinaryInteger {
     var isOdd: Bool { return self.magnitude % 2 != 0 }
 
     subscript(n: UInt8) -> Self {
-        get {
-            return (self >> n) & 1
-        }
+        return (self >> n) & 1
     }
 }
 
