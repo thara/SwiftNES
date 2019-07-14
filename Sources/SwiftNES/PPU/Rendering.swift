@@ -27,7 +27,6 @@ extension PPUEmulator {
             let preRendering = scanline == .preRender
 
             updateSprites(preRendering: preRendering)
-
             updateBackground(preRendering: preRendering)
 
             updateLineBuffer()
@@ -45,6 +44,74 @@ extension PPUEmulator {
             }
         }
     }
+
+    // swiftlint:disable cyclomatic_complexity
+    func updateBackground(preRendering: Bool = false) {
+        switch dot {
+        case 1:
+            background.addressNameTableEntry(using: registers.v)
+            if preRendering {
+                registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
+            }
+        case 321:
+            // No reload shift
+            background.addressNameTableEntry(using: registers.v)
+        case 2...255, 322...336:
+            switch dot % 8 {
+            // name table
+            case 1:
+                background.addressNameTableEntry(using: registers.v)
+                background.reloadShift()
+            case 2:
+                background.fetchNameTableEntry(from: memory)
+            // attribute table
+            case 3:
+                background.addressAttrTableEntry(using: registers.v)
+            case 4:
+                background.fetchAttrTableEntry(from: memory, v: registers.v)
+
+            // tile bitmap low
+            case 5:
+                background.addressTileBitmapLow(using: registers.v, controller: registers.controller)
+            case 6:
+                background.fetchTileBitmapLow(from: memory)
+            // tile bitmap high
+            case 7:
+                background.addressTileBitmapHigh()
+            case 0:
+                background.fetchTileBitmapHigh(from: memory)
+                incrCoarseX()
+            default:
+                break
+            }
+        case 256:
+            background.fetchTileBitmapHigh(from: memory)
+            incrY()
+        case 257:
+            updateHorizontalPosition()
+            background.reloadShift()
+        case 280...304:
+            if preRendering {
+                updateVerticalPosition()
+            }
+        // Unused name table fetches
+        case 337:
+            background.addressNameTableEntry(using: registers.v)
+        case 338:
+            background.fetchNameTableEntry(from: memory)
+        case 339:
+            background.addressNameTableEntry(using: registers.v)
+        case 340:
+            background.fetchNameTableEntry(from: memory)
+            if preRendering && renderingEnabled && frames.isOdd {
+                // Skip 0 cycle on visible frame
+                dot += 1
+            }
+        default:
+            break
+        }
+    }
+    // swiftlint:enable cyclomatic_complexity
 
     func updateLineBuffer() {
         // let bgPixel: UInt8 = 0

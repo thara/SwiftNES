@@ -1,3 +1,8 @@
+let nameTableFirstAddr: UInt16 = 0x2000
+let attrTableFirstAddr: UInt16 = 0x23C0
+
+let tileHeight: UInt8 = 8
+
 struct Background {
     /// value of name table
     var nameTableEntry: UInt8 = 0x00
@@ -22,6 +27,63 @@ struct Background {
     var tileAttrLowLatch: Bool = false
     var tileAttrHighLatch: Bool = false
 
+    /// Returns pallete index for fine X
+    func getPaletteIndex(fineX: UInt8) -> Int {
+        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
+        let pixel = (tilePatternSecond[15 - fineX] << 1) | tilePatternFirst[15 - fineX]
+        let pallete = (tileAttrHigh[7 - fineX] << 1) | tileAttrLow[7 - fineX]
+        return Int(pixel | (pallete << 2).u16)
+    }
+
+    /// Fetch nametable byte : step 1
+    mutating func addressNameTableEntry(using v: UInt16) {
+        tempTableAddr = nameTableFirstAddr | v.nameTableIdx
+    }
+
+    /// Fetch nametable byte : step 2
+    mutating func fetchNameTableEntry(from memory: Memory) {
+        nameTableEntry = memory.read(addr: tempTableAddr)
+    }
+
+    /// Fetch attribute table byte : step 1
+    mutating func addressAttrTableEntry(using v: UInt16) {
+        tempTableAddr = attrTableFirstAddr | v.nameTableSelect | (v.attrY << 3) | v.attrX
+    }
+
+    /// Fetch attribute table byte : step 2
+    mutating func fetchAttrTableEntry(from memory: Memory, v: UInt16) {
+        attrTableEntry = memory.read(addr: tempTableAddr)
+
+        if v.coarseXScroll & UInt16(0b10) == 0b10 {
+            // top right
+            attrTableEntry <<= 2
+        }
+        if v.coarseYScroll & UInt16(0b10)  == 0b10 {
+            // buttom left
+            attrTableEntry <<= 4
+        }
+    }
+
+    /// Fetch tile bitmap low byte : step 1
+    mutating func addressTileBitmapLow(using v: UInt16, controller: PPUController) {
+        tempTableAddr = controller.bgPatternTableAddrBase + (nameTableEntry * tileHeight * 2 + v.fineYScroll).u16
+    }
+
+    /// Fetch tile bitmap low byte : step 2
+    mutating func fetchTileBitmapLow(from memory: Memory) {
+        tempTileFirst = memory.read(addr: tempTableAddr)
+    }
+
+    /// Fetch tile bitmap high byte : step 1
+    mutating func addressTileBitmapHigh() {
+        tempTableAddr += tileHeight.u16
+    }
+
+    /// Fetch tile bitmap high byte : step 2
+    mutating func fetchTileBitmapHigh(from memory: Memory) {
+        tempTileSecond = memory.read(addr: tempTableAddr)
+    }
+
     mutating func shift() {
         tilePatternFirst <<= 1
         tilePatternSecond <<= 1
@@ -35,160 +97,5 @@ struct Background {
 
         tileAttrLowLatch = (attrTableEntry & 0b01) == 1
         tileAttrHighLatch = (attrTableEntry & 0b10) == 0b10
-    }
-
-    func getPaletteIndex(fineX: UInt8) -> Int {
-        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
-        let pixel = (tilePatternSecond[15 - fineX] << 1) | tilePatternFirst[15 - fineX]
-        let pallete = (tileAttrHigh[7 - fineX] << 1) | tileAttrLow[7 - fineX]
-        return Int(pixel | (pallete << 2).u16)
-    }
-
-}
-
-let nameTableFirstAddr: UInt16 = 0x2000
-let attrTableFirstAddr: UInt16 = 0x23C0
-
-let tileHeight: UInt8 = 8
-
-extension PPUEmulator {
-
-    // swiftlint:disable cyclomatic_complexity
-    func updateBackground(preRendering: Bool = false) {
-        switch dot {
-        case 1:
-            background.tempTableAddr = nameTableAddr
-            if preRendering {
-                registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
-            }
-        case 321:
-            // No reload shift
-            background.tempTableAddr = nameTableAddr
-        case 2...255, 322...336:
-            switch dot % 8 {
-            // name table
-            case 1:
-                background.tempTableAddr = nameTableAddr
-                background.reloadShift()
-            case 2:
-                background.nameTableEntry = memory.read(addr: background.tempTableAddr)
-            // attribute table
-            case 3:
-                background.tempTableAddr = attrTableAddr
-            case 4:
-                background.attrTableEntry = memory.read(addr: background.tempTableAddr)
-
-                if registers.v.coarseXScroll & UInt16(0b10) == 0b10 {
-                    // top right
-                    background.attrTableEntry <<= 2
-                }
-                if registers.v.coarseYScroll & UInt16(0b10)  == 0b10 {
-                    // buttom left
-                    background.attrTableEntry <<= 4
-                }
-
-            // tile bitmap low
-            case 5:
-                background.tempTableAddr = bgPatternTableAddr
-            case 6:
-                background.tempTileFirst = memory.read(addr: background.tempTableAddr)
-            // tile bitmap high
-            case 7:
-                background.tempTableAddr += tileHeight.u16
-            case 0:
-                background.tempTileSecond = memory.read(addr: background.tempTableAddr)
-                incrCoarseX()
-            default:
-                break
-            }
-        case 256:
-            background.tempTileSecond = memory.read(addr: background.tempTableAddr)
-            incrY()
-        case 257:
-            updateHorizontalPosition()
-            background.reloadShift()
-        case 280...304:
-            if preRendering {
-                updateVerticalPosition()
-            }
-        // Unused name table fetches
-        case 337:
-            background.tempTableAddr = nameTableAddr
-        case 338:
-            background.nameTableEntry = memory.read(addr: background.tempTableAddr)
-        case 339:
-            background.tempTableAddr = nameTableAddr
-        case 340:
-            background.nameTableEntry = memory.read(addr: background.tempTableAddr)
-            if preRendering && renderingEnabled && frames.isOdd {
-                // Skip 0 cycle on visible frame
-                dot += 1
-            }
-        default:
-            break
-        }
-    }
-    // swiftlint:enable cyclomatic_complexity
-
-    var nameTableAddr: UInt16 {
-        return nameTableFirstAddr | registers.v.nameTableIdx
-    }
-
-    var attrTableAddr: UInt16 {
-        // Translate current VRAM address for attribute table(8x8) from name table(16x15)
-        return attrTableFirstAddr | registers.v.nameTableSelect | (registers.v.attrY << 3) | registers.v.attrX
-    }
-
-    var bgPatternTableAddr: UInt16 {
-        return registers.controller.bgPatternTableAddrBase + (background.nameTableEntry * tileHeight * 2 + registers.v.fineYScroll).u16
-    }
-
-    func incrCoarseX() {
-        guard renderingEnabled else { return }
-
-        if registers.v.coarseXScroll == 31 {
-            registers.v &= ~0b11111 // coarse X = 0
-            registers.v ^= 0x0400  // switch horizontal nametable
-        } else {
-            registers.v += 1
-        }
-    }
-
-    func incrY() {
-        guard renderingEnabled else { return }
-
-        if registers.v.fineYScroll < 7 {
-            registers.v += 0x1000
-        } else {
-            registers.v &= ~0x7000 // fine Y = 0
-
-            var y = registers.v.coarseYScroll
-            if y == 29 {
-                y = 0
-                registers.v ^= 0x0800  // switch vertical nametable
-            } else if y == 31 {
-                y = 0
-            } else {
-                y += 1
-            }
-
-            registers.v = (registers.v & ~0x03E0) | (y << 5)
-        }
-    }
-
-    func updateHorizontalPosition() {
-        guard renderingEnabled else { return }
-
-        registers.v = (registers.v & ~0b010000011111) | (registers.t & 0b010000011111)
-    }
-
-    func updateVerticalPosition() {
-        guard renderingEnabled else { return }
-
-        registers.v = (registers.v & ~0b101111100000) | (registers.t & 0b101111100000)
-    }
-
-    var renderingEnabled: Bool {
-        return registers.mask.contains(.sprite) || registers.mask.contains(.background)
     }
 }
