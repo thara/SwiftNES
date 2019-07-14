@@ -70,11 +70,11 @@ extension PPUEmulator {
             case 4:
                 background.attrTableEntry = memory.read(addr: background.tempTableAddr)
 
-                if registers.vramAddr.coarseXScroll & UInt16(0b10) == 0b10 {
+                if registers.v.coarseXScroll & UInt16(0b10) == 0b10 {
                     // top right
                     background.attrTableEntry <<= 2
                 }
-                if registers.vramAddr.coarseYScroll & UInt16(0b10)  == 0b10 {
+                if registers.v.coarseYScroll & UInt16(0b10)  == 0b10 {
                     // buttom left
                     background.attrTableEntry <<= 4
                 }
@@ -130,61 +130,61 @@ extension PPUEmulator {
     }
 
     var nameTableAddr: UInt16 {
-        return nameTableFirstAddr | registers.vramAddr.nameTableIdx
+        return nameTableFirstAddr | registers.v.nameTableIdx
     }
 
     var attrTableAddr: UInt16 {
         // Translate current VRAM address for attribute table(8x8) from name table(16x15)
-        return attrTableFirstAddr | registers.vramAddr.nameTableSelect | (registers.vramAddr.attrY << 3) | registers.vramAddr.attrX
+        return attrTableFirstAddr | registers.v.nameTableSelect | (registers.v.attrY << 3) | registers.v.attrX
     }
 
     var bgPatternTableAddr: UInt16 {
-        return registers.controller.bgPatternTableAddrBase + (background.nameTableEntry * tileHeight * 2 + registers.vramAddr.fineYScroll).u16
+        return registers.controller.bgPatternTableAddrBase + (background.nameTableEntry * tileHeight * 2 + registers.v.fineYScroll).u16
     }
 
     func incrCoarseX() {
         guard renderingEnabled else { return }
 
-        if registers.vramAddr.coarseXScroll == 31 {
-            registers.vramAddr &= ~0b11111 // coarse X = 0
-            registers.vramAddr ^= 0x0400  // switch horizontal nametable
+        if registers.v.coarseXScroll == 31 {
+            registers.v &= ~0b11111 // coarse X = 0
+            registers.v ^= 0x0400  // switch horizontal nametable
         } else {
-            registers.vramAddr += 1
+            registers.v += 1
         }
     }
 
     func incrY() {
         guard renderingEnabled else { return }
 
-        if registers.vramAddr.fineYScroll < 7 {
-            registers.vramAddr += 0x1000
+        if registers.v.fineYScroll < 7 {
+            registers.v += 0x1000
         } else {
-            registers.vramAddr &= ~0x7000 // fine Y = 0
+            registers.v &= ~0x7000 // fine Y = 0
 
-            var y = registers.vramAddr.coarseYScroll
+            var y = registers.v.coarseYScroll
             if y == 29 {
                 y = 0
-                registers.vramAddr ^= 0x0800  // switch vertical nametable
+                registers.v ^= 0x0800  // switch vertical nametable
             } else if y == 31 {
                 y = 0
             } else {
                 y += 1
             }
 
-            registers.vramAddr = (registers.vramAddr & ~0x03E0) | (y << 5)
+            registers.v = (registers.v & ~0x03E0) | (y << 5)
         }
     }
 
     func updateHorizontalPosition() {
         guard renderingEnabled else { return }
 
-        registers.vramAddr = (registers.vramAddr & ~0b010000011111) | (registers.tempAddr & 0b010000011111)
+        registers.v = (registers.v & ~0b010000011111) | (registers.t & 0b010000011111)
     }
 
     func updateVerticalPosition() {
         guard renderingEnabled else { return }
 
-        registers.vramAddr = (registers.vramAddr & ~0b101111100000) | (registers.tempAddr & 0b101111100000)
+        registers.v = (registers.v & ~0b101111100000) | (registers.t & 0b101111100000)
     }
 
     var renderingEnabled: Bool {

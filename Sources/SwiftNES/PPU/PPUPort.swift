@@ -12,7 +12,7 @@ extension PPUEmulator: PPUPort {
         case 0x2004:
             return oam[Int(registers.objectAttributeMemoryAddress)]
         case 0x2007:
-            return memory.read(addr: registers.vramAddr)
+            return memory.read(addr: registers.v)
         default:
             return 0x00
         }
@@ -33,7 +33,7 @@ extension PPUEmulator: PPUPort {
         case 0x2006:
             registers.writeVRAMAddress(addr: data)
         case 0x2007:
-            memory.write(addr: registers.vramAddr, data: data)
+            memory.write(addr: registers.v, data: data)
         default:
             break
             // NOP
