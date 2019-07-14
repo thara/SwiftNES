@@ -184,6 +184,7 @@ class BackgroundSpec: QuickSpec {
 
             it("update background state") {
                 ppu.dot = 1
+
                 ppu.updateBackground()
                 expect(ppu.background.tempTableAddr).to(equal(0x2B3D))
 
@@ -214,6 +215,60 @@ class BackgroundSpec: QuickSpec {
                 ppu.dot += 1
                 ppu.updateBackground()
                 expect(ppu.background.tempTileSecond).to(equal(0x81))
+            }
+        }
+
+        describe("getBackgroundPaletteIndex") {
+            it("create correct pallet index") {
+                ppu.registers.fineX = 3
+                ppu.background.tilePatternFirst = 0b010100100101101
+                ppu.background.tilePatternSecond = 0b101110100011001
+                ppu.background.tileAttrLow = 0b1111010
+                ppu.background.tileAttrHigh = 0b1001100
+
+                let result = ppu.getBackgroundPaletteIndex()
+
+                expect(result & 0b0011).to(equal(0b0010))
+                expect(result & 0b1100).to(equal(0b0100))
+            }
+        }
+
+        describe("shift") {
+            it("shift registers") {
+                ppu.background.tilePatternFirst = 0b10101001
+                ppu.background.tilePatternSecond = 0b00101101
+                ppu.background.tileAttrLow = 0b11001010
+                ppu.background.tileAttrHigh = 0b01111100
+
+                ppu.background.tileAttrLowLatch = true
+                ppu.background.tileAttrHighLatch = false
+
+                ppu.background.shift()
+
+                expect(ppu.background.tilePatternFirst).to(equal(0b101010010))
+                expect(ppu.background.tilePatternSecond).to(equal(0b01011010))
+                expect(ppu.background.tileAttrLow).to(equal(0b10010101))
+                expect(ppu.background.tileAttrHigh).to(equal(0b11111000))
+            }
+        }
+
+        describe("reloadShift") {
+            it("reload shift registers") {
+                ppu.background.tilePatternFirst = 0b1010100100101101
+                ppu.background.tilePatternSecond = 0b1110110100011001
+                ppu.background.tileAttrLowLatch = false
+                ppu.background.tileAttrHighLatch = false
+
+                ppu.background.tempTileFirst = 0b11111111
+                ppu.background.tempTileSecond = 0b00000000
+                ppu.background.attrTableEntry = 0b1010110
+
+                ppu.background.reloadShift()
+
+                expect(ppu.background.tilePatternFirst).to(equal(0b1010100111111111))
+                expect(ppu.background.tilePatternSecond).to(equal(0b1110110100000000))
+                expect(ppu.background.tileAttrLowLatch).to(beFalsy())
+                expect(ppu.background.tileAttrHighLatch).to(beTruthy())
             }
         }
     }

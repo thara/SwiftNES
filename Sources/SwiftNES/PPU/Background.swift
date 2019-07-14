@@ -33,8 +33,8 @@ struct Background {
         tilePatternFirst = (tilePatternFirst & 0xFF00) | tempTileFirst.u16
         tilePatternSecond = (tilePatternSecond & 0xFF00) | tempTileSecond.u16
 
-        tileAttrLowLatch = (attrTableEntry & 0x01) == 1
-        tileAttrHighLatch = (attrTableEntry & 0x10) == 0x10
+        tileAttrLowLatch = (attrTableEntry & 0b01) == 1
+        tileAttrHighLatch = (attrTableEntry & 0b10) == 0b10
     }
 }
 
@@ -124,9 +124,9 @@ extension PPUEmulator {
 
     func getBackgroundPaletteIndex() -> Int {
         // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
-        let pixel = ((background.tilePatternSecond >> (15 - registers.fineX)) << 1) | (background.tilePatternFirst >> (15 - registers.fineX))
-        let pallete = ((background.tileAttrHigh.u16 >> (7 - registers.fineX)) << 1) | (background.tileAttrLow.u16 >> (7 - registers.fineX))
-        return Int(pixel | (pallete << 2))
+        let pixel = (background.tilePatternSecond[15 - registers.fineX] << 1) | background.tilePatternFirst[15 - registers.fineX]
+        let pallete = (background.tileAttrHigh[7 - registers.fineX] << 1) | background.tileAttrLow[7 - registers.fineX]
+        return Int(pixel | (pallete << 2).u16)
     }
 
     var nameTableAddr: UInt16 {
