@@ -3,21 +3,21 @@ struct Registers {
     var A: UInt8 {
         didSet {
             if A == 0 { P.formUnion(.Z) }
-            if A & 0x80 != 0 { P.formUnion(.N) }
+            if A[7] == 1 { P.formUnion(.N) }
         }
     }
     /// Index register
     var X: UInt8 {
         didSet {
             if X == 0 { P.formUnion(.Z) }
-            if X & 0x80 != 0 { P.formUnion(.N) }
+            if X[7] == 1 { P.formUnion(.N) }
         }
     }
     /// Index register
     var Y: UInt8 {
         didSet {
             if Y == 0 { P.formUnion(.Z) }
-            if Y & 0x80 != 0 { P.formUnion(.N) }
+            if Y[7] == 1 { P.formUnion(.N) }
         }
     }
     /// Stack pointer
