@@ -115,8 +115,8 @@ extension CPU {
         let data = registers.A & memory.read(addr: operand!)
         registers.P.remove([.Z, .V, .N])
         if data == 0 { registers.P.formUnion(.Z) }
-        if data & 0b01000000 != 0 { registers.P.formUnion(.V) }
-        if data & 0b10000000 != 0 { registers.P.formUnion(.N) }
+        if data[6] == 1 { registers.P.formUnion(.V) }
+        if data[7] == 1 { registers.P.formUnion(.N) }
         return .next
     }
 
@@ -130,7 +130,7 @@ extension CPU {
         if registers.P.contains(.C) { result += 1 }
 
         registers.P.remove([.C, .Z, .V, .N])
-        if result & 0x100 == 0x100 { registers.P.formUnion(.C)}
+        if result[8] == 1 { registers.P.formUnion(.C)}
         // same sign -> different sign
         if (a ^ val)[7] == 1 && (a ^ result)[7] == 1 {
             registers.P.formUnion(.V)

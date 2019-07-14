@@ -54,11 +54,11 @@ struct Background {
     mutating func fetchAttrTableEntry(from memory: Memory, v: UInt16) {
         attrTableEntry = memory.read(addr: tempTableAddr)
 
-        if v.coarseXScroll & UInt16(0b10) == 0b10 {
+        if v.coarseXScroll[1] == 1 {
             // top right
             attrTableEntry <<= 2
         }
-        if v.coarseYScroll & UInt16(0b10)  == 0b10 {
+        if v.coarseYScroll[1] == 1 {
             // buttom left
             attrTableEntry <<= 4
         }
@@ -95,7 +95,7 @@ struct Background {
         tilePatternFirst = (tilePatternFirst & 0xFF00) | tempTileFirst.u16
         tilePatternSecond = (tilePatternSecond & 0xFF00) | tempTileSecond.u16
 
-        tileAttrLowLatch = (attrTableEntry & 0b01) == 1
-        tileAttrHighLatch = (attrTableEntry & 0b10) == 0b10
+        tileAttrLowLatch = attrTableEntry[0] == 1
+        tileAttrHighLatch = attrTableEntry[1] == 1
     }
 }
