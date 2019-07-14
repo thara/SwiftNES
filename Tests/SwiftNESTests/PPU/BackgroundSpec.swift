@@ -49,6 +49,20 @@ class BackgroundSpec: QuickSpec {
                     expect(bg.tileAttrHighLatch).to(beTruthy())
                 }
             }
+
+            describe("getPaletteIndex") {
+                it("create correct pallet index") {
+                    bg.tilePatternFirst = 0b010100100101101
+                    bg.tilePatternSecond = 0b101110100011001
+                    bg.tileAttrLow = 0b1111010
+                    bg.tileAttrHigh = 0b1001100
+
+                    let result = bg.getPaletteIndex(fineX: 3)
+
+                    expect(result & 0b0011).to(equal(0b0010))
+                    expect(result & 0b1100).to(equal(0b0100))
+                }
+            }
         }
 
         describe("PPU extensions") {
@@ -262,21 +276,6 @@ class BackgroundSpec: QuickSpec {
                     ppu.dot += 1
                     ppu.updateBackground()
                     expect(ppu.background.tempTileSecond).to(equal(0x81))
-                }
-            }
-
-            describe("getBackgroundPaletteIndex") {
-                it("create correct pallet index") {
-                    ppu.registers.fineX = 3
-                    ppu.background.tilePatternFirst = 0b010100100101101
-                    ppu.background.tilePatternSecond = 0b101110100011001
-                    ppu.background.tileAttrLow = 0b1111010
-                    ppu.background.tileAttrHigh = 0b1001100
-
-                    let result = ppu.getBackgroundPaletteIndex()
-
-                    expect(result & 0b0011).to(equal(0b0010))
-                    expect(result & 0b1100).to(equal(0b0100))
                 }
             }
         }

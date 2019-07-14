@@ -36,6 +36,14 @@ struct Background {
         tileAttrLowLatch = (attrTableEntry & 0b01) == 1
         tileAttrHighLatch = (attrTableEntry & 0b10) == 0b10
     }
+
+    func getPaletteIndex(fineX: UInt8) -> Int {
+        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
+        let pixel = (tilePatternSecond[15 - fineX] << 1) | tilePatternFirst[15 - fineX]
+        let pallete = (tileAttrHigh[7 - fineX] << 1) | tileAttrLow[7 - fineX]
+        return Int(pixel | (pallete << 2).u16)
+    }
+
 }
 
 let nameTableFirstAddr: UInt16 = 0x2000
@@ -121,13 +129,6 @@ extension PPUEmulator {
         }
     }
     // swiftlint:enable cyclomatic_complexity
-
-    func getBackgroundPaletteIndex() -> Int {
-        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
-        let pixel = (background.tilePatternSecond[15 - registers.fineX] << 1) | background.tilePatternFirst[15 - registers.fineX]
-        let pallete = (background.tileAttrHigh[7 - registers.fineX] << 1) | background.tileAttrLow[7 - registers.fineX]
-        return Int(pixel | (pallete << 2).u16)
-    }
 
     var nameTableAddr: UInt16 {
         return nameTableFirstAddr | registers.v.nameTableIdx
