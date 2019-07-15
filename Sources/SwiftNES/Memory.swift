@@ -1,5 +1,3 @@
-import Foundation
-
 protocol Memory {
     func read(addr: UInt16) -> UInt8
     func write(addr: UInt16, data: UInt8)
@@ -14,18 +12,18 @@ extension Memory {
 }
 
 class RAM: Memory {
-    private var rawData: NSMutableArray
+    private var rawData: [UInt8]
 
-    init(rawData: NSMutableArray) {
+    init(rawData: [UInt8]) {
         self.rawData = rawData
     }
 
     convenience init(data: UInt8, count: Int) {
-        self.init(rawData: NSMutableArray(array: Array(repeating: data, count: count)))
+        self.init(rawData: [UInt8](repeating: data, count: count))
     }
 
     func read(addr: UInt16) -> UInt8 {
-        return rawData[Int(addr)] as! UInt8 // swiftlint:disable:this force_cast
+        return rawData[Int(addr)]
     }
 
     func write(addr: UInt16, data: UInt8) {
@@ -34,14 +32,14 @@ class RAM: Memory {
 }
 
 class ROM: Memory {
-    private var rawData: NSMutableArray
+    private var rawData: [UInt8]
 
-    init(rawData: NSMutableArray) {
+    init(rawData: [UInt8]) {
         self.rawData = rawData
     }
 
     func read(addr: UInt16) -> UInt8 {
-        return rawData[Int(addr)] as! UInt8 // swiftlint:disable:this force_cast
+        return rawData[Int(addr)]
     }
 
     func write(addr: UInt16, data: UInt8) {

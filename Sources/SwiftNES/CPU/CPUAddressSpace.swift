@@ -1,45 +1,39 @@
-import Foundation
-
 class CPUAddressSpace: Memory {
-    private var memory: NSMutableArray
-    private var wram: RAM
-    private var programROM: ROM
+    private var memory: RAM
 
     init() {
-        memory = NSMutableArray(array: Array(repeating: 0, count: 65536))
-        wram = RAM(rawData: memory)
-        programROM = ROM(rawData: memory)
+        memory = RAM(data: 0x00, count: 65536)
     }
 
     init(initial: [UInt8]) {
-        memory = NSMutableArray(array: initial)
-        wram = RAM(rawData: memory)
-        programROM = ROM(rawData: memory)
-    }
-
-    private func selectRegion(_ addr: UInt16) -> Memory {
-        if addr <= 0x07ff {
-            return wram
-        } else if 0x8000 <= addr && addr <= 0xbfff {
-            return programROM
-        } else if addr <= 0xffff {
-            return programROM
-        }
-        // TODO Support other memory regions
-        return DummyMemory()
+        self.memory = RAM(rawData: initial)
     }
 
     func read(addr: UInt16) -> UInt8 {
-        return selectRegion(addr).read(addr: addr)
+        switch addr {
+        case 0x0000...0x07FF:
+            return memory.read(addr: addr)
+        case 0x0000...0xFFFF:
+            return memory.read(addr: addr)
+        default:
+            return 0x00
+        }
     }
 
     func write(addr: UInt16, data: UInt8) {
-        selectRegion(addr).write(addr: addr, data: data)
+        switch addr {
+        case 0x0000...0x07FF:
+            memory.write(addr: addr, data: data)
+        case 0x0000...0xFFFF:
+            print("DEBUG: Unexpected Write to ROM region: addr=\(addr), data=\(data)\n")
+        default:
+            break
+        }
     }
 
     func loadProgram(index: Int, data: [UInt8]) {
         for (i, b) in data.enumerated() {
-            memory[0x8000 + index * 0x4000 + i] = b
+            memory.write(addr: UInt16(0x8000 + index * 0x4000 + i), data: b)
         }
     }
 }
