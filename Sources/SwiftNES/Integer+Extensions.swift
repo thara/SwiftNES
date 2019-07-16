@@ -3,9 +3,6 @@ extension BinaryInteger {
         return String(self, radix: 16)
     }
 
-    @inline(__always)
-    var isOdd: Bool { return self.magnitude % 2 != 0 }
-
     subscript(n: UInt8) -> Self {
         return (self >> n) & 1
     }

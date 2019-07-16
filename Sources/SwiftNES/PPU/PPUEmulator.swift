@@ -215,6 +215,11 @@ extension PPUEmulator {
     }
 }
 
+private extension BinaryInteger {
+    @inline(__always)
+    var isOdd: Bool { return self.magnitude % 2 != 0 }
+}
+
 enum RenderingPriority {
     case background, sprite
 }

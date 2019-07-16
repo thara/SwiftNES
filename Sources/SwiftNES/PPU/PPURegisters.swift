@@ -33,7 +33,7 @@ struct PPURegisters {
 
     mutating func writeScroll(position: UInt8) {
         if !writeToggle {
-            t = (t & 0b111111111100000) | position.coarseX.u16
+            t = (t & 0b111111111100000) | position.u16.coarseX
         } else {
             t = (t & 0b111110000011111) | (position.u16 << 5)
             fineX = position & 0b111
@@ -49,56 +49,6 @@ struct PPURegisters {
             v = t
         }
         writeToggle.toggle()
-    }
-}
-
-/// Extension for VRAM address
-extension BinaryInteger {
-
-    var nameTableIdx: UInt16 {
-        return UInt16(self & Self(0b111111111111))
-    }
-
-    var coarseX: Self {
-        return self & Self(0b11111)
-    }
-
-    var coarseXScroll: Self {
-        return self & Self(0b11111)
-    }
-
-    /// Translate index of attribute table from name table
-    var attrX: Self {
-        return coarseX / 4
-    }
-
-    var coarseY: Self {
-        return self & Self(0b1111100000)
-    }
-
-    var coarseYScroll: Self {
-        return coarseY >> 5
-    }
-
-    /// Translate index of attribute table from name table
-    var attrY: Self {
-        return coarseYScroll / 4
-    }
-
-    var nameTableSelect: Self {
-        return self & Self(0b110000000000)
-    }
-
-    var nameTableNo: Self {
-        return nameTableSelect >> 10
-    }
-
-    var fineY: Self {
-        return Self(self & Self(0b111000000000000))
-    }
-
-    var fineYScroll: UInt8 {
-        return UInt8((self & Self(0b111000000000000)) >> 12)
     }
 }
 
