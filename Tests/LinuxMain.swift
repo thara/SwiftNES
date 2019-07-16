@@ -4,11 +4,17 @@ import Quick
 @testable import SwiftNESTests
 
 QCKMain([
-    AddressingSpec.self,
+    AddressingModeSpec.self,
     CPUSpec.self,
     CPUAddressSpaceSpec.self,
     InstructionSpec.self,
     RegisterSpec.self,
+
     NESFileSpec.self,
+
     PPUPortSpec.self,
+    PPUEmulatorSpec.self,
+    PPURegistersSpec.self,
+    BackgroundSpec.self,
+    ScrollingSpec.self
 ])
