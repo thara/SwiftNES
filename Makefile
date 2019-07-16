@@ -3,8 +3,16 @@ bootstrap-macosx:  ## Bootstrap for macOSX
 	@brew install glfw3
 
 .PHONY: run
-run:  ## Run SwiftNES
+run-osx:  ## Run SwiftNES for macOSX
 	@swift run -Xswiftc -I/usr/local/include -Xlinker -L/usr/local/lib
+
+.PHONY: test
+test-osx:  ## Run tests for macOSX
+	@swift test -Xswiftc -I/usr/local/include -Xlinker -L/usr/local/lib
+
+.PHONY: ci-test
+ci-test:  ## Run tests for CI
+	@swift test -v -Xswiftc "-j1"
 
 .PHONY: help
 help:

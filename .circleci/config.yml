@@ -7,6 +7,9 @@ jobs:
     working_directory: ~/src
     steps:
       - checkout
+      - run:
+          name: Install glfw
+          command: apt-get update && apt-get install libglfw3 -y
       - restore_cache:
           name: Restore swiftlint
           key: swiftlint-0.33.0-bin
@@ -30,7 +33,7 @@ jobs:
           key: swiftpm-{{ checksum "Package.resolved" }}
       - run:
           name: Run test
-          command: swift test -v -Xswiftc "-j1"
+          command: make ci-test
       - save_cache:
           name: Cache build artifacts
           key: swiftpm-{{ checksum "Package.resolved" }}
