@@ -1,16 +1,15 @@
-protocol PPUPort: class {
-    func read(addr: UInt16) -> UInt8
-    func write(addr: UInt16, data: UInt8)
-}
-
 extension PPUEmulator: PPUPort {
+
+    var port: PPUPort {
+        return self
+    }
 
     func read(addr: UInt16) -> UInt8 {
         switch addr {
         case 0x2002:
             return registers.readStatus()
         case 0x2004:
-            return oam[Int(registers.objectAttributeMemoryAddress)]
+            return spriteOAM.primary[Int(registers.objectAttributeMemoryAddress)]
         case 0x2007:
             return memory.read(addr: registers.v)
         default:
@@ -27,7 +26,7 @@ extension PPUEmulator: PPUPort {
         case 0x2003:
              registers.objectAttributeMemoryAddress = data
         case 0x2004:
-             oam[Int(registers.objectAttributeMemoryAddress.u16)] = data
+             spriteOAM.primary[Int(registers.objectAttributeMemoryAddress.u16)] = data
         case 0x2005:
             registers.writeScroll(position: data)
         case 0x2006:

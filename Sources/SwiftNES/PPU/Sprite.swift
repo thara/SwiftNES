@@ -1,7 +1,3 @@
-let spriteSize: Int = 4
-let spriteCount: Int = 64
-let spriteLimit: Int = 8
-
 struct Sprite {
     /// Y position of top
     var y: UInt8
@@ -32,51 +28,48 @@ struct SpriteAttribute: OptionSet {
     }
 }
 
-extension PPUEmulator {
+let spriteSize: Int = 4
+let spriteCount: Int = 64
+let spriteLimit: Int = 8
 
-    func updateSprites(preRendering: Bool) {
-        switch dot {
-        case 1:
-            clearSecondaryOAM()
-            if preRendering {
-                registers.status.remove([.spriteOverflow, .spriteZeroHit])
-            }
-        case 257:
-            evalSprites()
-        case 321:
-            loadSprites()
-        default:
-            break
-        }
+struct SpriteOAM {
+    var primary: [UInt8]
+    var secondary: [UInt8]
+    var sprites: [Sprite]
+
+    init() {
+        self.primary = [UInt8](repeating: 0x00, count: spriteSize * spriteCount)
+        self.secondary = [UInt8](repeating: 0x00, count: spriteSize * spriteCount)
+        self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIdx: 0x00, attr: [], x: 0x00), count: spriteLimit)
     }
 
-    func clearSecondaryOAM() {
-        for i in 0..<secondaryOAM.count {
-            secondaryOAM[i] = 0xFF
+    mutating func clearSecondaryOAM() {
+        for i in 0..<secondary.count {
+            secondary[i] = 0xFF
         }
     }
 
     /// the sprite evaluation phase
-    func evalSprites() {
+    mutating func evalSprites() -> Bool {
         var found = 0
         for i in 0..<spriteCount {
-            secondaryOAM[i] = oam[i]
+            secondary[i] = primary[i]
             found += 1
             if spriteLimit < found {
-                registers.status.formUnion(.spriteOverflow)
-                break
+                return true
             }
         }
+        return false
     }
 
     /// the sprite loading phase
-    func loadSprites() {
+    mutating func loadSprites() {
         for i in stride(from: 0, to: spriteCount, by: spriteSize) {
             sprites[i] = Sprite(
-                y: secondaryOAM[i],
-                tileIdx: secondaryOAM[i + 1],
-                attr: SpriteAttribute(rawValue: secondaryOAM[i + 2]),
-                x: secondaryOAM[i + 3]
+                y: secondary[i],
+                tileIdx: secondary[i + 1],
+                attr: SpriteAttribute(rawValue: secondary[i + 2]),
+                x: secondary[i + 3]
             )
         }
     }

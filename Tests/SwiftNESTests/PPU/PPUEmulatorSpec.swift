@@ -3,9 +3,9 @@ import Nimble
 
 @testable import SwiftNES
 
-class RenderingSpec: QuickSpec {
+class PPUEmulatorSpec: QuickSpec {
     override func spec() {
-        describe("PPU extensions") {
+        describe("PPUEmulator") {
             var ppu: PPUEmulator!
             beforeEach {
                 ppu = PPUEmulator(sendNMI: {})

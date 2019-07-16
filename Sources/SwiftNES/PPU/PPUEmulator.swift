@@ -1,26 +1,84 @@
-enum Scanline {
-    case preRender
-    case visible
-    case postRender
-    case verticalBlanking
+private let maxDot: UInt16 = 341
+private let maxLine: UInt16 = 261
 
-    init?(lineNumber: UInt16) {
-        switch lineNumber {
-        case 261:
-            self = .preRender
-        case 0...239:
-            self = .visible
-        case 240:
-            self = .postRender
-        case 241...260:
-            self = .verticalBlanking
-        default:
-            return nil
+typealias SendNMI = (() -> Void)
+
+class PPUEmulator: PPU {
+
+    var registers: PPURegisters
+    var memory: Memory
+    var background: Background
+    var spriteOAM: SpriteOAM
+
+    // MARK: - Rendering counters
+    var dot: UInt16 = 0
+    var lineNumber: UInt16 = 0
+
+    var frames: UInt = 0
+
+    let sendNMI: SendNMI
+
+    var lineBuffer: [UInt8]
+
+    init(sendNMI: @escaping SendNMI) {
+        self.registers = PPURegisters()
+        self.memory = PPUAddressSpace()
+        self.background = Background()
+
+        self.spriteOAM = SpriteOAM()
+
+        self.lineBuffer = [UInt8](repeating: 0x00, count: Int(maxDot))
+
+        self.sendNMI = sendNMI
+    }
+}
+
+// MARK: - step implementation
+extension PPUEmulator {
+
+    enum Scanline {
+        case preRender
+        case visible
+        case postRender
+        case verticalBlanking
+
+        init?(lineNumber: UInt16) {
+            switch lineNumber {
+            case 261:
+                self = .preRender
+            case 0...239:
+                self = .visible
+            case 240:
+                self = .postRender
+            case 241...260:
+                self = .verticalBlanking
+            default:
+                return nil
+            }
+        }
+    }
+
+    func step() {
+        guard let scanline = Scanline(lineNumber: lineNumber) else {
+            fatalError("Unexpected lineNumber")
+        }
+        process(scanline: scanline)
+
+        dot += 1
+        if maxDot <= dot {
+            dot %= 341
+            lineNumber += 1
+            if maxLine < lineNumber {
+                lineNumber = 0
+                frames &+= 1
+            }
         }
     }
 }
 
+// MARK: - process implementation
 extension PPUEmulator {
+
     func process(scanline: Scanline) {
         switch scanline {
         case .preRender, .visible:
@@ -42,6 +100,24 @@ extension PPUEmulator {
                     sendNMI()
                 }
             }
+        }
+    }
+
+    func updateSprites(preRendering: Bool) {
+        switch dot {
+        case 1:
+            spriteOAM.clearSecondaryOAM()
+            if preRendering {
+                registers.status.remove([.spriteOverflow, .spriteZeroHit])
+            }
+        case 257:
+            if spriteOAM.evalSprites() {
+                registers.status.formUnion(.spriteOverflow)
+            }
+        case 321:
+            spriteOAM.loadSprites()
+        default:
+            break
         }
     }
 

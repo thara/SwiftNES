@@ -1,5 +1,3 @@
-import Foundation
-
 class PPUAddressSpace: Memory {
     private var patternTable = [UInt8](repeating: 0, count: 0x2000)
     private var nameTable = [UInt8](repeating: 0, count: 0x1000)
