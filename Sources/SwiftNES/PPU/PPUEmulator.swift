@@ -31,6 +31,10 @@ class PPUEmulator: PPU {
 
         self.sendNMI = sendNMI
     }
+
+    var renderingEnabled: Bool {
+        return registers.mask.contains(.sprite) || registers.mask.contains(.background)
+    }
 }
 
 // MARK: - step implementation
@@ -190,26 +194,41 @@ extension PPUEmulator {
     // swiftlint:enable cyclomatic_complexity
 
     func updateLineBuffer() {
-        // let bgPixel: UInt8 = 0
-        // if registers.mask.contains(.background) {
+        var bg = 0
+        if registers.mask.contains(.background) {
+            bg = background.getPaletteIndex(fineX: registers.fineX)
+        }
 
-        // }
-        // let paletteIdx = 
-        // let color = memory.read(addr: 0x3F00 + paletteIdx)
-        // lineBuffer[dot] = pallete[Int(color)]
+        // FIXME set sprite
+        let sprite = 0
+
+        var idx = 0
+
+        if renderingEnabled {
+            let priority = getRenderingPriority(bg: bg, sprite: sprite, spriteAttr: [])
+
+            switch priority {
+            case .background:
+                idx = bg
+            case .sprite:
+                idx = 0
+            }
+        }
+
+        lineBuffer[Int(dot)] = memory.read(addr: UInt16(0x3F00 + idx))
     }
 
-    func getRenderingPriority(bgPixel: UInt8, spritePixel: UInt8, sprite: Sprite) -> RenderingPriority {
-        switch (1 <= bgPixel && bgPixel <= 3, 1 <= spritePixel && spritePixel <= 3, sprite.attr.contains(.behindBackground)) {
-        case (false, false, _):
+    func getRenderingPriority(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> RenderingPriority {
+        switch (bg, sprite, spriteAttr.contains(.behindBackground)) {
+        case (1...3, 1...3, true):
             return .background
-        case (false, true, _):
+        case (1...3, 1...3, false):
             return .sprite
-        case (true, false, _):
+        case (1...3, _, _):
             return .background
-        case (true, true, false):
-            return .sprite
-        case (true, true, true):
+        case (_, 1...3, _):
+            return .background
+        default:
             return .background
         }
     }

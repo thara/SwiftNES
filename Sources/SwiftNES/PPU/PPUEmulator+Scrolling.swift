@@ -44,8 +44,4 @@ extension PPUEmulator {
 
         registers.v = (registers.v & ~0b101111100000) | (registers.t & 0b101111100000)
     }
-
-    var renderingEnabled: Bool {
-        return registers.mask.contains(.sprite) || registers.mask.contains(.background)
-    }
 }
