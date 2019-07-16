@@ -1,10 +1,3 @@
-enum Interrupt {
-    case RESET
-    case NMI
-    case IRQ
-    case BRK
-}
-
 extension CPU {
 
     /// Reset registers & memory state

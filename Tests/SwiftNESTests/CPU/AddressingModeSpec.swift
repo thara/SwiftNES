@@ -3,7 +3,7 @@ import Nimble
 
 @testable import SwiftNES
 
-class AddressingSpec: QuickSpec {
+class AddressingModeSpec: QuickSpec {
     override func spec() {
 
         describe("CPU.fetchOperand") {
