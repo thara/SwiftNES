@@ -20,7 +20,9 @@ class PPUEmulator: PPU {
 
     var lineBuffer: [UInt8]
 
-    init(sendNMI: @escaping SendNMI) {
+    let renderer: Renderer
+
+    init(renderer: Renderer, sendNMI: @escaping SendNMI) {
         self.registers = PPURegisters()
         self.memory = PPUAddressSpace()
         self.background = Background()
@@ -30,6 +32,7 @@ class PPUEmulator: PPU {
         self.lineBuffer = [UInt8](repeating: 0x00, count: Int(maxDot))
 
         self.sendNMI = sendNMI
+        self.renderer = renderer
     }
 
     var renderingEnabled: Bool {
@@ -70,6 +73,8 @@ extension PPUEmulator {
 
         dot += 1
         if maxDot <= dot {
+            renderer.render(line: lineBuffer)
+
             dot %= 341
             lineNumber += 1
             if maxLine < lineNumber {
@@ -92,7 +97,6 @@ extension PPUEmulator {
             updateBackground(preRendering: preRendering)
 
             updateLineBuffer()
-
         case .postRender:
             // Idling
             break
