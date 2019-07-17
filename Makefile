@@ -2,6 +2,10 @@
 bootstrap-macosx:  ## Bootstrap for macOSX
 	@brew install glfw3
 
+.PHONY: build
+build-osx:  ## Build SwiftNES for macOSX
+	@swift build -Xswiftc -I/usr/local/include -Xlinker -L/usr/local/lib
+
 .PHONY: run
 run-osx:  ## Run SwiftNES for macOSX
 	@swift run -Xswiftc -I/usr/local/include -Xlinker -L/usr/local/lib

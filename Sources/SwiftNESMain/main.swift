@@ -3,6 +3,12 @@ import SGLOpenGL
 
 let WIDTH:GLsizei = 800, HEIGHT:GLsizei = 600
 
+func keyCallback(_ window: OpaquePointer!, _ key: Int32, _ scancode: Int32, _ action: Int32, _ mode: Int32) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GL_TRUE)
+    }
+}
+
 func main() {
     glfwInit()
     defer { glfwTerminate() }
@@ -22,6 +28,8 @@ func main() {
 
     glViewport(x: 0, y: 0, width: WIDTH, height: HEIGHT)
 
+    glfwSetKeyCallback(window, keyCallback)
+
     while glfwWindowShouldClose(window) == GL_FALSE {
         glfwPollEvents()
 
@@ -33,3 +41,4 @@ func main() {
 }
 
 main()
+
