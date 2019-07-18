@@ -1,4 +1,4 @@
-class PPUAddressSpace: Memory {
+class PPUAddressSpace: RAM {
     private var patternTable = [UInt8](repeating: 0, count: 0x2000)
     private var nameTable = [UInt8](repeating: 0, count: 0x1000)
     private var paletteRAMIndexes = [UInt8](repeating: 0, count: 0x0020)

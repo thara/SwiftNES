@@ -1,6 +1,6 @@
 class CPUEmulator: CPU {
     var registers: Registers
-    var memory: CPUAddressSpace
+    var memory: RAM
     var interrupt: Interrupt?
 
     var instructions: [Instruction?]

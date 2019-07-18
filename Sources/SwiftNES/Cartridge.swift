@@ -1,4 +1,4 @@
-class Cartridge: Memory {
+class Cartridge {
     private var rom = [UInt8](repeating: 0x00, count: 32767)
 
     func read(addr: UInt16) -> UInt8 {

@@ -1,17 +1,17 @@
-protocol Memory {
+protocol RAM {
     func read(addr: UInt16) -> UInt8
     func write(addr: UInt16, data: UInt8)
 
     func readWord(addr: UInt16) -> UInt16
 }
 
-extension Memory {
+extension RAM {
     func readWord(addr: UInt16) -> UInt16 {
         return read(addr: addr).u16 | (read(addr: addr + 1).u16 << 8)
     }
 }
 
-class RAM: Memory {
+class ArrayRAM: RAM {
     private var rawData: [UInt8]
 
     init(rawData: [UInt8]) {
@@ -29,13 +29,4 @@ class RAM: Memory {
     func write(addr: UInt16, data: UInt8) {
         rawData[Int(addr)] = data
     }
-}
-
-class DummyMemory: Memory {
-
-    func read(addr: UInt16) -> UInt8 {
-        return 0
-    }
-
-    func write(addr: UInt16, data: UInt8) {}
 }

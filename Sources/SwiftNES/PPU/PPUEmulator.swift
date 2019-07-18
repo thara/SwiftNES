@@ -6,7 +6,7 @@ typealias SendNMI = (() -> Void)
 class PPUEmulator: PPU {
 
     var registers: PPURegisters
-    var memory: Memory
+    var memory: RAM
     var background: Background
     var spriteOAM: SpriteOAM
 

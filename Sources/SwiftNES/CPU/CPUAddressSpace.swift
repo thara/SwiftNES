@@ -1,20 +1,20 @@
-class CPUAddressSpace: Memory {
-    private var memory: RAM
+class CPUAddressSpace: RAM {
+    private var wram: RAM
     var ppuPort: IOPort?
     var cartridge: Cartridge?
 
     init() {
-        self.memory = RAM(data: 0x00, count: 32767)
+        self.wram = ArrayRAM(data: 0x00, count: 32767)
     }
 
     init(initial: [UInt8]) {
-        self.memory = RAM(rawData: initial)
+        self.wram = ArrayRAM(rawData: initial)
     }
 
     func read(addr: UInt16) -> UInt8 {
         switch addr {
         case 0x0000...0x1FFF:
-            return memory.read(addr: addr)
+            return wram.read(addr: addr)
         case 0x2000...0x3FFF:
             return ppuPort?.read(addr: ppuAddr(addr)) ?? 0x00
         case 0x4020...0xFFFF:
@@ -27,7 +27,7 @@ class CPUAddressSpace: Memory {
     func write(addr: UInt16, data: UInt8) {
         switch addr {
         case 0x0000...0x07FF:
-            memory.write(addr: addr, data: data)
+            wram.write(addr: addr, data: data)
         case 0x2000...0x3FFF:
             ppuPort?.write(addr: ppuAddr(addr), data: data)
         case 0x4020...0xFFFF:
