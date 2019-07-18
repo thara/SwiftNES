@@ -1496,10 +1496,10 @@ class InstructionSpec: QuickSpec {
                 it("force interrupt") {
                     let opcode: UInt8 = 0x00
 
-                    var program: [UInt8]  = Array(repeating: 0, count: 0x4000)
-                    program[0xFFFE - 0xC000] = 0x70
-                    program[0xFFFF - 0xC000] = 0x81
-                    cpu.memory.loadProgram(index: 1, data: program)
+                    var program: [UInt8]  = Array(repeating: 0, count: 0xBFE0)
+                    program[0xFFFE - 0x4020] = 0x70
+                    program[0xFFFF - 0x4020] = 0x81
+                    cpu.memory.cartridge = Cartridge(rawData: program)
 
                     cpu.memory.write(addr: 0x0302, data: opcode)
                     cpu.registers.PC = 0x0302

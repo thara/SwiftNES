@@ -8,8 +8,21 @@ class DummyRenderer: Renderer {
     func render(line: [UInt8]) {}
 }
 
+extension CPUEmulator {
+    convenience init() {
+        self.init(memory: CPUAddressSpace())
+    }
+}
+
 extension PPUEmulator {
     convenience init(sendNMI: @escaping SendNMI) {
         self.init(renderer: DummyRenderer(), sendNMI: sendNMI)
+    }
+}
+
+extension Cartridge {
+    convenience init(rawData: [UInt8]) {
+        self.init()
+        self.load(rawData: rawData)
     }
 }

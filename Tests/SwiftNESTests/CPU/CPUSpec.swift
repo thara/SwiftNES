@@ -10,12 +10,12 @@ class CPUSpec: QuickSpec {
             it("read opcode at address indicated by PC") {
                 let cpu = CPUEmulator()
 
-                var mem: [UInt8] = Array(repeating: 0, count: 0x4000)
-                mem[0x9051 - 0x8000] = 0x90
-                mem[0x9052 - 0x8000] = 0x3F
-                mem[0x9053 - 0x8000] = 0x81
-                mem[0x9054 - 0x8000] = 0x90
-                cpu.memory.loadProgram(index: 0, data: mem)
+                var program = [UInt8](repeating: 0, count: 0xBFE0)
+                program[0x9051 - 0x4020] = 0x90
+                program[0x9052 - 0x4020] = 0x3F
+                program[0x9053 - 0x4020] = 0x81
+                program[0x9054 - 0x4020] = 0x90
+                cpu.memory.cartridge = Cartridge(rawData: program)
 
                 cpu.registers.PC = 0x9052
 
@@ -62,15 +62,12 @@ class CPUSpec: QuickSpec {
                     PC: 0b0101011010001101
                 )
 
-                let program1: [UInt8] = Array(repeating: 0, count: 0x4000)
-                cpu.memory.loadProgram(index: 0, data: program1)
-
-                var program2: [UInt8]  = Array(repeating: 0, count: 0x4000)
-                program2[0xFFFB - 0xC000] = 1
-                program2[0xFFFC - 0xC000] = 32
-                program2[0xFFFD - 0xC000] = 127
-                program2[0xFFFE - 0xC000] = 64
-                cpu.memory.loadProgram(index: 1, data: program2)
+                var program = [UInt8](repeating: 0, count: 0xBFE0)
+                program[0xFFFB - 0x4020] = 1
+                program[0xFFFC - 0x4020] = 32
+                program[0xFFFD - 0x4020] = 127
+                program[0xFFFE - 0x4020] = 64
+                cpu.memory.cartridge = Cartridge(rawData: program)
 
                 _ = cpu.reset()
 

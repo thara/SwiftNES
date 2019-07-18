@@ -1,8 +1,10 @@
 class CPUAddressSpace: Memory {
     private var memory: RAM
+    var cartridge: Cartridge?
+    var ppuPort: Memory?
 
     init() {
-        memory = RAM(data: 0x00, count: 65536)
+        self.memory = RAM(data: 0x00, count: 32767)
     }
 
     init(initial: [UInt8]) {
@@ -11,10 +13,12 @@ class CPUAddressSpace: Memory {
 
     func read(addr: UInt16) -> UInt8 {
         switch addr {
-        case 0x0000...0x07FF:
+        case 0x0000...0x1FFF:
             return memory.read(addr: addr)
-        case 0x0000...0xFFFF:
-            return memory.read(addr: addr)
+        case 0x2000...0x3FFF:
+            return ppuPort?.read(addr: ppuAddr(addr)) ?? 0x00
+        case 0x4020...0xFFFF:
+            return cartridge?.read(addr: addr) ?? 0x00
         default:
             return 0x00
         }
@@ -24,16 +28,17 @@ class CPUAddressSpace: Memory {
         switch addr {
         case 0x0000...0x07FF:
             memory.write(addr: addr, data: data)
-        case 0x0000...0xFFFF:
-            print("DEBUG: Unexpected Write to ROM region: addr=\(addr), data=\(data)\n")
+        case 0x2000...0x3FFF:
+            ppuPort?.write(addr: ppuAddr(addr), data: data)
+        case 0x4020...0xFFFF:
+            cartridge?.write(addr: addr, data: data)
         default:
             break
         }
     }
 
-    func loadProgram(index: Int, data: [UInt8]) {
-        for (i, b) in data.enumerated() {
-            memory.write(addr: UInt16(0x8000 + index * 0x4000 + i), data: b)
-        }
+    private func ppuAddr(_ addr: UInt16) -> UInt16 {
+        // repears every 8 bytes
+        return 0x2000 + addr % 8
     }
 }

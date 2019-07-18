@@ -5,8 +5,8 @@ class CPUEmulator: CPU {
 
     var instructions: [Instruction?]
 
-    init() {
-        registers = Registers(
+    init(memory: CPUAddressSpace) {
+        self.registers = Registers(
             A: 0x00,
             X: 0x00,
             Y: 0x00,
@@ -14,9 +14,9 @@ class CPUEmulator: CPU {
             P: [Status.R, Status.B, Status.I],
             PC: 0x00
         )
-        memory = CPUAddressSpace()
-        instructions = []  // Need all properties are initialized because 'self' is used in 'buildInstructionTable'
-        instructions = buildInstructionTable()
+        self.memory = memory
+        self.instructions = []  // Need all properties are initialized because 'self' is used in 'buildInstructionTable'
+        self.instructions = buildInstructionTable()
     }
 
     func fetch() -> OpCode {

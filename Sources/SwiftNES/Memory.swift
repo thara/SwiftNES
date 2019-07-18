@@ -31,22 +31,6 @@ class RAM: Memory {
     }
 }
 
-class ROM: Memory {
-    private var rawData: [UInt8]
-
-    init(rawData: [UInt8]) {
-        self.rawData = rawData
-    }
-
-    func read(addr: UInt16) -> UInt8 {
-        return rawData[Int(addr)]
-    }
-
-    func write(addr: UInt16, data: UInt8) {
-        print("DEBUG: Unexpected Write to ROM region: addr=\(addr), data=\(data)\n")
-    }
-}
-
 class DummyMemory: Memory {
 
     func read(addr: UInt16) -> UInt8 {

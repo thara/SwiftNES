@@ -16,12 +16,12 @@ class AddressingModeSpec: QuickSpec {
                 cpu.registers.X = 0x05
                 cpu.registers.Y = 0x80
 
-                var p1: [UInt8] = Array(repeating: 0, count: 0x4000)
-                p1[0x8234 - 0x8000] = 0x90
-                p1[0x8235 - 0x8000] = 0x94
-                p1[0x9490 - 0x8000] = 0x33
-                p1[0x9491 - 0x8000] = 0x81
-                cpu.memory.loadProgram(index: 0, data: p1)
+                var p = [UInt8](repeating: 0, count: 0xBFE0)
+                p[0x8234 - 0x4020] = 0x90
+                p[0x8235 - 0x4020] = 0x94
+                p[0x9490 - 0x4020] = 0x33
+                p[0x9491 - 0x4020] = 0x81
+                cpu.memory.cartridge = Cartridge(rawData: p)
             }
 
             context("implicit") {

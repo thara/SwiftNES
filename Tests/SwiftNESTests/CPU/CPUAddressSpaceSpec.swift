@@ -35,21 +35,16 @@ class CPUAddressSpaceSpec: QuickSpec {
             it("load Program") {
                 let mem = CPUAddressSpace()
 
-                var program: [UInt8]  = Array(repeating: 0, count: 0x4000)
-                program[0x0000] = 1
-                program[0x0100] = 2
-                program[0x1000] = 3
+                var p: [UInt8]  = Array(repeating: 0, count: 0x4000)
+                p[0x0000] = 1
+                p[0x0100] = 2
+                p[0x1000] = 3
 
-                mem.loadProgram(index: 0, data: program)
-                mem.loadProgram(index: 1, data: program)
+                mem.cartridge = Cartridge(rawData: p)
 
-                expect(mem.read(addr: 0x8000)).to(equal(1))
-                expect(mem.read(addr: 0x8100)).to(equal(2))
-                expect(mem.read(addr: 0x9000)).to(equal(3))
-
-                expect(mem.read(addr: 0xC000)).to(equal(1))
-                expect(mem.read(addr: 0xC100)).to(equal(2))
-                expect(mem.read(addr: 0xD000)).to(equal(3))
+                expect(mem.read(addr: 0x4020)).to(equal(1))
+                expect(mem.read(addr: 0x4120)).to(equal(2))
+                expect(mem.read(addr: 0x5020)).to(equal(3))
             }
         }
 
