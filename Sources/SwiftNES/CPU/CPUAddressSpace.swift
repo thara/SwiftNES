@@ -1,7 +1,7 @@
 class CPUAddressSpace: Memory {
     private var memory: RAM
+    var ppuPort: IOPort?
     var cartridge: Cartridge?
-    var ppuPort: Memory?
 
     init() {
         self.memory = RAM(data: 0x00, count: 32767)

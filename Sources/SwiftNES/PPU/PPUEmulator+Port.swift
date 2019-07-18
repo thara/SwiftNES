@@ -1,6 +1,6 @@
-extension PPUEmulator: PPUPort {
+extension PPUEmulator: IOPort {
 
-    var port: PPUPort {
+    var port: IOPort {
         return self
     }
 
