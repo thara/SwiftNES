@@ -16,7 +16,7 @@ extension CPUEmulator {
 
 extension PPUEmulator {
     convenience init(sendNMI: @escaping SendNMI) {
-        self.init(renderer: DummyRenderer(), sendNMI: sendNMI)
+        self.init(bus: PPUBus(), renderer: DummyRenderer(), sendNMI: sendNMI)
     }
 }
 

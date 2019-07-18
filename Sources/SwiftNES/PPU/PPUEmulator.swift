@@ -22,9 +22,9 @@ class PPUEmulator: PPU {
 
     let renderer: Renderer
 
-    init(renderer: Renderer, sendNMI: @escaping SendNMI) {
+    init(bus: PPUBus, renderer: Renderer, sendNMI: @escaping SendNMI) {
         self.registers = PPURegisters()
-        self.memory = PPUAddressSpace()
+        self.memory = bus
         self.background = Background()
 
         self.spriteOAM = SpriteOAM()
