@@ -9,6 +9,10 @@ class Cartridge {
         rom[Int(addr - 0x4020)] = data
     }
 
+    func readCharacter(addr: UInt16) -> UInt8 {
+        return rom[Int(addr)]
+    }
+
     func load(rawData: [UInt8]) {
         rom = rawData
     }

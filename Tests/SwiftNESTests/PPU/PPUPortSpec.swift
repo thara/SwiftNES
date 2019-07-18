@@ -125,12 +125,12 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("write data at currentAddress in memory") {
-                    ppu.write(addr: 0x2006, data: 0x0F)
+                    ppu.write(addr: 0x2006, data: 0x2F)
                     ppu.write(addr: 0x2006, data: 0x11)
 
                     ppu.write(addr: address, data: 0x83)
 
-                    expect(ppu.memory.read(addr: 0x0F11)).to(equal(0x83))
+                    expect(ppu.memory.read(addr: 0x2F11)).to(equal(0x83))
                 }
             }
         }

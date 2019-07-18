@@ -18,6 +18,10 @@ extension PPUEmulator {
     convenience init(sendNMI: @escaping SendNMI) {
         self.init(bus: PPUBus(), renderer: DummyRenderer(), sendNMI: sendNMI)
     }
+
+    convenience init(bus: PPUBus) {
+        self.init(bus: bus, renderer: DummyRenderer(), sendNMI: {})
+    }
 }
 
 extension Cartridge {
