@@ -6,7 +6,7 @@ import Quick
 QCKMain([
     AddressingModeSpec.self,
     CPUSpec.self,
-    CPUAddressSpaceSpec.self,
+    CPUBusSpec.self,
     InstructionSpec.self,
     RegisterSpec.self,
 

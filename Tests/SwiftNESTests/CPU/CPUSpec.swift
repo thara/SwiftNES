@@ -8,15 +8,15 @@ class CPUSpec: QuickSpec {
 
         describe("fetch") {
             it("read opcode at address indicated by PC") {
-                let memory = CPUAddressSpace()
-                let cpu = CPUEmulator(memory: memory)
+                let bus = CPUBus()
+                let cpu = CPUEmulator(bus: bus)
 
                 var program = [UInt8](repeating: 0, count: 0xBFE0)
                 program[0x9051 - 0x4020] = 0x90
                 program[0x9052 - 0x4020] = 0x3F
                 program[0x9053 - 0x4020] = 0x81
                 program[0x9054 - 0x4020] = 0x90
-                memory.cartridge = Cartridge(rawData: program)
+                bus.cartridge = Cartridge(rawData: program)
 
                 cpu.registers.PC = 0x9052
 
@@ -52,8 +52,8 @@ class CPUSpec: QuickSpec {
 
         describe("reset") {
             it("reset registers & memory state") {
-                let memory = CPUAddressSpace()
-                let cpu = CPUEmulator(memory: memory)
+                let bus = CPUBus()
+                let cpu = CPUEmulator(bus: bus)
 
                 cpu.registers = Registers(
                     A: 0xFA,
@@ -69,7 +69,7 @@ class CPUSpec: QuickSpec {
                 program[0xFFFC - 0x4020] = 32
                 program[0xFFFD - 0x4020] = 127
                 program[0xFFFE - 0x4020] = 64
-                memory.cartridge = Cartridge(rawData: program)
+                bus.cartridge = Cartridge(rawData: program)
 
                 _ = cpu.reset()
 

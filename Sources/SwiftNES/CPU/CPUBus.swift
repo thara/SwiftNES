@@ -1,4 +1,4 @@
-class CPUAddressSpace: RAM {
+class CPUBus: RAM {
     private var wram: RAM
     var ppuPort: IOPort?
     var cartridge: Cartridge?

@@ -9,8 +9,8 @@ class AddressingModeSpec: QuickSpec {
         describe("CPU.fetchOperand") {
             var cpu: CPU!
             beforeEach {
-                let memory = CPUAddressSpace()
-                cpu = CPUEmulator(memory: memory)
+                let bus = CPUBus()
+                cpu = CPUEmulator(bus: bus)
 
                 cpu.registers.PC = 0x8234
 
@@ -22,7 +22,7 @@ class AddressingModeSpec: QuickSpec {
                 p[0x8235 - 0x4020] = 0x94
                 p[0x9490 - 0x4020] = 0x33
                 p[0x9491 - 0x4020] = 0x81
-                memory.cartridge = Cartridge(rawData: p)
+                bus.cartridge = Cartridge(rawData: p)
             }
 
             context("implicit") {

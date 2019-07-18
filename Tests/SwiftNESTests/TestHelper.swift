@@ -10,7 +10,7 @@ class DummyRenderer: Renderer {
 
 extension CPUEmulator {
     convenience init() {
-        self.init(memory: CPUAddressSpace())
+        self.init(bus: CPUBus())
     }
 }
 

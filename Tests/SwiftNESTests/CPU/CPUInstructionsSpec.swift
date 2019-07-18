@@ -6,10 +6,10 @@ import Nimble
 class InstructionSpec: QuickSpec {
     override func spec() {
         var cpu: CPU!
-        var memory: CPUAddressSpace!
+        var bus: CPUBus!
         beforeEach {
-            memory = CPUAddressSpace()
-            cpu = CPUEmulator(memory: memory)
+            bus = CPUBus()
+            cpu = CPUEmulator(bus: bus)
         }
 
         describe("LDA") {
@@ -1501,7 +1501,7 @@ class InstructionSpec: QuickSpec {
                     var program: [UInt8]  = Array(repeating: 0, count: 0xBFE0)
                     program[0xFFFE - 0x4020] = 0x70
                     program[0xFFFF - 0x4020] = 0x81
-                    memory.cartridge = Cartridge(rawData: program)
+                    bus.cartridge = Cartridge(rawData: program)
 
                     cpu.memory.write(addr: 0x0302, data: opcode)
                     cpu.registers.PC = 0x0302
