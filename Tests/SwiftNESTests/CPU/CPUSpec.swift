@@ -8,15 +8,12 @@ class CPUSpec: QuickSpec {
 
         describe("fetch") {
             it("read opcode at address indicated by PC") {
-                let bus = CPUBus()
-                let cpu = CPUEmulator(bus: bus)
+                let cpu = CPUEmulator()
 
-                var program = [UInt8](repeating: 0, count: 0xBFE0)
-                program[0x9051 - 0x4020] = 0x90
-                program[0x9052 - 0x4020] = 0x3F
-                program[0x9053 - 0x4020] = 0x81
-                program[0x9054 - 0x4020] = 0x90
-                bus.cartridge = Cartridge(rawData: program)
+                cpu.memory.write(addr: 0x9051, data: 0x90)
+                cpu.memory.write(addr: 0x9052, data: 0x3F)
+                cpu.memory.write(addr: 0x9053, data: 0x81)
+                cpu.memory.write(addr: 0x9054, data: 0x90)
 
                 cpu.registers.PC = 0x9052
 
@@ -52,8 +49,7 @@ class CPUSpec: QuickSpec {
 
         describe("reset") {
             it("reset registers & memory state") {
-                let bus = CPUBus()
-                let cpu = CPUEmulator(bus: bus)
+                let cpu = CPUEmulator()
 
                 cpu.registers = Registers(
                     A: 0xFA,
@@ -64,12 +60,10 @@ class CPUSpec: QuickSpec {
                     PC: 0b0101011010001101
                 )
 
-                var program = [UInt8](repeating: 0, count: 0xBFE0)
-                program[0xFFFB - 0x4020] = 1
-                program[0xFFFC - 0x4020] = 32
-                program[0xFFFD - 0x4020] = 127
-                program[0xFFFE - 0x4020] = 64
-                bus.cartridge = Cartridge(rawData: program)
+                cpu.memory.write(addr: 0xFFFB, data: 1)
+                cpu.memory.write(addr: 0xFFFC, data: 32)
+                cpu.memory.write(addr: 0xFFFD, data: 127)
+                cpu.memory.write(addr: 0xFFFE, data: 64)
 
                 _ = cpu.reset()
 

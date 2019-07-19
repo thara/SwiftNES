@@ -9,20 +9,21 @@ class AddressingModeSpec: QuickSpec {
         describe("CPU.fetchOperand") {
             var cpu: CPU!
             beforeEach {
-                let bus = CPUBus()
-                cpu = CPUEmulator(bus: bus)
+                cpu = CPUEmulator()
 
                 cpu.registers.PC = 0x8234
 
                 cpu.registers.X = 0x05
                 cpu.registers.Y = 0x80
 
-                var p = [UInt8](repeating: 0, count: 0xBFE0)
-                p[0x8234 - 0x4020] = 0x90
-                p[0x8235 - 0x4020] = 0x94
-                p[0x9490 - 0x4020] = 0x33
-                p[0x9491 - 0x4020] = 0x81
-                bus.cartridge = Cartridge(rawData: p)
+                cpu.memory.write(addr: 0x8234, data: 0x90)
+                cpu.memory.write(addr: 0x8235, data: 0x94)
+                cpu.memory.write(addr: 0x9490, data: 0x33)
+                cpu.memory.write(addr: 0x9491, data: 0x81)
+                cpu.memory.write(addr: 0x8234, data: 0x90)
+                cpu.memory.write(addr: 0x8235, data: 0x94)
+                cpu.memory.write(addr: 0x9490, data: 0x33)
+                cpu.memory.write(addr: 0x9491, data: 0x81)
             }
 
             context("implicit") {
