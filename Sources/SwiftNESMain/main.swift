@@ -10,9 +10,15 @@ func keyCallback(_ window: OpaquePointer!, _ key: Int32, _ scancode: Int32, _ ac
 }
 
 let vertices:[GLfloat] = [
-  -0.5, -0.5, 0.0,
-   0.5, -0.5, 0.0,
-   0.0,  0.5, 0.0
+     0.5,  0.5, 0.0,  // Top Right
+     0.5, -0.5, 0.0,  // Bottom Right
+    -0.5, -0.5, 0.0,  // Bottom Left
+    -0.5,  0.5, 0.0   // Top Left 
+]
+
+let indices: [GLuint] = [
+    0, 1, 3,  // First Triangle
+    1, 2, 3   // Second Triangle
 ]
 
 let vertextShaderSource = """
@@ -114,15 +120,24 @@ func main() {
     glGenBuffers(n: 1, buffers: &VBO)
     defer { glDeleteBuffers(1, &VBO)  }
 
+    var EBO: GLuint = 0
+    glGenBuffers(n: 1, buffers: &EBO)
+    defer { glDeleteBuffers(1, &EBO) }
+
     glBindVertexArray(VAO)
 
     glBindBuffer(target: GL_ARRAY_BUFFER, buffer: VBO)
     glBufferData(target: GL_ARRAY_BUFFER, size: MemoryLayout<GLfloat>.stride * vertices.count, data: vertices, usage: GL_STATIC_DRAW)
 
+    glBindBuffer(target: GL_ELEMENT_ARRAY_BUFFER, buffer: EBO)
+    glBufferData(target: GL_ELEMENT_ARRAY_BUFFER, size: MemoryLayout<GLuint>.stride * indices.count, data: indices, usage: GL_STATIC_DRAW)
+
     glVertexAttribPointer(index: 0, size: 3, type: GL_FLOAT, normalized: false, stride: GLsizei(MemoryLayout<GLfloat>.stride * 3), pointer: nil)
     glEnableVertexAttribArray(0)
 
     glBindVertexArray(0)
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
     while glfwWindowShouldClose(window) == GL_FALSE {
         glfwPollEvents()
@@ -132,7 +147,9 @@ func main() {
 
         glUseProgram(shaderProgram)
         glBindVertexArray(VAO)
-        glDrawArrays(GL_TRIANGLES, 0, 3)
+        // glDrawArrays(GL_TRIANGLES, 0, 3)
+        // glBindBuffer(target: GL_ELEMENT_ARRAY_BUFFER, buffer: EBO)
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nil)
         glBindVertexArray(0)
 
         glfwSwapBuffers(window)
