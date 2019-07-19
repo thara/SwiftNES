@@ -6,7 +6,7 @@ typealias SendNMI = (() -> Void)
 class PPUEmulator: PPU {
 
     var registers: PPURegisters
-    var memory: RAM
+    var memory: Memory
     var background: Background
     var spriteOAM: SpriteOAM
 
@@ -22,9 +22,9 @@ class PPUEmulator: PPU {
 
     let renderer: Renderer
 
-    init(bus: PPUBus, renderer: Renderer, sendNMI: @escaping SendNMI) {
+    init(memory: Memory, renderer: Renderer, sendNMI: @escaping SendNMI) {
         self.registers = PPURegisters()
-        self.memory = bus
+        self.memory = memory
         self.background = Background()
 
         self.spriteOAM = SpriteOAM()

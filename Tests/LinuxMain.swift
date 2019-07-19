@@ -6,15 +6,16 @@ import Quick
 QCKMain([
     AddressingModeSpec.self,
     CPUSpec.self,
-    CPUBusSpec.self,
     InstructionSpec.self,
     RegisterSpec.self,
-
-    NESFileSpec.self,
 
     PPUPortSpec.self,
     PPUEmulatorSpec.self,
     PPURegistersSpec.self,
     BackgroundSpec.self,
-    ScrollingSpec.self
+    ScrollingSpec.self,
+
+    CPUBusSpec.self,
+
+    NESFileSpec.self,
 ])

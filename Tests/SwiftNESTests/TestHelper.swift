@@ -10,17 +10,21 @@ class DummyRenderer: Renderer {
 
 extension CPUEmulator {
     convenience init() {
-        self.init(bus: CPUBus())
+        self.init(memory: RAM(data: 0x00, count: 65536))
     }
 }
 
 extension PPUEmulator {
-    convenience init(sendNMI: @escaping SendNMI) {
-        self.init(bus: PPUBus(), renderer: DummyRenderer(), sendNMI: sendNMI)
+    convenience init() {
+        self.init(memory: RAM(data: 0x00, count: 65534), renderer: DummyRenderer(), sendNMI: {})
     }
 
-    convenience init(bus: PPUBus) {
-        self.init(bus: bus, renderer: DummyRenderer(), sendNMI: {})
+    convenience init(sendNMI: @escaping SendNMI) {
+        self.init(memory: RAM(data: 0x00, count: 65534), renderer: DummyRenderer(), sendNMI: sendNMI)
+    }
+
+    convenience init(memory: Memory) {
+        self.init(memory: memory, renderer: DummyRenderer(), sendNMI: {})
     }
 }
 

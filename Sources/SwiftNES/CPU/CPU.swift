@@ -2,7 +2,7 @@ typealias OpCode = UInt8
 
 protocol CPU: class {
     var registers: Registers { get set }
-    var memory: RAM { get }
+    var memory: Memory { get }
     var interrupt: Interrupt? { get set }
 
     func fetch() -> OpCode

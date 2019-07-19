@@ -6,10 +6,8 @@ import Nimble
 class InstructionSpec: QuickSpec {
     override func spec() {
         var cpu: CPU!
-        var bus: CPUBus!
         beforeEach {
-            bus = CPUBus()
-            cpu = CPUEmulator(bus: bus)
+            cpu = CPUEmulator()
         }
 
         describe("LDA") {
@@ -1498,10 +1496,8 @@ class InstructionSpec: QuickSpec {
                 it("force interrupt") {
                     let opcode: UInt8 = 0x00
 
-                    var program: [UInt8]  = Array(repeating: 0, count: 0xBFE0)
-                    program[0xFFFE - 0x4020] = 0x70
-                    program[0xFFFF - 0x4020] = 0x81
-                    bus.cartridge = Cartridge(rawData: program)
+                    cpu.memory.write(addr: 0xFFFE, data: 0x70)
+                    cpu.memory.write(addr: 0xFFFF, data: 0x81)
 
                     cpu.memory.write(addr: 0x0302, data: opcode)
                     cpu.registers.PC = 0x0302

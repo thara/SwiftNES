@@ -1,11 +1,11 @@
 class CPUEmulator: CPU {
     var registers: Registers
-    var memory: RAM
+    var memory: Memory
     var interrupt: Interrupt?
 
     var instructions: [Instruction?]
 
-    init(bus: CPUBus) {
+    init(memory: Memory) {
         self.registers = Registers(
             A: 0x00,
             X: 0x00,
@@ -14,7 +14,7 @@ class CPUEmulator: CPU {
             P: [Status.R, Status.B, Status.I],
             PC: 0x00
         )
-        self.memory = bus
+        self.memory = memory
         self.instructions = []  // Need all properties are initialized because 'self' is used in 'buildInstructionTable'
         self.instructions = buildInstructionTable()
     }

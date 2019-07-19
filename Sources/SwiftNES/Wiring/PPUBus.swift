@@ -1,18 +1,22 @@
-class PPUBus: RAM {
+class PPUBus: Memory {
     var cartridge: Cartridge?
 
-    private var patternTable = [UInt8](repeating: 0, count: 0x2000)
-    private var nameTable = [UInt8](repeating: 0, count: 0x1000)
-    private var paletteRAMIndexes = [UInt8](repeating: 0, count: 0x0020)
+    private var nameTable: RAM
+    private var paletteRAMIndexes: RAM
+
+    init() {
+        nameTable = RAM(data: 0x00, count: 0x1000)
+        paletteRAMIndexes = RAM(data: 0x00, count: 0x0020)
+    }
 
     func read(addr: UInt16) -> UInt8 {
         switch addr {
         case 0x0000...0x1FFF:
             return cartridge?.readCharacter(addr: addr) ?? 0x00
         case 0x2000...0x3EFF:
-            return nameTable[Int(addr - 0x2000)]
+            return nameTable.read(addr: addr - 0x2000)
         case 0x3F00...0x3F1F:
-            return paletteRAMIndexes[Int(addr - 0x3F00)]
+            return paletteRAMIndexes.read(addr: addr - 0x3F00)
         default:
             return 0x00
         }
@@ -23,9 +27,9 @@ class PPUBus: RAM {
         case 0x0000...0x1FFF:
             print("[PPU] Unsupported write access to cartridge")
         case 0x2000...0x3EFF:
-            nameTable[Int(addr - 0x2000)] = data
+            nameTable.write(addr: addr - 0x2000, data: data)
         case 0x3F00...0x3F1F:
-            paletteRAMIndexes[Int(addr - 0x3F00)] = data
+            paletteRAMIndexes.write(addr: addr - 0x3F00, data: data)
         default:
             break // NOP
         }

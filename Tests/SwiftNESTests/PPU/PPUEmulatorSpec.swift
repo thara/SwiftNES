@@ -7,20 +7,16 @@ class PPUEmulatorSpec: QuickSpec {
     override func spec() {
         describe("PPUEmulator") {
             var ppu: PPUEmulator!
-            var bus: PPUBus!
             beforeEach {
-                bus = PPUBus()
-                ppu = PPUEmulator(bus: bus)
+                ppu = PPUEmulator()
             }
 
             describe("updateBackground") {
                 beforeEach {
                     ppu.registers.v = vramAddress(fineYScroll: 5, nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
 
-                    var patterns = [UInt8](repeating: 0x00, count: 0x2000)
-                    patterns[0x0035] = 0x11
-                    patterns[0x003D] = 0x81
-                    bus.cartridge = Cartridge(rawData: patterns)
+                    ppu.memory.write(addr: 0x0035, data: 0x11)
+                    ppu.memory.write(addr: 0x003D, data: 0x81)
 
                     ppu.memory.write(addr: 0x2B3D, data: 0x03)
                     ppu.memory.write(addr: 0x2BF7, data: 0x41)
