@@ -9,11 +9,24 @@ func keyCallback(_ window: OpaquePointer!, _ key: Int32, _ scancode: Int32, _ ac
     }
 }
 
-let vertices:[GLfloat] = [
+let vertices: [GLfloat] = [
      0.5,  0.5, 0.0,  // Top Right
      0.5, -0.5, 0.0,  // Bottom Right
     -0.5, -0.5, 0.0,  // Bottom Left
     -0.5,  0.5, 0.0   // Top Left 
+]
+
+
+let vTriangle1:[GLfloat] = [
+   0.0, 0.0, 0.0,
+   1.0, 0.0, 0.0,
+   0.5, 1.0, 0.0
+]
+
+let vTriangle2:[GLfloat] = [
+  -1.0, 0.0, 0.0,
+   0.0, 0.0, 0.0,
+  -0.5, 1.0, 0.0
 ]
 
 let indices: [GLuint] = [
@@ -38,6 +51,16 @@ out vec4 color;
 
 void main() {
     color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+}
+"""
+
+let fragmentShaderSource2 = """
+#version 330 core
+
+out vec4 color;
+
+void main() {
+    color = vec4(1.0f, 1.0f, 0.1f, 1.0f);
 }
 """
 
@@ -78,6 +101,22 @@ func main() {
         }
     }
 
+    let vertexShader2: GLuint = glCreateShader(type: GL_VERTEX_SHADER)
+    do {
+        vertextShaderSource.withCString {
+            var s = [$0]
+            glShaderSource(shader: vertexShader2, count: 1, string: &s, length: nil)
+        }
+        glCompileShader(vertexShader2)
+        var success: GLint = 0
+        glGetShaderiv(vertexShader2, GL_COMPILE_STATUS, &success)
+        guard success == GL_TRUE else {
+            var infoLog = [GLchar](repeating: 0, count: 512)
+            glGetShaderInfoLog(vertexShader2, 512, nil, &infoLog)
+            fatalError(String(cString: infoLog))
+        }
+    }
+
     let fragmentShader: GLuint = glCreateShader(type: GL_FRAGMENT_SHADER)
     do {
         fragmentShaderSource.withCString {
@@ -90,6 +129,22 @@ func main() {
         guard success == GL_TRUE else {
             var infoLog = [GLchar](repeating: 0, count: 512)
             glGetShaderInfoLog(fragmentShader, 512, nil, &infoLog)
+            fatalError(String(cString: infoLog))
+        }
+    }
+
+    let fragmentShader2: GLuint = glCreateShader(type: GL_FRAGMENT_SHADER)
+    do {
+        fragmentShaderSource2.withCString {
+            var s = [$0]
+            glShaderSource(shader: fragmentShader2, count: 1, string: &s, length: nil)
+        }
+        glCompileShader(fragmentShader2)
+        var success: GLint = 0
+        glGetShaderiv(fragmentShader2, GL_COMPILE_STATUS, &success)
+        guard success == GL_TRUE else {
+            var infoLog = [GLchar](repeating: 0, count: 512)
+            glGetShaderInfoLog(fragmentShader2, 512, nil, &infoLog)
             fatalError(String(cString: infoLog))
         }
     }
@@ -109,33 +164,63 @@ func main() {
             fatalError(String(cString: infoLog))
         }
     }
+
+    let shaderProgram2: GLuint = glCreateProgram()
+    defer { glDeleteProgram(shaderProgram2) }
+    do {
+        glAttachShader(shaderProgram2, vertexShader2)
+        glAttachShader(shaderProgram2, fragmentShader2)
+        glLinkProgram(shaderProgram2)
+
+        var success: GLint = 0
+        glGetProgramiv(shaderProgram2, GL_LINK_STATUS, &success)
+        guard success == GL_TRUE else {
+            var infoLog = [GLchar](repeating: 0, count: 512)
+            glGetShaderInfoLog(shaderProgram2, 512, nil, &infoLog)
+            print("\(String(cString: infoLog))")
+            fatalError(String(cString: infoLog))
+        }
+    }
     glDeleteShader(vertexShader)
     glDeleteShader(fragmentShader)
+    glDeleteShader(fragmentShader2)
 
-    var VAO: GLuint = 0
-    glGenVertexArrays(n: 1, arrays: &VAO)
-    defer { glDeleteVertexArrays(1, &VAO) }
+    var VAO1: GLuint = 0
+    glGenVertexArrays(n: 1, arrays: &VAO1)
+    defer { glDeleteVertexArrays(1, &VAO1) }
 
-    var VBO: GLuint = 0
-    glGenBuffers(n: 1, buffers: &VBO)
-    defer { glDeleteBuffers(1, &VBO)  }
+    var VAO2: GLuint = 0
+    glGenVertexArrays(n: 1, arrays: &VAO2)
+    defer { glDeleteVertexArrays(1, &VAO2) }
 
-    var EBO: GLuint = 0
-    glGenBuffers(n: 1, buffers: &EBO)
-    defer { glDeleteBuffers(1, &EBO) }
+    var VBO1: GLuint = 0
+    glGenBuffers(n: 1, buffers: &VBO1)
+    defer { glDeleteBuffers(1, &VBO1)  }
 
-    glBindVertexArray(VAO)
+    // var EBO: GLuint = 0
+    // glGenBuffers(n: 1, buffers: &EBO)
+    // defer { glDeleteBuffers(1, &EBO) }
 
-    glBindBuffer(target: GL_ARRAY_BUFFER, buffer: VBO)
-    glBufferData(target: GL_ARRAY_BUFFER, size: MemoryLayout<GLfloat>.stride * vertices.count, data: vertices, usage: GL_STATIC_DRAW)
+    glBindVertexArray(VAO1)
+    glBindBuffer(target: GL_ARRAY_BUFFER, buffer: VBO1)
+    glBufferData(target: GL_ARRAY_BUFFER, size: MemoryLayout<GLfloat>.stride * vTriangle1.count, data: vTriangle1, usage: GL_STATIC_DRAW)
 
-    glBindBuffer(target: GL_ELEMENT_ARRAY_BUFFER, buffer: EBO)
-    glBufferData(target: GL_ELEMENT_ARRAY_BUFFER, size: MemoryLayout<GLuint>.stride * indices.count, data: indices, usage: GL_STATIC_DRAW)
+    // glBindBuffer(target: GL_ELEMENT_ARRAY_BUFFER, buffer: EBO)
+    // glBufferData(target: GL_ELEMENT_ARRAY_BUFFER, size: MemoryLayout<GLuint>.stride * indices.count, data: indices, usage: GL_STATIC_DRAW)
 
     glVertexAttribPointer(index: 0, size: 3, type: GL_FLOAT, normalized: false, stride: GLsizei(MemoryLayout<GLfloat>.stride * 3), pointer: nil)
     glEnableVertexAttribArray(0)
 
-    glBindVertexArray(0)
+    var VBO2: GLuint = 0
+    glGenBuffers(n: 1, buffers: &VBO2)
+    defer { glDeleteBuffers(1, &VBO2)  }
+
+    glBindVertexArray(VAO2)
+    glBindBuffer(target: GL_ARRAY_BUFFER, buffer: VBO2)
+    glBufferData(target: GL_ARRAY_BUFFER, size: MemoryLayout<GLfloat>.stride * vTriangle2.count, data: vTriangle2, usage: GL_STATIC_DRAW)
+
+    glVertexAttribPointer(index: 0, size: 3, type: GL_FLOAT, normalized: false, stride: GLsizei(MemoryLayout<GLfloat>.stride * 3), pointer: nil)
+    glEnableVertexAttribArray(0)
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
@@ -146,10 +231,17 @@ func main() {
         glClear(GL_COLOR_BUFFER_BIT)
 
         glUseProgram(shaderProgram)
-        glBindVertexArray(VAO)
-        // glDrawArrays(GL_TRIANGLES, 0, 3)
-        // glBindBuffer(target: GL_ELEMENT_ARRAY_BUFFER, buffer: EBO)
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nil)
+
+        glBindVertexArray(VAO1)
+        glDrawArrays(GL_TRIANGLES, 0, 3)
+
+        glUseProgram(shaderProgram2)
+
+        glBindVertexArray(VAO2)
+        glDrawArrays(GL_TRIANGLES, 0, 3)
+
+        //glBindBuffer(target: GL_ELEMENT_ARRAY_BUFFER, buffer: EBO)
+        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nil)
         glBindVertexArray(0)
 
         glfwSwapBuffers(window)
