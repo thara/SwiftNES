@@ -11,7 +11,7 @@ enum PCUpdate {
 
 struct Instruction {
     let mnemonic: Mnemonic
-    let addressing: AddressingMode
+    let addressingMode: AddressingMode
     let cycle: UInt
     let exec: Operation
 }

@@ -32,20 +32,20 @@ class CPUEmulator: CPU {
         return Instruction.NOP
     }
 
-    func execute(_ inst: Instruction) -> UInt {
-        let (operand, pc) = fetchOperand(addressingMode: inst.addressing)
+    func execute(_ instruction: Instruction) -> UInt {
+        let (operand, pc) = fetchOperand(in: instruction.addressingMode)
 
         registers.PC += pc
-        switch inst.exec(operand) {
+        switch instruction.exec(operand) {
         case .jump(let addr):
             registers.PC = addr
         case .branch(let offset):
             registers.PC &+= offset
-            return inst.cycle + 1
+            return instruction.cycle + 1
         case .next:
             break // NOP
         }
 
-        return inst.cycle
+        return instruction.cycle
     }
 }
