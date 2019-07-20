@@ -16,7 +16,7 @@ class CPUBus: Memory {
         case 0x0000...0x1FFF:
             return wram.read(at: address)
         case 0x2000...0x3FFF:
-            return ppuPort?.read(addr: ppuAddr(address)) ?? 0x00
+            return ppuPort?.read(from: ppuAddress(address)) ?? 0x00
         case 0x4020...0xFFFF:
             return cartridge?.read(addr: address) ?? 0x00
         default:
@@ -29,7 +29,7 @@ class CPUBus: Memory {
         case 0x0000...0x07FF:
             wram.write(value, at: address)
         case 0x2000...0x3FFF:
-            ppuPort?.write(addr: ppuAddr(address), data: value)
+            ppuPort?.write(value, to: ppuAddress(address))
         case 0x4020...0xFFFF:
             cartridge?.write(addr: address, data: value)
         default:
@@ -37,7 +37,7 @@ class CPUBus: Memory {
         }
     }
 
-    private func ppuAddr(_ address: UInt16) -> UInt16 {
+    private func ppuAddress(_ address: UInt16) -> UInt16 {
         // repears every 8 bytes
         return 0x2000 + address % 8
     }

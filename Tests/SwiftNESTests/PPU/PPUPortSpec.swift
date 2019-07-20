@@ -15,10 +15,10 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("set controller register") {
-                    ppu.write(addr: address, data: 0b01010000)
+                    ppu.write(0b01010000, to: address)
                     expect(ppu.registers.controller).to(equal([.slave, .bgTableAddr]))
 
-                    ppu.write(addr: address, data: 0b00000111)
+                    ppu.write(0b00000111, to: address)
                     expect(ppu.registers.controller).to(equal([.vramAddrIncr, .nameTableAddrHigh, .nameTableAddrLow]))
                 }
             }
@@ -28,10 +28,10 @@ class PPUPortSpec: QuickSpec {
             let address: UInt16 = 0x2001
             context("write") {
                 it("set mask register") {
-                    ppu.write(addr: address, data: 0b01010000)
+                    ppu.write(0b01010000, to: address)
                     expect(ppu.registers.mask).to(equal([.green, .sprite]))
 
-                    ppu.write(addr: address, data: 0b00000111)
+                    ppu.write(0b00000111, to: address)
                     expect(ppu.registers.mask).to(equal([.spriteLeft, .backgroundLeft, .greyscale]))
                 }
             }
@@ -44,10 +44,10 @@ class PPUPortSpec: QuickSpec {
                 it("read status and clear vblank and write toggle") {
                     ppu.registers.status = [.vblank, .spriteZeroHit]
                     ppu.registers.writeToggle = true
-                    expect(ppu.read(addr: address)).to(equal(0b11000000))
+                    expect(ppu.read(from: address)).to(equal(0b11000000))
                     expect(ppu.registers.writeToggle).to(beFalsy())
 
-                    expect(ppu.read(addr: address)).to(equal(0b01000000))
+                    expect(ppu.read(from: address)).to(equal(0b01000000))
                 }
             }
         }
@@ -57,7 +57,7 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("write oam address") {
-                    ppu.write(addr: address, data: 255)
+                    ppu.write(255, to: address)
                     expect(ppu.registers.objectAttributeMemoryAddress).to(equal(255))
                 }
             }
@@ -69,16 +69,16 @@ class PPUPortSpec: QuickSpec {
             context("read") {
                 it("read oam data") {
                     ppu.spriteOAM.primary[0x09] = 0xA3
-                    ppu.write(addr: 0x2003, data: 0x09)
+                    ppu.write(0x09, to: 0x2003)
 
-                    expect(ppu.read(addr: address)).to(equal(0xA3))
+                    expect(ppu.read(from: address)).to(equal(0xA3))
                 }
             }
 
             context("write") {
                 it("write oam data") {
-                    ppu.write(addr: 0x2003, data: 0xAB)
-                    ppu.write(addr: address, data: 0x32)
+                    ppu.write(0xAB, to: 0x2003)
+                    ppu.write(0x32, to: address)
 
                     expect(ppu.spriteOAM.primary[0xAB]).to(equal(0x32))
                 }
@@ -90,12 +90,12 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("set scroll position by two write") {
-                    ppu.write(addr: address, data: 0x1F)
+                    ppu.write(0x1F, to: address)
                     expect(ppu.registers.writeToggle).to(beTruthy())
                     expect(ppu.registers.t.coarseXScroll).to(equal(0x1F))
                     expect(ppu.registers.fineX).to(equal(0x00))
 
-                    ppu.write(addr: address, data: 0x0E)
+                    ppu.write(0x0E, to: address)
                     expect(ppu.registers.writeToggle).to(beFalsy())
                     expect(ppu.registers.t.coarseYScroll).to(equal(0x0E))
                     expect(ppu.registers.fineX).to(equal(0x0E & 0b111))
@@ -108,10 +108,10 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("set current address by two write") {
-                    ppu.write(addr: address, data: 0x3F)
+                    ppu.write(0x3F, to: address)
                     expect(ppu.registers.writeToggle).to(beTruthy())
 
-                    ppu.write(addr: address, data: 0x91)
+                    ppu.write(0x91, to: address)
                     expect(ppu.registers.writeToggle).to(beFalsy())
 
                     expect(ppu.registers.v).to(equal(0x3F91))
@@ -125,10 +125,10 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("write data at currentAddress in memory") {
-                    ppu.write(addr: 0x2006, data: 0x2F)
-                    ppu.write(addr: 0x2006, data: 0x11)
+                    ppu.write(0x2F, to: 0x2006)
+                    ppu.write(0x11, to: 0x2006)
 
-                    ppu.write(addr: address, data: 0x83)
+                    ppu.write(0x83, to: address)
 
                     expect(ppu.memory.read(at: 0x2F11)).to(equal(0x83))
                 }
