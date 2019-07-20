@@ -6,6 +6,8 @@ import PackageDescription
 let package = Package(
     name: "SwiftNES",
     dependencies: [
+        .package(url: "https://github.com/PureSwift/SDL.git", .branch("master")),
+
         .package(url: "https://github.com/Quick/Quick.git", from: "2.1.0"),
         .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.0"),
     ],
@@ -15,9 +17,9 @@ let package = Package(
             dependencies: []),
         .target(
             name: "SwiftNESMain",
-            dependencies: []),
+            dependencies: ["SDL"]),
         .testTarget(
             name: "SwiftNESTests",
-            dependencies: ["SwiftNES", "Quick", "Nimble"])
+            dependencies: ["SwiftNES", "Quick", "Nimble"]),
     ]
 )

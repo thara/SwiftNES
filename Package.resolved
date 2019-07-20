@@ -18,6 +18,15 @@
           "revision": "94df9b449508344667e5afc7e80f8bcbff1e4c37",
           "version": "2.1.0"
         }
+      },
+      {
+        "package": "SDL",
+        "repositoryURL": "https://github.com/PureSwift/SDL.git",
+        "state": {
+          "branch": "master",
+          "revision": "79e193ee7ad11b76f5863205f4e2892f9369eed3",
+          "version": null
+        }
       }
     ]
   },
