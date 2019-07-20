@@ -18,7 +18,7 @@ class CPUBus: Memory {
         case 0x2000...0x3FFF:
             return ppuPort?.read(from: ppuAddress(address)) ?? 0x00
         case 0x4020...0xFFFF:
-            return cartridge?.read(addr: address) ?? 0x00
+            return cartridge?.read(at: address) ?? 0x00
         default:
             return 0x00
         }
@@ -31,7 +31,7 @@ class CPUBus: Memory {
         case 0x2000...0x3FFF:
             ppuPort?.write(value, to: ppuAddress(address))
         case 0x4020...0xFFFF:
-            cartridge?.write(addr: address, data: value)
+            cartridge?.write(value, at: address)
         default:
             break
         }
