@@ -4,37 +4,37 @@ extension CPU {
 
     /// LDA
     func loadAccumulator(operand: Operand?) -> PCUpdate {
-        registers.A = memory.read(addr: operand!)
+        registers.A = memory.read(at: operand!)
         return .next
     }
 
     /// LDX
     func loadXRegister(operand: Operand?) -> PCUpdate {
-        registers.X = memory.read(addr: operand!)
+        registers.X = memory.read(at: operand!)
         return .next
     }
 
     /// LDY
     func loadYRegister(operand: Operand?) -> PCUpdate {
-        registers.Y = memory.read(addr: operand!)
+        registers.Y = memory.read(at: operand!)
         return .next
     }
 
     /// STA
     func storeAccumulator(operand: Operand?) -> PCUpdate {
-        memory.write(addr: operand!, data: registers.A)
+        memory.write(registers.A, at: operand!)
         return .next
     }
 
     /// STX
     func storeXRegister(operand: Operand?) -> PCUpdate {
-        memory.write(addr: operand!, data: registers.X)
+        memory.write(registers.X, at: operand!)
         return .next
     }
 
     /// STY
     func storeYRegister(operand: Operand?) -> PCUpdate {
-        memory.write(addr: operand!, data: registers.Y)
+        memory.write(registers.Y, at: operand!)
         return .next
     }
 
@@ -94,25 +94,25 @@ extension CPU {
 
     /// AND
     func bitwiseANDwithAccumulator(operand: Operand?) -> PCUpdate {
-        registers.A &= memory.read(addr: operand!)
+        registers.A &= memory.read(at: operand!)
         return .next
     }
 
     /// EOR
     func bitwiseExclusiveOR(operand: Operand?) -> PCUpdate {
-        registers.A ^= memory.read(addr: operand!)
+        registers.A ^= memory.read(at: operand!)
         return .next
     }
 
     /// ORA
     func bitwiseORwithAccumulator(operand: Operand?) -> PCUpdate {
-        registers.A |= memory.read(addr: operand!)
+        registers.A |= memory.read(at: operand!)
         return .next
     }
 
     /// BIT
     func testBits(operand: Operand?) -> PCUpdate {
-        let data = registers.A & memory.read(addr: operand!)
+        let data = registers.A & memory.read(at: operand!)
         registers.P.remove([.Z, .V, .N])
         if data == 0 { registers.P.formUnion(.Z) }
         if data[6] == 1 { registers.P.formUnion(.V) }
@@ -125,7 +125,7 @@ extension CPU {
     /// ADC
     func addWithCarry(operand: Operand?) -> PCUpdate {
         let a = Int16(registers.A)
-        let val = Int16(memory.read(addr: operand!))
+        let val = Int16(memory.read(at: operand!))
         var result = a + val
         if registers.P.contains(.C) { result += 1 }
 
@@ -142,7 +142,7 @@ extension CPU {
     /// SBC
     func subtractWithCarry(operand: Operand?) -> PCUpdate {
         let a = Int16(registers.A)
-        let val = Int16(memory.read(addr: operand!))
+        let val = Int16(memory.read(at: operand!))
         var result = a - val
         if registers.P.contains(.C) { result -= 1 }
 
@@ -158,7 +158,7 @@ extension CPU {
 
     /// CMP
     func compareAccumulator(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.A) - Int16(memory.read(addr: operand!))
+        let cmp = Int16(registers.A) - Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
         if cmp == 0 { registers.P.formUnion(.Z) }
@@ -170,7 +170,7 @@ extension CPU {
 
     /// CPX
     func compareXRegister(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.X) - Int16(memory.read(addr: operand!))
+        let cmp = Int16(registers.X) - Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
         if cmp == 0 { registers.P.formUnion(.Z) }
@@ -182,7 +182,7 @@ extension CPU {
 
     /// CPY
     func compareYRegister(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.Y) - Int16(memory.read(addr: operand!))
+        let cmp = Int16(registers.Y) - Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
         if cmp == 0 { registers.P.formUnion(.Z) }
@@ -196,12 +196,12 @@ extension CPU {
 
     /// INC
     func incrementMemory(operand: Operand?) -> PCUpdate {
-        let result = memory.read(addr: operand!) &+ 1
+        let result = memory.read(at: operand!) &+ 1
 
         if result == 0 { registers.P.formUnion(.Z) }
         if result[7] == 1 { registers.P.formUnion(.N) }
 
-        memory.write(addr: operand!, data: result)
+        memory.write(result, at: operand!)
 
         return .next
     }
@@ -232,12 +232,12 @@ extension CPU {
 
     /// DEC
     func decrementMemory(operand: Operand?) -> PCUpdate {
-        let result = memory.read(addr: operand!) &- 1
+        let result = memory.read(at: operand!) &- 1
 
         if result == 0 { registers.P.formUnion(.Z) }
         if result[7] == 1 { registers.P.formUnion(.N) }
 
-        memory.write(addr: operand!, data: result)
+        memory.write(result, at: operand!)
 
         return .next
     }
@@ -270,7 +270,7 @@ extension CPU {
 
     /// ASL
     func arithmeticShiftLeft(operand: Operand?) -> PCUpdate {
-        var data = memory.read(addr: operand!)
+        var data = memory.read(at: operand!)
 
         registers.P.remove([.C, .Z, .N])
         if data[7] == 1 { registers.P.formUnion(.C) }
@@ -280,7 +280,7 @@ extension CPU {
         if data == 0 { registers.P.formUnion(.Z) }
         if data[7] == 1 { registers.P.formUnion(.N) }
 
-        memory.write(addr: operand!, data: data)
+        memory.write(data, at: operand!)
 
         return .next
     }
@@ -296,7 +296,7 @@ extension CPU {
 
     /// LSR
     func logicalShiftRight(operand: Operand?) -> PCUpdate {
-        var data = memory.read(addr: operand!)
+        var data = memory.read(at: operand!)
 
         registers.P.remove([.C, .Z, .N])
         if data[7] == 1 { registers.P.formUnion(.C) }
@@ -306,7 +306,7 @@ extension CPU {
         if data == 0 { registers.P.formUnion(.Z) }
         if data[7] == 1 { registers.P.formUnion(.N) }
 
-        memory.write(addr: operand!, data: data)
+        memory.write(data, at: operand!)
 
         return .next
     }
@@ -322,7 +322,7 @@ extension CPU {
 
     /// ROL
     func rotateLeft(operand: Operand?) -> PCUpdate {
-        var data = memory.read(addr: operand!)
+        var data = memory.read(at: operand!)
         let c = data & 0x80
 
         data <<= 1
@@ -334,7 +334,7 @@ extension CPU {
         if data == 0 { registers.P.formUnion(.Z) }
         if data[7] == 1 { registers.P.formUnion(.N) }
 
-        memory.write(addr: operand!, data: data)
+        memory.write(data, at: operand!)
 
         return .next
     }
@@ -354,7 +354,7 @@ extension CPU {
 
     /// ROR
     func rotateRight(operand: Operand?) -> PCUpdate {
-        var data = memory.read(addr: operand!)
+        var data = memory.read(at: operand!)
         let c = data & 0x01
 
         data >>= 1
@@ -366,7 +366,7 @@ extension CPU {
         if data == 0 { registers.P.formUnion(.Z) }
         if data[7] == 1 { registers.P.formUnion(.N) }
 
-        memory.write(addr: operand!, data: data)
+        memory.write(data, at: operand!)
         return .next
     }
 
@@ -523,7 +523,7 @@ extension CPU {
     func forceInterrupt(operand: Operand?) -> PCUpdate {
         pushStack(word: registers.PC)
         pushStack(data: registers.P.rawValue)
-        registers.PC = memory.readWord(addr: 0xFFFE)
+        registers.PC = memory.readWord(at: 0xFFFE)
         registers.P.formUnion(.B)
         return .next
     }

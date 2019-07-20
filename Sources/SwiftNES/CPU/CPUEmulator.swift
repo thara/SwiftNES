@@ -20,7 +20,7 @@ class CPUEmulator: CPU {
     }
 
     func fetch() -> OpCode {
-        let opcode = memory.read(addr: registers.PC)
+        let opcode = memory.read(at: registers.PC)
         registers.PC += 1
         return opcode
     }

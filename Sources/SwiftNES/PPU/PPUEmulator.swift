@@ -219,7 +219,7 @@ extension PPUEmulator {
             }
         }
 
-        lineBuffer[Int(dot)] = memory.read(addr: UInt16(0x3F00 + idx))
+        lineBuffer[Int(dot)] = memory.read(at: UInt16(0x3F00 + idx))
     }
 
     func getRenderingPriority(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> RenderingPriority {

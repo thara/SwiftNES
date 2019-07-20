@@ -2,7 +2,7 @@ typealias OpCode = UInt8
 
 protocol CPU: class {
     var registers: Registers { get set }
-    var memory: Memory { get }
+    var memory: Memory { get set }
     var interrupt: Interrupt? { get set }
 
     func fetch() -> OpCode
@@ -45,7 +45,7 @@ extension CPU {
     }
 
     func pushStack(data: UInt8) {
-        memory.write(addr: registers.S.u16 + 0x100, data: data)
+        memory.write(data, at: registers.S.u16 + 0x100)
         registers.S -= 1
     }
 
@@ -56,7 +56,7 @@ extension CPU {
 
     func pullStack() -> UInt8 {
         registers.S += 1
-        return memory.read(addr: registers.S.u16 + 0x100)
+        return memory.read(at: registers.S.u16 + 0x100)
     }
 
     func pullStack() -> UInt16 {

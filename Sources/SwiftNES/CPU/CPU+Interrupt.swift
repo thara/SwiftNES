@@ -8,7 +8,7 @@ extension CPU {
         registers.X = 0x00
         registers.Y = 0x00
         registers.S = 0xff
-        registers.PC = memory.readWord(addr: 0xFFFC)
+        registers.PC = memory.readWord(at: 0xFFFC)
 
         return 7
     }
@@ -19,7 +19,7 @@ extension CPU {
         pushStack(data: registers.P.rawValue)
         registers.P.formUnion(.I)
 
-        registers.PC = memory.readWord(addr: 0xFFFA)
+        registers.PC = memory.readWord(at: 0xFFFA)
         return 7
     }
 
@@ -32,7 +32,7 @@ extension CPU {
         pushStack(word: registers.PC)
         pushStack(data: registers.P.rawValue)
         registers.P.formUnion(.I)
-        registers.PC = memory.readWord(addr: 0xFFFE)
+        registers.PC = memory.readWord(at: 0xFFFE)
         return 7
     }
 
@@ -46,7 +46,7 @@ extension CPU {
         pushStack(word: registers.PC)
         pushStack(data: registers.P.rawValue)
         registers.P.formUnion(.I)
-        registers.PC = memory.readWord(addr: 0xFFFE)
+        registers.PC = memory.readWord(at: 0xFFFE)
         return 7
     }
 }

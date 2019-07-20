@@ -14,19 +14,19 @@ class CPUBusSpec: QuickSpec {
             let bus = CPUBus(initial: data)
 
             it("Read") {
-                expect(bus.read(addr: 0)).to(equal(1))
-                expect(bus.read(addr: 1)).to(equal(0))
-                expect(bus.read(addr: 1023)).to(equal(0))
-                expect(bus.read(addr: 1024)).to(equal(52))
-                expect(bus.read(addr: 1025)).to(equal(0))
+                expect(bus.read(at: 0)).to(equal(1))
+                expect(bus.read(at: 1)).to(equal(0))
+                expect(bus.read(at: 1023)).to(equal(0))
+                expect(bus.read(at: 1024)).to(equal(52))
+                expect(bus.read(at: 1025)).to(equal(0))
             }
 
             it("Write & read") {
-                bus.write(addr: 256, data: 87)
+                bus.write(87, at: 256)
 
-                expect(bus.read(addr: 255)).to(equal(0))
-                expect(bus.read(addr: 256)).to(equal(87))
-                expect(bus.read(addr: 257)).to(equal(0))
+                expect(bus.read(at: 255)).to(equal(0))
+                expect(bus.read(at: 256)).to(equal(87))
+                expect(bus.read(at: 257)).to(equal(0))
             }
         }
 
@@ -42,9 +42,9 @@ class CPUBusSpec: QuickSpec {
 
                 bus.cartridge = Cartridge(rawData: p)
 
-                expect(bus.read(addr: 0x4020)).to(equal(1))
-                expect(bus.read(addr: 0x4120)).to(equal(2))
-                expect(bus.read(addr: 0x5020)).to(equal(3))
+                expect(bus.read(at: 0x4020)).to(equal(1))
+                expect(bus.read(at: 0x4120)).to(equal(2))
+                expect(bus.read(at: 0x5020)).to(equal(3))
             }
         }
 
@@ -53,18 +53,18 @@ class CPUBusSpec: QuickSpec {
             let bus = CPUBus()
 
             it("read 1 word") {
-                bus.write(addr: 128, data: 1)
-                bus.write(addr: 129, data: 1)
+                bus.write(1, at: 128)
+                bus.write(1, at: 129)
 
-                expect(bus.readWord(addr: 128)).to(equal(0b0000000100000001))
+                expect(bus.readWord(at: 128)).to(equal(0b0000000100000001))
 
-                bus.write(addr: 10, data: 64)
-                bus.write(addr: 11, data: 32)
-                bus.write(addr: 12, data: 255)
+                bus.write(64, at: 10)
+                bus.write(32, at: 11)
+                bus.write(255, at: 12)
 
-                expect(bus.readWord(addr: 10)).to(equal(0b0010000001000000))
-                expect(bus.readWord(addr: 11)).to(equal(0b1111111100100000))
-                expect(bus.readWord(addr: 12)).to(equal(0b0000000011111111))
+                expect(bus.readWord(at: 10)).to(equal(0b0010000001000000))
+                expect(bus.readWord(at: 11)).to(equal(0b1111111100100000))
+                expect(bus.readWord(at: 12)).to(equal(0b0000000011111111))
             }
         }
     }

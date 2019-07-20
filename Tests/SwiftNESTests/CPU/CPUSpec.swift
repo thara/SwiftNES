@@ -10,10 +10,10 @@ class CPUSpec: QuickSpec {
             it("read opcode at address indicated by PC") {
                 let cpu = CPUEmulator()
 
-                cpu.memory.write(addr: 0x9051, data: 0x90)
-                cpu.memory.write(addr: 0x9052, data: 0x3F)
-                cpu.memory.write(addr: 0x9053, data: 0x81)
-                cpu.memory.write(addr: 0x9054, data: 0x90)
+                cpu.memory.write(0x90, at: 0x9051)
+                cpu.memory.write(0x3F, at: 0x9052)
+                cpu.memory.write(0x81, at: 0x9053)
+                cpu.memory.write(0x90, at: 0x9054)
 
                 cpu.registers.PC = 0x9052
 
@@ -60,10 +60,10 @@ class CPUSpec: QuickSpec {
                     PC: 0b0101011010001101
                 )
 
-                cpu.memory.write(addr: 0xFFFB, data: 1)
-                cpu.memory.write(addr: 0xFFFC, data: 32)
-                cpu.memory.write(addr: 0xFFFD, data: 127)
-                cpu.memory.write(addr: 0xFFFE, data: 64)
+                cpu.memory.write(1, at: 0xFFFB)
+                cpu.memory.write(32, at: 0xFFFC)
+                cpu.memory.write(127, at: 0xFFFD)
+                cpu.memory.write(64, at: 0xFFFE)
 
                 _ = cpu.reset()
 

@@ -42,7 +42,7 @@ struct Background {
 
     /// Fetch nametable byte : step 2
     mutating func fetchNameTableEntry(from memory: Memory) {
-        nameTableEntry = memory.read(addr: tempTableAddr)
+        nameTableEntry = memory.read(at: tempTableAddr)
     }
 
     /// Fetch attribute table byte : step 1
@@ -52,7 +52,7 @@ struct Background {
 
     /// Fetch attribute table byte : step 2
     mutating func fetchAttrTableEntry(from memory: Memory, v: UInt16) {
-        attrTableEntry = memory.read(addr: tempTableAddr)
+        attrTableEntry = memory.read(at: tempTableAddr)
 
         if v.coarseXScroll[1] == 1 {
             // top right
@@ -71,7 +71,7 @@ struct Background {
 
     /// Fetch tile bitmap low byte : step 2
     mutating func fetchTileBitmapLow(from memory: Memory) {
-        tempTileFirst = memory.read(addr: tempTableAddr)
+        tempTileFirst = memory.read(at: tempTableAddr)
     }
 
     /// Fetch tile bitmap high byte : step 1
@@ -81,7 +81,7 @@ struct Background {
 
     /// Fetch tile bitmap high byte : step 2
     mutating func fetchTileBitmapHigh(from memory: Memory) {
-        tempTileSecond = memory.read(addr: tempTableAddr)
+        tempTileSecond = memory.read(at: tempTableAddr)
     }
 
     mutating func shift() {

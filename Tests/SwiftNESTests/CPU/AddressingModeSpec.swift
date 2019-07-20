@@ -16,14 +16,14 @@ class AddressingModeSpec: QuickSpec {
                 cpu.registers.X = 0x05
                 cpu.registers.Y = 0x80
 
-                cpu.memory.write(addr: 0x8234, data: 0x90)
-                cpu.memory.write(addr: 0x8235, data: 0x94)
-                cpu.memory.write(addr: 0x9490, data: 0x33)
-                cpu.memory.write(addr: 0x9491, data: 0x81)
-                cpu.memory.write(addr: 0x8234, data: 0x90)
-                cpu.memory.write(addr: 0x8235, data: 0x94)
-                cpu.memory.write(addr: 0x9490, data: 0x33)
-                cpu.memory.write(addr: 0x9491, data: 0x81)
+                cpu.memory.write(0x90, at: 0x8234)
+                cpu.memory.write(0x94, at: 0x8235)
+                cpu.memory.write(0x33, at: 0x9490)
+                cpu.memory.write(0x81, at: 0x9491)
+                cpu.memory.write(0x90, at: 0x8234)
+                cpu.memory.write(0x94, at: 0x8235)
+                cpu.memory.write(0x33, at: 0x9490)
+                cpu.memory.write(0x81, at: 0x9491)
             }
 
             context("implicit") {
@@ -101,7 +101,7 @@ class AddressingModeSpec: QuickSpec {
             context("relative") {
                 it("return offset") {
                     cpu.registers.PC = 0x50
-                    cpu.memory.write(addr: 0x50, data: 120)
+                    cpu.memory.write(120, at: 0x50)
 
                     let (operand, pc) = cpu.fetchOperand(addressingMode: .relative)
                     expect(operand).to(equal(120))
@@ -119,8 +119,8 @@ class AddressingModeSpec: QuickSpec {
 
             context("indexedIndirect") {
                 it("return (Indirect, X) address") {
-                    cpu.memory.write(addr: 0x95, data: 0xFF)
-                    cpu.memory.write(addr: 0x96, data: 0xF0)
+                    cpu.memory.write(0xFF, at: 0x95)
+                    cpu.memory.write(0xF0, at: 0x96)
 
                     let (operand, pc) = cpu.fetchOperand(addressingMode: .indexedIndirect)
                     expect(operand).to(equal(0xF0FF))  // 0xFF + (0xF0 << 8)
@@ -130,8 +130,8 @@ class AddressingModeSpec: QuickSpec {
 
             context("indirectIndexed") {
                 it("return (Indirect), Y address") {
-                    cpu.memory.write(addr: 0x90, data: 0x43)
-                    cpu.memory.write(addr: 0x91, data: 0xC0)
+                    cpu.memory.write(0x43, at: 0x90)
+                    cpu.memory.write(0xC0, at: 0x91)
 
                     let (operand, pc) = cpu.fetchOperand(addressingMode: .indirectIndexed)
                     expect(operand).to(equal(0xC0C3))  // 0xC043 + Y

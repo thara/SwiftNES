@@ -11,7 +11,7 @@ extension PPUEmulator: IOPort {
         case 0x2004:
             return spriteOAM.primary[Int(registers.objectAttributeMemoryAddress)]
         case 0x2007:
-            return memory.read(addr: registers.v)
+            return memory.read(at: registers.v)
         default:
             return 0x00
         }
@@ -32,7 +32,7 @@ extension PPUEmulator: IOPort {
         case 0x2006:
             registers.writeVRAMAddress(addr: data)
         case 0x2007:
-            memory.write(addr: registers.v, data: data)
+            memory.write(data, at: registers.v)
         default:
             break
             // NOP
