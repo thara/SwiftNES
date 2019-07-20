@@ -82,8 +82,8 @@ class CPUSpec: QuickSpec {
                 let cpu = CPUEmulator()
                 cpu.registers.S = 0xFF
 
-                cpu.pushStack(data: 0x83)
-                cpu.pushStack(data: 0x14)
+                cpu.pushStack(0x83)
+                cpu.pushStack(0x14)
 
                 expect(cpu.pullStack() as UInt8).to(equal(0x14))
                 expect(cpu.pullStack() as UInt8).to(equal(0x83))

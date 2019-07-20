@@ -16,7 +16,7 @@ extension CPU {
     func handleNMI() -> UInt {
         registers.P.remove(.B)
         pushStack(word: registers.PC)
-        pushStack(data: registers.P.rawValue)
+        pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
 
         registers.PC = memory.readWord(at: 0xFFFA)
@@ -30,7 +30,7 @@ extension CPU {
 
         registers.P.remove(.B)
         pushStack(word: registers.PC)
-        pushStack(data: registers.P.rawValue)
+        pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
         registers.PC = memory.readWord(at: 0xFFFE)
         return 7
@@ -44,7 +44,7 @@ extension CPU {
         registers.P.formUnion(.B)
         registers.PC += 1
         pushStack(word: registers.PC)
-        pushStack(data: registers.P.rawValue)
+        pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
         registers.PC = memory.readWord(at: 0xFFFE)
         return 7

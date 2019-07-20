@@ -44,14 +44,14 @@ extension CPU {
         }
     }
 
-    func pushStack(data: UInt8) {
-        memory.write(data, at: registers.S.u16 + 0x100)
+    func pushStack(_ value: UInt8) {
+        memory.write(value, at: registers.S.u16 + 0x100)
         registers.S -= 1
     }
 
     func pushStack(word: UInt16) {
-        pushStack(data: UInt8(word >> 8))
-        pushStack(data: UInt8(word & 0xFF))
+        pushStack(UInt8(word >> 8))
+        pushStack(UInt8(word & 0xFF))
     }
 
     func pullStack() -> UInt8 {

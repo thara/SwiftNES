@@ -498,7 +498,7 @@ class InstructionSpec: QuickSpec {
                     cpu.registers.PC = 0x0302
                     cpu.registers.S = 0xFF
                     cpu.registers.A = 0xF2
-                    cpu.pushStack(data: 0xA2)
+                    cpu.pushStack(0xA2)
 
                     let cycle = cpu.run()
 
@@ -519,7 +519,7 @@ class InstructionSpec: QuickSpec {
                     cpu.registers.S = 0xFF
 
                     let status: Status = [.N, .R, .Z, .C]
-                    cpu.pushStack(data: status.rawValue)
+                    cpu.pushStack(status.rawValue)
 
                     let cycle = cpu.run()
 
@@ -1082,7 +1082,7 @@ class InstructionSpec: QuickSpec {
 
                     cpu.pushStack(word: 0x0401)
                     let status: Status = [.N, .Z, .C]
-                    cpu.pushStack(data: status.rawValue)
+                    cpu.pushStack(status.rawValue)
 
                     let cycle = cpu.run()
 

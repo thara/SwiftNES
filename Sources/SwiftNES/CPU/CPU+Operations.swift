@@ -68,13 +68,13 @@ extension CPU {
 
     /// PHA
     func pushAccumulator(operand: Operand?) -> PCUpdate {
-        pushStack(data: registers.A)
+        pushStack(registers.A)
         return .next
     }
 
     /// PHP
     func pushProcessorStatus(operand: Operand?) -> PCUpdate {
-        pushStack(data: registers.P.rawValue)
+        pushStack(registers.P.rawValue)
         return .next
     }
 
@@ -522,7 +522,7 @@ extension CPU {
     /// BRK
     func forceInterrupt(operand: Operand?) -> PCUpdate {
         pushStack(word: registers.PC)
-        pushStack(data: registers.P.rawValue)
+        pushStack(registers.P.rawValue)
         registers.PC = memory.readWord(at: 0xFFFE)
         registers.P.formUnion(.B)
         return .next
