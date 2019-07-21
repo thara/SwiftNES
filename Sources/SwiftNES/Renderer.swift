@@ -1,3 +1,3 @@
-protocol Renderer {
-    func render(line: [UInt8])
+public protocol Renderer {
+    func renderLine(number: Int, pixels: [UInt32])
 }

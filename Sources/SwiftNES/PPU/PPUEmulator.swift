@@ -12,13 +12,13 @@ class PPUEmulator: PPU {
 
     // MARK: - Rendering counters
     var dot: UInt16 = 0
-    var lineNumber: UInt16 = 0
+    var lineNumber: Int = 0
 
     var frames: UInt = 0
 
     let sendNMI: SendNMI
 
-    var lineBuffer: [UInt8]
+    var lineBuffer: [UInt32]
 
     let renderer: Renderer
 
@@ -29,7 +29,7 @@ class PPUEmulator: PPU {
 
         self.spriteOAM = SpriteOAM()
 
-        self.lineBuffer = [UInt8](repeating: 0x00, count: Int(maxDot))
+        self.lineBuffer = [UInt32](repeating: 0x00, count: Int(maxDot))
 
         self.sendNMI = sendNMI
         self.renderer = renderer
@@ -49,7 +49,7 @@ extension PPUEmulator {
         case postRender
         case verticalBlanking
 
-        init?(lineNumber: UInt16) {
+        init?(lineNumber: Int) {
             switch lineNumber {
             case 261:
                 self = .preRender
@@ -73,7 +73,7 @@ extension PPUEmulator {
 
         dot += 1
         if maxDot <= dot {
-            renderer.render(line: lineBuffer)
+            renderer.renderLine(number: lineNumber, pixels: lineBuffer)
 
             dot %= 341
             lineNumber += 1
@@ -219,7 +219,8 @@ extension PPUEmulator {
             }
         }
 
-        lineBuffer[Int(dot)] = memory.read(at: UInt16(0x3F00 + idx))
+        let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
+        lineBuffer[Int(dot)] = palletes[Int(palleteNo)]
     }
 
     func getRenderingPriority(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> RenderingPriority {

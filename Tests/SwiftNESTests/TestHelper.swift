@@ -5,7 +5,7 @@ func vramAddress(fineYScroll: UInt16 = 0, nameTableNo: UInt16, coarseYScroll: UI
 }
 
 class DummyRenderer: Renderer {
-    func render(line: [UInt8]) {}
+    func renderLine(number: Int, pixels: [UInt32]) {}
 }
 
 extension CPUEmulator {

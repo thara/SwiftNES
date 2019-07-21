@@ -21,10 +21,10 @@
       },
       {
         "package": "SDL",
-        "repositoryURL": "https://github.com/PureSwift/SDL.git",
+        "repositoryURL": "https://github.com/thara/SDL.git",
         "state": {
-          "branch": "master",
-          "revision": "79e193ee7ad11b76f5863205f4e2892f9369eed3",
+          "branch": "update_texture",
+          "revision": "c1310c5a5eeaa34a7f6d52ebb2dfae7be4a32879",
           "version": null
         }
       }

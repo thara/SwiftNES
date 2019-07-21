@@ -11,6 +11,7 @@ disabled_rules:
 
 included:
 - Sources/SwiftNES
+- Sources/SwiftNESMain
 - Tests/SwiftNESTests
 
 file_length:
