@@ -11,6 +11,9 @@ jobs:
           name: Restore swiftlint
           key: swiftlint-0.33.0-bin
       - run:
+          name: Install dependencies
+          command: apt-get update && apt-get install -y libsdl2-dev
+      - run:
           name: Build swiftlint
           command: |
             if [ ! -f ~/swiftlint ]; then
