@@ -10,7 +10,7 @@ class CPUEmulator: CPU {
             A: 0x00,
             X: 0x00,
             Y: 0x00,
-            S: 0x00,
+            S: 0xFF,
             P: [Status.R, Status.B, Status.I],
             PC: 0x00
         )
