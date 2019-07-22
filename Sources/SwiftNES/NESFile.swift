@@ -12,6 +12,10 @@ public struct NESFile {
     let program: [UInt8]
     let characterData: [UInt8]
 
+    var bytes: [UInt8] {
+        return header.rowData + program + characterData
+    }
+
     public init(path: String, bufferSize: Int = 1024) throws {
         if let f = FileHandle(forReadingAtPath: path) {
             defer {
@@ -51,6 +55,8 @@ struct NESFileHeader {
     let flags10: UInt8
     let padding: [UInt8]
 
+    let rowData: [UInt8]
+
     init(bytes: [UInt8]) {
         magic = Array(bytes[0...3])
         programROMSizeOfUnit = Int(bytes[4])
@@ -61,6 +67,7 @@ struct NESFileHeader {
         flags9 = bytes[9]
         flags10 = bytes[10]
         padding = Array(bytes[11..<bytes.count])
+        rowData = bytes
     }
 
     func valid() -> Bool {

@@ -26,6 +26,6 @@ public class Cartridge {
     }
 
     func load(file: NESFile) {
-        rom = file.program
+        rom = file.bytes
     }
 }
