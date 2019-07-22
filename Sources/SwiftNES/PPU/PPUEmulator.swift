@@ -1,8 +1,6 @@
 private let maxDot: UInt16 = 341
 private let maxLine: UInt16 = 261
 
-typealias SendNMI = (() -> Void)
-
 class PPUEmulator: PPU {
 
     var registers: PPURegisters
@@ -10,29 +8,22 @@ class PPUEmulator: PPU {
     var background: Background
     var spriteOAM: SpriteOAM
 
-    // MARK: - Rendering counters
-    var dot: UInt16 = 0
-    var lineNumber: Int = 0
-
     var frames: UInt = 0
 
-    let sendNMI: SendNMI
+    var interruptLine: InterruptLine
 
-    var lineBuffer: [UInt32]
+    let lineBuffer: LineBuffer
 
-    let renderer: Renderer
-
-    init(memory: Memory, renderer: Renderer, sendNMI: @escaping SendNMI) {
+    init(memory: Memory, interruptLine: InterruptLine, lineBufferFactory: LineBufferFactory) {
         self.registers = PPURegisters()
         self.memory = memory
         self.background = Background()
 
         self.spriteOAM = SpriteOAM()
 
-        self.lineBuffer = [UInt32](repeating: 0x00, count: Int(maxDot))
+        self.lineBuffer = lineBufferFactory.make(pixels: maxDot, lines: maxLine)
 
-        self.sendNMI = sendNMI
-        self.renderer = renderer
+        self.interruptLine = interruptLine
     }
 
     var renderingEnabled: Bool {
@@ -66,22 +57,12 @@ extension PPUEmulator {
     }
 
     func step() {
-        guard let scanline = Scanline(lineNumber: lineNumber) else {
+        guard let scanline = Scanline(lineNumber: lineBuffer.lineNumber) else {
             fatalError("Unexpected lineNumber")
         }
         process(scanline: scanline)
 
-        dot += 1
-        if maxDot <= dot {
-            renderer.renderLine(number: lineNumber, pixels: lineBuffer)
-
-            dot %= 341
-            lineNumber += 1
-            if maxLine < lineNumber {
-                lineNumber = 0
-                frames &+= 1
-            }
-        }
+        lineBuffer.nextDot()
     }
 }
 
@@ -102,17 +83,17 @@ extension PPUEmulator {
             break
         case .verticalBlanking:
             // VBLANK
-            if dot == 1 {
+            if lineBuffer.dot == 1 {
                 registers.status.formUnion(.vblank)
                 if registers.controller.contains(.nmi) {
-                    sendNMI()
+                    interruptLine.send(.NMI)
                 }
             }
         }
     }
 
     func updateSprites(preRendering: Bool) {
-        switch dot {
+        switch lineBuffer.dot {
         case 1:
             spriteOAM.clearSecondaryOAM()
             if preRendering {
@@ -131,7 +112,7 @@ extension PPUEmulator {
 
     // swiftlint:disable cyclomatic_complexity
     func updateBackground(preRendering: Bool = false) {
-        switch dot {
+        switch lineBuffer.dot {
         case 1:
             background.addressNameTableEntry(using: registers.v)
             if preRendering {
@@ -141,7 +122,7 @@ extension PPUEmulator {
             // No reload shift
             background.addressNameTableEntry(using: registers.v)
         case 2...255, 322...336:
-            switch dot % 8 {
+            switch lineBuffer.dot % 8 {
             // name table
             case 1:
                 background.addressNameTableEntry(using: registers.v)
@@ -189,7 +170,7 @@ extension PPUEmulator {
             background.fetchNameTableEntry(from: memory)
             if preRendering && renderingEnabled && frames.isOdd {
                 // Skip 0 cycle on visible frame
-                dot += 1
+                lineBuffer.skip()
             }
         default:
             break
@@ -220,7 +201,7 @@ extension PPUEmulator {
         }
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
-        lineBuffer[Int(dot)] = palletes[Int(palleteNo)]
+        lineBuffer.write(pixel: palletes[Int(palleteNo)])
     }
 
     func getRenderingPriority(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> RenderingPriority {

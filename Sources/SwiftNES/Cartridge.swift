@@ -1,5 +1,11 @@
-class Cartridge {
+public class Cartridge {
     private var rom = [UInt8](repeating: 0x00, count: 32767)
+
+    init() {}
+
+    public init(file: NESFile) {
+        load(file: file)
+    }
 
     /// Read a byte at the given `address` on this cartridge
     func read(at address: UInt16) -> UInt8 {

@@ -3,16 +3,17 @@ import SDL
 
 import SwiftNES
 
-class GUIApplication {
+class Emulator {
 
     let window: SDLWindow
-    let frameRenderer: SDLFrameRenderer
 
     let fps: UInt32
 
     var event: SDL_Event
 
     var isRunning = true
+
+    let nes: NES
 
     init(windowTitle: String, windowScale: Int) throws {
         try SDL.initialize(subSystems: [.video])
@@ -27,7 +28,11 @@ class GUIApplication {
                                options: [.resizable, .shown])
         fps = UInt32(try window.displayMode().refreshRate)
 
-        frameRenderer = try SDLFrameRenderer(window: window, windowSize: windowSize)
+        let frameRenderer = try SDLFrameRenderer(window: window, windowSize: windowSize)
+
+        let lineBufferFactory = SDLLineBufferFactory(renderer: frameRenderer)
+
+        nes = makeNES(lineBufferFactory)
 
         event = SDL_Event()
     }
@@ -50,15 +55,7 @@ class GUIApplication {
                 break
             }
 
-            do {
-                try frameRenderer.update()
-            } catch let error as SDLError {
-                print("Frame Rendering Error: \(error.debugDescription)")
-                throw error
-            } catch {
-                print("Frame Rendering Error: \(error)")
-                throw error
-            }
+            nes.cycle()
 
             let endTime = SDL_GetTicks()
             let frameDuration = endTime - startTime

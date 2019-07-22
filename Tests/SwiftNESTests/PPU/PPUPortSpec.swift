@@ -7,7 +7,7 @@ class PPUPortSpec: QuickSpec {
     override func spec() {
         var ppu: PPUEmulator!
         beforeEach {
-            ppu = PPUEmulator(sendNMI: {})
+            ppu = PPUEmulator()
         }
 
         describe("PPUCTRL") {

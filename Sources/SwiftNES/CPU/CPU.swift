@@ -3,7 +3,7 @@ typealias OpCode = UInt8
 protocol CPU: class {
     var registers: Registers { get set }
     var memory: Memory { get set }
-    var interrupt: Interrupt? { get set }
+    var interruptLine: InterruptLine { get }
 
     func fetch() -> OpCode
     func decode(_ opcode: OpCode) -> Instruction
@@ -11,13 +11,6 @@ protocol CPU: class {
 
     func run() -> UInt
     func step() -> UInt
-}
-
-enum Interrupt {
-    case RESET
-    case NMI
-    case IRQ
-    case BRK
 }
 
 extension CPU {
@@ -30,15 +23,15 @@ extension CPU {
     }
 
     func step() -> UInt {
-        switch interrupt {
-        case .RESET?:
+        switch interruptLine.get() {
+        case .RESET:
             return reset()
-        case .NMI?:
+        case .NMI:
             return handleNMI()
-        case .IRQ?:
-            return handleIMQ() ?? run()
-        case .BRK?:
-            return handleBRQ() ?? run()
+        case .IRQ:
+            return handleIRQ() ?? run()
+        case .BRK:
+            return handleBRK() ?? run()
         default:
             return run()
         }
@@ -64,4 +57,8 @@ extension CPU {
         let ho: UInt8 = pullStack()
         return ho.u16 << 8 | lo.u16
     }
+}
+
+private func ~= (pattern: Interrupt, line: Interrupt) -> Bool {
+    return line.contains(pattern)
 }

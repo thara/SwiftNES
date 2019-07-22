@@ -1,16 +1,17 @@
 import CSDL2
 import SDL
 
+import SwiftNES
+
 func main() throws {
-    let app = try GUIApplication(windowTitle: "SwiftNES", windowScale: 3)
+    let emulator = try Emulator(windowTitle: "SwiftNES", windowScale: 3)
 
-    let color = SDLColor(format: try SDLPixelFormat(format: .argb8888), red: 0x85, green: 0x19, blue: 0x19)
-    let pixels = [UInt32](repeating: color.rawValue, count: 256)
-    for n in 0..<240 {
-        app.frameRenderer.renderLine(number: n, pixels: pixels)
-    }
+    let path = "Tests/SwiftNESTests/fixtures/helloworld/sample1.nes"
 
-    try app.runLoop()
+    let cartridge = Cartridge(file: try NESFile(path: path))
+    emulator.nes.cartridgeDrive.insert(cartridge)
+
+    try emulator.runLoop()
 }
 
 do {

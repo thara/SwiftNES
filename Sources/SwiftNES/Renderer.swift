@@ -1,3 +1,4 @@
 public protocol Renderer {
-    func renderLine(number: Int, pixels: [UInt32])
+    func newLine(number: Int, pixels: inout [UInt32])
+    func newFrame(frames: Int)
 }

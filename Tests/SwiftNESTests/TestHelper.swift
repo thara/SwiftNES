@@ -5,26 +5,30 @@ func vramAddress(fineYScroll: UInt16 = 0, nameTableNo: UInt16, coarseYScroll: UI
 }
 
 class DummyRenderer: Renderer {
-    func renderLine(number: Int, pixels: [UInt32]) {}
+    func newLine(number: Int, pixels: inout [UInt32]) {}
+    func newFrame(frames: Int) {}
+}
+
+class DummyLineBufferFactory: LineBufferFactory {
+
+    func make(pixels: UInt16, lines: UInt16) -> LineBuffer {
+        return LineBuffer(pixels: pixels, lines: lines, renderer: DummyRenderer())
+    }
 }
 
 extension CPUEmulator {
     convenience init() {
-        self.init(memory: RAM(data: 0x00, count: 65536))
+        self.init(memory: RAM(data: 0x00, count: 65536), interruptLine: InterruptLine())
     }
 }
 
 extension PPUEmulator {
     convenience init() {
-        self.init(memory: RAM(data: 0x00, count: 65534), renderer: DummyRenderer(), sendNMI: {})
-    }
-
-    convenience init(sendNMI: @escaping SendNMI) {
-        self.init(memory: RAM(data: 0x00, count: 65534), renderer: DummyRenderer(), sendNMI: sendNMI)
+        self.init(memory: RAM(data: 0x00, count: 65534), interruptLine: InterruptLine(), lineBufferFactory: DummyLineBufferFactory())
     }
 
     convenience init(memory: Memory) {
-        self.init(memory: memory, renderer: DummyRenderer(), sendNMI: {})
+        self.init(memory: memory, interruptLine: InterruptLine(), lineBufferFactory: DummyLineBufferFactory())
     }
 }
 

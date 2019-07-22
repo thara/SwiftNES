@@ -8,7 +8,7 @@ class ScrollingSpec: QuickSpec {
         describe("PPU extensions") {
             var ppu: PPUEmulator!
             beforeEach {
-                ppu = PPUEmulator(sendNMI: {})
+                ppu = PPUEmulator()
             }
 
             describe("incrCoarseX") {

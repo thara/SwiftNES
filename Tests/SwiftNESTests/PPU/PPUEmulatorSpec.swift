@@ -24,36 +24,36 @@ class PPUEmulatorSpec: QuickSpec {
                 }
 
                 it("update background state") {
-                    ppu.dot = 1
+                    ppu.lineBuffer.nextDot()
 
                     ppu.updateBackground()
                     expect(ppu.background.tempTableAddr).to(equal(0x2B3D))
 
-                    ppu.dot += 1
+                    ppu.lineBuffer.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.nameTableEntry).to(equal(0x03))
 
-                    ppu.dot += 1
+                    ppu.lineBuffer.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTableAddr).to(equal(0x2BF7))
 
-                    ppu.dot += 1
+                    ppu.lineBuffer.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.attrTableEntry).to(equal(0x41))
 
-                    ppu.dot += 1
+                    ppu.lineBuffer.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTableAddr).to(equal(0x0035))
 
-                    ppu.dot += 1
+                    ppu.lineBuffer.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTileFirst).to(equal(0x11))
 
-                    ppu.dot += 1
+                    ppu.lineBuffer.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTableAddr).to(equal(0x003D))
 
-                    ppu.dot += 1
+                    ppu.lineBuffer.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTileSecond).to(equal(0x81))
                 }

@@ -7,12 +7,12 @@ fileprivate extension FileHandle {
     }
 }
 
-struct NESFile {
+public struct NESFile {
     let header: NESFileHeader
     let program: [UInt8]
     let characterData: [UInt8]
 
-    init(path: String, bufferSize: Int = 1024) throws {
+    public init(path: String, bufferSize: Int = 1024) throws {
         if let f = FileHandle(forReadingAtPath: path) {
             defer {
                 f.closeFile()

@@ -15,8 +15,6 @@ class SDLFrameRenderer: Renderer {
 
     var frameBuffer: [UInt32]
 
-    var renderingEnabled: Bool = false
-
     init(window: SDLWindow, windowSize: (width: Int, height: Int)) throws {
         let driver = SDLRenderer.Driver.default
         renderer = try SDLRenderer(window: window, driver: driver, options: [.accelerated, .presentVsync])
@@ -31,8 +29,12 @@ class SDLFrameRenderer: Renderer {
         frameBuffer = [UInt32](repeating: 0x00, count: 256 * 240)
     }
 
-    func update() throws {
-        if renderingEnabled {
+    func newLine(number: Int, pixels: inout [UInt32]) {
+        frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[...]
+    }
+
+    func newFrame(frames: Int) {
+        do {
             try renderer.clear()
 
             let p = UnsafePointer(frameBuffer)
@@ -43,14 +45,9 @@ class SDLFrameRenderer: Renderer {
 
             try renderer.copy(frameTexture, destination: screenRect)
             renderer.present()
-
-            renderingEnabled.toggle()
+        } catch {
+            print("Error: \(error)")
         }
-    }
-
-    func renderLine(number: Int, pixels: [UInt32]) {
-        frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[...]
-        renderingEnabled = 240 <= (number + 1)
     }
 
     static func printDriverInfo() {
