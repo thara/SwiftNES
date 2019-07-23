@@ -1,4 +1,4 @@
-struct Registers : CustomStringConvertible {
+struct Registers: CustomStringConvertible {
     /// Accumulator
     var A: UInt8 = 0x00 {
         didSet {

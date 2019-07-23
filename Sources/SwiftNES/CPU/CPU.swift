@@ -2,14 +2,13 @@ import Logging
 
 typealias OpCode = UInt8
 
-class CPU {
+final class CPU {
     var registers: Registers
     var memory: Memory
+
     let interruptLine: InterruptLine
 
-    var instructions: [Instruction?]
-
-    var logger: Logger!
+    private var instructions: [Instruction?]
 
     init(memory: Memory, interruptLine: InterruptLine) {
         self.registers = Registers(
@@ -37,8 +36,6 @@ class CPU {
     }
 
     func step() -> UInt {
-        logger = cpuLogger
-
         switch interruptLine.get() {
         case .RESET:
             return reset()
@@ -63,14 +60,14 @@ extension CPU {
         let instruction = decode(opcode)
         let cycle = execute(instruction)
 
-        logger.debug("PC:\(pc.radix16) Op:\(opcode.radix16) \(registers)")
+        cpuLogger.debug("PC:\(pc.radix16) Op:\(opcode.radix16) \(registers)")
 
         return cycle
     }
 
     func fetch() -> OpCode {
         let opcode = memory.read(at: registers.PC)
-        registers.PC += 1
+        registers.PC &+= 1
         return opcode
     }
 
@@ -84,7 +81,7 @@ extension CPU {
     func execute(_ instruction: Instruction) -> UInt {
         let (operand, pc) = fetchOperand(in: instruction.addressingMode)
 
-        registers.PC += pc
+        registers.PC &+= pc
 
         let result = instruction.exec(operand)
 
@@ -93,7 +90,7 @@ extension CPU {
             registers.PC = addr
         case .branch(let offset):
             registers.PC &+= offset
-            return instruction.cycle + 1
+            return instruction.cycle &+ 1
         case .next:
             break // NOP
         }
@@ -105,8 +102,8 @@ extension CPU {
 // MARK: - Stack
 extension CPU {
     func pushStack(_ value: UInt8) {
-        memory.write(value, at: registers.S.u16 + 0x100)
-        registers.S -= 1
+        memory.write(value, at: registers.S.u16 &+ 0x100)
+        registers.S &-= 1
     }
 
     func pushStack(word: UInt16) {
@@ -115,14 +112,14 @@ extension CPU {
     }
 
     func pullStack() -> UInt8 {
-        registers.S += 1
-        return memory.read(at: registers.S.u16 + 0x100)
+        registers.S &+= 1
+        return memory.read(at: registers.S.u16 &+ 0x100)
     }
 
     func pullStack() -> UInt16 {
         let lo: UInt8 = pullStack()
         let ho: UInt8 = pullStack()
-        return ho.u16 << 8 | lo.u16
+        return ho.u16 &<< 8 | lo.u16
     }
 }
 

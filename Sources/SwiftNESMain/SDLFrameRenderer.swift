@@ -5,15 +5,15 @@ import SwiftNES
 
 let rowPixels = 256
 
-class SDLFrameRenderer: Renderer {
+final class SDLFrameRenderer: Renderer {
 
-    let renderer: SDLRenderer
+    private let renderer: SDLRenderer
 
-    let screenRect: SDL_Rect
+    private let screenRect: SDL_Rect
 
-    let frameTexture: SDLTexture
+    private let frameTexture: SDLTexture
 
-    var frameBuffer: [UInt32]
+    private var frameBuffer: [UInt32]
 
     init(window: SDLWindow, windowSize: (width: Int, height: Int)) throws {
         let driver = SDLRenderer.Driver.default

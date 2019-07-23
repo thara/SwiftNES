@@ -30,23 +30,23 @@ class CPUBusSpec: QuickSpec {
             }
         }
 
-        describe("ROM") {
+        // describe("ROM") {
 
-            it("load Program") {
-                let bus = CPUBus()
+        //     it("load Program") {
+        //         let bus = CPUBus()
 
-                var p: [UInt8]  = Array(repeating: 0, count: 0x4000)
-                p[0x0000] = 1
-                p[0x0100] = 2
-                p[0x1000] = 3
+        //         var p: [UInt8]  = Array(repeating: 0, count: 0x4000)
+        //         p[0x0000] = 1
+        //         p[0x0100] = 2
+        //         p[0x1000] = 3
 
-                bus.cartridge = Cartridge(rawData: p)
+        //         bus.cartridge = Cartridge(rawData: p)
 
-                expect(bus.read(at: 0x4020)).to(equal(1))
-                expect(bus.read(at: 0x4120)).to(equal(2))
-                expect(bus.read(at: 0x5020)).to(equal(3))
-            }
-        }
+        //         expect(bus.read(at: 0x4020)).to(equal(1))
+        //         expect(bus.read(at: 0x4120)).to(equal(2))
+        //         expect(bus.read(at: 0x5020)).to(equal(3))
+        //     }
+        // }
 
         describe("readWord") {
 

@@ -1,4 +1,4 @@
-class PPUBus: Memory {
+final class PPUBus: Memory {
     var cartridge: Cartridge?
 
     private var nameTable: RAM
@@ -14,9 +14,9 @@ class PPUBus: Memory {
         case 0x0000...0x1FFF:
             return cartridge?.read(at: address) ?? 0x00
         case 0x2000...0x3EFF:
-            return nameTable.read(at: address - 0x2000)
+            return nameTable.read(at: address &- 0x2000)
         case 0x3F00...0x3F1F:
-            return paletteRAMIndexes.read(at: address - 0x3F00)
+            return paletteRAMIndexes.read(at: address &- 0x3F00)
         default:
             return 0x00
         }
@@ -27,9 +27,9 @@ class PPUBus: Memory {
         case 0x0000...0x1FFF:
             print("[PPU] Unsupported write access to cartridge")
         case 0x2000...0x3EFF:
-            nameTable.write(value, at: address - 0x2000)
+            nameTable.write(value, at: address &- 0x2000)
         case 0x3F00...0x3F1F:
-            paletteRAMIndexes.write(value, at: address - 0x3F00)
+            paletteRAMIndexes.write(value, at: address &- 0x3F00)
         default:
             break // NOP
         }

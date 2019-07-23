@@ -126,8 +126,8 @@ extension CPU {
     func addWithCarry(operand: Operand?) -> PCUpdate {
         let a = Int16(registers.A)
         let val = Int16(memory.read(at: operand!))
-        var result = a + val
-        if registers.P.contains(.C) { result += 1 }
+        var result = a &+ val
+        if registers.P.contains(.C) { result &+= 1 }
 
         registers.P.remove([.C, .Z, .V, .N])
         if result[8] == 1 { registers.P.formUnion(.C)}
@@ -143,8 +143,8 @@ extension CPU {
     func subtractWithCarry(operand: Operand?) -> PCUpdate {
         let a = Int16(registers.A)
         let val = Int16(memory.read(at: operand!))
-        var result = a - val
-        if registers.P.contains(.C) { result -= 1 }
+        var result = a &- val
+        if registers.P.contains(.C) { result &-= 1 }
 
         registers.P.remove([.C, .Z, .V, .N])
         if result & 0x100 != 0x100 { registers.P.formUnion(.C)}
@@ -158,7 +158,7 @@ extension CPU {
 
     /// CMP
     func compareAccumulator(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.A) - Int16(memory.read(at: operand!))
+        let cmp = Int16(registers.A) &- Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
         if cmp == 0 { registers.P.formUnion(.Z) }
@@ -170,7 +170,7 @@ extension CPU {
 
     /// CPX
     func compareXRegister(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.X) - Int16(memory.read(at: operand!))
+        let cmp = Int16(registers.X) &- Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
         if cmp == 0 { registers.P.formUnion(.Z) }
@@ -182,7 +182,7 @@ extension CPU {
 
     /// CPY
     func compareYRegister(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.Y) - Int16(memory.read(at: operand!))
+        let cmp = Int16(registers.Y) &- Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
         if cmp == 0 { registers.P.formUnion(.Z) }
@@ -398,7 +398,7 @@ extension CPU {
 
     /// RTS
     func returnFromSubroutine(operand: Operand?) -> PCUpdate {
-        return .jump(addr: pullStack() + 1)
+        return .jump(addr: pullStack() &+ 1)
     }
 
     /// RTI

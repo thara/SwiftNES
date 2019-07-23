@@ -50,7 +50,7 @@ extension CPU {
         }
 
         registers.P.formUnion(.B)
-        registers.PC += 1
+        registers.PC &+= 1
         pushStack(word: registers.PC)
         pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)

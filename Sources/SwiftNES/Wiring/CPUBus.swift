@@ -1,5 +1,6 @@
-class CPUBus: Memory {
+final class CPUBus: Memory {
     private var wram: RAM
+
     var ppuPort: IOPort?
     var cartridge: Cartridge?
 
@@ -39,7 +40,7 @@ class CPUBus: Memory {
 
     private func ppuAddress(_ address: UInt16) -> UInt16 {
         // repears every 8 bytes
-        return 0x2000 + address % 8
+        return 0x2000 &+ address % 8
     }
 
     func clear() {

@@ -29,16 +29,16 @@ public class LineBuffer {
     }
 
     func skip() {
-        dot += 1
+        dot &+= 1
     }
 
     func nextDot() {
-        dot += 1
+        dot &+= 1
         if maxDot <= dot {
             flush()
 
             dot %= 341
-            lineNumber += 1
+            lineNumber &+= 1
         }
     }
 
@@ -49,7 +49,7 @@ public class LineBuffer {
     func flush() {
         renderer.newLine(number: lineNumber, pixels: &buffer)
 
-        if maxLine <= (lineNumber + 1) {
+        if maxLine <= (lineNumber &+ 1) {
             renderer.newFrame(frames: Int(frames))
 
             lineNumber = 0

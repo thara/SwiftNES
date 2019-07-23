@@ -1,7 +1,9 @@
-public class Cartridge {
-    private var rom = [UInt8](repeating: 0x00, count: 32767)
-
+public final class Cartridge {
     private let mapper: Mapper
+
+    init(mapper: Mapper) {
+        self.mapper = mapper
+    }
 
     public init?(file: NESFile) {
         switch file.header.mapperNo {
@@ -20,9 +22,5 @@ public class Cartridge {
     /// Write the given `value` at the `address` into this cartridge
     func write(_ value: UInt8, at address: UInt16) {
         mapper.write(value, at: address)
-    }
-
-    func load(rawData: [UInt8]) {
-        rom = rawData
     }
 }

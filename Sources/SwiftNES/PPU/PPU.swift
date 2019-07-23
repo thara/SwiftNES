@@ -1,15 +1,16 @@
 private let maxDot: UInt16 = 341
 private let maxLine: UInt16 = 261
 
-class PPU {
+final class PPU {
     var registers: PPURegisters
     var memory: Memory
+
     var background: Background
     var spriteOAM: SpriteOAM
 
-    var frames: UInt = 0
+    private var frames: UInt = 0
 
-    var interruptLine: InterruptLine
+    private let interruptLine: InterruptLine
 
     let lineBuffer: LineBuffer
 
@@ -29,6 +30,14 @@ class PPU {
         return registers.mask.contains(.sprite) || registers.mask.contains(.background)
     }
 
+    func step() {
+        ppuLogger.debug("\(lineBuffer.dot) in line \(lineBuffer.lineNumber)")
+
+        process()
+
+        lineBuffer.nextDot()
+    }
+
     func reset() {
         registers.clear()
         memory.clear()
@@ -37,59 +46,27 @@ class PPU {
     }
 }
 
-// MARK: - step implementation
-extension PPU {
-
-    enum Scanline {
-        case preRender
-        case visible
-        case postRender
-        case verticalBlanking
-
-        init?(lineNumber: Int) {
-            switch lineNumber {
-            case 261:
-                self = .preRender
-            case 0...239:
-                self = .visible
-            case 240:
-                self = .postRender
-            case 241...260:
-                self = .verticalBlanking
-            default:
-                return nil
-            }
-        }
-    }
-
-    func step() {
-        ppuLogger.debug("\(lineBuffer.dot) in line \(lineBuffer.lineNumber)")
-
-        guard let scanline = Scanline(lineNumber: lineBuffer.lineNumber) else {
-            fatalError("Unexpected lineNumber")
-        }
-        process(scanline: scanline)
-
-        lineBuffer.nextDot()
-    }
-}
-
 // MARK: - process implementation
 extension PPU {
 
-    func process(scanline: Scanline) {
-        switch scanline {
-        case .preRender, .visible:
-            let preRendering = scanline == .preRender
+    func process() {
+        var preRendering = false
 
+        switch lineBuffer.lineNumber {
+        case 261:
+            // Pre Render
+            preRendering = true
+            fallthrough
+        case 0...239:
+            // Visible
             updateSprites(preRendering: preRendering)
             updateBackground(preRendering: preRendering)
 
             updateLineBuffer()
-        case .postRender:
-            // Idling
+        case 240:
+            // Post Render
             break
-        case .verticalBlanking:
+        case 241...260:
             // VBLANK
             if lineBuffer.dot == 1 {
                 registers.status.formUnion(.vblank)
@@ -97,6 +74,8 @@ extension PPU {
                     interruptLine.send(.NMI)
                 }
             }
+        default:
+            break
         }
     }
 
@@ -196,7 +175,6 @@ extension PPU {
         let sprite = 0
 
         var idx = 0
-
         if renderingEnabled {
             let priority = getRenderingPriority(bg: bg, sprite: sprite, spriteAttr: [])
 

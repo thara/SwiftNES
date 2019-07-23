@@ -7,7 +7,7 @@ extension PPU {
             registers.v &= ~0b11111 // coarse X = 0
             registers.v ^= 0x0400  // switch horizontal nametable
         } else {
-            registers.v += 1
+            registers.v &+= 1
         }
     }
 
@@ -15,7 +15,7 @@ extension PPU {
         guard renderingEnabled else { return }
 
         if registers.v.fineYScroll < 7 {
-            registers.v += 0x1000
+            registers.v &+= 0x1000
         } else {
             registers.v &= ~0x7000 // fine Y = 0
 
@@ -26,10 +26,10 @@ extension PPU {
             } else if y == 31 {
                 y = 0
             } else {
-                y += 1
+                y &+= 1
             }
 
-            registers.v = (registers.v & ~0x03E0) | (y << 5)
+            registers.v = (registers.v & ~0x03E0) | (y &<< 5)
         }
     }
 

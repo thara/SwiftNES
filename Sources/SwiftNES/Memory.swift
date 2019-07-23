@@ -1,4 +1,4 @@
-protocol Memory {
+protocol Memory: class {
     /// Read a byte at the given `address` on this memory
     func read(at address: UInt16) -> UInt8
     /// Write the given `value` at the `address` into this memory
@@ -16,7 +16,7 @@ extension Memory {
     }
 }
 
-class RAM: Memory {
+final class RAM: Memory {
     private var rawData: [UInt8]
 
     init(rawData: [UInt8]) {

@@ -13,7 +13,7 @@ extension CPU {
     }
 
     // swiftlint:disable cyclomatic_complexity function_body_length line_length
-    func buildInstruction(opcode: UInt8) -> Instruction? {
+    private func buildInstruction(opcode: UInt8) -> Instruction? {
         switch opcode {
 
         case 0xA9:

@@ -3,15 +3,15 @@ import SDL
 
 import SwiftNES
 
-class Emulator {
+final class Emulator {
 
-    let window: SDLWindow
+    private let window: SDLWindow
 
-    let fps: UInt32
+    private let fps: UInt32
 
-    var event: SDL_Event
+    private var event: SDL_Event
 
-    var isRunning = true
+    private var isRunning = true
 
     let nes: NES
 
@@ -55,10 +55,12 @@ class Emulator {
                 break
             }
 
-            nes.cycle()
+            nes.runFrame()
 
             let endTime = SDL_GetTicks()
             let frameDuration = endTime - startTime
+
+            mainLogger.debug("Frame Duration: \(frameDuration)")
 
             // sleep to save energy
             if frameDuration < 1000 / fps {

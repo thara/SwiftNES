@@ -30,9 +30,12 @@ struct Background {
     /// Returns pallete index for fine X
     func getPaletteIndex(fineX: UInt8) -> Int {
         // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
-        let pixel = (tilePatternSecond[15 - fineX] << 1) | tilePatternFirst[15 - fineX]
-        let pallete = (tileAttrHigh[7 - fineX] << 1) | tileAttrLow[7 - fineX]
-        return Int(pixel | (pallete << 2).u16)
+        let pixelIdx = 15 &- fineX
+        let pixel = (tilePatternSecond[pixelIdx] &<< 1) | tilePatternFirst[pixelIdx]
+
+        let palleteIdx = 7 &- fineX
+        let pallete = (tileAttrHigh[palleteIdx] &<< 1) | tileAttrLow[palleteIdx]
+        return Int(pixel | (pallete &<< 2).u16)
     }
 
     /// Fetch nametable byte : step 1
@@ -47,7 +50,7 @@ struct Background {
 
     /// Fetch attribute table byte : step 1
     mutating func addressAttrTableEntry(using v: UInt16) {
-        tempTableAddr = attrTableFirstAddr | v.nameTableSelect | (v.attrY << 3) | v.attrX
+        tempTableAddr = attrTableFirstAddr | v.nameTableSelect | (v.attrY &<< 3) | v.attrX
     }
 
     /// Fetch attribute table byte : step 2
@@ -56,17 +59,17 @@ struct Background {
 
         if v.coarseXScroll[1] == 1 {
             // top right
-            attrTableEntry <<= 2
+            attrTableEntry &<<= 2
         }
         if v.coarseYScroll[1] == 1 {
             // buttom left
-            attrTableEntry <<= 4
+            attrTableEntry &<<= 4
         }
     }
 
     /// Fetch tile bitmap low byte : step 1
     mutating func addressTileBitmapLow(using v: UInt16, controller: PPUController) {
-        tempTableAddr = controller.bgPatternTableAddrBase + (nameTableEntry.u16 * tileHeight.u16 * 2 + v.fineYScroll.u16)
+        tempTableAddr = controller.bgPatternTableAddrBase &+ (nameTableEntry.u16 &* tileHeight.u16 &* 2 &+ v.fineYScroll.u16)
     }
 
     /// Fetch tile bitmap low byte : step 2
@@ -76,7 +79,7 @@ struct Background {
 
     /// Fetch tile bitmap high byte : step 1
     mutating func addressTileBitmapHigh() {
-        tempTableAddr += tileHeight.u16
+        tempTableAddr &+= tileHeight.u16
     }
 
     /// Fetch tile bitmap high byte : step 2
@@ -85,10 +88,10 @@ struct Background {
     }
 
     mutating func shift() {
-        tilePatternFirst <<= 1
-        tilePatternSecond <<= 1
-        tileAttrLow = (tileAttrLow << 1) | unsafeBitCast(tileAttrLowLatch, to: UInt8.self)
-        tileAttrHigh = (tileAttrHigh << 1) | unsafeBitCast(tileAttrHighLatch, to: UInt8.self)
+        tilePatternFirst &<<= 1
+        tilePatternSecond &<<= 1
+        tileAttrLow = (tileAttrLow &<< 1) | unsafeBitCast(tileAttrLowLatch, to: UInt8.self)
+        tileAttrHigh = (tileAttrHigh &<< 1) | unsafeBitCast(tileAttrHighLatch, to: UInt8.self)
     }
 
     mutating func reloadShift() {

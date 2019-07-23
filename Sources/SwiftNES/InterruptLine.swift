@@ -8,8 +8,8 @@ struct Interrupt: OptionSet {
     static let BRK = Interrupt(rawValue: 1 << 0)
 }
 
-class InterruptLine {
-    var current: Interrupt = []
+final class InterruptLine {
+    private var current: Interrupt = []
 
     func send(_ interrupt: Interrupt) {
         interruptLogger.debug("Send \(interrupt)")

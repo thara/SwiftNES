@@ -34,7 +34,23 @@ extension PPU {
 
 extension Cartridge {
     convenience init(rawData: [UInt8]) {
-        self.init()
-        self.load(rawData: rawData)
+        self.init(mapper: DummyMapper(rawData: rawData))
+    }
+}
+
+class DummyMapper: Mapper {
+
+    var ram: RAM
+
+    init(rawData: [UInt8]) {
+        ram = RAM(rawData: rawData)
+    }
+
+    func read(at address: UInt16) -> UInt8 {
+        return ram.read(at: address)
+    }
+
+    func write(_ value: UInt8, at address: UInt16) {
+        ram.write(value, at: address)
     }
 }

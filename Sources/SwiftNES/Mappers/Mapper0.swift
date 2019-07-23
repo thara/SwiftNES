@@ -1,4 +1,4 @@
-class Mapper0 : Mapper {
+final class Mapper0: Mapper {
 
     let characterData: [UInt8]
     let program: [UInt8]
@@ -14,7 +14,7 @@ class Mapper0 : Mapper {
             return characterData[Int(address)]
 
         case 0x8000...0xFFFF:
-            return program[Int(address - 0x8000)]
+            return program[Int(address &- 0x8000)]
         default:
             return 0x00
         }

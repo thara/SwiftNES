@@ -5,11 +5,16 @@ import Logging
 
 import SwiftNES
 
+var mainLogger = Logger(label: "SwiftNESMain")
+
 func main() throws {
     LoggingSystem.bootstrap(StreamLogHandler.standardOutput)
+
     cpuLogger.logLevel = .debug
     ppuLogger.logLevel = .debug
     interruptLogger.logLevel = .debug
+
+    mainLogger.logLevel = .debug
 
     let emulator = try Emulator(windowTitle: "SwiftNES", windowScale: 3)
 
