@@ -6,6 +6,8 @@ import PackageDescription
 let package = Package(
     name: "SwiftNES",
     dependencies: [
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+
         .package(url: "https://github.com/thara/SDL.git", .branch("update_texture")),
 
         .package(url: "https://github.com/Quick/Quick.git", from: "2.1.0"),
@@ -14,10 +16,10 @@ let package = Package(
     targets: [
         .target(
             name: "SwiftNES",
-            dependencies: []),
+            dependencies: ["Logging"]),
         .target(
             name: "SwiftNESMain",
-            dependencies: ["SwiftNES", "SDL"]),
+            dependencies: ["SwiftNES", "SDL", "Logging"]),
         .testTarget(
             name: "SwiftNESTests",
             dependencies: ["SwiftNES", "Quick", "Nimble"]),

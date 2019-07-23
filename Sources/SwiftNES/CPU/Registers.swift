@@ -1,31 +1,43 @@
-struct Registers {
+struct Registers : CustomStringConvertible {
     /// Accumulator
-    var A: UInt8 {
+    var A: UInt8 = 0x00 {
         didSet {
             if A == 0 { P.formUnion(.Z) }
             if A[7] == 1 { P.formUnion(.N) }
         }
     }
     /// Index register
-    var X: UInt8 {
+    var X: UInt8 = 0x00 {
         didSet {
             if X == 0 { P.formUnion(.Z) }
             if X[7] == 1 { P.formUnion(.N) }
         }
     }
     /// Index register
-    var Y: UInt8 {
+    var Y: UInt8 = 0x00 {
         didSet {
             if Y == 0 { P.formUnion(.Z) }
             if Y[7] == 1 { P.formUnion(.N) }
         }
     }
     /// Stack pointer
-    var S: UInt8
+    var S: UInt8 = 0xFF
     /// Status register
-    var P: Status
+    var P: Status = []
     /// Program Counter
-    var PC: UInt16
+    var PC: UInt16 = 0x00
+
+    var description: String {
+        return "A:\(A.radix16) X:\(X.radix16) Y:\(Y.radix16) SP:\(S.radix16)"
+    }
+
+    mutating func powerOn() {
+        P = Status(rawValue: 0x34)
+        A = 0
+        X = 0
+        Y = 0
+        S = 0xFD
+    }
 }
 
 /// Status register details

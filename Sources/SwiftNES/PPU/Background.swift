@@ -66,7 +66,7 @@ struct Background {
 
     /// Fetch tile bitmap low byte : step 1
     mutating func addressTileBitmapLow(using v: UInt16, controller: PPUController) {
-        tempTableAddr = controller.bgPatternTableAddrBase + (nameTableEntry * tileHeight * 2 + v.fineYScroll).u16
+        tempTableAddr = controller.bgPatternTableAddrBase + (nameTableEntry.u16 * tileHeight.u16 * 2 + v.fineYScroll.u16)
     }
 
     /// Fetch tile bitmap low byte : step 2

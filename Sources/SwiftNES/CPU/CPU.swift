@@ -1,3 +1,5 @@
+import Logging
+
 typealias OpCode = UInt8
 
 class CPU {
@@ -6,6 +8,8 @@ class CPU {
     let interruptLine: InterruptLine
 
     var instructions: [Instruction?]
+
+    var logger: Logger!
 
     init(memory: Memory, interruptLine: InterruptLine) {
         self.registers = Registers(
@@ -23,7 +27,18 @@ class CPU {
         self.instructions = buildInstructionTable()
     }
 
+    func powerOn() {
+        registers.powerOn()
+        memory.clear()
+
+        interruptLine.clear([.NMI, .IRQ])
+
+        interruptLine.send(.RESET)
+    }
+
     func step() -> UInt {
+        logger = cpuLogger
+
         switch interruptLine.get() {
         case .RESET:
             return reset()
@@ -37,15 +52,19 @@ class CPU {
             return run()
         }
     }
-
 }
 
 // MARK: - CPU.run implementation
 extension CPU {
     func run() -> UInt {
+        let pc = registers.PC
+
         let opcode = fetch()
         let instruction = decode(opcode)
         let cycle = execute(instruction)
+
+        logger.debug("PC:\(pc.radix16) Op:\(opcode.radix16) \(registers)")
+
         return cycle
     }
 
@@ -66,7 +85,10 @@ extension CPU {
         let (operand, pc) = fetchOperand(in: instruction.addressingMode)
 
         registers.PC += pc
-        switch instruction.exec(operand) {
+
+        let result = instruction.exec(operand)
+
+        switch result {
         case .jump(let addr):
             registers.PC = addr
         case .branch(let offset):

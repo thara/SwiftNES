@@ -12,6 +12,8 @@ class InterruptLine {
     var current: Interrupt = []
 
     func send(_ interrupt: Interrupt) {
+        interruptLogger.debug("Send \(interrupt)")
+
         current.formUnion(interrupt)
     }
 
@@ -20,6 +22,8 @@ class InterruptLine {
     }
 
     func clear(_ interrupt: Interrupt) {
+        interruptLogger.debug("Clear \(interrupt)")
+
         current.remove(interrupt)
     }
 }

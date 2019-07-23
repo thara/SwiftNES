@@ -65,7 +65,7 @@ struct SpriteOAM {
     /// the sprite loading phase
     mutating func loadSprites() {
         for i in stride(from: 0, to: spriteCount, by: spriteSize) {
-            sprites[i] = Sprite(
+            sprites[i % spriteSize] = Sprite(
                 y: secondary[i],
                 tileIdx: secondary[i + 1],
                 attr: SpriteAttribute(rawValue: secondary[i + 2]),

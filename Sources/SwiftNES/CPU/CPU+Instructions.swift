@@ -5,7 +5,7 @@ extension Instruction {
 extension CPU {
 
     func buildInstructionTable() -> [Instruction?] {
-        var table: [Instruction?] = Array(repeating: nil, count: 0xFF)
+        var table: [Instruction?] = Array(repeating: nil, count: 0x100)
         for i in 0x00..<0xFF {
             table[i] = buildInstruction(opcode: UInt8(i))
         }

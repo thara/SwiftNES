@@ -1,5 +1,5 @@
 extension BinaryInteger {
-    func radix16() -> String {
+    var radix16: String {
         return String(self, radix: 16)
     }
 

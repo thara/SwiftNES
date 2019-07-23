@@ -12,7 +12,7 @@ class PPUBus: Memory {
     func read(at address: UInt16) -> UInt8 {
         switch address {
         case 0x0000...0x1FFF:
-            return cartridge?.readCharacter(addr: address) ?? 0x00
+            return cartridge?.read(at: address) ?? 0x00
         case 0x2000...0x3EFF:
             return nameTable.read(at: address - 0x2000)
         case 0x3F00...0x3F1F:
@@ -33,5 +33,10 @@ class PPUBus: Memory {
         default:
             break // NOP
         }
+    }
+
+    func clear() {
+        nameTable.fill(0xFF)
+        paletteRAMIndexes.fill(0x00)
     }
 }

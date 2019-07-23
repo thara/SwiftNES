@@ -9,34 +9,37 @@ fileprivate extension FileHandle {
 
 public struct NESFile {
     let header: NESFileHeader
-    let program: [UInt8]
-    let characterData: [UInt8]
+    let bytes: [UInt8]
 
-    var bytes: [UInt8] {
-        return header.rowData + program + characterData
-    }
+    let program: ArraySlice<UInt8>
+    let characterData: ArraySlice<UInt8>
 
     public init(path: String, bufferSize: Int = 1024) throws {
         if let f = FileHandle(forReadingAtPath: path) {
             defer {
                 f.closeFile()
             }
+            bytes = [UInt8](f.readDataToEndOfFile())
 
-            let headerData = f.readBytes(ofLength: NESFileHeader.size)
+            let headerData = bytes[0..<NESFileHeader.size]
             if headerData.count < NESFileHeader.size {
                 throw NESFileError.notEnoughHeaderSize(size: headerData.count)
             }
             header = NESFileHeader(bytes: [UInt8](headerData))
             guard header.valid() else {
-                throw NESFileError.invalidHeader(bytes: headerData)
+                throw NESFileError.invalidHeader(bytes: Array(headerData))
             }
 
-            program = f.readBytes(ofLength: header.programROMSizeOfUnit * 16384)
+            let programFirst = NESFileHeader.size
+            let programLength = header.programROMSizeOfUnit * 0x4000
+            program = bytes[programFirst..<(programFirst + programLength)]
 
             if header.characterROMSizeOfUnit == 0 {
                 characterData = []
             } else {
-                characterData = f.readBytes(ofLength: header.characterROMSizeOfUnit * 8192)
+                let characterFirst = programFirst + programLength
+                let characterLength = header.characterROMSizeOfUnit * 0x2000
+                characterData = bytes[characterFirst..<(characterFirst + characterLength)]
             }
         } else {
             throw NESFileError.cannotOpenStream(path: path)
@@ -72,6 +75,10 @@ struct NESFileHeader {
 
     func valid() -> Bool {
         return magic == NESFileHeader.magicNumber && padding == NESFileHeader.padding
+    }
+
+    var mapperNo: UInt8 {
+        return (flags7 & 0b11110000) + (flags6 >> 4)
     }
 
     static let magicNumber: [UInt8] = [0x4E, 0x45, 0x53, 0x1A]

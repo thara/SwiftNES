@@ -2,7 +2,7 @@ public class NES {
     let cpu: CPU
     let ppu: PPU
 
-    public let cartridgeDrive: CartridgeDrive
+    let cartridgeDrive: CartridgeDrive
 
     init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive) {
         self.cpu = cpu
@@ -15,6 +15,12 @@ public class NES {
         for _ in 0..<(cpuCycles * 3) {
             ppu.step()
         }
+    }
+
+    public func insert(cartridge: Cartridge) {
+        cartridgeDrive.insert(cartridge)
+        cpu.powerOn()
+        ppu.reset()
     }
 }
 

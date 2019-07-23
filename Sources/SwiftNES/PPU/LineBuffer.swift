@@ -22,6 +22,12 @@ public class LineBuffer {
         self.renderer = renderer
     }
 
+    func clear() {
+        lineNumber = 0
+        dot = 0
+        buffer = [UInt32](repeating: 0x00, count: buffer.count)
+    }
+
     func skip() {
         dot += 1
     }

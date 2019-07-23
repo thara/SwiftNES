@@ -24,6 +24,12 @@ struct PPURegisters {
 
     var writeToggle: Bool = false
 
+    mutating func clear() {
+        controller = []
+        mask = []
+        status = []
+    }
+
     mutating func readStatus() -> UInt8 {
         let s = status
         status.remove(.vblank)

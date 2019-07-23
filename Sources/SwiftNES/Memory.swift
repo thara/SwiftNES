@@ -6,6 +6,8 @@ protocol Memory {
 
     /// Read a word at the given `address` on this memory
     func readWord(at address: UInt16) -> UInt16
+
+    func clear()
 }
 
 extension Memory {
@@ -31,5 +33,13 @@ class RAM: Memory {
 
     func write(_ value: UInt8, at address: UInt16) {
         rawData[Int(address)] = value
+    }
+
+    func clear() {
+        rawData = [UInt8](repeating: 0x00, count: rawData.count)
+    }
+
+    func fill(_ value: UInt8) {
+        rawData = [UInt8](repeating: value, count: rawData.count)
     }
 }

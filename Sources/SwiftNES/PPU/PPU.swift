@@ -28,6 +28,13 @@ class PPU {
     var renderingEnabled: Bool {
         return registers.mask.contains(.sprite) || registers.mask.contains(.background)
     }
+
+    func reset() {
+        registers.clear()
+        memory.clear()
+        lineBuffer.clear()
+        frames = 0
+    }
 }
 
 // MARK: - step implementation
@@ -56,6 +63,8 @@ extension PPU {
     }
 
     func step() {
+        ppuLogger.debug("\(lineBuffer.dot) in line \(lineBuffer.lineNumber)")
+
         guard let scanline = Scanline(lineNumber: lineBuffer.lineNumber) else {
             fatalError("Unexpected lineNumber")
         }
