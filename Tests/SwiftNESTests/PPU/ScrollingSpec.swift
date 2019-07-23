@@ -6,9 +6,9 @@ import Nimble
 class ScrollingSpec: QuickSpec {
     override func spec() {
         describe("PPU extensions") {
-            var ppu: PPUEmulator!
+            var ppu: PPU!
             beforeEach {
-                ppu = PPUEmulator()
+                ppu = PPU()
             }
 
             describe("incrCoarseX") {

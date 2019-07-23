@@ -3,12 +3,12 @@ import Nimble
 
 @testable import SwiftNES
 
-class PPUEmulatorSpec: QuickSpec {
+class PPUSpec: QuickSpec {
     override func spec() {
-        describe("PPUEmulator") {
-            var ppu: PPUEmulator!
+        describe("PPU") {
+            var ppu: PPU!
             beforeEach {
-                ppu = PPUEmulator()
+                ppu = PPU()
             }
 
             describe("updateBackground") {

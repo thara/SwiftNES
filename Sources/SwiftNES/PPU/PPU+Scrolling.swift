@@ -1,4 +1,4 @@
-extension PPUEmulator {
+extension PPU {
 
     func incrCoarseX() {
         guard renderingEnabled else { return }

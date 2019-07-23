@@ -22,7 +22,7 @@ extension CPU {
     }
 }
 
-extension PPUEmulator {
+extension PPU {
     convenience init() {
         self.init(memory: RAM(data: 0x00, count: 65534), interruptLine: InterruptLine(), lineBufferFactory: DummyLineBufferFactory())
     }

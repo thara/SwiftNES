@@ -5,7 +5,7 @@ public func makeNES(_ lineBufferFactory: LineBufferFactory) -> NES {
     let cpu = CPU(memory: cpuBus, interruptLine: interruptLine)
 
     let ppuBus = PPUBus()
-    let ppu = PPUEmulator(memory: ppuBus, interruptLine: interruptLine, lineBufferFactory: lineBufferFactory)
+    let ppu = PPU(memory: ppuBus, interruptLine: interruptLine, lineBufferFactory: lineBufferFactory)
 
     cpuBus.ppuPort = ppu.port
 

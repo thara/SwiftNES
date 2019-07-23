@@ -5,9 +5,9 @@ import Nimble
 
 class PPUPortSpec: QuickSpec {
     override func spec() {
-        var ppu: PPUEmulator!
+        var ppu: PPU!
         beforeEach {
-            ppu = PPUEmulator()
+            ppu = PPU()
         }
 
         describe("PPUCTRL") {

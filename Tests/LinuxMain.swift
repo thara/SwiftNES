@@ -9,8 +9,8 @@ QCKMain([
     InstructionSpec.self,
     RegisterSpec.self,
 
+    PPUSpec.self,
     PPUPortSpec.self,
-    PPUEmulatorSpec.self,
     PPURegistersSpec.self,
     BackgroundSpec.self,
     ScrollingSpec.self,
