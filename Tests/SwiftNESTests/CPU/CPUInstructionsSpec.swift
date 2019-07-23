@@ -7,7 +7,7 @@ class InstructionSpec: QuickSpec {
     override func spec() {
         var cpu: CPU!
         beforeEach {
-            cpu = CPUEmulator()
+            cpu = CPU()
         }
 
         describe("LDA") {

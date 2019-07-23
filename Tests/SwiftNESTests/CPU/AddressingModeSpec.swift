@@ -9,7 +9,7 @@ class AddressingModeSpec: QuickSpec {
         describe("CPU.fetchOperand") {
             var cpu: CPU!
             beforeEach {
-                cpu = CPUEmulator()
+                cpu = CPU()
 
                 cpu.registers.PC = 0x8234
 

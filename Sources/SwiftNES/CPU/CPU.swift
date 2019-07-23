@@ -1,25 +1,26 @@
 typealias OpCode = UInt8
 
-protocol CPU: class {
-    var registers: Registers { get set }
-    var memory: Memory { get set }
-    var interruptLine: InterruptLine { get }
+class CPU {
+    var registers: Registers
+    var memory: Memory
+    let interruptLine: InterruptLine
 
-    func fetch() -> OpCode
-    func decode(_ opcode: OpCode) -> Instruction
-    func execute(_ instraction: Instruction) -> UInt
+    var instructions: [Instruction?]
 
-    func run() -> UInt
-    func step() -> UInt
-}
+    init(memory: Memory, interruptLine: InterruptLine) {
+        self.registers = Registers(
+            A: 0x00,
+            X: 0x00,
+            Y: 0x00,
+            S: 0xFF,
+            P: [Status.R, Status.B, Status.I],
+            PC: 0x00
+        )
+        self.memory = memory
+        self.interruptLine = interruptLine
 
-extension CPU {
-
-    func run() -> UInt {
-        let opcode = fetch()
-        let instruction = decode(opcode)
-        let cycle = execute(instruction)
-        return cycle
+        self.instructions = []  // Need all properties are initialized because 'self' is used in 'buildInstructionTable'
+        self.instructions = buildInstructionTable()
     }
 
     func step() -> UInt {
@@ -37,6 +38,50 @@ extension CPU {
         }
     }
 
+}
+
+// MARK: - CPU.run implementation
+extension CPU {
+    func run() -> UInt {
+        let opcode = fetch()
+        let instruction = decode(opcode)
+        let cycle = execute(instruction)
+        return cycle
+    }
+
+    func fetch() -> OpCode {
+        let opcode = memory.read(at: registers.PC)
+        registers.PC += 1
+        return opcode
+    }
+
+    func decode(_ opcode: OpCode) -> Instruction {
+        if let ins = instructions[Int(opcode)] {
+            return ins
+        }
+        return Instruction.NOP
+    }
+
+    func execute(_ instruction: Instruction) -> UInt {
+        let (operand, pc) = fetchOperand(in: instruction.addressingMode)
+
+        registers.PC += pc
+        switch instruction.exec(operand) {
+        case .jump(let addr):
+            registers.PC = addr
+        case .branch(let offset):
+            registers.PC &+= offset
+            return instruction.cycle + 1
+        case .next:
+            break // NOP
+        }
+
+        return instruction.cycle
+    }
+}
+
+// MARK: - Stack
+extension CPU {
     func pushStack(_ value: UInt8) {
         memory.write(value, at: registers.S.u16 + 0x100)
         registers.S -= 1
@@ -59,6 +104,7 @@ extension CPU {
     }
 }
 
+// Test subset of interrupt for switch-case
 private func ~= (pattern: Interrupt, line: Interrupt) -> Bool {
     return line.contains(pattern)
 }

@@ -16,7 +16,7 @@ class DummyLineBufferFactory: LineBufferFactory {
     }
 }
 
-extension CPUEmulator {
+extension CPU {
     convenience init() {
         self.init(memory: RAM(data: 0x00, count: 65536), interruptLine: InterruptLine())
     }

@@ -8,7 +8,7 @@ class CPUSpec: QuickSpec {
 
         describe("fetch") {
             it("read opcode at address indicated by PC") {
-                let cpu = CPUEmulator()
+                let cpu = CPU()
 
                 cpu.memory.write(0x90, at: 0x9051)
                 cpu.memory.write(0x3F, at: 0x9052)
@@ -26,7 +26,7 @@ class CPUSpec: QuickSpec {
         }
 
         describe("decode") {
-            let cpu = CPUEmulator()
+            let cpu = CPU()
 
             context("If passed opcode is supported") {
                 it("select an instruction by opcode") {
@@ -49,7 +49,7 @@ class CPUSpec: QuickSpec {
 
         describe("reset") {
             it("reset registers & memory state") {
-                let cpu = CPUEmulator()
+                let cpu = CPU()
 
                 cpu.registers = Registers(
                     A: 0xFA,
@@ -79,7 +79,7 @@ class CPUSpec: QuickSpec {
         describe("stack") {
 
             it("push data, and pull the same") {
-                let cpu = CPUEmulator()
+                let cpu = CPU()
                 cpu.registers.S = 0xFF
 
                 cpu.pushStack(0x83)
@@ -90,7 +90,7 @@ class CPUSpec: QuickSpec {
             }
 
             it("push word, and pull the same") {
-                let cpu = CPUEmulator()
+                let cpu = CPU()
                 cpu.registers.S = 0xFF
 
                 cpu.pushStack(word: 0x98AF)
