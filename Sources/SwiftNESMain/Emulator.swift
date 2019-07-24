@@ -61,11 +61,6 @@ final class Emulator {
             let frameDuration = endTime - startTime
 
             mainLogger.debug("Frame Duration: \(frameDuration)")
-
-            // sleep to save energy
-            if frameDuration < 1000 / fps {
-                SDL_Delay((1000 / fps) - frameDuration)
-            }
         }
     }
 }
