@@ -1,12 +1,32 @@
 struct Sprite {
     /// Y position of top
-    var y: UInt8
+    let y: UInt8
     /// Tile index number
-    var tileIdx: UInt8
+    let tileIdx: UInt8
     /// Attributes
-    var attr: SpriteAttribute
+    let attr: SpriteAttribute
     /// X position of left
-    var x: UInt8
+    let x: UInt8
+
+    var valid: Bool {
+        return y != 0xFF && tileIdx != 0xFF && attr != [] && x != 0xFF
+    }
+
+    func row(lineNumber: Int) -> UInt16 {
+        var row = lineNumber - Int(y) - 1
+        if attr.contains(.flipVertically) {
+            row = 8 - 1 - row
+        }
+        return UInt16(row)
+    }
+
+    func col(x: Int) -> UInt8 {
+        var col = 7 - (x &- Int(self.x))
+        if attr.contains(.flipHorizontally) {
+            col = 8 - 1 - col
+        }
+        return UInt8(col)
+    }
 }
 
 struct SpriteAttribute: OptionSet {
@@ -31,6 +51,7 @@ struct SpriteAttribute: OptionSet {
 let spriteSize: Int = 4
 let spriteCount: Int = 64
 let spriteLimit: Int = 8
+let oamSize = spriteSize * spriteCount
 
 struct SpriteOAM {
     var primary: [UInt8]
@@ -38,32 +59,39 @@ struct SpriteOAM {
     var sprites: [Sprite]
 
     init() {
-        self.primary = [UInt8](repeating: 0x00, count: spriteSize * spriteCount)
-        self.secondary = [UInt8](repeating: 0x00, count: spriteSize * spriteCount)
+        self.primary = [UInt8](repeating: 0x00, count: oamSize)
+        self.secondary = [UInt8](repeating: 0x00, count: oamSize)
         self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIdx: 0x00, attr: [], x: 0x00), count: spriteLimit)
     }
 
     mutating func clearSecondaryOAM() {
-        for i in 0..<secondary.count {
+        for i in 0..<oamSize {
             secondary[i] = 0xFF
         }
     }
 
     /// the sprite evaluation phase
     mutating func evalSprites() -> Bool {
-        var found = 0
+        var n = 0
         for i in 0..<spriteCount {
-            secondary[i] = primary[i]
-            found += 1
-            if spriteLimit < found {
-                return true
+            let s = i &* spriteSize
+
+            let y = primary[s]
+            if 0 <= y && y < 8 {
+                secondary[s..<(s &+ spriteSize)] = primary[s..<(s &+ spriteSize)]
+                n &+= 1
+
+                if spriteLimit < n {
+                    return true
+                }
             }
+
         }
         return false
     }
 
-    /// the sprite loading phase
-    mutating func loadSprites() {
+    /// the sprite fetch phase
+    mutating func fetchSprites() {
         for i in stride(from: 0, to: spriteCount, by: spriteSize) {
             sprites[i % spriteSize] = Sprite(
                 y: secondary[i],

@@ -96,6 +96,10 @@ struct PPUController: OptionSet {
             fatalError("PPUController.baseNameTableAddr - unexpected bits: \(bits)")
         }
     }
+
+    var baseSpriteTableAddr: UInt16 {
+        return contains(.spriteTableAddr) ? 0x1000 : 0x0000
+    }
 }
 
 struct PPUMask: OptionSet {
