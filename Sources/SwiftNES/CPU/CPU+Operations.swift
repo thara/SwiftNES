@@ -377,7 +377,7 @@ extension CPU {
     /// BCC
     func branchIfCarryClear(operand: Operand?) -> PCUpdate {
         if !registers.P.contains(.C) {
-            return .branch(offset: operand!)
+            return .branch(offset: operand!.i8)
         }
         return .next
     }
@@ -385,7 +385,7 @@ extension CPU {
     /// BCS
     func branchIfCarrySet(operand: Operand?) -> PCUpdate {
         if registers.P.contains(.C) {
-            return .branch(offset: operand!)
+            return .branch(offset: operand!.i8)
         }
         return .next
     }
@@ -393,7 +393,7 @@ extension CPU {
     /// BEQ
     func branchIfEqual(operand: Operand?) -> PCUpdate {
         if registers.P.contains(.Z) {
-            return .branch(offset: operand!)
+            return .branch(offset: operand!.i8)
         }
         return .next
     }
@@ -401,7 +401,7 @@ extension CPU {
     /// BMI
     func branchIfMinus(operand: Operand?) -> PCUpdate {
         if registers.P.contains(.N) {
-            return .branch(offset: operand!)
+            return .branch(offset: operand!.i8)
         }
         return .next
     }
@@ -409,7 +409,7 @@ extension CPU {
     /// BNE
     func branchIfNotEqual(operand: Operand?) -> PCUpdate {
         if !registers.P.contains(.Z) {
-            return .branch(offset: operand!)
+            return .branch(offset: operand!.i8)
         }
         return .next
     }
@@ -417,7 +417,7 @@ extension CPU {
     /// BPL
     func branchIfPlus(operand: Operand?) -> PCUpdate {
         if !registers.P.contains(.N) {
-            return .branch(offset: operand!)
+            return .branch(offset: operand!.i8)
         }
         return .next
     }
@@ -425,7 +425,7 @@ extension CPU {
     /// BVC
     func branchIfOverflowClear(operand: Operand?) -> PCUpdate {
         if !registers.P.contains(.V) {
-            return .branch(offset: operand!)
+            return .branch(offset: operand!.i8)
         }
         return .next
     }
@@ -433,7 +433,7 @@ extension CPU {
     /// BVS
     func branchIfOverflowSet(operand: Operand?) -> PCUpdate {
         if registers.P.contains(.V) {
-            return .branch(offset: operand!)
+            return .branch(offset: operand!.i8)
         }
         return .next
     }

@@ -34,6 +34,11 @@ extension UInt16 {
     }
 
     @inline(__always)
+    var i8: Int8 {
+        return Int8(bitPattern: UInt8(self))
+    }
+
+    @inline(__always)
     subscript(n: UInt8) -> UInt16 {
         return (self &>> n) & 1
     }
