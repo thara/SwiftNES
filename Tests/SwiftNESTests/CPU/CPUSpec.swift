@@ -71,7 +71,7 @@ class CPUSpec: QuickSpec {
                 expect(cpu.registers.X).to(equal(0x0000))
                 expect(cpu.registers.Y).to(equal(0x0000))
                 expect(cpu.registers.S).to(equal(0x00FF))
-                expect(cpu.registers.P).to(equal([Status.N, Status.V, Status.Z, Status.I]))
+                expect(cpu.registers.P).to(equal([Status.V, Status.Z, Status.I]))
                 expect(cpu.registers.PC).to(equal(0b0111111100100000))
             }
         }
