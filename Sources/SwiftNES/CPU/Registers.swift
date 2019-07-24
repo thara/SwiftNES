@@ -2,22 +2,19 @@ struct Registers: CustomStringConvertible {
     /// Accumulator
     var A: UInt8 = 0x00 {
         didSet {
-            if A == 0 { P.formUnion(.Z) }
-            if A[7] == 1 { P.formUnion(.N) }
+            P.setZN(A)
         }
     }
     /// Index register
     var X: UInt8 = 0x00 {
         didSet {
-            if X == 0 { P.formUnion(.Z) }
-            if X[7] == 1 { P.formUnion(.N) }
+            P.setZN(X)
         }
     }
     /// Index register
     var Y: UInt8 = 0x00 {
         didSet {
-            if Y == 0 { P.formUnion(.Z) }
-            if Y[7] == 1 { P.formUnion(.N) }
+            P.setZN(Y)
         }
     }
     /// Stack pointer
@@ -60,4 +57,14 @@ struct Status: OptionSet {
     static let Z = Status(rawValue: 1 << 1)
     /// Carry
     static let C = Status(rawValue: 1 << 0)
+
+    mutating func setZN(_ value: UInt8) {
+        if value == 0 { formUnion(.Z) } else { remove(.Z) }
+        if value[7] == 1 { formUnion(.N) } else { remove(.N) }
+    }
+
+    mutating func setZN(_ value: Int16) {
+        if value == 0 { formUnion(.Z) } else { remove(.Z) }
+        if value[7] == 1 { formUnion(.N) } else { remove(.N) }
+    }
 }
