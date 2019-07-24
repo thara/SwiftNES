@@ -60,8 +60,6 @@ extension CPU {
         let instruction = decode(opcode)
         let cycle = execute(instruction)
 
-        cpuLogger.debug("PC:\(pc.radix16) Op:\(opcode.radix16) \(registers)")
-
         return cycle
     }
 
@@ -85,11 +83,13 @@ extension CPU {
 
         let result = instruction.exec(operand)
 
+        cpuLogger.debug("PC:\(pc.radix16) \(instruction.mnemonic) \(operand?.radix16 ?? "") \(registers)")
+
         switch result {
         case .jump(let addr):
             registers.PC = addr
         case .branch(let offset):
-            registers.PC &+= offset
+            registers.PC = UInt16(Int(registers.PC) &+ Int(offset))
             return instruction.cycle &+ 1
         case .next:
             break // NOP

@@ -114,9 +114,8 @@ extension CPU {
     func testBits(operand: Operand?) -> PCUpdate {
         let data = registers.A & memory.read(at: operand!)
         registers.P.remove([.Z, .V, .N])
-        if data == 0 { registers.P.formUnion(.Z) }
-        if data[6] == 1 { registers.P.formUnion(.V) }
-        if data[7] == 1 { registers.P.formUnion(.N) }
+        registers.P.setZN(data)
+        if data[6] == 1 { registers.P.formUnion(.V) } else { registers.P.remove(.V) }
         return .next
     }
 
@@ -161,9 +160,8 @@ extension CPU {
         let cmp = Int16(registers.A) &- Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
-        if cmp == 0 { registers.P.formUnion(.Z) }
-        if cmp[7] == 1 { registers.P.formUnion(.N) }
-        if 0 < cmp { registers.P.formUnion(.C) }
+        registers.P.setZN(cmp)
+        if 0 < cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
         return .next
     }
@@ -173,9 +171,8 @@ extension CPU {
         let cmp = Int16(registers.X) &- Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
-        if cmp == 0 { registers.P.formUnion(.Z) }
-        if cmp[7] == 1 { registers.P.formUnion(.N) }
-        if 0 < cmp { registers.P.formUnion(.C) }
+        registers.P.setZN(cmp)
+        if 0 < cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
         return .next
     }
@@ -185,9 +182,8 @@ extension CPU {
         let cmp = Int16(registers.Y) &- Int16(memory.read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
-        if cmp == 0 { registers.P.formUnion(.Z) }
-        if cmp[7] == 1 { registers.P.formUnion(.N) }
-        if 0 < cmp { registers.P.formUnion(.C) }
+        registers.P.setZN(cmp)
+        if 0 < cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
         return .next
     }
@@ -198,9 +194,7 @@ extension CPU {
     func incrementMemory(operand: Operand?) -> PCUpdate {
         let result = memory.read(at: operand!) &+ 1
 
-        if result == 0 { registers.P.formUnion(.Z) }
-        if result[7] == 1 { registers.P.formUnion(.N) }
-
+        registers.P.setZN(result)
         memory.write(result, at: operand!)
 
         return .next
@@ -208,25 +202,13 @@ extension CPU {
 
     /// INX
     func incrementX(_: Operand?) -> PCUpdate {
-        let result = registers.X &+ 1
-
-        if result == 0 { registers.P.formUnion(.Z) }
-        if result[7] == 1 { registers.P.formUnion(.N) }
-
-        registers.X = result
-
+        registers.X = registers.X &+ 1
         return .next
     }
 
     /// INY
     func incrementY(operand: Operand?) -> PCUpdate {
-        let result = registers.Y &+ 1
-
-        if result == 0 { registers.P.formUnion(.Z) }
-        if result[7] == 1 { registers.P.formUnion(.N) }
-
-        registers.Y = result
-
+        registers.Y = registers.Y &+ 1
         return .next
     }
 
@@ -234,8 +216,7 @@ extension CPU {
     func decrementMemory(operand: Operand?) -> PCUpdate {
         let result = memory.read(at: operand!) &- 1
 
-        if result == 0 { registers.P.formUnion(.Z) }
-        if result[7] == 1 { registers.P.formUnion(.N) }
+        registers.P.setZN(result)
 
         memory.write(result, at: operand!)
 
@@ -244,25 +225,13 @@ extension CPU {
 
     /// DEX
     func decrementX(operand: Operand?) -> PCUpdate {
-        let result = registers.X &- 1
-
-        if result == 0 { registers.P.formUnion(.Z) }
-        if result[7] == 1 { registers.P.formUnion(.N) }
-
-        registers.X = result
-
+        registers.X = registers.X &- 1
         return .next
     }
 
     /// DEY
     func decrementY(operand: Operand?) -> PCUpdate {
-        let result = registers.Y &- 1
-
-        if result == 0 { registers.P.formUnion(.Z) }
-        if result[7] == 1 { registers.P.formUnion(.N) }
-
-        registers.X = result
-
+        registers.Y = registers.Y &- 1
         return .next
     }
 
@@ -277,8 +246,7 @@ extension CPU {
 
         data <<= 1
 
-        if data == 0 { registers.P.formUnion(.Z) }
-        if data[7] == 1 { registers.P.formUnion(.N) }
+        registers.P.setZN(data)
 
         memory.write(data, at: operand!)
 
@@ -303,8 +271,7 @@ extension CPU {
 
         data >>= 1
 
-        if data == 0 { registers.P.formUnion(.Z) }
-        if data[7] == 1 { registers.P.formUnion(.N) }
+        registers.P.setZN(data)
 
         memory.write(data, at: operand!)
 
@@ -331,8 +298,7 @@ extension CPU {
         registers.P.remove([.C, .Z, .N])
         if c == 0x80 { registers.P.formUnion(.C) }
 
-        if data == 0 { registers.P.formUnion(.Z) }
-        if data[7] == 1 { registers.P.formUnion(.N) }
+        registers.P.setZN(data)
 
         memory.write(data, at: operand!)
 
@@ -363,8 +329,7 @@ extension CPU {
         registers.P.remove([.C, .Z, .N])
         if c == 1 { registers.P.formUnion(.C) }
 
-        if data == 0 { registers.P.formUnion(.Z) }
-        if data[7] == 1 { registers.P.formUnion(.N) }
+        registers.P.setZN(data)
 
         memory.write(data, at: operand!)
         return .next

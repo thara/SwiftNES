@@ -5,7 +5,7 @@ typealias Operation = ((Operand?) -> PCUpdate)
 /// How to update program counter in registers after operation are executed
 enum PCUpdate {
     case jump(addr: UInt16)
-    case branch(offset: UInt16)
+    case branch(offset: Int8)
     case next
 }
 
