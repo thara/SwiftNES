@@ -24,9 +24,10 @@ extension PPU: IOPort {
         case 0x2001:
             registers.mask = PPUMask(rawValue: value)
         case 0x2003:
-             registers.objectAttributeMemoryAddress = value
+            registers.objectAttributeMemoryAddress = value
         case 0x2004:
-             spriteOAM.primary[Int(registers.objectAttributeMemoryAddress.u16)] = value
+            spriteOAM.primary[Int(registers.objectAttributeMemoryAddress)] = value
+            registers.objectAttributeMemoryAddress &+= 1
         case 0x2005:
             registers.writeScroll(position: value)
         case 0x2006:
