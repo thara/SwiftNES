@@ -38,7 +38,7 @@ struct PPURegisters {
     }
 
     mutating func writeScroll(position: UInt8) {
-        if !writeToggle {
+        if writeToggle {
             t = (t & 0b111111111100000) | position.u16.coarseX
         } else {
             t = (t & 0b111110000011111) | (position.u16 << 5)
@@ -48,11 +48,11 @@ struct PPURegisters {
     }
 
     mutating func writeVRAMAddress(addr: UInt8) {
-        if !writeToggle {
-            t = addr.u16 << 8 | (t & 0x00FF)
+        if writeToggle {
+            t = t << 8 | (addr.u16 & 0x00FF)
+            v = t
         } else {
             t = (t & 0xFF00) | addr.u16
-            v = t
         }
         writeToggle.toggle()
     }
