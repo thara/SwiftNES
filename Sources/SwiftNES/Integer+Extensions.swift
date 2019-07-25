@@ -1,4 +1,9 @@
 extension BinaryInteger {
+
+    var radix2: String {
+        return String(self, radix: 2)
+    }
+
     var radix16: String {
         return String(self, radix: 16)
     }
