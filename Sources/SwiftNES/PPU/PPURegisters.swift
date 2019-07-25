@@ -39,9 +39,9 @@ struct PPURegisters {
 
     mutating func writeScroll(position: UInt8) {
         if writeToggle {
-            t = (t & 0b111111111100000) | position.u16.coarseX
-        } else {
             t = (t & 0b111110000011111) | (position.u16 << 5)
+        } else {
+            t = (t & 0b111111111100000) | position.u16.coarseX
             fineX = position & 0b111
         }
         writeToggle.toggle()
