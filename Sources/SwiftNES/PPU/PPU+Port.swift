@@ -34,6 +34,7 @@ extension PPU: IOPort {
             registers.writeVRAMAddress(addr: value)
         case 0x2007:
             memory.write(value, at: registers.v)
+            registers.incrV()
         default:
             break
             // NOP

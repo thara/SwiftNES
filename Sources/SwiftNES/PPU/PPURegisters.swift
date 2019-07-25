@@ -1,4 +1,4 @@
-struct PPURegisters {
+struct PPURegisters: CustomStringConvertible {
     /// PPUCTRL
     var controller: PPUController = []
     /// PPUMASK
@@ -24,10 +24,29 @@ struct PPURegisters {
 
     var writeToggle: Bool = false
 
+    var description: String {
+        return """
+            v:\(v.radix16) \
+            t:\(t.radix16) \
+            fineX:\(fineX.radix16) \
+            w:\(writeToggle) \
+            CTRL:\(controller.rawValue.radix2) \
+            MASK:\(mask.rawValue.radix2) \
+            STATUS:\(status.rawValue.radix2) \
+            OAMADDR:\(objectAttributeMemoryAddress.radix16) \
+            SCROLL:\(scroll.radix16) \
+            ADDR:\(address.radix16)
+            """
+    }
+
     mutating func clear() {
         controller = []
         mask = []
         status = []
+    }
+
+    mutating func incrV() {
+        v &+= controller.vramIncrement
     }
 
     mutating func readStatus() -> UInt8 {
@@ -99,6 +118,10 @@ struct PPUController: OptionSet {
 
     var baseSpriteTableAddr: UInt16 {
         return contains(.spriteTableAddr) ? 0x1000 : 0x0000
+    }
+
+    var vramIncrement: UInt16 {
+        return contains(.vramAddrIncr) ? 32 : 1
     }
 }
 
