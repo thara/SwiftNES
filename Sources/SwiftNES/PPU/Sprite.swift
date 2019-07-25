@@ -85,19 +85,19 @@ struct SpriteOAM {
                     return true
                 }
             }
-
         }
         return false
     }
 
     /// the sprite fetch phase
     mutating func fetchSprites() {
-        for i in stride(from: 0, to: spriteCount, by: spriteSize) {
-            sprites[i % spriteSize] = Sprite(
-                y: secondary[i],
-                tileIdx: secondary[i + 1],
-                attr: SpriteAttribute(rawValue: secondary[i + 2]),
-                x: secondary[i + 3]
+        for i in 0..<spriteLimit {
+            let n = i &* spriteSize
+            sprites[i] = Sprite(
+                y: secondary[n],
+                tileIdx: secondary[n + 1],
+                attr: SpriteAttribute(rawValue: secondary[n + 2]),
+                x: secondary[n + 3]
             )
         }
     }
