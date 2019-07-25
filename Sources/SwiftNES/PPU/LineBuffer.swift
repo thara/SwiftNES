@@ -42,8 +42,8 @@ public class LineBuffer {
         }
     }
 
-    func write(pixel: UInt32) {
-        buffer[dot] = pixel
+    func write(pixel: UInt32, at x: Int) {
+        buffer[x] = pixel
     }
 
     func flush() {

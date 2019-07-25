@@ -61,8 +61,6 @@ extension PPU {
             // Visible
             updateSprites(preRendering: preRendering)
             updateBackground(preRendering: preRendering)
-
-            updateLineBuffer()
         case 240:
             // Post Render
             break
@@ -109,6 +107,8 @@ extension PPU {
             // No reload shift
             background.addressNameTableEntry(using: registers.v)
         case 2...255, 322...336:
+            updatePixel()
+
             switch lineBuffer.dot % 8 {
             // name table
             case 1:
@@ -137,9 +137,11 @@ extension PPU {
                 break
             }
         case 256:
+            updatePixel()
             background.fetchTileBitmapHigh(from: memory)
             incrY()
         case 257:
+            updatePixel()
             updateHorizontalPosition()
             background.reloadShift()
         case 280...304:
@@ -165,13 +167,15 @@ extension PPU {
     }
     // swiftlint:enable cyclomatic_complexity
 
-    func updateLineBuffer() {
+    func updatePixel() {
+        let x = lineBuffer.dot &- 2
+
         let bg = registers.mask.contains(.background)
             ? background.getPaletteIndex(fineX: registers.fineX)
             : 0
 
         let (sprite, spriteAttr) = registers.mask.contains(.sprite)
-            ? getSpritePalleteIndex()
+            ? getSpritePalleteIndex(x: x)
             : (0, [])
 
         var idx = 0
@@ -187,11 +191,12 @@ extension PPU {
         }
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
-        lineBuffer.write(pixel: palletes[Int(palleteNo)])
+        lineBuffer.write(pixel: palletes[Int(palleteNo)], at: x)
+
+        background.shift()
     }
 
-    func getSpritePalleteIndex() -> (Int, SpriteAttribute) {
-        let x = lineBuffer.dot &- 2
+    func getSpritePalleteIndex(x: Int) -> (Int, SpriteAttribute) {
 
         let baseSpriteTableAddr = registers.controller.baseSpriteTableAddr
 
