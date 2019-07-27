@@ -30,7 +30,7 @@ struct Scan {
     }
 }
 
-enum ScanUpdate {
+enum ScanUpdate: Equatable {
     case dot
     case line(lastLine: Int)
 }

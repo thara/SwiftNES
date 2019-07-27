@@ -6,23 +6,6 @@ func vramAddress(fineYScroll: UInt16 = 0, nameTableNo: UInt16, coarseYScroll: UI
 
 class DummyRenderer: Renderer {
     func newLine(number: Int, pixels: inout [UInt32]) {}
-    func newFrame(frames: Int) {}
-}
-
-class DummyLineBufferFactory: LineBufferFactory {
-    let renderer: Renderer
-
-    init(renderer: Renderer) {
-        self.renderer = renderer
-    }
-
-    convenience init() {
-        self.init(renderer: DummyRenderer())
-    }
-
-    func make(pixels: UInt16, lines: UInt16) -> LineBuffer {
-        return LineBuffer(pixels: pixels, lines: lines, renderer: renderer)
-    }
 }
 
 extension CPU {
@@ -33,11 +16,11 @@ extension CPU {
 
 extension PPU {
     convenience init() {
-        self.init(memory: RAM(data: 0x00, count: 65534), interruptLine: InterruptLine(), lineBufferFactory: DummyLineBufferFactory())
+        self.init(memory: RAM(data: 0x00, count: 65534), interruptLine: InterruptLine(), renderer: DummyRenderer())
     }
 
     convenience init(memory: Memory) {
-        self.init(memory: memory, interruptLine: InterruptLine(), lineBufferFactory: DummyLineBufferFactory())
+        self.init(memory: memory, interruptLine: InterruptLine(), renderer: DummyRenderer())
     }
 }
 

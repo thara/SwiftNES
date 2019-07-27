@@ -24,36 +24,36 @@ class PPUSpec: QuickSpec {
                 }
 
                 it("update background state") {
-                    ppu.lineBuffer.nextDot()
+                    ppu.scan.nextDot()
 
                     ppu.updateBackground()
                     expect(ppu.background.tempTableAddr).to(equal(0x2B3D))
 
-                    ppu.lineBuffer.nextDot()
+                    ppu.scan.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.nameTableEntry).to(equal(0x03))
 
-                    ppu.lineBuffer.nextDot()
+                    ppu.scan.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTableAddr).to(equal(0x2BF7))
 
-                    ppu.lineBuffer.nextDot()
+                    ppu.scan.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.attrTableEntry).to(equal(0x41))
 
-                    ppu.lineBuffer.nextDot()
+                    ppu.scan.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTableAddr).to(equal(0x0035))
 
-                    ppu.lineBuffer.nextDot()
+                    ppu.scan.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTileFirst).to(equal(0x11))
 
-                    ppu.lineBuffer.nextDot()
+                    ppu.scan.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTableAddr).to(equal(0x003D))
 
-                    ppu.lineBuffer.nextDot()
+                    ppu.scan.nextDot()
                     ppu.updateBackground()
                     expect(ppu.background.tempTileSecond).to(equal(0x81))
                 }

@@ -13,11 +13,12 @@ class ScanSpec: QuickSpec {
         describe("nextDot") {
             context("next line") {
                 it("clear dot and increment line") {
-                    scan.dot = Scan.maxDot - 1
+                    scan.dot = NES.maxDot - 1
                     scan.line = 12
 
-                    scan.nextDot()
+                    let update = scan.nextDot()
 
+                    expect(update) == ScanUpdate.line(lastLine: 12)
                     expect(scan.dot) == 0
                     expect(scan.line) == 13
                 }
@@ -25,11 +26,12 @@ class ScanSpec: QuickSpec {
 
             context("next frame") {
                 it("clear dot and line") {
-                    scan.dot = Scan.maxDot - 1
-                    scan.line = Scan.maxLine - 1
+                    scan.dot = NES.maxDot - 1
+                    scan.line = NES.maxLine - 1
 
-                    scan.nextDot()
+                    let update = scan.nextDot()
 
+                    expect(update) == ScanUpdate.line(lastLine: NES.maxLine - 1)
                     expect(scan.dot) == 0
                     expect(scan.line) == 0
                 }
