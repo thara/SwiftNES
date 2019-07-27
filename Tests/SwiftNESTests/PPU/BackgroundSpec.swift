@@ -111,6 +111,26 @@ class BackgroundSpec: QuickSpec {
                     }
                 }
             }
+
+            describe("getPaletteIndex") {
+
+                it("return pallete index at fineX from tile patterns and attributes") {
+                    bg.tilePatternFirst  = 0b0101010101010101
+                    bg.tilePatternSecond = 0b0110110110110110
+                    bg.tileAttrLow       = 0b10110011
+                    bg.tileAttrHigh      = 0b00100101
+
+                    // NOTE: fine X is a value in range of 0...7
+                    expect(bg.getPaletteIndex(fineX: 0)).to(equal(0b0000))
+                    expect(bg.getPaletteIndex(fineX: 1)).to(equal(0b0011))
+                    expect(bg.getPaletteIndex(fineX: 2)).to(equal(0b1110))
+                    expect(bg.getPaletteIndex(fineX: 3)).to(equal(0b0101))
+                    expect(bg.getPaletteIndex(fineX: 4)).to(equal(0b0010))
+                    expect(bg.getPaletteIndex(fineX: 5)).to(equal(0b1011))
+                    expect(bg.getPaletteIndex(fineX: 6)).to(equal(0b0000))
+                    expect(bg.getPaletteIndex(fineX: 7)).to(equal(0b1111))
+                }
+            }
         }
     }
 }

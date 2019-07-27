@@ -33,6 +33,10 @@ struct Background {
         let pixelIdx = 15 &- fineX
         let pixel = (tilePatternSecond[pixelIdx] &<< 1) | tilePatternFirst[pixelIdx]
 
+        guard pixel != 0 else {
+            return Int(pixel)
+        }
+
         let palleteIdx = 7 &- fineX
         let pallete = (tileAttrHigh[palleteIdx] &<< 1) | tileAttrLow[palleteIdx]
         return Int(pixel | (pallete &<< 2).u16)
@@ -57,14 +61,9 @@ struct Background {
     mutating func fetchAttrTableEntry(from memory: Memory, v: UInt16) {
         attrTableEntry = memory.read(at: tempTableAddr)
 
-        if v.coarseXScroll[1] == 1 {
-            // top right
-            attrTableEntry &<<= 2
-        }
-        if v.coarseYScroll[1] == 1 {
-            // buttom left
-            attrTableEntry &<<= 4
-        }
+        // select area
+        if v.coarseXScroll[1] == 1 { attrTableEntry &>>= 2 }
+        if v.coarseYScroll[1] == 1 { attrTableEntry &>>= 4 }
     }
 
     /// Fetch tile bitmap low byte : step 1
