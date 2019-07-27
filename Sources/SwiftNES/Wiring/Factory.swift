@@ -1,11 +1,11 @@
-public func makeNES(_ lineBufferFactory: LineBufferFactory) -> NES {
+public func makeNES(renderer: Renderer) -> NES {
     let interruptLine = InterruptLine()
 
     let cpuBus = CPUBus()
     let cpu = CPU(memory: cpuBus, interruptLine: interruptLine)
 
     let ppuBus = PPUBus()
-    let ppu = PPU(memory: ppuBus, interruptLine: interruptLine, lineBufferFactory: lineBufferFactory)
+    let ppu = PPU(memory: ppuBus, interruptLine: interruptLine, renderer: renderer)
 
     cpuBus.ppuPort = ppu.port
 

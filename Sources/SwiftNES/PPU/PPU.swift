@@ -12,16 +12,18 @@ final class PPU {
 
     private let interruptLine: InterruptLine
 
+    var scan: Scan
     let lineBuffer: LineBuffer
 
-    init(memory: Memory, interruptLine: InterruptLine, lineBufferFactory: LineBufferFactory) {
+    init(memory: Memory, interruptLine: InterruptLine, renderer: Renderer) {
         self.registers = PPURegisters()
         self.memory = memory
         self.background = Background()
 
         self.spriteOAM = SpriteOAM()
 
-        self.lineBuffer = lineBufferFactory.make(pixels: maxDot, lines: maxLine)
+        self.scan = Scan()
+        self.lineBuffer = LineBuffer(renderer: renderer)
 
         self.interruptLine = interruptLine
     }
@@ -31,16 +33,20 @@ final class PPU {
     }
 
     func step() {
-        // ppuLogger.debug("\(lineBuffer.dot) in line \(lineBuffer.lineNumber)")
-
         process()
 
-        lineBuffer.nextDot()
+        switch scan.nextDot() {
+        case .line(let last):
+            lineBuffer.flush(lineNumber: last)
+        default:
+            break
+        }
     }
 
     func reset() {
         registers.clear()
         memory.clear()
+        scan.clear()
         lineBuffer.clear()
         frames = 0
     }
@@ -52,7 +58,7 @@ extension PPU {
     func process() {
         var preRendering = false
 
-        switch lineBuffer.lineNumber {
+        switch scan.line {
         case 261:
             // Pre Render
             preRendering = true
@@ -66,7 +72,7 @@ extension PPU {
             break
         case 241...260:
             // VBLANK
-            if lineBuffer.dot == 1 {
+            if scan.dot == 1 {
                 registers.status.formUnion(.vblank)
                 if registers.controller.contains(.nmi) {
                     interruptLine.send(.NMI)
@@ -78,7 +84,7 @@ extension PPU {
     }
 
     func updateSprites(preRendering: Bool) {
-        switch lineBuffer.dot {
+        switch scan.dot {
         case 1:
             spriteOAM.clearSecondaryOAM()
             if preRendering {
@@ -97,7 +103,7 @@ extension PPU {
 
     // swiftlint:disable cyclomatic_complexity
     func updateBackground(preRendering: Bool = false) {
-        switch lineBuffer.dot {
+        switch scan.dot {
         case 1:
             background.addressNameTableEntry(using: registers.v)
             if preRendering {
@@ -109,7 +115,7 @@ extension PPU {
         case 2...255, 322...336:
             updatePixel()
 
-            switch lineBuffer.dot % 8 {
+            switch scan.dot % 8 {
             // name table
             case 1:
                 background.addressNameTableEntry(using: registers.v)
@@ -159,7 +165,7 @@ extension PPU {
             background.fetchNameTableEntry(from: memory)
             if preRendering && renderingEnabled && frames.isOdd {
                 // Skip 0 cycle on visible frame
-                lineBuffer.skip()
+                scan.skip()
             }
         default:
             break
@@ -168,7 +174,7 @@ extension PPU {
     // swiftlint:enable cyclomatic_complexity
 
     func updatePixel() {
-        let x = lineBuffer.dot &- 2
+        let x = scan.dot &- 2
 
         let bg = registers.mask.contains(.background)
             ? background.getPaletteIndex(fineX: registers.fineX)
@@ -208,7 +214,7 @@ extension PPU {
                 continue
             }
 
-            let row = sprite.row(lineNumber: lineBuffer.lineNumber)
+            let row = sprite.row(lineNumber: scan.line)
             let col = sprite.col(x: x)
 
             let tileAddr = baseSpriteTableAddr &+ sprite.tileIdx.u16 &* 16 &+ row

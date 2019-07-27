@@ -15,6 +15,8 @@ final class SDLFrameRenderer: Renderer {
 
     private var frameBuffer: [UInt32]
 
+    private var line = 0
+
     init(window: SDLWindow, windowSize: (width: Int, height: Int)) throws {
         let driver = SDLRenderer.Driver.default
         renderer = try SDLRenderer(window: window, driver: driver, options: [.accelerated, .presentVsync])
@@ -31,9 +33,15 @@ final class SDLFrameRenderer: Renderer {
 
     func newLine(number: Int, pixels: inout [UInt32]) {
         frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[...]
+        line &+= 1
+
+        if NES.maxLine <= line {
+            line = 0
+            render()
+        }
     }
 
-    func newFrame(frames: Int) {
+    func render() {
         do {
             try renderer.clear()
 
@@ -41,7 +49,10 @@ final class SDLFrameRenderer: Renderer {
             try frameTexture.update(pixels: UnsafeMutablePointer(mutating: p), pitch: rowPixels)
 
             // background
-            try renderer.setDrawColor(red: 0x00, green: 0x00, blue: 0x00, alpha: 0xFF)
+            // try renderer.setDrawColor(red: 0x00, green: 0x00, blue: 0x00, alpha: 0xFF)
+
+            //FIXME for test
+            try renderer.setDrawColor(red: 0x85, green: 0x19, blue: 0x19, alpha: 0xFF)
 
             try renderer.copy(frameTexture, destination: screenRect)
             renderer.present()

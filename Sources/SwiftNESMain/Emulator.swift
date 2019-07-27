@@ -30,9 +30,7 @@ final class Emulator {
 
         let frameRenderer = try SDLFrameRenderer(window: window, windowSize: windowSize)
 
-        let lineBufferFactory = SDLLineBufferFactory(renderer: frameRenderer)
-
-        nes = makeNES(lineBufferFactory)
+        nes = makeNES(renderer: frameRenderer)
 
         event = SDL_Event()
     }

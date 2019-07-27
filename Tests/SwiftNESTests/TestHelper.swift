@@ -10,9 +10,18 @@ class DummyRenderer: Renderer {
 }
 
 class DummyLineBufferFactory: LineBufferFactory {
+    let renderer: Renderer
+
+    init(renderer: Renderer) {
+        self.renderer = renderer
+    }
+
+    convenience init() {
+        self.init(renderer: DummyRenderer())
+    }
 
     func make(pixels: UInt16, lines: UInt16) -> LineBuffer {
-        return LineBuffer(pixels: pixels, lines: lines, renderer: DummyRenderer())
+        return LineBuffer(pixels: pixels, lines: lines, renderer: renderer)
     }
 }
 

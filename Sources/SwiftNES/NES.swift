@@ -4,6 +4,9 @@ public final class NES {
 
     private let cartridgeDrive: CartridgeDrive
 
+    public static let maxDot = 341
+    public static let maxLine = 261
+
     static let totalCycles = 29781
 
     init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive) {
