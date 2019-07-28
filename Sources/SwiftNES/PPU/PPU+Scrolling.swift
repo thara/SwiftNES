@@ -36,12 +36,12 @@ extension PPU {
     func updateHorizontalPosition() {
         guard renderingEnabled else { return }
 
-        registers.v = (registers.v & ~0b010000011111) | (registers.t & 0b010000011111)
+        registers.v = (registers.v & ~0b10000011111) | (registers.t & 0b10000011111)
     }
 
     func updateVerticalPosition() {
         guard renderingEnabled else { return }
 
-        registers.v = (registers.v & ~0b101111100000) | (registers.t & 0b101111100000)
+        registers.v = (registers.v & ~0b111101111100000) | (registers.t & 0b111101111100000)
     }
 }
