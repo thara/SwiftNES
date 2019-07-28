@@ -8,11 +8,6 @@ struct PPURegisters: CustomStringConvertible {
     /// OAMADDR
     var objectAttributeMemoryAddress: UInt8 = 0x00
 
-    /// PPUSCROLL
-    var scroll: UInt8 = 0x00
-    /// PPUADDR
-    var address: UInt8 = 0x00
-
     /// current VRAM address
     var v: UInt16 = 0x00
 
@@ -33,9 +28,7 @@ struct PPURegisters: CustomStringConvertible {
             CTRL:\(controller.rawValue.radix2) \
             MASK:\(mask.rawValue.radix2) \
             STATUS:\(status.rawValue.radix2) \
-            OAMADDR:\(objectAttributeMemoryAddress.radix16) \
-            SCROLL:\(scroll.radix16) \
-            ADDR:\(address.radix16)
+            OAMADDR:\(objectAttributeMemoryAddress.radix16)
             """
     }
 
