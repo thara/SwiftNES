@@ -20,7 +20,7 @@ extension PPU: IOPort {
     func write(_ value: UInt8, to address: UInt16) {
         switch address {
         case 0x2000:
-            registers.controller = PPUController(rawValue: value)
+            registers.writeController(value)
         case 0x2001:
             registers.mask = PPUMask(rawValue: value)
         case 0x2003:

@@ -49,6 +49,11 @@ struct PPURegisters: CustomStringConvertible {
         v &+= controller.vramIncrement
     }
 
+    mutating func writeController(_ value: UInt8) {
+        controller = PPUController(rawValue: value)
+        t = (t & 0b1111001111111111) | (controller.nameTableSelect << 10)
+    }
+
     mutating func readStatus() -> UInt8 {
         let s = status
         status.remove(.vblank)
@@ -57,23 +62,29 @@ struct PPURegisters: CustomStringConvertible {
     }
 
     mutating func writeScroll(position: UInt8) {
-        if writeToggle {
-            t = (t & 0b111110000011111) | (position.u16 << 5)
-        } else {
-            t = (t & 0b111111111100000) | position.u16.coarseX
+        if !writeToggle {
+            // first write
+            t = (t & 0b111111111100000) | ((position & 0b11111000).u16 >> 3)
             fineX = position & 0b111
+            writeToggle = true
+        } else {
+            // second write
+            t = (t & 0b1000111111111111) | ((position & 0b111).u16 << 12) | ((position & 0b1111000).u16 << 2)
+            writeToggle = false
         }
-        writeToggle.toggle()
     }
 
     mutating func writeVRAMAddress(addr: UInt8) {
-        if writeToggle {
-            t = t << 8 | (addr.u16 & 0x00FF)
-            v = t
+        if !writeToggle {
+            // first write
+            t = (t & 0b1100000011111111) | ((addr & 0b111111).u16 << 8)
+            writeToggle = true
         } else {
-            t = (t & 0xFF00) | addr.u16
+            // second write
+            t = (t & 0b1111111100000000) | addr.u16
+            v = t
+            writeToggle = false
         }
-        writeToggle.toggle()
     }
 }
 
@@ -95,6 +106,10 @@ struct PPUController: OptionSet {
     /// Base nametable address
     static let nameTableAddrHigh = PPUController(rawValue: 1 << 1)
     static let nameTableAddrLow = PPUController(rawValue: 1)
+
+    var nameTableSelect: UInt16 {
+        return (rawValue & 0b11).u16
+    }
 
     var bgPatternTableAddrBase: UInt16 {
         return contains(.bgTableAddr) ? 0x1000 : 0x0000

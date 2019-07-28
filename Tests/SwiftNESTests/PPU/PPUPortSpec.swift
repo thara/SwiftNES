@@ -92,12 +92,12 @@ class PPUPortSpec: QuickSpec {
                 it("set scroll position by two write") {
                     ppu.write(0x1F, to: address)
                     expect(ppu.registers.writeToggle).to(beTruthy())
-                    expect(ppu.registers.t.coarseXScroll).to(equal(0x1F))
+                    expect(ppu.registers.t.coarseXScroll).to(equal(3))
                     expect(ppu.registers.fineX).to(equal(0x1F & 0b111))
 
                     ppu.write(0x0E, to: address)
                     expect(ppu.registers.writeToggle).to(beFalsy())
-                    expect(ppu.registers.t.coarseYScroll).to(equal(0x0E))
+                    expect(ppu.registers.t.coarseYScroll).to(equal(1))
                 }
             }
         }
