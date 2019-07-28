@@ -7,6 +7,9 @@ public final class NES {
     public static let maxDot = 341
     public static let maxLine = 261
 
+    public static let height = 240
+    public static let width = 256
+
     static let totalCycles = 29781
 
     init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive) {

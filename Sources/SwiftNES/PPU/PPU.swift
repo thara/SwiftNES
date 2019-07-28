@@ -174,7 +174,15 @@ extension PPU {
     // swiftlint:enable cyclomatic_complexity
 
     func updatePixel() {
+        defer {
+            background.shift()
+        }
+
         let x = scan.dot &- 2
+
+        guard scan.line < NES.height && 0 <= x && x < NES.width else {
+            return
+        }
 
         let bg = registers.mask.contains(.background)
             ? background.getPaletteIndex(fineX: registers.fineX)
@@ -198,8 +206,6 @@ extension PPU {
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
         lineBuffer.write(pixel: palletes[Int(palleteNo)], at: x)
-
-        background.shift()
     }
 
     func getSpritePalleteIndex(x: Int) -> (Int, SpriteAttribute) {
