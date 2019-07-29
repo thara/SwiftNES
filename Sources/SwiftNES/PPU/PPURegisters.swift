@@ -70,12 +70,10 @@ struct PPURegisters: CustomStringConvertible {
     mutating func writeVRAMAddress(addr: UInt8) {
         if !writeToggle {
             // first write
-            print(addr.radix2)
             t = (t & 0b1100000011111111) | ((addr & 0b111111).u16 << 8)
             writeToggle = true
         } else {
             // second write
-            print(addr.radix2)
             t = (t & 0b1111111100000000) | addr.u16
             v = t
             writeToggle = false

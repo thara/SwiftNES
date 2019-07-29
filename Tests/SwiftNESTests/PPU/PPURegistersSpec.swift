@@ -91,7 +91,6 @@ class PPURegistersSpec: QuickSpec {
             it("increment fine Y") {
                 registers.v = vramAddress(fineYScroll: 0b101, nameTableNo: 2, coarseYScroll: 0b10101, coarseXScroll: 0b11101)
 
-                print(registers.v.radix2)
                 registers.incrY()
                 expect(registers.v).to(equal(0b0110101010111101))
             }
