@@ -34,6 +34,8 @@ class DummyMapper: Mapper {
 
     var ram: RAM
 
+    var mirroring: Mirroring = .vertical
+
     init(rawData: [UInt8]) {
         ram = RAM(rawData: rawData)
     }
