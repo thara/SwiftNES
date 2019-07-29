@@ -81,6 +81,10 @@ struct NESFileHeader {
         return (flags7 & 0b11110000) + (flags6 >> 4)
     }
 
+    var prgRAMSize: UInt8 {
+        return flags8
+    }
+
     static let magicNumber: [UInt8] = [0x4E, 0x45, 0x53, 0x1A]
     static let padding = [UInt8](repeating: 0x00, count: 5)
 
