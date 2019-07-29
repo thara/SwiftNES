@@ -67,11 +67,11 @@ class CPUSpec: QuickSpec {
 
                 _ = cpu.reset()
 
-                expect(cpu.registers.A).to(equal(0x0000))
-                expect(cpu.registers.X).to(equal(0x0000))
-                expect(cpu.registers.Y).to(equal(0x0000))
-                expect(cpu.registers.S).to(equal(0x00FF))
-                expect(cpu.registers.P).to(equal([Status.V, Status.Z, Status.I]))
+                expect(cpu.registers.A).to(equal(0xFA))
+                expect(cpu.registers.X).to(equal(0x1F))
+                expect(cpu.registers.Y).to(equal(0x59))
+                expect(cpu.registers.S).to(equal(0x34))
+                expect(cpu.registers.P).to(equal([Status.N, Status.V, Status.I]))
                 expect(cpu.registers.PC).to(equal(0b0111111100100000))
             }
         }

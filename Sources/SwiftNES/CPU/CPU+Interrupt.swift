@@ -2,22 +2,19 @@ extension CPU {
 
     /// Reset registers & memory state
     func reset() -> UInt {
-        registers.P.formUnion(.I)
-
-        registers.A = 0x00
-        registers.X = 0x00
-        registers.Y = 0x00
-        registers.S = 0xff
-
 #if nestest
         registers.PC = 0xC000
+        interruptLine.clear(.RESET)
+        return 7
 #else
         registers.PC = memory.readWord(at: 0xFFFC)
-#endif
+        registers.P.formUnion(.I)
+        registers.S -= 3
 
         interruptLine.clear(.RESET)
 
         return 7
+#endif
     }
 
     func handleNMI() -> UInt {
