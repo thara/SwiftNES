@@ -18,6 +18,6 @@ public class LineBuffer {
     }
 
     func flush(lineNumber: Int) {
-        renderer.newLine(number: lineNumber, pixels: &buffer)
+        renderer.newLine(number: lineNumber, pixels: buffer)
     }
 }

@@ -5,7 +5,7 @@ func vramAddress(fineYScroll: UInt16 = 0, nameTableNo: UInt16, coarseYScroll: UI
 }
 
 class DummyRenderer: Renderer {
-    func newLine(number: Int, pixels: inout [UInt32]) {}
+    func newLine(number: Int, pixels: [UInt32]) {}
 }
 
 extension CPU {

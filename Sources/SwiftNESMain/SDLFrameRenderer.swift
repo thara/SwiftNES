@@ -3,7 +3,7 @@ import SDL
 
 import SwiftNES
 
-let rowPixels = 256
+let rowPixels = NES.width
 
 final class SDLFrameRenderer: Renderer {
 
@@ -31,7 +31,7 @@ final class SDLFrameRenderer: Renderer {
         frameBuffer = [UInt32](repeating: 0x00, count: 256 * 240)
     }
 
-    func newLine(number: Int, pixels: inout [UInt32]) {
+    func newLine(number: Int, pixels: [UInt32]) {
         frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[...]
         line &+= 1
 
