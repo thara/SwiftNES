@@ -1,22 +1,51 @@
 extension CPU {
-    func logNestest(_ pc: UInt16, _ operand: UInt16?, _ instruction: Instruction) {
+    func logNestest(_ pc: UInt16, _ operandPC: UInt16, _ operand: UInt16?, _ instruction: Instruction) {
         let opcodePC = pc.hex4
 
         let machineCode: String
         let assemblyCode: String
-        if let operand = operand {
-            let operand1 = operand & 0xFF
-            let operand2 = (operand & 0xFF00) >> 8
-            machineCode = "\(instruction.opcode.hex2) \(operand1.hex2) \(operand2 == 0 ? "" : operand2.hex2)"
 
-            let operandString = String(format: instruction.addressingMode.nestestStringFormat, operand2, operand1)
-            assemblyCode = "\(instruction.mnemonic) \(operandString)"
-        } else {
+        switch operandPC {
+        case 0:
             machineCode = "\(instruction.opcode.hex2)"
             assemblyCode = "\(instruction.mnemonic)"
+        case 1:
+            let operand1 = memory.read(at: pc &+ 1)
+            machineCode = "\(instruction.opcode.hex2) \(operand1.hex2)"
+
+            guard var operand = operand else {
+                return
+            }
+
+            switch instruction.addressingMode {
+            case .immediate:
+                operand = UInt16(operand1)
+            case .relative:
+                operand += (pc + 1 + operandPC)
+            default:
+                break
+            }
+
+            let operandString = String(format: instruction.addressingMode.nestestStringFormat, operand)
+            assemblyCode = "\(instruction.mnemonic) \(operandString)"
+        case 2:
+            let operand1 = memory.read(at: pc &+ 1)
+            let operand2 = memory.read(at: pc &+ 2)
+            machineCode = "\(instruction.opcode.hex2) \(operand1.hex2) \(operand2.hex2)"
+
+            guard let operand = operand else {
+                return
+            }
+
+            let asmOperand1 = operand & 0xFF
+            let asmOperand2 = (operand & 0xFF00) >> 8
+            let operandString = String(format: instruction.addressingMode.nestestStringFormat, asmOperand2, asmOperand1)
+            assemblyCode = "\(instruction.mnemonic) \(operandString)"
+        default:
+            return
         }
 
-        print("\(opcodePC)  \(machineCode.padding(10)) \(assemblyCode.padding(32)) \(registers)")
+        print("\(opcodePC)  \(machineCode.padding(10))\(assemblyCode.padding(32))\(registers)")
     }
 }
 

@@ -71,7 +71,7 @@ extension CPU {
         let (operand, pc) = fetchOperand(in: instruction.addressingMode)
 
 #if nestest
-        logNestest(registers.PC &- 1, operand, instruction)
+        logNestest(registers.PC &- 1, pc, operand, instruction)
 #endif
 
         registers.PC &+= pc

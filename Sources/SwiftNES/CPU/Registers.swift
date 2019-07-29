@@ -25,11 +25,16 @@ struct Registers {
     var PC: UInt16 = 0x00
 
     mutating func powerOn() {
-        P = Status(rawValue: 0x34)
         A = 0
         X = 0
         Y = 0
         S = 0xFD
+#if nestest
+        // https://wiki.nesdev.com/w/index.php/CPU_power_up_state#cite_ref-1
+        P = Status(rawValue: 0x24)
+#else
+        P = Status(rawValue: 0x34)
+#endif
     }
 }
 
