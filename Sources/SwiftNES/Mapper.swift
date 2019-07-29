@@ -3,4 +3,12 @@ protocol Mapper: class {
     func read(at address: UInt16) -> UInt8
     /// Write the given `value` at the `address`
     func write(_ value: UInt8, at address: UInt16)
+
+    var mirroring: Mirroring { get }
+}
+
+extension Mapper {
+    func applyMirroring(to ppuBus: PPUBus) {
+        ppuBus.mirroring = mirroring
+    }
 }

@@ -22,5 +22,7 @@ struct BusConnectedCartridgeDrive: CartridgeDrive {
     func insert(_ cartridge: Cartridge) {
         cpuBus.cartridge = cartridge
         ppuBus.cartridge = cartridge
+
+        cartridge.applyMirroring(to: ppuBus)
     }
 }

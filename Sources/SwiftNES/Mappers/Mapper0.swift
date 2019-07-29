@@ -2,10 +2,12 @@ final class Mapper0: Mapper {
 
     let characterData: [UInt8]
     let program: [UInt8]
+    let mirroring: Mirroring
 
     init(file: NESFile) {
         characterData = Array(file.characterData)
         program = Array(file.program)
+        mirroring = file.header.flags6 & 1 == 0 ? .horizontal : .vertical
     }
 
     func read(at address: UInt16) -> UInt8 {

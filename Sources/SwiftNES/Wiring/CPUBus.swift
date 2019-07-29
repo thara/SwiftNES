@@ -26,6 +26,7 @@ final class CPUBus: Memory {
     }
 
     func write(_ value: UInt8, at address: UInt16) {
+        print("\(value.radix16) at \(address.radix16)")
         switch address {
         case 0x0000...0x07FF:
             wram.write(value, at: address)
