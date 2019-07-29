@@ -32,7 +32,10 @@ final class SDLFrameRenderer: Renderer {
     }
 
     func newLine(number: Int, pixels: [UInt32]) {
-        frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[...]
+        guard number < NES.height else {
+            return
+        }
+        frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[..<rowPixels]
         line &+= 1
 
         if NES.maxLine <= line {
@@ -46,7 +49,7 @@ final class SDLFrameRenderer: Renderer {
             try renderer.clear()
 
             let p = UnsafePointer(frameBuffer)
-            try frameTexture.update(pixels: UnsafeMutablePointer(mutating: p), pitch: rowPixels)
+            try frameTexture.update(pixels: UnsafeMutablePointer(mutating: p), pitch: rowPixels * MemoryLayout<UInt32>.stride)
 
             // background
             // try renderer.setDrawColor(red: 0x00, green: 0x00, blue: 0x00, alpha: 0xFF)
