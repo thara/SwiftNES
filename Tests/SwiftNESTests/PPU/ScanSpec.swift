@@ -31,7 +31,7 @@ class ScanSpec: QuickSpec {
 
                     let update = scan.nextDot()
 
-                    expect(update) == ScanUpdate.line(lastLine: NES.maxLine - 1)
+                    expect(update) == ScanUpdate.frame(lastLine: NES.maxLine - 1)
                     expect(scan.dot) == 0
                     expect(scan.line) == 0
                 }

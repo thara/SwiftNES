@@ -38,6 +38,9 @@ final class PPU {
         switch scan.nextDot() {
         case .line(let last):
             lineBuffer.flush(lineNumber: last)
+        case .frame(let last):
+            lineBuffer.flush(lineNumber: last)
+            frames += 1
         default:
             break
         }

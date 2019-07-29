@@ -21,9 +21,10 @@ struct Scan {
             line &+= 1
             if NES.maxLine <= line {
                 line = 0
+                return .frame(lastLine: last)
+            } else {
+                return .line(lastLine: last)
             }
-
-            return .line(lastLine: last)
         } else {
             return .dot
         }
@@ -33,4 +34,5 @@ struct Scan {
 enum ScanUpdate: Equatable {
     case dot
     case line(lastLine: Int)
+    case frame(lastLine: Int)
 }
