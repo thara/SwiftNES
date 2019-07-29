@@ -1,5 +1,5 @@
 public final class NES {
-    let cpu: CPU
+    private let cpu: CPU
     private let ppu: PPU
 
     private let cartridgeDrive: CartridgeDrive

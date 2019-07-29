@@ -8,6 +8,7 @@ run:  ## Run emulator
 
 nestest:  ## Run nestest
 	@mkdir -p .log
+	@rm -f .log/nestest.log
 	@swift run -Xswiftc -Dnestest > .log/nestest.log
 
 help:

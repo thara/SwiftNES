@@ -8,7 +8,12 @@ extension CPU {
         registers.X = 0x00
         registers.Y = 0x00
         registers.S = 0xff
+
+#if nestest
+        registers.PC = 0xC000
+#else
         registers.PC = memory.readWord(at: 0xFFFC)
+#endif
 
         interruptLine.clear(.RESET)
 

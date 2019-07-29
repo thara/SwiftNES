@@ -33,7 +33,6 @@ final class PPUBus: Memory {
     }
 
     func write(_ value: UInt8, at address: UInt16) {
-        print("PPUBUS \(value.radix16) at \(address.radix16)")
         switch address {
         case 0x0000...0x1FFF:
             ppuBusLogger.warning("[PPU] Unsupported write access to cartridge : addr=\(address.radix16) value=\(value.radix16)")

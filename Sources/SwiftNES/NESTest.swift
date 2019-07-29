@@ -1,3 +1,5 @@
+#if nestest
+
 public func nestest(romPath: String) throws {
     let rom = try NESFile(path: romPath)
 
@@ -8,11 +10,11 @@ public func nestest(romPath: String) throws {
     let nes = makeNES(renderer: DummyRenderer())
     nes.insert(cartridge: cartridge)
 
-    nes.cpu.registers.PC = 0xC000
-
     nes.runFrame()
 }
 
 private class DummyRenderer: Renderer {
     func newLine(number: Int, pixels: [UInt32]) {}
 }
+
+#endif
