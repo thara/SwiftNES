@@ -130,6 +130,7 @@ extension PPU {
 
             // tile bitmap low
             case 5:
+                ppuLogger.trace("VRAM[\(registers.v.radix16)] tile bitmap low: \(scan)")
                 background.addressTileBitmapLow(using: registers.v, controller: registers.controller)
             case 6:
                 background.fetchTileBitmapLow(from: memory)
@@ -206,6 +207,9 @@ extension PPU {
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
         lineBuffer.write(pixel: palletes[Int(palleteNo)], at: x)
+        if 0 < palletes[Int(palleteNo)] {
+            ppuLogger.trace("VRAM[\(registers.v.radix16)] LineBuffer.write : line=\(scan.line) x=\(x) pixel=\(palletes[Int(palleteNo)].radix16) idx=\(idx.radix16) v=\(registers.v.radix2)(\(registers.v.radix16))")
+        }
     }
 
     func getSpritePalleteIndex(x: Int) -> (Int, SpriteAttribute) {
