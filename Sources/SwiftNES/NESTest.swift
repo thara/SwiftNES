@@ -13,6 +13,6 @@ public func nestest(romPath: String) throws {
     nes.runFrame()
 }
 
-fileprivate class DummyRenderer: Renderer {
+private class DummyRenderer: Renderer {
     func newLine(number: Int, pixels: [UInt32]) {}
 }

@@ -20,7 +20,7 @@ extension CPU {
     }
 }
 
-extension Registers : CustomStringConvertible {
+extension Registers: CustomStringConvertible {
     var description: String {
         return "A:\(A.hex2) X:\(X.hex2) Y:\(Y.hex2) P:\(P.rawValue.hex2) SP:\(S.hex2)"
     }

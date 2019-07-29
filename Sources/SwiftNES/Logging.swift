@@ -7,4 +7,3 @@ public var ppuBusLogger = Logger(label: "SwiftNES.PPUBus")
 public var ppuBackgroundLogger = Logger(label: "SwiftNES.Background")
 
 public var interruptLogger = Logger(label: "SwiftNES.Interrupt")
-
