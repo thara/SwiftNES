@@ -6,7 +6,7 @@ extension CPU {
         let assemblyCode: String
         if let operand = operand {
             let operand1 = operand & 0xFF
-            let operand2 = (operand & 0xFF00) >> 2
+            let operand2 = (operand & 0xFF00) >> 8
             machineCode = "\(instruction.opcode.hex2) \(operand1.hex2) \(operand2.hex2)"
 
             let operandString = String(format: instruction.addressingMode.nestestStringFormat, operand1, operand2)
