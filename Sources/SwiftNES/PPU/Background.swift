@@ -1,7 +1,7 @@
 let nameTableFirstAddr: UInt16 = 0x2000
 let attrTableFirstAddr: UInt16 = 0x23C0
 
-let tileHeight: UInt8 = 8
+let tileHeight: UInt16 = 8
 
 struct Background {
     /// value of name table
@@ -34,6 +34,7 @@ struct Background {
         let pixel = (tilePatternSecond[pixelIdx] &<< 1) | tilePatternFirst[pixelIdx]
 
         ppuBackgroundLogger.trace("BG: \(tilePatternFirst.radix2)")
+
         guard pixel != 0 else {
             return Int(pixel)
         }
@@ -58,7 +59,7 @@ struct Background {
 
     /// Fetch attribute table byte : step 1
     mutating func addressAttrTableEntry(using v: UInt16) {
-        tempTableAddr = attrTableFirstAddr | v.nameTableSelect | (v.attrY &<< 3) | v.attrX
+        tempTableAddr = attrTableFirstAddr | v.nameTableSelect | ((v &>> 4) & 0b111000) | ((v &>> 2) & 0b111)
     }
 
     /// Fetch attribute table byte : step 2
@@ -72,7 +73,7 @@ struct Background {
 
     /// Fetch tile bitmap low byte : step 1
     mutating func addressTileBitmapLow(using v: UInt16, controller: PPUController) {
-        tempTableAddr = controller.bgPatternTableAddrBase &+ (nameTableEntry.u16 &* tileHeight.u16 &* 2 &+ v.fineYScroll.u16)
+        tempTableAddr = controller.bgPatternTableAddrBase &+ (nameTableEntry.u16 &* tileHeight &* 2) &+ v.fineYScroll.u16
     }
 
     /// Fetch tile bitmap low byte : step 2
@@ -85,7 +86,7 @@ struct Background {
 
     /// Fetch tile bitmap high byte : step 1
     mutating func addressTileBitmapHigh() {
-        tempTableAddr &+= tileHeight.u16
+        tempTableAddr &+= tileHeight
     }
 
     /// Fetch tile bitmap high byte : step 2
