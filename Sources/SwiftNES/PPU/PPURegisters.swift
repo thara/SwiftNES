@@ -70,14 +70,53 @@ struct PPURegisters: CustomStringConvertible {
     mutating func writeVRAMAddress(addr: UInt8) {
         if !writeToggle {
             // first write
+            print(addr.radix2)
             t = (t & 0b1100000011111111) | ((addr & 0b111111).u16 << 8)
             writeToggle = true
         } else {
             // second write
+            print(addr.radix2)
             t = (t & 0b1111111100000000) | addr.u16
             v = t
             writeToggle = false
         }
+    }
+
+    mutating func incrCoarseX() {
+        if v.coarseXScroll == 31 {
+            v &= ~0b11111 // coarse X = 0
+            v ^= 0x0400  // switch horizontal nametable
+        } else {
+            v &+= 1
+        }
+    }
+
+    mutating func incrY() {
+        if v.fineYScroll < 7 {
+            v &+= 0x1000
+        } else {
+            v &= ~0x7000 // fine Y = 0
+
+            var y = v.coarseYScroll
+            if y == 29 {
+                y = 0
+                v ^= 0x0800  // switch vertical nametable
+            } else if y == 31 {
+                y = 0
+            } else {
+                y &+= 1
+            }
+
+            v = (v & ~0x03E0) | (y &<< 5)
+        }
+    }
+
+    mutating func copyX() {
+        v = (v & ~0b10000011111) | (t & 0b10000011111)
+    }
+
+    mutating func copyY() {
+        v = (v & ~0b111101111100000) | (t & 0b111101111100000)
     }
 }
 

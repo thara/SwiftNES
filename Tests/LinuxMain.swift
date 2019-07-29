@@ -13,7 +13,6 @@ QCKMain([
     PPUPortSpec.self,
     PPURegistersSpec.self,
     BackgroundSpec.self,
-    ScrollingSpec.self,
 
     CPUBusSpec.self,
 

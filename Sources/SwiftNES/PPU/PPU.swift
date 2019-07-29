@@ -139,21 +139,27 @@ extension PPU {
                 background.addressTileBitmapHigh()
             case 0:
                 background.fetchTileBitmapHigh(from: memory)
-                incrCoarseX()
+                if renderingEnabled {
+                    registers.incrCoarseX()
+                }
             default:
                 break
             }
         case 256:
             updatePixel()
             background.fetchTileBitmapHigh(from: memory)
-            incrY()
+            if renderingEnabled {
+                registers.incrY()
+            }
         case 257:
             updatePixel()
-            updateHorizontalPosition()
             background.reloadShift()
+            if renderingEnabled {
+                registers.copyX()
+            }
         case 280...304:
-            if preRendering {
-                updateVerticalPosition()
+            if preRendering && renderingEnabled {
+                registers.copyY()
             }
         // Unused name table fetches
         case 337:

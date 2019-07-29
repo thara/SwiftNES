@@ -11,6 +11,7 @@ extension PPU: IOPort {
         case 0x2004:
             return spriteOAM.primary[Int(registers.objectAttributeMemoryAddress)]
         case 0x2007:
+            defer { registers.incrV() }
             return memory.read(at: registers.v)
         default:
             return 0x00
