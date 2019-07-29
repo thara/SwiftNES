@@ -1,4 +1,4 @@
-struct Registers: CustomStringConvertible {
+struct Registers {
     /// Accumulator
     var A: UInt8 = 0x00 {
         didSet {
@@ -23,10 +23,6 @@ struct Registers: CustomStringConvertible {
     var P: Status = []
     /// Program Counter
     var PC: UInt16 = 0x00
-
-    var description: String {
-        return "A:\(A.radix16) X:\(X.radix16) Y:\(Y.radix16) SP:\(S.radix16)"
-    }
 
     mutating func powerOn() {
         P = Status(rawValue: 0x34)

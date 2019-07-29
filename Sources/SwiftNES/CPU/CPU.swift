@@ -54,8 +54,6 @@ final class CPU {
 // MARK: - CPU.run implementation
 extension CPU {
     func run() -> UInt {
-        let pc = registers.PC
-
         let opcode = fetch()
         let instruction = decode(opcode)
         let cycle = execute(instruction)
@@ -78,6 +76,10 @@ extension CPU {
 
     func execute(_ instruction: Instruction) -> UInt {
         let (operand, pc) = fetchOperand(in: instruction.addressingMode)
+
+#if nestest
+        logNestest(registers.PC &- 1, operand, instruction)
+#endif
 
         registers.PC &+= pc
 

@@ -10,6 +10,7 @@ enum PCUpdate {
 }
 
 struct Instruction {
+    let opcode: UInt8
     let mnemonic: Mnemonic
     let addressingMode: AddressingMode
     let cycle: UInt

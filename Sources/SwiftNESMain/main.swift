@@ -10,11 +10,13 @@ var mainLogger = Logger(label: "SwiftNESMain")
 func main() throws {
     LoggingSystem.bootstrap(StreamLogHandler.standardOutput)
 
-    cpuLogger.logLevel = .debug
-    ppuLogger.logLevel = .debug
-    interruptLogger.logLevel = .debug
-
-    mainLogger.logLevel = .debug
+#if nestest
+    try SwiftNES.nestest(romPath: "Sources/SwiftNESMain/example/nestest/nestest.nes")
+#else
+    // cpuLogger.logLevel = .debug
+    // ppuLogger.logLevel = .debug
+    // interruptLogger.logLevel = .debug
+    // mainLogger.logLevel = .debug
 
     let emulator = try Emulator(windowTitle: "SwiftNES", windowScale: 3)
 
@@ -27,6 +29,7 @@ func main() throws {
     emulator.nes.insert(cartridge: cartridge)
 
     try emulator.runLoop()
+#endif
 }
 
 do {

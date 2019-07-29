@@ -12,9 +12,10 @@ final class Mapper0: Mapper {
         switch address {
         case 0x0000...0x1FFF:
             return characterData[Int(address)]
-
-        case 0x8000...0xFFFF:
+        case 0x8000...0xBFFF:
             return program[Int(address &- 0x8000)]
+        case 0xC000...0xFFFF:
+            return program[Int(address &- 0xC000)]
         default:
             return 0x00
         }
