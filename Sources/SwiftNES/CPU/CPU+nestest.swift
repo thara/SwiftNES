@@ -7,9 +7,9 @@ extension CPU {
         if let operand = operand {
             let operand1 = operand & 0xFF
             let operand2 = (operand & 0xFF00) >> 8
-            machineCode = "\(instruction.opcode.hex2) \(operand1.hex2) \(operand2.hex2)"
+            machineCode = "\(instruction.opcode.hex2) \(operand1.hex2) \(operand2 == 0 ? "" : operand2.hex2)"
 
-            let operandString = String(format: instruction.addressingMode.nestestStringFormat, operand1, operand2)
+            let operandString = String(format: instruction.addressingMode.nestestStringFormat, operand2, operand1)
             assemblyCode = "\(instruction.mnemonic) \(operandString)"
         } else {
             machineCode = "\(instruction.opcode.hex2)"
