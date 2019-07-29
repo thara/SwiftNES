@@ -4,7 +4,9 @@
 .DEFAULT_GOAL := run
 
 run:  ## Run emulator
-	@swift run
+	@mkdir -p .log
+	@rm -f .log/debug.log
+	@swift run > .log/debug.log
 
 nestest:  ## Run nestest
 	@mkdir -p .log
