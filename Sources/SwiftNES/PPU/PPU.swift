@@ -117,7 +117,6 @@ extension PPU {
             background.addressNameTableEntry(using: registers.v)
         case 2...255, 322...336:
             updatePixel()
-
             switch scan.dot % 8 {
             // name table
             case 1:
@@ -166,6 +165,7 @@ extension PPU {
             }
         // Unused name table fetches
         case 337:
+            updatePixel()
             background.addressNameTableEntry(using: registers.v)
         case 338:
             background.fetchNameTableEntry(from: memory)
