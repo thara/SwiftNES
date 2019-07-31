@@ -8,7 +8,7 @@ final class PPU {
     var background: Background
     var spriteOAM: SpriteOAM
 
-    private var frames: UInt = 0
+    private(set) var frames: UInt = 0
 
     private let interruptLine: InterruptLine
 

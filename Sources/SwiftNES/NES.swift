@@ -10,8 +10,6 @@ public final class NES {
     public static let height = 240
     public static let width = 256
 
-    static let totalCycles = 29781
-
     init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive) {
         self.cpu = cpu
         self.ppu = ppu
@@ -19,12 +17,11 @@ public final class NES {
     }
 
     public func runFrame() {
-        var cycles = NES.totalCycles
+        let currentFrame = ppu.frames
 
-        while 0 < cycles {
+        repeat {
             cycle()
-            cycles &-= 1
-        }
+        } while currentFrame == ppu.frames
     }
 
     public func cycle() {
