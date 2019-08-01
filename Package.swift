@@ -12,6 +12,8 @@ let package = Package(
 
         .package(url: "https://github.com/Quick/Quick.git", from: "2.1.0"),
         .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.0"),
+
+        .package(url: "https://github.com/kylef/Commander.git", from: "0.9.0"),
     ],
     targets: [
         .target(
@@ -19,7 +21,7 @@ let package = Package(
             dependencies: ["Logging"]),
         .target(
             name: "SwiftNESMain",
-            dependencies: ["SwiftNES", "SDL", "Logging"]),
+            dependencies: ["SwiftNES", "SDL", "Logging", "Commander"]),
         .testTarget(
             name: "SwiftNESTests",
             dependencies: ["SwiftNES", "Quick", "Nimble"]),
