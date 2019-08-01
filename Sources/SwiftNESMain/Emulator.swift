@@ -47,6 +47,9 @@ final class Emulator {
     }
 
     func runLoop() throws {
+
+        let delay = 1000 / fps
+
         while isRunning {
             SDL_PollEvent(&event)
 
@@ -66,6 +69,11 @@ final class Emulator {
             let frameDuration = endTime - startTime
 
             mainLogger.debug("Frame Duration: \(frameDuration)")
+
+            //  Wait to mantain framerate
+            if frameDuration < delay {
+                SDL_Delay(delay - frameDuration)
+            }
         }
     }
 }
