@@ -11,9 +11,6 @@ public struct NESFile {
     let header: NESFileHeader
     let bytes: [UInt8]
 
-    let program: ArraySlice<UInt8>
-    let characterData: ArraySlice<UInt8>
-
     public init(path: String, bufferSize: Int = 1024) throws {
         if let f = FileHandle(forReadingAtPath: path) {
             defer {
@@ -29,21 +26,22 @@ public struct NESFile {
             guard header.valid() else {
                 throw NESFileError.invalidHeader(bytes: Array(headerData))
             }
-
-            let programFirst = NESFileHeader.size
-            let programLength = header.programROMSizeOfUnit * 0x4000
-            program = bytes[programFirst..<(programFirst + programLength)]
-
-            if header.characterROMSizeOfUnit == 0 {
-                characterData = []
-            } else {
-                let characterFirst = programFirst + programLength
-                let characterLength = header.characterROMSizeOfUnit * 0x2000
-                characterData = bytes[characterFirst..<(characterFirst + characterLength)]
-            }
         } else {
             throw NESFileError.cannotOpenStream(path: path)
         }
+    }
+
+    func readBytes(from first: Int, count: Int) -> ([UInt8], Int) {
+        let last = first + count
+        return (Array(bytes[first..<last]), last)
+    }
+
+    func readProgramROM(from first: Int, romSize: Int) -> ([UInt8], Int) {
+        return readBytes(from: first, count: header.programROMSizeOfUnit * romSize)
+    }
+
+    func readCharacterROM(from first: Int, romSize: Int) -> ([UInt8], Int) {
+        return readBytes(from: first, count: header.characterROMSizeOfUnit * romSize)
     }
 }
 

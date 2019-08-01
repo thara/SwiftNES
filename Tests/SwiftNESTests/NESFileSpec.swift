@@ -52,8 +52,6 @@ class NESFileSpec: QuickSpec {
                         let f = try NESFile(path: path)
 
                         expect(f.header.valid()).to(beTruthy())
-                        expect(f.program.count).to(beGreaterThan(0))
-                        expect(f.characterData.count).to(beGreaterThan(0))
                     } catch let error {
                         return .failed(reason: (error as NSError).localizedDescription)
                     }
