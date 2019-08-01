@@ -21,10 +21,8 @@ struct PPURegisters: CustomStringConvertible {
 
     var description: String {
         return """
-            v:\(v.radix16) \
-            t:\(t.radix16) \
-            fineX:\(fineX.radix16) \
-            w:\(writeToggle) \
+            v:\(v.radix2) \
+            t:\(t.radix2) \
             CTRL:\(controller.rawValue.radix2) \
             MASK:\(mask.rawValue.radix2) \
             STATUS:\(status.rawValue.radix2) \

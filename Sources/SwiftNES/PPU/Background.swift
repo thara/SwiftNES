@@ -52,9 +52,6 @@ struct Background {
     /// Fetch nametable byte : step 2
     mutating func fetchNameTableEntry(from memory: Memory) {
         nameTableEntry = memory.read(at: tempTableAddr)
-        if 0 < nameTableEntry {
-            ppuBackgroundLogger.trace("NT: \(tempTableAddr.radix16) \(nameTableEntry.radix16)")
-        }
     }
 
     /// Fetch attribute table byte : step 1

@@ -33,6 +33,8 @@ final class PPU {
     }
 
     func step() {
+        ppuLogger.trace("Dot \(scan) \(registers)")
+
         process()
 
         switch scan.nextDot() {
@@ -117,9 +119,11 @@ extension PPU {
             background.addressNameTableEntry(using: registers.v)
         case 2...255, 322...336:
             updatePixel()
+
             switch scan.dot % 8 {
             // name table
             case 1:
+                ppuLogger.trace("Name table: address v=\(registers.v.nameTableIdx.radix16) t=\(registers.t.nameTableIdx.radix16)")
                 background.addressNameTableEntry(using: registers.v)
                 background.reloadShift()
             case 2:
@@ -213,6 +217,7 @@ extension PPU {
                 idx = sprite
             }
         }
+        ppuLogger.trace("updatePixel: \(idx) \(scan)")
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
         lineBuffer.write(pixel: palletes[Int(palleteNo)], at: x)
