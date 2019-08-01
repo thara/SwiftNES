@@ -46,7 +46,7 @@ struct Background {
 
     /// Fetch nametable byte : step 1
     mutating func addressNameTableEntry(using v: UInt16) {
-        tempTableAddr = nameTableFirstAddr | v.nameTableIdx
+        tempTableAddr = nameTableFirstAddr | v.nameTableAddressIndex
     }
 
     /// Fetch nametable byte : step 2
@@ -56,7 +56,7 @@ struct Background {
 
     /// Fetch attribute table byte : step 1
     mutating func addressAttrTableEntry(using v: UInt16) {
-        tempTableAddr = attrTableFirstAddr | v.nameTableSelect | ((v &>> 4) & 0b111000) | ((v &>> 2) & 0b111)
+        tempTableAddr = attrTableFirstAddr | v.attributeAddressIndex
     }
 
     /// Fetch attribute table byte : step 2

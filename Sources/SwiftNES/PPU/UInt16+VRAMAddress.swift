@@ -1,9 +1,13 @@
 /// Extensions for VRAM address
+///
+/// https://wiki.nesdev.com/w/index.php/PPU_scrolling#PPU_internal_registers
+///
+/// yyy NN YYYYY XXXXX
+/// ||| || ||||| +++++-- coarse X scroll
+/// ||| || +++++-------- coarse Y scroll
+/// ||| ++-------------- nametable select
+/// +++----------------- fine Y scroll
 extension UInt16 {
-
-    var nameTableIdx: UInt16 {
-        return self & 0b111111111111
-    }
 
     var coarseX: UInt16 {
         return self & 0b11111
@@ -11,11 +15,6 @@ extension UInt16 {
 
     var coarseXScroll: UInt16 {
         return self & 0b11111
-    }
-
-    /// Translate index of attribute table from name table
-    var attrX: UInt16 {
-        return coarseX / 4
     }
 
     var coarseY: UInt16 {
@@ -26,9 +25,16 @@ extension UInt16 {
         return coarseY >> 5
     }
 
-    /// Translate index of attribute table from name table
-    var attrY: UInt16 {
-        return coarseYScroll / 4
+    var fineY: UInt16 {
+        return self & 0b111000000000000
+    }
+
+    var fineYScroll: UInt8 {
+        return UInt8((self & 0b111000000000000) >> 12)
+    }
+
+    var nameTableAddressIndex: UInt16 {
+        return self & 0b111111111111
     }
 
     var nameTableSelect: UInt16 {
@@ -38,12 +44,27 @@ extension UInt16 {
     var nameTableNo: UInt16 {
         return nameTableSelect >> 10
     }
+}
 
-    var fineY: UInt16 {
-        return self & 0b111000000000000
+/// Tile and attribute fetching
+/// https://wiki.nesdev.com/w/index.php/PPU_scrolling#Tile_and_attribute_fetching
+///
+/// NN 1111 YYY XXX
+/// || |||| ||| +++-- high 3 bits of coarse X (x/4)
+/// || |||| +++------ high 3 bits of coarse Y (y/4)
+/// || ++++---------- attribute offset (960 bytes)
+/// ++--------------- nametable select
+extension UInt16 {
+
+    var coarseXHigh: UInt16 {
+        return (self &>> 2) & 0b000111
     }
 
-    var fineYScroll: UInt8 {
-        return UInt8((self & 0b111000000000000) >> 12)
+    var coarseYHigh: UInt16 {
+        return (self &>> 4) & 0b111000
+    }
+
+    var attributeAddressIndex: UInt16 {
+        return nameTableSelect | coarseYHigh | coarseXHigh
     }
 }

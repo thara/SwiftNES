@@ -123,7 +123,7 @@ extension PPU {
             switch scan.dot % 8 {
             // name table
             case 1:
-                ppuLogger.trace("Name table: address v=\(registers.v.nameTableIdx.radix16) t=\(registers.t.nameTableIdx.radix16)")
+                ppuLogger.trace("Name table: address v=\(registers.v.nameTableAddressIndex.radix16) t=\(registers.t.nameTableAddressIndex.radix16)")
                 background.addressNameTableEntry(using: registers.v)
                 background.reloadShift()
             case 2:
