@@ -17,12 +17,11 @@ final class SDLFrameRenderer: Renderer {
 
     private var line = 0
 
-    init(window: SDLWindow, windowSize: (width: Int, height: Int)) throws {
-        let driver = SDLRenderer.Driver.default
-        renderer = try SDLRenderer(window: window, driver: driver, options: [.accelerated, .presentVsync])
-        renderer.setLogicalSize(w: Int32(windowSize.width), h: Int32(windowSize.height))
+    private let pitch = rowPixels * MemoryLayout<UInt32>.stride
 
-        screenRect = SDL_Rect(x: 0, y: 0, w: Int32(windowSize.width), h: Int32(windowSize.height))
+    init(renderer: SDLRenderer, screenRect: SDL_Rect) throws {
+        self.renderer = renderer
+        self.screenRect = screenRect
 
         frameTexture = try SDLTexture(
             renderer: renderer, format: .argb8888, access: .streaming, width: 256, height: 240
@@ -38,6 +37,9 @@ final class SDLFrameRenderer: Renderer {
         frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[..<rowPixels]
         line &+= 1
 
+        // let p = pixels[..<rowPixels].map { $0 == 0 ? " " : "*" }
+        // print(p.joined())
+
         if NES.maxLine <= line {
             line = 0
             render()
@@ -46,17 +48,15 @@ final class SDLFrameRenderer: Renderer {
 
     func render() {
         do {
-            try renderer.clear()
-
             let p = UnsafePointer(frameBuffer)
-            try frameTexture.update(pixels: UnsafeMutablePointer(mutating: p), pitch: rowPixels * MemoryLayout<UInt32>.stride)
+            try frameTexture.update(pixels: UnsafeMutablePointer(mutating: p), pitch: pitch)
 
             // background
-            // try renderer.setDrawColor(red: 0x00, green: 0x00, blue: 0x00, alpha: 0xFF)
-
+            // try frameRenderer.setDrawColor(red: 0x00, green: 0x00, blue: 0x00, alpha: 0xFF)
             //FIXME for test
             try renderer.setDrawColor(red: 0x85, green: 0x19, blue: 0x19, alpha: 0xFF)
 
+            try renderer.clear()
             try renderer.copy(frameTexture, destination: screenRect)
             renderer.present()
         } catch {

@@ -28,7 +28,14 @@ final class Emulator {
                                options: [.resizable, .shown])
         fps = UInt32(try window.displayMode().refreshRate)
 
-        let frameRenderer = try SDLFrameRenderer(window: window, windowSize: windowSize)
+        let driver = SDLRenderer.Driver.default
+
+        let renderer = try SDLRenderer(window: window, driver: driver, options: [.accelerated, .presentVsync])
+        renderer.setLogicalSize(w: Int32(windowSize.width), h: Int32(windowSize.height))
+
+        let screenRect = SDL_Rect(x: 0, y: 0, w: Int32(windowSize.width), h: Int32(windowSize.height))
+
+        let frameRenderer = try SDLFrameRenderer(renderer: renderer, screenRect: screenRect)
 
         nes = makeNES(renderer: frameRenderer)
 
