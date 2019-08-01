@@ -161,7 +161,7 @@ extension CPU {
 
         registers.P.remove([.C, .Z, .N])
         registers.P.setZN(cmp)
-        if 0 < cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
+        if 0 <= cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
         return .next
     }

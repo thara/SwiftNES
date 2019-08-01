@@ -740,7 +740,7 @@ class InstructionSpec: QuickSpec {
 
                         let cycle = cpu.run()
 
-                        expect(cpu.registers.P.contains(.C)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.C)).to(beTruthy())
                         expect(cpu.registers.P.contains(.Z)).to(beTruthy())
                         expect(cpu.registers.P.contains(.N)).to(beFalsy())
                         expect(cpu.registers.PC).to(equal(0x0305))
