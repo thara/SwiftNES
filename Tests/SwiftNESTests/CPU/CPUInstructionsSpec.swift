@@ -1510,7 +1510,7 @@ class InstructionSpec: QuickSpec {
 
                     expect(cpu.registers.P.contains(.B)).to(beTruthy())
                     expect(cpu.registers.PC).to(equal(0x8170))
-                    expect(cpu.pullStack() as UInt8).to(equal(status.rawValue))
+                    expect(cpu.pullStack() as UInt8).to(equal(status.rawValue | Status.B.rawValue))
                     expect(cpu.pullStack() as UInt16).to(equal(0x0303))
                     expect(cycle).to(equal(7))
                 }

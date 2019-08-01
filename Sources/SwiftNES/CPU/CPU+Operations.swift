@@ -74,7 +74,9 @@ extension CPU {
 
     /// PHP
     func pushProcessorStatus(operand: Operand?) -> PCUpdate {
-        pushStack(registers.P.rawValue)
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        pushStack(registers.P.rawValue | Status.B.rawValue)
         return .next
     }
 
@@ -487,7 +489,9 @@ extension CPU {
     /// BRK
     func forceInterrupt(operand: Operand?) -> PCUpdate {
         pushStack(word: registers.PC)
-        pushStack(registers.P.rawValue)
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        pushStack(registers.P.rawValue | Status.B.rawValue)
         registers.PC = memory.readWord(at: 0xFFFE)
         registers.P.formUnion(.B)
         return .next
