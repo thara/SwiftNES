@@ -699,6 +699,7 @@ class InstructionSpec: QuickSpec {
         }
 
         describe("SBC") {
+            // TODO more test patterns
             describe("absolute") {
                 it("subtract with carry") {
                     let opcode: UInt8 = 0xED
@@ -713,7 +714,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.registers.A).to(equal(243))
+                    expect(cpu.registers.A).to(equal(244))
                     expect(cpu.registers.P.contains(.Z)).to(beFalsy())
                     expect(cpu.registers.P.contains(.V)).to(beFalsy())
                     expect(cpu.registers.P.contains(.N)).to(beTruthy())
