@@ -129,18 +129,24 @@ extension CPU {
 
     /// ADC
     func addWithCarry(operand: Operand?) -> PCUpdate {
-        let a = Int16(registers.A)
-        let val = Int16(memory.read(at: operand!))
+        let a = registers.A
+        let val = memory.read(at: operand!)
         var result = a &+ val
+
         if registers.P.contains(.C) { result &+= 1 }
 
         registers.P.remove([.C, .Z, .V, .N])
-        if result[8] == 1 { registers.P.formUnion(.C)}
-        // same sign -> different sign
-        if (a ^ val)[7] == 1 && (a ^ result)[7] == 1 {
-            registers.P.formUnion(.V)
-        }
-        registers.A = UInt8(result & 0xFF)
+
+        // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+        let a7 = a[7]
+        let v7 = val[7]
+        let c6 = a7 ^ v7 ^ result[7]
+        let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
+
+        if c7 == 1 { registers.P.formUnion(.C) }
+        if c6 ^ c7 == 1 { registers.P.formUnion(.V) }
+
+        registers.A = result
         return .next
     }
 
