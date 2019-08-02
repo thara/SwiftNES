@@ -1,28 +1,21 @@
 disabled_rules:
-- identifier_name
-- conditional_returns_on_newline
-- discouraged_optional_collection
-- file_header
-- strict_fileprivate
-- switch_case_on_newline
-- file_length
-- function_body_length
-- type_body_length
+  - identifier_name
+  - conditional_returns_on_newline
+  - discouraged_optional_collection
+  - file_header
+  - strict_fileprivate
+  - switch_case_on_newline
+  - type_body_length
 
 included:
-- Sources/SwiftNES
-- Sources/SwiftNESMain
-- Tests/SwiftNESTests
+  - Sources/SwiftNES
+  - Sources/SwiftNESMain
+  - Tests/SwiftNESTests
 
 file_length:
-  warning: 120
-  error: 200
-  excluded: "Tests/*/.*Spec\\.swift"
+  warning: 300
+  error: 600
 
 function_body_length:
   warning: 100
   error: 200
-  excluded: "Tests/*/.*Spec\\.swift"
-
-type_body_length:
-  excluded: "Tests/*/.*Spec\\.swift"

@@ -25,7 +25,6 @@ func main(_ romPath: String) throws {
     try emulator.runLoop()
 }
 
-
 command { (filename: String?) in
     LoggingSystem.bootstrap(StreamLogHandler.standardOutput)
 
