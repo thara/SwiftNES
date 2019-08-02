@@ -19,7 +19,7 @@ struct Scan {
             let last = line
 
             line &+= 1
-            if NES.maxLine <= line {
+            if NES.maxLine < line {
                 line = 0
                 return .frame(lastLine: last)
             } else {

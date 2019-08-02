@@ -27,11 +27,11 @@ class ScanSpec: QuickSpec {
             context("next frame") {
                 it("clear dot and line") {
                     scan.dot = NES.maxDot - 1
-                    scan.line = NES.maxLine - 1
+                    scan.line = NES.maxLine
 
                     let update = scan.nextDot()
 
-                    expect(update) == ScanUpdate.frame(lastLine: NES.maxLine - 1)
+                    expect(update) == ScanUpdate.frame(lastLine: NES.maxLine)
                     expect(scan.dot) == 0
                     expect(scan.line) == 0
                 }
