@@ -76,7 +76,7 @@ extension CPU {
     func pushProcessorStatus(operand: Operand?) -> PCUpdate {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(registers.P.rawValue | Status.B.rawValue)
+        pushStack(registers.P.rawValue | Status.operatedB.rawValue)
         return .next
     }
 
@@ -88,7 +88,9 @@ extension CPU {
 
     /// PLP
     func pullProcessorStatus(operand: Operand?) -> PCUpdate {
-        registers.P = Status(rawValue: pullStack())
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
         return .next
     }
 
@@ -491,9 +493,8 @@ extension CPU {
         pushStack(word: registers.PC)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(registers.P.rawValue | Status.B.rawValue)
+        pushStack(registers.P.rawValue | Status.interruptedB.rawValue)
         registers.PC = memory.readWord(at: 0xFFFE)
-        registers.P.formUnion(.B)
         return .next
     }
 }

@@ -18,7 +18,6 @@ extension CPU {
     }
 
     func handleNMI() -> UInt {
-        registers.P.remove(.B)
         pushStack(word: registers.PC)
         pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
@@ -35,7 +34,6 @@ extension CPU {
             return nil
         }
 
-        registers.P.remove(.B)
         pushStack(word: registers.PC)
         pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
@@ -51,7 +49,6 @@ extension CPU {
             return nil
         }
 
-        registers.P.formUnion(.B)
         registers.PC &+= 1
         pushStack(word: registers.PC)
         pushStack(registers.P.rawValue)

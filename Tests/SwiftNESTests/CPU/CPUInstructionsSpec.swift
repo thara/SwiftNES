@@ -482,7 +482,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(Status(rawValue: cpu.pullStack())).to(equal(cpu.registers.P))
+                    expect(Status(rawValue: cpu.pullStack())).to(equal([cpu.registers.P, Status.operatedB] as Status))
                     expect(cpu.registers.PC).to(equal(0x0303))
                     expect(cycle).to(equal(3))
                 }
@@ -1508,9 +1508,8 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.run()
 
-                    expect(cpu.registers.P.contains(.B)).to(beTruthy())
                     expect(cpu.registers.PC).to(equal(0x8170))
-                    expect(cpu.pullStack() as UInt8).to(equal(status.rawValue | Status.B.rawValue))
+                    expect(cpu.pullStack() as UInt8).to(equal(status.rawValue | Status.interruptedB.rawValue))
                     expect(cpu.pullStack() as UInt16).to(equal(0x0303))
                     expect(cycle).to(equal(7))
                 }
