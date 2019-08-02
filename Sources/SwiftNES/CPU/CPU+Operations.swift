@@ -180,22 +180,24 @@ extension CPU {
 
     /// CPX
     func compareXRegister(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.X) &- Int16(memory.read(at: operand!))
+        let value = memory.read(at: operand!)
+        let cmp = registers.X &- value
 
         registers.P.remove([.C, .Z, .N])
         registers.P.setZN(cmp)
-        if 0 < cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
+        if registers.X >= value { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
         return .next
     }
 
     /// CPY
     func compareYRegister(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.Y) &- Int16(memory.read(at: operand!))
+        let value = memory.read(at: operand!)
+        let cmp = registers.Y &- value
 
         registers.P.remove([.C, .Z, .N])
         registers.P.setZN(cmp)
-        if 0 < cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
+        if registers.Y >= value { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
         return .next
     }

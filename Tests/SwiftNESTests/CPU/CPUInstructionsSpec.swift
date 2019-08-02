@@ -791,7 +791,7 @@ class InstructionSpec: QuickSpec {
             // skip other addressing mode because of similar specifications to the above.
         }
 
-        // skip CPX/CPY because of similar specifications to the CMP.
+        // TODO CPX/CPY test
 
         describe("INC") {
             describe("absolute") {
