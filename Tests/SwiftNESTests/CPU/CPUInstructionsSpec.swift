@@ -617,7 +617,7 @@ class InstructionSpec: QuickSpec {
 
                         expect(cpu.registers.P.contains(.Z)).to(beTruthy())
                         expect(cpu.registers.P.contains(.V)).to(beFalsy())
-                        expect(cpu.registers.P.contains(.N)).to(beFalsy())
+                        expect(cpu.registers.P.contains(.N)).to(beTruthy())
                         expect(cpu.registers.PC).to(equal(0x0305))
                         expect(cycle).to(equal(4))
                     }

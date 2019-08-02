@@ -116,10 +116,12 @@ extension CPU {
 
     /// BIT
     func testBits(operand: Operand?) -> PCUpdate {
-        let data = registers.A & memory.read(at: operand!)
+        let value = memory.read(at: operand!)
+        let data = registers.A & value
         registers.P.remove([.Z, .V, .N])
-        registers.P.setZN(data)
-        if data[6] == 1 { registers.P.formUnion(.V) } else { registers.P.remove(.V) }
+        if data == 0 { registers.P.formUnion(.Z) } else { registers.P.remove(.Z) }
+        if value[6] == 1 { registers.P.formUnion(.V) } else { registers.P.remove(.V) }
+        if value[7] == 1 { registers.P.formUnion(.N) } else { registers.P.remove(.N) }
         return .next
     }
 
