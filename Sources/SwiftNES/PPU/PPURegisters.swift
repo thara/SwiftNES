@@ -21,8 +21,8 @@ struct PPURegisters: CustomStringConvertible {
 
     var description: String {
         return """
-            v:\(v.radix2) \
-            t:\(t.radix2) \
+            v:\(v.descriptionAsVRAMAddress) \
+            t:\(t.descriptionAsVRAMAddress) \
             CTRL:\(controller.rawValue.radix2) \
             MASK:\(mask.rawValue.radix2) \
             STATUS:\(status.rawValue.radix2) \
@@ -55,12 +55,15 @@ struct PPURegisters: CustomStringConvertible {
     mutating func writeScroll(position: UInt8) {
         if !writeToggle {
             // first write
+            // t: ....... ...HGFED = d: HGFED...
+            // x:              CBA = d: .....CBA
             t = (t & 0b111111111100000) | ((position & 0b11111000).u16 >> 3)
             fineX = position & 0b111
             writeToggle = true
         } else {
             // second write
-            t = (t & 0b1000111111111111) | ((position & 0b111).u16 << 12) | ((position & 0b1111000).u16 << 2)
+            // t: CBA..HG FED..... = d: HGFEDCBA
+            t = (t & 0b000110000011111) | ((position & 0b111).u16 << 12) | ((position & 0b1111000).u16 << 2)
             writeToggle = false
         }
     }
@@ -68,11 +71,15 @@ struct PPURegisters: CustomStringConvertible {
     mutating func writeVRAMAddress(addr: UInt8) {
         if !writeToggle {
             // first write
-            t = (t & 0b1100000011111111) | ((addr & 0b111111).u16 << 8)
+            // t: .FEDCBA ........ = d: ..FEDCBA
+            // t: X...... ........ = 0
+            t = (t & 0b000000011111111) | ((addr & 0b111111).u16 << 8)
             writeToggle = true
         } else {
             // second write
-            t = (t & 0b1111111100000000) | addr.u16
+            // t: ....... HGFEDCBA = d: HGFEDCBA
+            // v                   = t
+            t = (t & 0b111111100000000) | addr.u16
             v = t
             writeToggle = false
         }
@@ -108,10 +115,12 @@ struct PPURegisters: CustomStringConvertible {
     }
 
     mutating func copyX() {
+        // v: ....F.. ...EDCBA = t: ....F.. ...EDCBA
         v = (v & ~0b10000011111) | (t & 0b10000011111)
     }
 
     mutating func copyY() {
+        // v: IHGF.ED CBA..... = t: IHGF.ED CBA.....
         v = (v & ~0b111101111100000) | (t & 0b111101111100000)
     }
 }

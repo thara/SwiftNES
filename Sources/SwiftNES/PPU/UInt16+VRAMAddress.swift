@@ -44,6 +44,10 @@ extension UInt16 {
     var nameTableNo: UInt16 {
         return nameTableSelect >> 10
     }
+
+    var descriptionAsVRAMAddress: String {
+        return "fY=\(fineYScroll.radix16) NT=\(nameTableNo) cY=\(coarseYScroll) cX=\(coarseXScroll)"
+    }
 }
 
 /// Tile and attribute fetching
@@ -66,5 +70,9 @@ extension UInt16 {
 
     var attributeAddressIndex: UInt16 {
         return nameTableSelect | coarseYHigh | coarseXHigh
+    }
+
+    var descriptionAsVRAMTile: String {
+        return "NT=\(nameTableNo) cY=\(coarseYHigh >> 3) cX=\(coarseXHigh)"
     }
 }
