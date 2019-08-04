@@ -58,7 +58,7 @@ final class PPUBus: Memory {
     }
 
     func clear() {
-        nameTable.fill(0xFF)
+        nameTable.fill(0x00)
         paletteRAMIndexes.fill(0x00)
     }
 }
