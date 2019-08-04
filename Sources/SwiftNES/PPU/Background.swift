@@ -33,8 +33,6 @@ struct Background {
         let pixelIdx = 15 &- fineX
         let pixel = (tilePatternSecond[pixelIdx] &<< 1) | tilePatternFirst[pixelIdx]
 
-        ppuBackgroundLogger.trace("BG: \(tilePatternFirst.radix2)")
-
         guard pixel != 0 else {
             return Int(pixel)
         }
@@ -76,9 +74,6 @@ struct Background {
     /// Fetch tile bitmap low byte : step 2
     mutating func fetchTileBitmapLow(from memory: Memory) {
         tempTileFirst = memory.read(at: tempTableAddr)
-        if 0 < tempTileFirst {
-            ppuBackgroundLogger.trace("fetchTileBitmapLow \(tempTileFirst.radix2) \(tempTableAddr.radix16) \(nameTableEntry.radix16)")
-        }
     }
 
     /// Fetch tile bitmap high byte : step 1

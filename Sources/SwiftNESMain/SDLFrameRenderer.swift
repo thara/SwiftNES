@@ -37,9 +37,6 @@ final class SDLFrameRenderer: Renderer {
         frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[..<rowPixels]
         line &+= 1
 
-        // let p = pixels[..<rowPixels].map { $0 == 0 ? " " : "*" }
-        // print(p.joined())
-
         if NES.maxLine <= line {
             line = 0
             render()

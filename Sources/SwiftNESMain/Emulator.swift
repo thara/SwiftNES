@@ -68,8 +68,6 @@ final class Emulator {
             let endTime = SDL_GetTicks()
             let frameDuration = endTime - startTime
 
-            mainLogger.debug("Frame Duration: \(frameDuration)")
-
             //  Wait to mantain framerate
             if frameDuration < delay {
                 SDL_Delay(delay - frameDuration)

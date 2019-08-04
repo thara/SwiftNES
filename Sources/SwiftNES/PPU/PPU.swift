@@ -33,8 +33,6 @@ final class PPU {
     }
 
     func step() {
-        ppuLogger.trace("Dot \(scan) \(registers)")
-
         process()
 
         switch scan.nextDot() {
@@ -123,7 +121,6 @@ extension PPU {
             switch scan.dot % 8 {
             // name table
             case 1:
-                ppuLogger.trace("Name table: address v=\(registers.v.nameTableAddressIndex.radix16) t=\(registers.t.nameTableAddressIndex.radix16)")
                 background.addressNameTableEntry(using: registers.v)
                 background.reloadShift()
             case 2:
@@ -136,7 +133,6 @@ extension PPU {
 
             // tile bitmap low
             case 5:
-                ppuLogger.trace("VRAM[\(registers.v.radix16)] tile bitmap low: \(scan)")
                 background.addressTileBitmapLow(using: registers.v, controller: registers.controller)
             case 6:
                 background.fetchTileBitmapLow(from: memory)
@@ -217,7 +213,6 @@ extension PPU {
                 idx = sprite
             }
         }
-        ppuLogger.trace("updatePixel: \(idx) \(scan)")
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
         lineBuffer.write(pixel: palletes[Int(palleteNo)], at: x)

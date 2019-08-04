@@ -78,8 +78,6 @@ extension CPU {
 
         let result = instruction.exec(operand)
 
-        cpuLogger.debug("PC:\(pc.radix16) \(instruction.mnemonic) \(operand?.radix16 ?? "") \(registers)")
-
         switch result {
         case .jump(let addr):
             registers.PC = addr
