@@ -17,8 +17,8 @@ jobs:
           name: Build swiftlint
           command: |
             if [ ! -f ~/swiftlint ]; then
-              ~/src/script/build_swiftlint
-              mv ~/src/script/bin/swiftlint ~/swiftlint
+              ~/src/.circleci/script/build_swiftlint
+              mv ~/src/.circleci/script/bin/swiftlint ~/swiftlint
             fi
       - save_cache:
           name: Cache swiftlint
