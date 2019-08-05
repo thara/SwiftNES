@@ -101,4 +101,33 @@ struct SpriteOAM {
             )
         }
     }
+
+    func getPalleteIndex(x: Int, y: Int, baseAddr: UInt16, memory: inout Memory) -> (Int, SpriteAttribute) {
+        for sprite in sprites {
+            guard sprite.valid else {
+                break
+            }
+            guard x &- 7 <= sprite.x && sprite.x <= x else {
+                continue
+            }
+
+            let row = sprite.row(lineNumber: y)
+            let col = sprite.col(x: x)
+
+            let tileAddr = baseAddr &+ sprite.tileIdx.u16 &* 16 &+ row
+            let low = memory.read(at: tileAddr)
+            let high = memory.read(at: tileAddr + 8)
+
+            let pixel = low[col] &+ (high[col] &<< 1)
+
+            if pixel == 0 {
+                // transparent
+                continue
+            }
+
+            return (Int(pixel + 0x10), sprite.attr)   // from 0x3F10
+        }
+
+        return (0, [])
+    }
 }

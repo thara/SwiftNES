@@ -202,7 +202,8 @@ extension PPU {
             : 0
 
         let (sprite, spriteAttr) = registers.mask.contains(.sprite)
-            ? getSpritePalleteIndex(x: x)
+            ? spriteOAM.getPalleteIndex(
+                x: x, y: scan.line, baseAddr: registers.controller.baseSpriteTableAddr, memory: &memory)
             : (0, [])
 
         let idx = renderingEnabled
@@ -211,38 +212,6 @@ extension PPU {
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
         lineBuffer[x] = palletes[Int(palleteNo)]
-    }
-
-    func getSpritePalleteIndex(x: Int) -> (Int, SpriteAttribute) {
-
-        let baseSpriteTableAddr = registers.controller.baseSpriteTableAddr
-
-        for sprite in spriteOAM.sprites {
-            guard sprite.valid else {
-                break
-            }
-            guard x &- 7 <= sprite.x && sprite.x <= x else {
-                continue
-            }
-
-            let row = sprite.row(lineNumber: scan.line)
-            let col = sprite.col(x: x)
-
-            let tileAddr = baseSpriteTableAddr &+ sprite.tileIdx.u16 &* 16 &+ row
-            let low = memory.read(at: tileAddr)
-            let high = memory.read(at: tileAddr + 8)
-
-            let pixel = low[col] &+ (high[col] &<< 1)
-
-            if pixel == 0 {
-                // transparent
-                continue
-            }
-
-            return (Int(pixel + 0x10), sprite.attr)   // from 0x3F10
-        }
-
-        return (0, [])
     }
 
     func selectPalleteIndex(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> Int {
