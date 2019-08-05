@@ -13,7 +13,9 @@ final class PPU {
     private let interruptLine: InterruptLine
 
     var scan: Scan
-    let lineBuffer: LineBuffer
+
+    var lineBuffer: [UInt32]
+    let renderer: Renderer
 
     init(memory: Memory, interruptLine: InterruptLine, renderer: Renderer) {
         self.registers = PPURegisters()
@@ -23,9 +25,10 @@ final class PPU {
         self.spriteOAM = SpriteOAM()
 
         self.scan = Scan()
-        self.lineBuffer = LineBuffer(renderer: renderer)
+        self.lineBuffer = [UInt32](repeating: 0x00, count: NES.maxDot)
 
         self.interruptLine = interruptLine
+        self.renderer = renderer
     }
 
     var renderingEnabled: Bool {
@@ -37,9 +40,9 @@ final class PPU {
 
         switch scan.nextDot() {
         case .line(let last):
-            lineBuffer.flush(lineNumber: last)
+            renderer.newLine(number: last, pixels: lineBuffer)
         case .frame(let last):
-            lineBuffer.flush(lineNumber: last)
+            renderer.newLine(number: last, pixels: lineBuffer)
             frames += 1
         default:
             break
@@ -50,7 +53,7 @@ final class PPU {
         registers.clear()
         memory.clear()
         scan.clear()
-        lineBuffer.clear()
+        lineBuffer = [UInt32](repeating: 0x00, count: NES.maxDot)
         frames = 0
     }
 }
@@ -215,7 +218,7 @@ extension PPU {
         }
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
-        lineBuffer.write(pixel: palletes[Int(palleteNo)], at: x)
+        lineBuffer[x] = palletes[Int(palleteNo)]
     }
 
     func getSpritePalleteIndex(x: Int) -> (Int, SpriteAttribute) {
