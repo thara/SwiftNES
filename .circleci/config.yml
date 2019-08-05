@@ -9,7 +9,7 @@ jobs:
       - checkout
       - restore_cache:
           name: Restore swiftlint
-          key: swiftlint-0.33.0-bin
+          key: swiftlint-0.33.0-bin-{{ .Environment.CACHE_VERSION }}
       - run:
           name: Install dependencies
           command: apt-get update && apt-get install -y libsdl2-dev
@@ -22,7 +22,7 @@ jobs:
             fi
       - save_cache:
           name: Cache swiftlint
-          key: swiftlint-0.33.0-bin
+          key: swiftlint-0.33.0-bin-{{ .Environment.CACHE_VERSION }}
           paths:
             - ~/swiftlint
       - run:
