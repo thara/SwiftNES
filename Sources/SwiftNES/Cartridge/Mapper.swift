@@ -6,9 +6,3 @@ protocol Mapper: class {
 
     var mirroring: Mirroring { get }
 }
-
-extension Mapper {
-    func applyMirroring(to ppuBus: PPUBus) {
-        ppuBus.mirroring = mirroring
-    }
-}

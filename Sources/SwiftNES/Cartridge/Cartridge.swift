@@ -26,6 +26,6 @@ public final class Cartridge {
 
     @inline(__always)
     func applyMirroring(to ppuBus: PPUBus) {
-        mapper.applyMirroring(to: ppuBus)
+        ppuBus.mirroring = mapper.mirroring
     }
 }
