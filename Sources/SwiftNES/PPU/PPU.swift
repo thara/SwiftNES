@@ -205,17 +205,9 @@ extension PPU {
             ? getSpritePalleteIndex(x: x)
             : (0, [])
 
-        var idx = 0
-        if renderingEnabled {
-            let priority = getRenderingPriority(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
-
-            switch priority {
-            case .background:
-                idx = bg
-            case .sprite:
-                idx = sprite
-            }
-        }
+        let idx = renderingEnabled
+            ? selectPalleteIndex(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
+            : 0
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
         lineBuffer[x] = palletes[Int(palleteNo)]
@@ -253,18 +245,18 @@ extension PPU {
         return (0, [])
     }
 
-    func getRenderingPriority(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> RenderingPriority {
+    func selectPalleteIndex(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> Int {
         switch (bg, sprite, spriteAttr.contains(.behindBackground)) {
         case (1...3, 1...3, true):
-            return .background
+            return bg
         case (1...3, 1...3, false):
-            return .sprite
+            return sprite
         case (1...3, _, _):
-            return .background
+            return bg
         case (_, 1...3, _):
-            return .background
+            return sprite
         default:
-            return .background
+            return bg
         }
     }
 }
@@ -272,8 +264,4 @@ extension PPU {
 private extension BinaryInteger {
     @inline(__always)
     var isOdd: Bool { return self.magnitude % 2 != 0 }
-}
-
-enum RenderingPriority {
-    case background, sprite
 }
