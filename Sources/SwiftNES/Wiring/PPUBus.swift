@@ -3,12 +3,12 @@ final class PPUBus: Memory {
 
     var mirroring: Mirroring?
 
-    private var nameTable: RAM
-    private var paletteRAMIndexes: RAM
+    private var nameTable: [UInt8]
+    private var paletteRAMIndexes: [UInt8]
 
     init() {
-        nameTable = RAM(data: 0x00, count: 0x1000)
-        paletteRAMIndexes = RAM(data: 0x00, count: 0x0020)
+        nameTable = [UInt8](repeating: 0x00, count: 0x1000)
+        paletteRAMIndexes = [UInt8](repeating: 0x00, count: 0x0020)
     }
 
     func read(at address: UInt16) -> UInt8 {

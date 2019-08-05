@@ -10,13 +10,13 @@ class DummyRenderer: Renderer {
 
 extension CPU {
     convenience init() {
-        self.init(memory: RAM(data: 0x00, count: 65536), interruptLine: InterruptLine())
+        self.init(memory: [UInt8](repeating: 0x00, count: 65536), interruptLine: InterruptLine())
     }
 }
 
 extension PPU {
     convenience init() {
-        self.init(memory: RAM(data: 0x00, count: 65534), interruptLine: InterruptLine(), renderer: DummyRenderer())
+        self.init(memory: [UInt8](repeating: 0x00, count: 65534), interruptLine: InterruptLine(), renderer: DummyRenderer())
     }
 
     convenience init(memory: Memory) {
@@ -32,12 +32,12 @@ extension Cartridge {
 
 class DummyMapper: Mapper {
 
-    var ram: RAM
+    var ram: [UInt8]
 
     var mirroring: Mirroring = .vertical
 
     init(rawData: [UInt8]) {
-        ram = RAM(rawData: rawData)
+        ram = rawData
     }
 
     func read(at address: UInt16) -> UInt8 {

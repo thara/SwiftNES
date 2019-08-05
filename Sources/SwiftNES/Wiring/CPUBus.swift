@@ -1,15 +1,15 @@
 final class CPUBus: Memory {
-    private var wram: RAM
+    private var wram: [UInt8]
 
     var ppuPort: IOPort?
     var cartridge: Cartridge?
 
     init() {
-        self.wram = RAM(data: 0x00, count: 32767)
+        self.wram = [UInt8](repeating: 0x00, count: 32767)
     }
 
     init(initial: [UInt8]) {
-        self.wram = RAM(rawData: initial)
+        self.wram = initial
     }
 
     func read(at address: UInt16) -> UInt8 {
