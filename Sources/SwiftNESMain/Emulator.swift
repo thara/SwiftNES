@@ -15,8 +15,12 @@ final class Emulator {
 
     let nes: NES
 
+    let windowTitle: String
+
     init(windowTitle: String, windowScale: Int) throws {
         try SDL.initialize(subSystems: [.video])
+
+        self.windowTitle = windowTitle
 
         let windowSize = (width: 256 * windowScale, height: 240 * windowScale)
         window = try SDLWindow(title: windowTitle,
@@ -72,6 +76,8 @@ final class Emulator {
             if frameDuration < delay {
                 SDL_Delay(delay - frameDuration)
             }
+
+            window.setWindowTitle("\(windowTitle) - \(1000 / frameDuration) fps")
         }
     }
 }

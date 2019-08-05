@@ -32,8 +32,8 @@
         "package": "SDL",
         "repositoryURL": "https://github.com/thara/SDL.git",
         "state": {
-          "branch": "fix_no_texture_on_release",
-          "revision": "05f0bd87997a69cd7e547dee24911b9a362bc6bf",
+          "branch": "swiftnes",
+          "revision": "17001c7df11496385c2938d51edd65c361036fdf",
           "version": null
         }
       },
