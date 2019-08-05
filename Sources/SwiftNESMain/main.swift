@@ -1,3 +1,5 @@
+import Foundation
+
 import CSDL2
 import SDL
 
@@ -28,18 +30,21 @@ func main(_ romPath: String) throws {
 command { (filename: String?) in
     LoggingSystem.bootstrap(StreamLogHandler.standardOutput)
 
-#if nestest
-    try SwiftNES.nestest(romPath: "Sources/SwiftNESMain/example/nestest/nestest.nes")
-#else
-    let romPath = filename ?? "Tests/SwiftNESTests/fixtures/helloworld/sample1.nes"
     do {
+#if nestest
+        try SwiftNES.nestest(romPath: filename ?? "nestest.nes")
+#else
+        let romPath = filename ?? "Tests/SwiftNESTests/fixtures/helloworld/sample1.nes"
         try main(romPath)
+#endif
     } catch let error as SDLError {
         print("Error: \(error.debugDescription)")
+        exit(EXIT_FAILURE)
+    } catch let error as LocalizedError {
+        print("Error: \(error.errorDescription ?? "unknown")")
         exit(EXIT_FAILURE)
     } catch {
         print("Error: \(error)")
         exit(EXIT_FAILURE)
     }
-#endif
 }.run()

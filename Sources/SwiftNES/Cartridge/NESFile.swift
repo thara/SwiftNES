@@ -99,7 +99,7 @@ extension NESFileError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .cannotOpenStream(let path):
-            return "Can not open file stream : path=\(path)"
+            return "Can not open file : path=\(path)"
         case .notEnoughHeaderSize(let size):
             return "Not enough header size : expected=16, actual=\(size)"
         case .invalidHeader(let bytes):
