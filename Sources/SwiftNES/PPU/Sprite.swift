@@ -9,7 +9,7 @@ struct Sprite {
     let x: UInt8
 
     var valid: Bool {
-        return y != 0xFF && tileIdx != 0xFF && attr != [] && x != 0xFF
+        return y != 0xFF && tileIdx != 0xFF && x != 0xFF
     }
 
     func row(lineNumber: Int) -> UInt16 {
@@ -71,19 +71,24 @@ struct SpriteOAM {
     }
 
     /// the sprite evaluation phase
-    mutating func evalSprites() -> Bool {
-        var n = 0
+    mutating func evalSprites(line: Int, registers: inout PPURegisters) -> Bool {
+        var found = 0
         for i in 0..<spriteCount {
             let s = i &* spriteSize
+            let y = line &- Int(primary[s])
 
-            let y = primary[s]
-            if 0 <= y && y < 8 {
-                secondary[s..<(s &+ spriteSize)] = primary[s..<(s &+ spriteSize)]
-                n &+= 1
+            guard 0 <= y && y < 8 else {
+                continue
+            }
+            found &+= 1
 
-                if spriteLimit < n {
-                    return true
-                }
+            if i == 0 {
+                registers.status.formUnion(.spriteZeroHit)
+            }
+
+            secondary[s..<(s &+ spriteSize)] = primary[s..<(s &+ spriteSize)]
+            if spriteLimit < found {
+                return true
             }
         }
         return false

@@ -97,7 +97,7 @@ extension PPU {
                 registers.status.remove([.spriteOverflow, .spriteZeroHit])
             }
         case 257:
-            if spriteOAM.evalSprites() {
+            if spriteOAM.evalSprites(line: scan.line, registers: &registers) {
                 registers.status.formUnion(.spriteOverflow)
             }
         case 321:
@@ -187,6 +187,7 @@ extension PPU {
     // swiftlint:enable cyclomatic_complexity
 
     func updatePixel() {
+
         defer {
             background.shift()
         }
@@ -216,15 +217,15 @@ extension PPU {
 
     func selectPalleteIndex(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> Int {
         switch (bg, sprite, spriteAttr.contains(.behindBackground)) {
-        case (1...3, 1...3, true):
+        case (0, 0, _):
             return bg
-        case (1...3, 1...3, false):
+        case (0, let p, _) where 0 < p:
             return sprite
-        case (1...3, _, _):
+        case (let p, 0, _) where 0 < p:
             return bg
-        case (_, 1...3, _):
+        case (_, _, false):
             return sprite
-        default:
+        case (_, _, true):
             return bg
         }
     }
