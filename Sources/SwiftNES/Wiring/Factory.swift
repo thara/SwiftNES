@@ -9,9 +9,12 @@ public func makeNES(renderer: Renderer) -> NES {
 
     cpuBus.ppuPort = ppu.port
 
+    let controllerPort = ControllerPort(port1: nil, port2: nil)
+    cpuBus.controllerPort = controllerPort
+
     let cartridgeDrive = BusConnectedCartridgeDrive(cpuBus: cpuBus, ppuBus: ppuBus)
 
-    return NES(cpu: cpu, ppu: ppu, cartridgeDrive: cartridgeDrive)
+    return NES(cpu: cpu, ppu: ppu, cartridgeDrive: cartridgeDrive, controllerPort: controllerPort)
 }
 
 struct BusConnectedCartridgeDrive: CartridgeDrive {

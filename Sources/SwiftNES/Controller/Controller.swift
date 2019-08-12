@@ -1,26 +1,24 @@
-protocol Controller: class {
-    var polling: Bool { get set }
-
+public protocol Controller: class {
+    func write(_ value: UInt8)
     func read() -> UInt8
 }
 
 struct ControllerPort {
 
-    var port1: Controller
-    var port2: Controller
+    var port1: Controller?
+    var port2: Controller?
 
-    mutating func write(value: UInt8) {
-        let latch = value[0] == 1
-        port1.polling = latch
-        port2.polling = latch
+    mutating func write(_ value: UInt8) {
+        port1?.write(value)
+        port2?.write(value)
     }
 
-    func read(addr: UInt16) -> UInt8 {
+    func read(at addr: UInt16) -> UInt8 {
         switch addr {
         case 0x4016:
-            return port1.read()
+            return port1?.read() ?? 0x00
         case 0x4017:
-            return port2.read()
+            return port2?.read() ?? 0x00
         default:
             return 0x00
         }

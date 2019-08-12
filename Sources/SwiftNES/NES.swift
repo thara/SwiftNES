@@ -10,10 +10,13 @@ public final class NES {
     public static let height = 240
     public static let width = 256
 
-    init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive) {
+    var controllerPort: ControllerPort
+
+    init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive, controllerPort: ControllerPort) {
         self.cpu = cpu
         self.ppu = ppu
         self.cartridgeDrive = cartridgeDrive
+        self.controllerPort = controllerPort
     }
 
     public func runFrame() {
@@ -38,6 +41,11 @@ public final class NES {
         cartridgeDrive.insert(cartridge)
         cpu.powerOn()
         ppu.reset()
+    }
+
+    public func connect(controller1: Controller?, controller2: Controller?) {
+        controllerPort.port1 = controller1
+        controllerPort.port2 = controller2
     }
 }
 

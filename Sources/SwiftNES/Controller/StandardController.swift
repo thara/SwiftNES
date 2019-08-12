@@ -25,6 +25,8 @@ public final class StandardController: Controller {
         }
     }
 
+    public init() {}
+
     var state: UInt8 = 0
     var strobe: Button?
 
@@ -34,7 +36,11 @@ public final class StandardController: Controller {
         }
     }
 
-    func read() -> UInt8 {
+    public func write(_ value: UInt8) {
+        polling = value[0] == 1
+    }
+
+    public func read() -> UInt8 {
         if polling {
             return 0x40 & state[Button.A.rawValue]
         }
@@ -50,7 +56,7 @@ public final class StandardController: Controller {
         return 0x40 & input
     }
 
-    func press(button: Button) {
+    public func press(button: Button) {
         guard polling else { return }
         state = button.rawValue
     }

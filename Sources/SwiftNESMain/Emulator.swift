@@ -17,6 +17,8 @@ final class Emulator {
 
     let windowTitle: String
 
+    let controller: VirtualStandardController
+
     init(windowTitle: String, windowScale: Int) throws {
         try SDL.initialize(subSystems: [.video])
 
@@ -29,7 +31,7 @@ final class Emulator {
                                    y: .centered,
                                    width: windowSize.width,
                                    height: windowSize.height),
-                               options: [.resizable, .shown])
+                               options: [.shown, .inputFocus])
         fps = UInt32(try window.displayMode().refreshRate)
 
         let driver = SDLRenderer.Driver.default
@@ -41,7 +43,10 @@ final class Emulator {
 
         let frameRenderer = try SDLFrameRenderer(renderer: renderer, screenRect: screenRect)
 
+        controller = VirtualStandardController()
+
         nes = makeNES(renderer: frameRenderer)
+        nes.connect(controller1: controller.nesController, controller2: nil)
 
         event = SDL_Event()
     }
@@ -51,6 +56,7 @@ final class Emulator {
     }
 
     func runLoop() throws {
+        window.raise()
 
         let delay = 1000 / fps
 
@@ -63,6 +69,8 @@ final class Emulator {
             switch eventType {
             case SDL_QUIT, SDL_APP_TERMINATING:
                 isRunning = false
+            case SDL_KEYDOWN:
+                controller.press(key: Int(event.key.keysym.sym))
             default:
                 break
             }
