@@ -5,26 +5,25 @@ import SwiftNES
 
 final class Emulator {
 
-    private let window: SDLWindow
-
-    private let fps: UInt32
-
-    private var event: SDL_Event
-
-    private var isRunning = true
-
     private let nes: NES
 
-    let windowTitle: String
+    private let window: SDLWindow
+    private let windowTitle: String
+    private var event: SDL_Event
 
-    let controller: VirtualStandardController
+    private let fps: UInt32
+    private var isRunning = true
+
+    private let controller: VirtualStandardController
 
     init(windowTitle: String, windowScale: Int) throws {
         try SDL.initialize(subSystems: [.video])
 
         self.windowTitle = windowTitle
 
-        let windowSize = (width: 256 * windowScale, height: 240 * windowScale)
+        let windowSize = (
+            width: NES.width * windowScale,
+            height: NES.height * windowScale)
         window = try SDLWindow(title: windowTitle,
                                frame: (
                                    x: .centered,
