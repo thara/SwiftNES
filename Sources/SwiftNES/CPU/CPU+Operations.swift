@@ -46,6 +46,12 @@ extension CPU {
         return .next
     }
 
+    /// TSX
+    func transferStackPointerToX(operand: Operand?) -> PCUpdate {
+        registers.X = registers.S
+        return .next
+    }
+
     /// TAY
     func transferAccumulatorToY(operand: Operand?) -> PCUpdate {
         registers.Y = registers.A
@@ -55,6 +61,12 @@ extension CPU {
     /// TXA
     func transferXtoAccumulator(operand: Operand?) -> PCUpdate {
         registers.A = registers.X
+        return .next
+    }
+
+    /// TXS
+    func transferXtoStackPointer(operand: Operand?) -> PCUpdate {
+        registers.S = registers.X
         return .next
     }
 

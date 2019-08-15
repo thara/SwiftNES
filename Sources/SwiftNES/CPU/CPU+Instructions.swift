@@ -80,10 +80,14 @@ extension CPU {
             return Instruction(opcode: opcode, mnemonic: .STY, addressingMode: .absolute, cycle: 4, exec: storeYRegister)
         case 0xAA:
             return Instruction(opcode: opcode, mnemonic: .TAX, addressingMode: .implicit, cycle: 2, exec: transferAccumulatorToX)
+        case 0xBA:
+            return Instruction(opcode: opcode, mnemonic: .TSX, addressingMode: .implicit, cycle: 2, exec: transferStackPointerToX)
         case 0xA8:
             return Instruction(opcode: opcode, mnemonic: .TAY, addressingMode: .implicit, cycle: 2, exec: transferAccumulatorToY)
         case 0x8A:
             return Instruction(opcode: opcode, mnemonic: .TXA, addressingMode: .implicit, cycle: 2, exec: transferXtoAccumulator)
+        case 0x9A:
+            return Instruction(opcode: opcode, mnemonic: .TXS, addressingMode: .implicit, cycle: 2, exec: transferXtoStackPointer)
         case 0x98:
             return Instruction(opcode: opcode, mnemonic: .TYA, addressingMode: .implicit, cycle: 2, exec: transferYtoAccumulator)
 

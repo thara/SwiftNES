@@ -38,10 +38,14 @@ enum Mnemonic {
 
     /// Transfer Accumulator to X
     case TAX
+    /// Transfer Stack pointer to X
+    case TSX
     /// Transfer Accumulator to Y
     case TAY
     /// Transfer X to Accumulator
     case TXA
+    /// Transfer X to Stack pointer
+    case TXS
     /// Transfer Y to Accumulator
     case TYA
 
