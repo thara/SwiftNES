@@ -3,21 +3,20 @@ import SDL
 
 import SwiftNES
 
-let rowPixels = NES.width
+private let rowPixels = NES.width
+private let pitch = {
+    rowPixels * MemoryLayout<UInt32>.stride
+}()
 
 final class SDLFrameRenderer: Renderer {
 
     private let renderer: SDLRenderer
-
     private let screenRect: SDL_Rect
-
     private let frameTexture: SDLTexture
 
     private var frameBuffer: [UInt32]
 
     private var line = 0
-
-    private let pitch = rowPixels * MemoryLayout<UInt32>.stride
 
     init(renderer: SDLRenderer, screenRect: SDL_Rect) throws {
         self.renderer = renderer
@@ -34,7 +33,11 @@ final class SDLFrameRenderer: Renderer {
         guard number < NES.height else {
             return
         }
-        frameBuffer[(number * rowPixels)..<((number + 1) * rowPixels)] = pixels[..<rowPixels]
+
+        let start = number * rowPixels
+        let end = (number + 1) * rowPixels
+        frameBuffer[start..<end] = pixels[..<rowPixels]
+
         line &+= 1
 
         if NES.maxLine <= line {
@@ -49,9 +52,7 @@ final class SDLFrameRenderer: Renderer {
             try frameTexture.update(pixels: UnsafeMutablePointer(mutating: p), pitch: pitch)
 
             // background
-            // try frameRenderer.setDrawColor(red: 0x00, green: 0x00, blue: 0x00, alpha: 0xFF)
-            //FIXME for test
-            try renderer.setDrawColor(red: 0x85, green: 0x19, blue: 0x19, alpha: 0xFF)
+            try renderer.setDrawColor(red: 0x00, green: 0x00, blue: 0x00, alpha: 0xFF)
 
             try renderer.clear()
             try renderer.copy(frameTexture, destination: screenRect)
