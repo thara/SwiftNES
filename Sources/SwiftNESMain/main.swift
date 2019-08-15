@@ -17,13 +17,7 @@ func main(_ romPath: String) throws {
     // mainLogger.logLevel = .debug
 
     let emulator = try Emulator(windowTitle: "SwiftNES", windowScale: 3)
-
-    guard let cartridge = Cartridge(file: try NESFile(path: romPath)) else {
-        fatalError("Unsupported mapper")
-    }
-
-    emulator.nes.insert(cartridge: cartridge)
-
+    try emulator.loadNESFile(path: romPath)
     try emulator.runLoop()
 }
 

@@ -13,7 +13,7 @@ final class Emulator {
 
     private var isRunning = true
 
-    let nes: NES
+    private let nes: NES
 
     let windowTitle: String
 
@@ -53,6 +53,13 @@ final class Emulator {
 
     deinit {
          SDL.quit()
+    }
+
+    func loadNESFile(path: String) throws {
+        guard let cartridge = Cartridge(file: try NESFile(path: path)) else {
+            fatalError("Unsupported mapper")
+        }
+        nes.insert(cartridge: cartridge)
     }
 
     func runLoop() throws {
