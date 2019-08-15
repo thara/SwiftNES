@@ -400,7 +400,7 @@ extension CPU {
 
     /// RTI
     func returnFromInterrupt(operand: Operand?) -> PCUpdate {
-        registers.P = Status(rawValue: pullStack())
+        registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
         return .jump(addr: pullStack())
     }
 
