@@ -4,7 +4,7 @@ import SDL
 import SwiftNES
 
 struct VirtualStandardController {
-    var nesController: StandardController = StandardController()
+    let nesController: StandardController = StandardController()
 
     func press(key: Int) {
         mainLogger.info("Press \(key)")

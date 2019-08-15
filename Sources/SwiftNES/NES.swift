@@ -3,14 +3,13 @@ public final class NES {
     private let ppu: PPU
 
     private let cartridgeDrive: CartridgeDrive
+    private let controllerPort: ControllerPort
 
     public static let maxDot = 341
     public static let maxLine = 261
 
     public static let height = 240
     public static let width = 256
-
-    var controllerPort: ControllerPort
 
     init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive, controllerPort: ControllerPort) {
         self.cpu = cpu

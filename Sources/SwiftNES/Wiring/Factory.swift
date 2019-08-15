@@ -9,7 +9,7 @@ public func makeNES(renderer: Renderer) -> NES {
 
     cpuBus.ppuPort = ppu.port
 
-    let controllerPort = ControllerPort(port1: nil, port2: nil)
+    let controllerPort = ControllerPort()
     cpuBus.controllerPort = controllerPort
 
     let cartridgeDrive = BusConnectedCartridgeDrive(cpuBus: cpuBus, ppuBus: ppuBus)

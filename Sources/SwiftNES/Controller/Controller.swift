@@ -3,12 +3,12 @@ public protocol Controller: class {
     func read() -> UInt8
 }
 
-struct ControllerPort {
+class ControllerPort {
 
     var port1: Controller?
     var port2: Controller?
 
-    mutating func write(_ value: UInt8) {
+    func write(_ value: UInt8) {
         port1?.write(value)
         port2?.write(value)
     }
