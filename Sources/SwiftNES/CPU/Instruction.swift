@@ -163,4 +163,9 @@ enum Mnemonic {
     case BRK
     /// No Operation
     case NOP
+
+    // MARK: - Illegal
+
+    // Load Accumulator and X
+    case LAX
 }

@@ -532,4 +532,14 @@ extension CPU {
     func doNothing(_ operand: Operand?) -> PCUpdate {
         return .next
     }
+
+    // MARK: - Illegal
+
+    /// LAX
+    func loadAccumulatorAndX(operand: Operand?) -> PCUpdate {
+        let data = memory.read(at: operand!)
+        registers.A = data
+        registers.X = data
+        return .next
+    }
 }

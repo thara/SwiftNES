@@ -340,6 +340,19 @@ extension CPU {
         case 0x80, 0x82, 0x89, 0xC2, 0xE2:
             return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .immediate, cycle: 0, exec: doNothing)
 
+        case 0xA3:
+            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .indirectIndexed, cycle: 0, exec: loadAccumulatorAndX)
+        case 0xA7:
+            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .zeroPage, cycle: 0, exec: loadAccumulatorAndX)
+        case 0xAF:
+            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .absolute, cycle: 0, exec: loadAccumulatorAndX)
+        case 0xB3:
+            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .indirectIndexed, cycle: 0, exec: loadAccumulatorAndX)
+        case 0xB7:
+            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .zeroPageX, cycle: 0, exec: loadAccumulatorAndX)
+        case 0xBF:
+            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .absoluteY, cycle: 0, exec: loadAccumulatorAndX)
+
         default:
             return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .implicit, cycle: 2, exec: { _ in .next })
         }
