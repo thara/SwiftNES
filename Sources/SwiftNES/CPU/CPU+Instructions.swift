@@ -75,7 +75,7 @@ extension CPU {
         case 0x84:
             return Instruction(opcode: opcode, mnemonic: .STY, addressingMode: .zeroPage, cycle: 3, exec: storeYRegister)
         case 0x94:
-            return Instruction(opcode: opcode, mnemonic: .STY, addressingMode: .zeroPageY, cycle: 4, exec: storeYRegister)
+            return Instruction(opcode: opcode, mnemonic: .STY, addressingMode: .zeroPageX, cycle: 4, exec: storeYRegister)
         case 0x8C:
             return Instruction(opcode: opcode, mnemonic: .STY, addressingMode: .absolute, cycle: 4, exec: storeYRegister)
         case 0xAA:
