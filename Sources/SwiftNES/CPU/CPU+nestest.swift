@@ -8,7 +8,15 @@ extension CPU {
         switch operandPC {
         case 0:
             machineCode = "\(instruction.opcode.hex2)"
-            assemblyCode = "\(instruction.mnemonic)"
+
+            let operandString: String
+            switch instruction.addressingMode {
+            case .accumulator:
+                operandString = "A"
+            default:
+                operandString = ""
+            }
+            assemblyCode = "\(instruction.mnemonic) \(operandString)"
         case 1:
             let operand1 = memory.read(at: pc &+ 1)
             machineCode = "\(instruction.opcode.hex2) \(operand1.hex2)"
