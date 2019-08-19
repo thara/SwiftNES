@@ -29,7 +29,7 @@ extension CPU {
             case .immediate:
                 operand = UInt16(operand1)
             case .relative:
-                operand += (pc + 1 + operandPC)
+                operand = UInt16(Int(pc) + 2 + Int(operand.i8))
             default:
                 break
             }
