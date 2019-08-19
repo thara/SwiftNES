@@ -341,7 +341,7 @@ extension CPU {
             return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .immediate, cycle: 0, exec: doNothing)
 
         case 0xA3:
-            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .indirectIndexed, cycle: 0, exec: loadAccumulatorAndX)
+            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .indexedIndirect, cycle: 0, exec: loadAccumulatorAndX)
         case 0xA7:
             return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .zeroPage, cycle: 0, exec: loadAccumulatorAndX)
         case 0xAF:
@@ -349,7 +349,7 @@ extension CPU {
         case 0xB3:
             return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .indirectIndexed, cycle: 0, exec: loadAccumulatorAndX)
         case 0xB7:
-            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .zeroPageX, cycle: 0, exec: loadAccumulatorAndX)
+            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .zeroPageY, cycle: 0, exec: loadAccumulatorAndX)
         case 0xBF:
             return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .absoluteY, cycle: 0, exec: loadAccumulatorAndX)
 
