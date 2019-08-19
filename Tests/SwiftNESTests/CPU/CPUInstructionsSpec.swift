@@ -1089,7 +1089,7 @@ class InstructionSpec: QuickSpec {
                     let cycle = cpu.run()
 
                     expect(cpu.registers.PC).to(equal(0x0401))
-                    expect(cpu.registers.P.rawValue).to(equal(status.rawValue & ~0x30))
+                    expect(cpu.registers.P.rawValue).to(equal(status.rawValue | 0x20))
                     expect(cycle).to(equal(6))
                 }
             }
