@@ -545,8 +545,7 @@ extension CPU {
 
     /// SAX
     func storeAccumulatorAndX(operand: Operand?) -> PCUpdate {
-        memory.write(registers.A, at: operand!)
-        memory.write(registers.X, at: operand!)
+        memory.write(registers.A & registers.X, at: operand!)
         return .next
     }
 }
