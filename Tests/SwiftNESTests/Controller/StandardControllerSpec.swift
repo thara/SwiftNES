@@ -11,66 +11,39 @@ class StandardControllerSpec: QuickSpec {
         }
 
         describe("read") {
-            context("before polling") {
+            context("strobe off") {
                 beforeEach {
-                    controller.press(button: .A)
+                    controller.press(down: .A)
                 }
 
                 it("returns always 0") {
-                    expect(controller.read()) == 0
-                    expect(controller.read()) == 0
-                    expect(controller.read()) == 0
-                    expect(controller.read()) == 0
-                    expect(controller.read()) == 0
-                    expect(controller.read()) == 0
-                    expect(controller.read()) == 0
-                    expect(controller.read()) == 0
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 0
                 }
             }
 
-            context("duaring polling") {
+            context("strobe on") {
                 beforeEach {
-                    controller.polling = true
-                    controller.press(button: .A)
-                }
-
-                it("returns always A button state") {
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                }
-            }
-
-            context("after polling") {
-                beforeEach {
-                    controller.polling = true
-                    controller.press(button: [.A, .B, .up, .left])
-                    controller.polling = false
+                    controller.write(1)
+                    controller.write(0)
+                    controller.press(down: [.A, .B, .up, .left])
                 }
 
                 it("returns button state sequentially") {
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 0
-                    expect(controller.read()) == 0x40 & 0
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 0
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 0
-
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
-                    expect(controller.read()) == 0x40 & 1
+                    expect(controller.read()) == 0x40 | 1
+                    expect(controller.read()) == 0x40 | 1
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 1
+                    expect(controller.read()) == 0x40 | 0
+                    expect(controller.read()) == 0x40 | 1
+                    expect(controller.read()) == 0x40 | 0
                 }
             }
         }

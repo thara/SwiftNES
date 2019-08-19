@@ -16,48 +16,35 @@ public final class StandardController: Controller {
         public init(rawValue: UInt8) {
             self.rawValue = rawValue
         }
-
-        func shift() -> Button? {
-            if self == Button.right {
-                return nil
-            }
-            return Button(rawValue: rawValue &<< 1)
-        }
     }
 
     public init() {}
 
     var state: UInt8 = 0
-    var strobe: Button?
-
-    var polling: Bool = false {
-        didSet {
-            strobe = .A
-        }
-    }
+    var current: UInt8 = 0
+    var strobe: Bool = false
 
     public func write(_ value: UInt8) {
-        polling = value[0] == 1
+        strobe = value[0] == 1
+        current = 1
     }
 
     public func read() -> UInt8 {
-        if polling {
+        if strobe {
             return 0x40 & state[Button.A.rawValue]
         }
 
-        let input: UInt8
-        if let button = strobe {
-            input = state[button.rawValue]
-        } else {
-            input = 1
-        }
+        let input = state & current
 
-        strobe = strobe?.shift()
-        return 0x40 & input
+        current &<<= 1
+        return 0x40 | (0 < input ? 1 : 0)
     }
 
-    public func press(button: Button) {
-        guard polling else { return }
-        state = button.rawValue
+    public func press(down button: Button) {
+        state |= button.rawValue
+    }
+
+    public func press(up button: Button) {
+        state &= ~button.rawValue
     }
 }

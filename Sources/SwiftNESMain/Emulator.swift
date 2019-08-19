@@ -76,7 +76,9 @@ final class Emulator {
             case SDL_QUIT, SDL_APP_TERMINATING:
                 isRunning = false
             case SDL_KEYDOWN:
-                controller.press(key: Int(event.key.keysym.sym))
+                controller.press(down: Int(event.key.keysym.sym))
+            case SDL_KEYUP:
+                controller.press(up: Int(event.key.keysym.sym))
             default:
                 break
             }

@@ -6,11 +6,15 @@ import SwiftNES
 struct VirtualStandardController {
     let nesController: StandardController = StandardController()
 
-    func press(key: Int) {
-        mainLogger.info("Press \(key)")
-
+    func press(down key: Int) {
         if let button = keyMap[key] {
-            nesController.press(button: button)
+            nesController.press(down: button)
+        }
+    }
+
+    func press(up key: Int) {
+        if let button = keyMap[key] {
+            nesController.press(up: button)
         }
     }
 
