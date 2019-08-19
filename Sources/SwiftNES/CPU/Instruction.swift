@@ -166,6 +166,8 @@ enum Mnemonic {
 
     // MARK: - Illegal
 
-    // Load Accumulator and X
+    /// Load Accumulator and X
     case LAX
+    /// Store Accumulator and X
+    case SAX
 }

@@ -542,4 +542,11 @@ extension CPU {
         registers.X = data
         return .next
     }
+
+    /// SAX
+    func storeAccumulatorAndX(operand: Operand?) -> PCUpdate {
+        memory.write(registers.A, at: operand!)
+        memory.write(registers.X, at: operand!)
+        return .next
+    }
 }

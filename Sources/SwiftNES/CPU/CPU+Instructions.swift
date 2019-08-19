@@ -353,6 +353,15 @@ extension CPU {
         case 0xBF:
             return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: .absoluteY, cycle: 0, exec: loadAccumulatorAndX)
 
+        case 0x83:
+            return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: .indexedIndirect, cycle: 0, exec: storeAccumulatorAndX)
+        case 0x87:
+            return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: .zeroPage, cycle: 0, exec: storeAccumulatorAndX)
+        case 0x8F:
+            return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: .absolute, cycle: 0, exec: storeAccumulatorAndX)
+        case 0x97:
+            return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: .zeroPageY, cycle: 0, exec: storeAccumulatorAndX)
+
         default:
             return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .implicit, cycle: 2, exec: { _ in .next })
         }
