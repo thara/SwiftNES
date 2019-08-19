@@ -527,4 +527,9 @@ extension CPU {
         registers.PC = memory.readWord(at: 0xFFFE)
         return .next
     }
+
+    /// NOP
+    func doNothing(_ operand: Operand?) -> PCUpdate {
+        return .next
+    }
 }

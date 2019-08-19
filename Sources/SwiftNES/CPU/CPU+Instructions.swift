@@ -327,6 +327,19 @@ extension CPU {
         case 0x00:
             return Instruction(opcode: opcode, mnemonic: .BRK, addressingMode: .implicit, cycle: 7, exec: forceInterrupt)
 
+        case 0x04, 0x44, 0x64:
+            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .zeroPage, cycle: 0, exec: doNothing)
+        case 0x0C:
+            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .absolute, cycle: 0, exec: doNothing)
+        case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
+            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .zeroPageX, cycle: 0, exec: doNothing)
+        case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
+            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .implicit, cycle: 0, exec: doNothing)
+        case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
+            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .absoluteX, cycle: 0, exec: doNothing)
+        case 0x80, 0x82, 0x89, 0xC2, 0xE2:
+            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .immediate, cycle: 0, exec: doNothing)
+
         default:
             return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .implicit, cycle: 2, exec: { _ in .next })
         }
