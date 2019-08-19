@@ -299,7 +299,7 @@ extension CPU {
         var data = memory.read(at: operand!)
 
         registers.P.remove([.C, .Z, .N])
-        if data[7] == 1 { registers.P.formUnion(.C) }
+        if data[0] == 1 { registers.P.formUnion(.C) }
 
         data >>= 1
 
@@ -312,7 +312,7 @@ extension CPU {
 
     func logicalShiftRightForAccumulator(operand: Operand?) -> PCUpdate {
         registers.P.remove([.C, .Z, .N])
-        if registers.A[7] == 1 { registers.P.formUnion(.C) }
+        if registers.A[0] == 1 { registers.P.formUnion(.C) }
 
         registers.A >>= 1
 

@@ -921,7 +921,7 @@ class InstructionSpec: QuickSpec {
 
                     expect(cpu.memory.read(at: 0x0130)).to(equal(0b01110111))
                     expect(cpu.registers.P.contains(.N)).to(beFalsy())
-                    expect(cpu.registers.P.contains(.C)).to(beTruthy())
+                    expect(cpu.registers.P.contains(.C)).to(beFalsy())
                     expect(cpu.registers.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
                 }
