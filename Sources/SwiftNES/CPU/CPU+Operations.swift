@@ -400,6 +400,8 @@ extension CPU {
 
     /// RTI
     func returnFromInterrupt(operand: Operand?) -> PCUpdate {
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
         return .jump(addr: pullStack())
     }
