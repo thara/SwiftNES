@@ -327,6 +327,11 @@ extension CPU {
         case 0x00:
             return Instruction(opcode: opcode, mnemonic: .BRK, addressingMode: .implicit, cycle: 7, exec: forceInterrupt)
 
+        // Undocumented
+
+        case 0xEB:
+            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: .immediate, cycle: 2, exec: subtractWithCarry)
+
         case 0x04, 0x44, 0x64:
             return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .zeroPage, cycle: 0, exec: doNothing)
         case 0x0C:
