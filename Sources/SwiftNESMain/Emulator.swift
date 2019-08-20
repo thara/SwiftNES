@@ -70,16 +70,16 @@ final class Emulator {
         let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 101)
 
         while isRunning {
-            SDL_PollEvent(&event)
-
             let startTime = SDL_GetTicks()
             let eventType = SDL_EventType(rawValue: event.type)
 
-            switch eventType {
-            case SDL_QUIT, SDL_APP_TERMINATING:
-                isRunning = false
-            default:
-                break
+            while SDL_PollEvent(&event) != 0 {
+                switch eventType {
+                case SDL_QUIT, SDL_APP_TERMINATING:
+                    isRunning = false
+                default:
+                    break
+                }
             }
 
             controller.update(keys: currentKeys)
