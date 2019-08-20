@@ -13,17 +13,17 @@ struct Sprite {
     }
 
     func row(lineNumber: Int) -> UInt16 {
-        var row = lineNumber - Int(y) - 1
+        var row = UInt16(lineNumber) &- y.u16 &- 1
         if attr.contains(.flipVertically) {
-            row = 8 - 1 - row
+            row = 8 &- 1 &- row
         }
-        return UInt16(row)
+        return row
     }
 
     func col(x: Int) -> UInt8 {
-        var col = 7 - (x &- Int(self.x))
+        var col = 7 &- (x &- Int(self.x))
         if attr.contains(.flipHorizontally) {
-            col = 8 - 1 - col
+            col = 8 &- 1 &- col
         }
         return UInt8(col)
     }
@@ -121,7 +121,7 @@ struct SpriteOAM {
 
             let tileAddr = baseAddr &+ sprite.tileIdx.u16 &* 16 &+ row
             let low = memory.read(at: tileAddr)
-            let high = memory.read(at: tileAddr + 8)
+            let high = memory.read(at: tileAddr &+ 8)
 
             let pixel = low[col] &+ (high[col] &<< 1)
 
@@ -130,7 +130,7 @@ struct SpriteOAM {
                 continue
             }
 
-            return (Int(pixel + 0x10), sprite.attr)   // from 0x3F10
+            return (Int(pixel &+ 0x10), sprite.attr)   // from 0x3F10
         }
 
         return (0, [])
