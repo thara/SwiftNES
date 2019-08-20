@@ -76,8 +76,8 @@ extension PPU {
         case 240:
             // Post Render
             break
-        case 241...260:
-            // VBLANK
+        case 241:
+            // begin VBLANK
             if scan.dot == 1 {
                 registers.status.formUnion(.vblank)
                 if registers.controller.contains(.nmi) {
