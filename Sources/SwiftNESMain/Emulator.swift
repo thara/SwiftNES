@@ -67,7 +67,7 @@ final class Emulator {
         let delay = 1000 / fps
 
         let keyboardState = SDL_GetKeyboardState(nil)
-        let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 101)
+        let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 226)
 
         while isRunning {
             let startTime = SDL_GetTicks()
