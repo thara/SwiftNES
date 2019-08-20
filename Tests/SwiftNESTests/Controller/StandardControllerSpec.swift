@@ -13,7 +13,7 @@ class StandardControllerSpec: QuickSpec {
         describe("read") {
             context("strobe off") {
                 beforeEach {
-                    controller.press(down: .A)
+                    controller.update(button: .A)
                 }
 
                 it("returns always 0") {
@@ -32,7 +32,7 @@ class StandardControllerSpec: QuickSpec {
                 beforeEach {
                     controller.write(1)
                     controller.write(0)
-                    controller.press(down: [.A, .B, .up, .left])
+                    controller.update(button: [.A, .B, .up, .left])
                 }
 
                 it("returns button state sequentially") {

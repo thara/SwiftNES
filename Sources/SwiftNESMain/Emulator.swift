@@ -66,6 +66,9 @@ final class Emulator {
 
         let delay = 1000 / fps
 
+        let keyboardState = SDL_GetKeyboardState(nil)
+        let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 101)
+
         while isRunning {
             SDL_PollEvent(&event)
 
@@ -75,13 +78,11 @@ final class Emulator {
             switch eventType {
             case SDL_QUIT, SDL_APP_TERMINATING:
                 isRunning = false
-            case SDL_KEYDOWN:
-                controller.press(down: Int(event.key.keysym.sym))
-            case SDL_KEYUP:
-                controller.press(up: Int(event.key.keysym.sym))
             default:
                 break
             }
+
+            controller.update(keys: currentKeys)
 
             nes.runFrame()
 

@@ -6,26 +6,26 @@ import SwiftNES
 struct VirtualStandardController {
     let nesController: StandardController = StandardController()
 
-    func press(down key: Int) {
-        if let button = keyMap[key] {
-            nesController.press(down: button)
+    func update(keys: UnsafeBufferPointer<UInt8>) {
+        var state: UInt8 = 0
+        for (scancode, button) in VirtualStandardController.keys {
+            if 0 < keys[scancode] {
+                state |= button
+            }
         }
+        nesController.update(button: StandardController.Button(rawValue: state))
     }
 
-    func press(up key: Int) {
-        if let button = keyMap[key] {
-            nesController.press(up: button)
-        }
-    }
+    static let keys: [Int: UInt8] = [
+        Int(SDL_SCANCODE_W.rawValue): StandardController.Button.up.rawValue,
+        Int(SDL_SCANCODE_A.rawValue): StandardController.Button.left.rawValue,
+        Int(SDL_SCANCODE_S.rawValue): StandardController.Button.down.rawValue,
+        Int(SDL_SCANCODE_D.rawValue): StandardController.Button.right.rawValue,
 
-    let keyMap: [Int: StandardController.Button] = [
-        SDLK_w: .up,
-        SDLK_a: .left,
-        SDLK_s: .down,
-        SDLK_d: .right,
-        SDLK_LSHIFT: .start,
-        SDLK_LCTRL: .select,
-        SDLK_j: .B,
-        SDLK_k: .A
+        Int(SDL_SCANCODE_LSHIFT.rawValue): StandardController.Button.start.rawValue,
+        Int(SDL_SCANCODE_LCTRL.rawValue): StandardController.Button.select.rawValue,
+
+        Int(SDL_SCANCODE_J.rawValue): StandardController.Button.B.rawValue,
+        Int(SDL_SCANCODE_K.rawValue): StandardController.Button.A.rawValue
     ]
 }

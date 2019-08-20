@@ -40,11 +40,7 @@ public final class StandardController: Controller {
         return 0x40 | (0 < input ? 1 : 0)
     }
 
-    public func press(down button: Button) {
-        state |= button.rawValue
-    }
-
-    public func press(up button: Button) {
-        state &= ~button.rawValue
+    public func update(button: Button) {
+        state = button.rawValue
     }
 }
