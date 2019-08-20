@@ -34,6 +34,12 @@ final class CPUBus: Memory {
             wram.write(value, at: address)
         case 0x2000...0x3FFF:
             ppuPort?.write(value, to: ppuAddress(address))
+        case 0x4014:
+            let start = value.u16 * 0x100
+            for i in 0..<256 {
+                let data = read(at: start + UInt16(i))
+                write(data, at: 0x2004)
+            }
         case 0x4016, 0x4017:
             controllerPort?.write(value)
         case 0x4020...0xFFFF:
