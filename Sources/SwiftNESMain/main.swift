@@ -10,27 +10,11 @@ import SwiftNES
 
 var mainLogger = Logger(label: "SwiftNESMain")
 
-func main(_ romPath: String) throws {
-    // cpuLogger.logLevel = .debug
-    // ppuLogger.logLevel = .debug
-    // interruptLogger.logLevel = .debug
-    // mainLogger.logLevel = .debug
-
-    let emulator = try Emulator(windowTitle: "SwiftNES", windowScale: 3)
-    try emulator.loadNESFile(path: romPath)
-    try emulator.runLoop()
-}
-
-command { (filename: String?) in
+func run(_ closure: () throws -> Void) {
     LoggingSystem.bootstrap(StreamLogHandler.standardOutput)
 
     do {
-#if nestest
-        try SwiftNES.nestest(romPath: filename ?? "nestest.nes")
-#else
-        let romPath = filename ?? "Tests/SwiftNESTests/fixtures/helloworld/sample1.nes"
-        try main(romPath)
-#endif
+        try closure()
     } catch let error as SDLError {
         print("Error: \(error.debugDescription)")
         exit(EXIT_FAILURE)
@@ -41,4 +25,22 @@ command { (filename: String?) in
         print("Error: \(error)")
         exit(EXIT_FAILURE)
     }
+}
+
+Group {
+    $0.command("run") { (romPath: String) in
+        run {
+            let emulator = try Emulator(windowTitle: "SwiftNES", windowScale: 3)
+            try emulator.loadNESFile(path: romPath)
+            try emulator.runLoop()
+        }
+    }
+
+#if nestest
+    $0.command("nestest") { (romPath: String?) in
+        run {
+            try SwiftNES.nestest(romPath: romPath ?? "nestest.nes")
+        }
+    }
+#endif
 }.run()
