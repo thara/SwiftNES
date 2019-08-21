@@ -397,6 +397,66 @@ extension CPU {
         case 0xFF:
             return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: .absoluteX, cycle: 0, exec: incrementMemoryAndSubtractWithCarry)
 
+        case 0x03:
+            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: .indexedIndirect, cycle: 0, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+        case 0x07:
+            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: .zeroPage, cycle: 0, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+        case 0x0F:
+            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: .absolute, cycle: 0, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+        case 0x13:
+            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: .indirectIndexed, cycle: 0, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+        case 0x17:
+            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: .zeroPageX, cycle: 0, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+        case 0x1B:
+            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: .absoluteY, cycle: 0, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+        case 0x1F:
+            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: .absoluteX, cycle: 0, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+
+        case 0x23:
+            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: .indexedIndirect, cycle: 0, exec: rotateLeftAndBitwiseANDwithAccumulator)
+        case 0x27:
+            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: .zeroPage, cycle: 0, exec: rotateLeftAndBitwiseANDwithAccumulator)
+        case 0x2F:
+            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: .absolute, cycle: 0, exec: rotateLeftAndBitwiseANDwithAccumulator)
+        case 0x33:
+            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: .indirectIndexed, cycle: 0, exec: rotateLeftAndBitwiseANDwithAccumulator)
+        case 0x37:
+            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: .zeroPageX, cycle: 0, exec: rotateLeftAndBitwiseANDwithAccumulator)
+        case 0x3B:
+            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: .absoluteY, cycle: 0, exec: rotateLeftAndBitwiseANDwithAccumulator)
+        case 0x3F:
+            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: .absoluteX, cycle: 0, exec: rotateLeftAndBitwiseANDwithAccumulator)
+
+        case 0x43:
+            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: .indexedIndirect, cycle: 0, exec: logicalShiftRightAndBitwiseExclusiveOR)
+        case 0x47:
+            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: .zeroPage, cycle: 0, exec: logicalShiftRightAndBitwiseExclusiveOR)
+        case 0x4F:
+            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: .absolute, cycle: 0, exec: logicalShiftRightAndBitwiseExclusiveOR)
+        case 0x53:
+            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: .indirectIndexed, cycle: 0, exec: logicalShiftRightAndBitwiseExclusiveOR)
+        case 0x57:
+            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: .zeroPageX, cycle: 0, exec: logicalShiftRightAndBitwiseExclusiveOR)
+        case 0x5B:
+            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: .absoluteY, cycle: 0, exec: logicalShiftRightAndBitwiseExclusiveOR)
+        case 0x5F:
+            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: .absoluteX, cycle: 0, exec: logicalShiftRightAndBitwiseExclusiveOR)
+
+        case 0x63:
+            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: .indexedIndirect, cycle: 0, exec: rotateRightAndAddWithCarry)
+        case 0x67:
+            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: .zeroPage, cycle: 0, exec: rotateRightAndAddWithCarry)
+        case 0x6F:
+            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: .absolute, cycle: 0, exec: rotateRightAndAddWithCarry)
+        case 0x73:
+            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: .indirectIndexed, cycle: 0, exec: rotateRightAndAddWithCarry)
+        case 0x77:
+            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: .zeroPageX, cycle: 0, exec: rotateRightAndAddWithCarry)
+        case 0x7B:
+            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: .absoluteY, cycle: 0, exec: rotateRightAndAddWithCarry)
+        case 0x7F:
+            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: .absoluteX, cycle: 0, exec: rotateRightAndAddWithCarry)
+
         default:
             return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .implicit, cycle: 2, exec: { _ in .next })
         }

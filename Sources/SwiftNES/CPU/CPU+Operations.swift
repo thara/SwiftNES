@@ -560,4 +560,28 @@ extension CPU {
         _ = incrementMemory(operand: operand)
         return subtractWithCarry(operand: operand)
     }
+
+    /// SLO
+    func arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: Operand?) -> PCUpdate {
+        _ = arithmeticShiftLeft(operand: operand)
+        return bitwiseORwithAccumulator(operand: operand)
+    }
+
+    /// RLA
+    func rotateLeftAndBitwiseANDwithAccumulator(operand: Operand?) -> PCUpdate {
+        _ = rotateLeft(operand: operand)
+        return bitwiseANDwithAccumulator(operand: operand)
+    }
+
+    /// SRE
+    func logicalShiftRightAndBitwiseExclusiveOR(operand: Operand?) -> PCUpdate {
+        _ = logicalShiftRight(operand: operand)
+        return bitwiseExclusiveOR(operand: operand)
+    }
+
+    /// RRA
+    func rotateRightAndAddWithCarry(operand: Operand?) -> PCUpdate {
+        _ = rotateRight(operand: operand)
+        return addWithCarry(operand: operand)
+    }
 }

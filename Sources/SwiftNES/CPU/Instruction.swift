@@ -174,4 +174,12 @@ enum Mnemonic {
     case DCP
     /// INC + SBC
     case ISB
+    /// ASL + ORA
+    case SLO
+    /// ROL + AND
+    case RLA
+    /// LSR + EOR
+    case SRE
+    /// ROR + ADC
+    case RRA
 }
