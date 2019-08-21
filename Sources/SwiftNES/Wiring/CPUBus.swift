@@ -55,6 +55,6 @@ final class CPUBus: Memory {
     }
 
     func clear() {
-        wram.fill(0xFF)
+        wram.fill(0x00)
     }
 }
