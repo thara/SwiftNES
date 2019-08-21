@@ -170,4 +170,8 @@ enum Mnemonic {
     case LAX
     /// Store Accumulator and X
     case SAX
+    /// DEC + CMP
+    case DCP
+    /// INC + SBC
+    case ISB
 }

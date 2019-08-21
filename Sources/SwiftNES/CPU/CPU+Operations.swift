@@ -548,4 +548,16 @@ extension CPU {
         memory.write(registers.A & registers.X, at: operand!)
         return .next
     }
+
+    /// DCP
+    func decrementMemoryAndCompareAccumulator(operand: Operand?) -> PCUpdate {
+        _  = decrementMemory(operand: operand)
+        return compareAccumulator(operand: operand)
+    }
+
+    /// ISB
+    func incrementMemoryAndSubtractWithCarry(operand: Operand?) -> PCUpdate {
+        _ = incrementMemory(operand: operand)
+        return subtractWithCarry(operand: operand)
+    }
 }

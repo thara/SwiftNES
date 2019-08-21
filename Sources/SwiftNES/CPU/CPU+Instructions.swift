@@ -6,7 +6,7 @@ extension CPU {
 
     func buildInstructionTable() -> [Instruction?] {
         var table: [Instruction?] = Array(repeating: nil, count: 0x100)
-        for i in 0x00..<0xFF {
+        for i in 0x00...0xFF {
             table[i] = buildInstruction(opcode: UInt8(i))
         }
         return table
@@ -366,6 +366,36 @@ extension CPU {
             return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: .absolute, cycle: 0, exec: storeAccumulatorAndX)
         case 0x97:
             return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: .zeroPageY, cycle: 0, exec: storeAccumulatorAndX)
+
+        case 0xC3:
+            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: .indexedIndirect, cycle: 0, exec: decrementMemoryAndCompareAccumulator)
+        case 0xC7:
+            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: .zeroPage, cycle: 0, exec: decrementMemoryAndCompareAccumulator)
+        case 0xCF:
+            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: .absolute, cycle: 0, exec: decrementMemoryAndCompareAccumulator)
+        case 0xD3:
+            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: .indirectIndexed, cycle: 0, exec: decrementMemoryAndCompareAccumulator)
+        case 0xD7:
+            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: .zeroPageX, cycle: 0, exec: decrementMemoryAndCompareAccumulator)
+        case 0xDB:
+            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: .absoluteY, cycle: 0, exec: decrementMemoryAndCompareAccumulator)
+        case 0xDF:
+            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: .absoluteX, cycle: 0, exec: decrementMemoryAndCompareAccumulator)
+
+        case 0xE3:
+            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: .indexedIndirect, cycle: 0, exec: incrementMemoryAndSubtractWithCarry)
+        case 0xE7:
+            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: .zeroPage, cycle: 0, exec: incrementMemoryAndSubtractWithCarry)
+        case 0xEF:
+            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: .absolute, cycle: 0, exec: incrementMemoryAndSubtractWithCarry)
+        case 0xF3:
+            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: .indirectIndexed, cycle: 0, exec: incrementMemoryAndSubtractWithCarry)
+        case 0xF7:
+            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: .zeroPageX, cycle: 0, exec: incrementMemoryAndSubtractWithCarry)
+        case 0xFB:
+            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: .absoluteY, cycle: 0, exec: incrementMemoryAndSubtractWithCarry)
+        case 0xFF:
+            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: .absoluteX, cycle: 0, exec: incrementMemoryAndSubtractWithCarry)
 
         default:
             return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: .implicit, cycle: 2, exec: { _ in .next })
