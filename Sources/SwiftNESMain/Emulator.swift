@@ -64,13 +64,13 @@ final class Emulator {
     func runLoop() throws {
         window.raise()
 
-        let delay = 1000 / fps
-
         let keyboardState = SDL_GetKeyboardState(nil)
         let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 226)
 
         while isRunning {
-            let startTime = SDL_GetTicks()
+            let startTicks = SDL_GetTicks()
+            let startPerf = SDL_GetPerformanceCounter()
+
             let eventType = SDL_EventType(rawValue: event.type)
 
             while SDL_PollEvent(&event) != 0 {
@@ -86,15 +86,23 @@ final class Emulator {
 
             nes.runFrame()
 
-            let endTime = SDL_GetTicks()
-            let frameDuration = endTime - startTime
-
-            //  Wait to mantain framerate
-            if frameDuration < delay {
-                SDL_Delay(delay - frameDuration)
+            let endPerf = SDL_GetPerformanceCounter()
+            let framePerf = Double(endPerf - startPerf) / Double(SDL_GetPerformanceFrequency()) * 1000
+            if 0 < 16.666 - framePerf {
+                // Capping 60 FPS
+                SDL_Delay(UInt32(16.666 - framePerf))
             }
 
-            window.setWindowTitle("\(windowTitle) - \(1000 / frameDuration) fps")
+            let endTicks = SDL_GetTicks()
+            let frameTicks = Double(endTicks - startTicks) / 1000
+
+            if 0 < frameTicks {
+                window.setWindowTitle("\(windowTitle) - \(toString(1 / frameTicks)) fps")
+            }
         }
     }
+}
+
+func toString(_ d: Double) -> String {
+    return String(format: "%.0f", d)
 }
