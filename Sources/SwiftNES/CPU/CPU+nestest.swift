@@ -2,95 +2,116 @@ extension CPU {
     func logNestest(_ pc: UInt16, _ operandPC: UInt16, _ operand: UInt16?, _ instruction: Instruction) {
         let opcodePC = pc.hex4
 
+        let operand8_1 = memory.read(at: pc &+ 1)
+        let operand8_2 = memory.read(at: pc &+ 2)
+        let operand16 = operand8_1.u16 | (operand8_2.u16 << 8)
+
         let machineCode: String
-        let assemblyCode: String
-
-        switch operandPC {
-        case 0:
-            machineCode = "\(instruction.opcode.hex2)"
-
-            let operandString: String
-            switch instruction.addressingMode {
-            case .accumulator:
-                operandString = "A"
-            default:
-                operandString = ""
-            }
-            assemblyCode = "\(instruction.mnemonic) \(operandString)"
-        case 1:
-            let operand1 = memory.read(at: pc &+ 1)
-            machineCode = "\(instruction.opcode.hex2) \(operand1.hex2)"
-
-            guard var operand = operand else {
-                return
-            }
-
-            switch instruction.addressingMode {
-            case .immediate:
-                operand = UInt16(operand1)
-            case .relative:
-                operand = UInt16(Int(pc) + 2 + Int(operand.i8))
-            default:
-                break
-            }
-
-            let operandString = String(format: instruction.addressingMode.nestestStringFormat, operand)
-            assemblyCode = "\(instruction.mnemonic) \(operandString)"
-        case 2:
-            let operand1 = memory.read(at: pc &+ 1)
-            let operand2 = memory.read(at: pc &+ 2)
-            machineCode = "\(instruction.opcode.hex2) \(operand1.hex2) \(operand2.hex2)"
-
-            guard let operand = operand else {
-                return
-            }
-
-            let asmOperand1 = operand & 0xFF
-            let asmOperand2 = (operand & 0xFF00) >> 8
-            let operandString = String(format: instruction.addressingMode.nestestStringFormat, asmOperand2, asmOperand1)
-            assemblyCode = "\(instruction.mnemonic) \(operandString)"
+        switch instruction.addressingMode {
+        case .immediate, .zeroPage, .zeroPageX, .zeroPageY, .relative, .indirectIndexed, .indexedIndirect:
+            machineCode = "\(instruction.opcode.hex2) \(operand8_1.hex2)"
+        case .indirect, .absolute, .absoluteX, .absoluteY:
+            machineCode = "\(instruction.opcode.hex2) \(operand8_1.hex2) \(operand8_2.hex2)"
         default:
-            return
+            machineCode = "\(instruction.opcode.hex2)"
         }
 
-        print("\(opcodePC)  \(machineCode.padding(10))\(assemblyCode.padding(32))\(registers)")
+        var operandString = toOperandString(addressingMode: instruction.addressingMode, pc: pc, operand8_1: operand8_1, operand8_2: operand8_2, operand16: operand16)
+
+        switch instruction.mnemonic {
+        case .JMP, .JSR:
+            if instruction.addressingMode == .absolute {
+                let addr = decodeAddress(instruction.addressingMode, pc, operand8_1, operand16)
+                operandString = String(format: "$%04X", addr)
+            }
+        case .LSR, .ASL, .ROR, .ROL:
+            if instruction.addressingMode == .accumulator {
+                operandString = "A"
+            }
+        default:
+            break
+        }
+        let prefix = undocumentedOpcodes.contains(Int(instruction.opcode)) ? "*" : " "
+        let assemblyCode = "\(prefix)\(instruction.mnemonic) \(operandString)"
+
+        print("\(opcodePC)  \(machineCode.padding(9))\(assemblyCode.padding(33))\(registers)")
+    }
+
+    func decodeAddress(_ addressingMode: AddressingMode, _ pc: UInt16, _ operand8_1: UInt8, _ operand16: UInt16) -> UInt16 {
+        switch addressingMode {
+        case .implicit:
+            return 0x00
+        case .immediate:
+            return pc
+        case .zeroPage:
+            return operand8_1.u16
+        case .zeroPageX:
+            return (operand8_1 &+ registers.X).u16 & 0xFF
+        case .zeroPageY:
+            return (operand8_1 &+ registers.Y).u16 & 0xFF
+        case .absolute:
+            return operand16
+        case .absoluteX:
+            return operand16 &+ registers.X.u16
+        case .absoluteY:
+            return operand16 &+ registers.Y.u16
+        case .relative:
+            return pc
+        case .indirect:
+            return readOnIndirect(operand: operand16)
+        case .indirectIndexed:
+            return readOnIndirect(operand: (operand16 &+ registers.X.u16) & 0xFF)
+        case .indexedIndirect:
+            return readOnIndirect(operand: operand16) + registers.Y.u16
+        default:
+            return 0x00
+        }
+    }
+
+    func toOperandString(addressingMode: AddressingMode, pc: UInt16, operand8_1: UInt8, operand8_2: UInt8, operand16: UInt16) -> String {
+        let operand16 = operand8_1.u16 | (operand8_2.u16 << 8)
+
+        switch addressingMode {
+        case .implicit, .accumulator:
+            return " "
+        case .immediate:
+            return String(format: "#$%02X", operand8_1)
+        case .zeroPage:
+            return String(format: "$%02X = %02X", operand8_1, memory.read(at: operand8_1.u16))
+        case .zeroPageX:
+            return String(format: "$%02X,X @ %02X = %02X", operand8_1, operand8_1 &+ registers.X, memory.read(at: (operand8_1 &+ registers.X).u16))
+        case .zeroPageY:
+            return String(format: "$%02X,Y @ %02X = %02X", operand8_1, operand8_1 &+ registers.Y, memory.read(at: (operand8_1 &+ registers.Y).u16))
+        case .absolute:
+            return String(format: "$%04X = %02X", operand16, memory.read(at: operand16))
+        case .absoluteX:
+            return String(format: "$%04X,X @ %04X = %02X", operand16, operand16 &+ registers.X.u16, memory.read(at: operand16 &+ registers.X.u16))
+        case .absoluteY:
+            return String(format: "$%04X,Y @ %04X = %02X", operand16, operand16 &+ registers.Y.u16, memory.read(at: operand16 &+ registers.Y.u16))
+        case .relative:
+            return String(format: "$%04X", Int(pc) &+ 2 &+ Int(operand8_1.i8))
+        case .indirect:
+            return String(format: "($%04X) = %04X", operand16, readOnIndirect(operand: operand16))
+        case .indexedIndirect:
+            let operandX = registers.X &+ operand8_1
+            return String(format: "($%02X,X) @ %02X = %04X = %02X", operand8_1, operandX, readOnIndirect(operand: operandX.u16), memory.read(at: readOnIndirect(operand: operandX.u16)))
+        case .indirectIndexed:
+            let data = readOnIndirect(operand: operand8_1.u16)
+            return String(format: "($%02X),Y = %04X @ %04X = %02X", operand8_1, data, data &+ registers.Y.u16, memory.read(at: data &+ registers.Y.u16))
+        }
     }
 }
+
+private let undocumentedOpcodes = [
+    0xEB, 0x04, 0x44, 0x64, 0x0C, 0x14, 0x34, 0x54,
+    0x74, 0xD4, 0xF4, 0x1A, 0x3A, 0x5A, 0x7A, 0xDA,
+    0xFA, 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC, 0x80, 0x82, 0x89, 0xC2, 0xE2,
+    0xA3, 0xA7, 0xAF, 0xB3, 0xB7, 0xBF, 0x83, 0x87, 0x8F, 0x97
+]
 
 extension Registers: CustomStringConvertible {
     var description: String {
         return "A:\(A.hex2) X:\(X.hex2) Y:\(Y.hex2) P:\(P.rawValue.hex2) SP:\(S.hex2)"
-    }
-}
-
-extension AddressingMode {
-    var nestestStringFormat: String {
-        switch self {
-        case .implicit, .accumulator:
-            return ""
-        case .immediate:
-            return "#$%02X"
-        case .zeroPage:
-            return "$%02X"
-        case .zeroPageX:
-            return "$%02X, X"
-        case .zeroPageY:
-            return "$%02X, Y"
-        case .absolute:
-            return "$%02X%02X"
-        case .absoluteX:
-            return "$%02X%02X, X"
-        case .absoluteY:
-            return "$%02X%02X"
-        case .relative:
-            return "$%02X"
-        case .indirect:
-            return "($%02X%02X)"
-        case .indexedIndirect:
-            return "($%02X, X)"
-        case .indirectIndexed:
-            return "($%02X, Y)"
-        }
     }
 }
 

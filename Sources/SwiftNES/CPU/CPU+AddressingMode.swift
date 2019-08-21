@@ -40,19 +40,21 @@ extension CPU {
         case .relative:
             return (memory.read(at: registers.PC).u16, 1)
         case .indirect:
-            let low = memory.readWord(at: registers.PC)
-            let high = low & 0xFF00 &+ ((low &+ 1) & 0x00FF)  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-            return (memory.read(at: low).u16 &+ memory.read(at: high).u16 &<< 8, 2)
+            let data = memory.readWord(at: registers.PC)
+            return (readOnIndirect(operand: data), 2)
         case .indexedIndirect:
-            let low = (memory.read(at: registers.PC).u16 + registers.X.u16) & 0x00FF
-            let high = (low &+ 1) & 0x00FF  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-            return (memory.read(at: low).u16 &+ memory.read(at: high).u16 &<< 8, 1)
+            let data = memory.readWord(at: registers.PC)
+            return (readOnIndirect(operand: (data &+ registers.X.u16) & 0xFF), 1)
         case .indirectIndexed:
-            let low = memory.read(at: registers.PC).u16
-            let high = (low &+ 1) & 0x00FF  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-            let base = memory.read(at: low).u16 &+ memory.read(at: high).u16 &<< 8
-            return (base &+ registers.Y.u16, 1)
+            let data = memory.read(at: registers.PC).u16
+            return (readOnIndirect(operand: data) &+ registers.Y.u16, 1)
         }
     }
     // swiftlint:enable cyclomatic_complexity
+
+    func readOnIndirect(operand: UInt16) -> UInt16 {
+        let low = memory.read(at: operand).u16
+        let high = memory.read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8   // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
+        return low | high
+    }
 }
