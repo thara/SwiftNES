@@ -1,5 +1,26 @@
 extension CPU {
 
+    func interrupt() -> UInt? {
+        switch interruptLine.get() {
+        case .RESET:
+            return reset()
+        case .NMI:
+            return handleNMI()
+        case .IRQ:
+            if registers.P.contains(.I) {
+                return handleIRQ()
+            }
+        case .BRK:
+            if registers.P.contains(.I) {
+                return handleBRK()
+            }
+        default:
+            break
+        }
+
+        return nil
+    }
+
     /// Reset registers & memory state
     func reset() -> UInt {
 #if nestest
@@ -29,11 +50,7 @@ extension CPU {
         return 7
     }
 
-    func handleIRQ() -> UInt? {
-        guard !registers.P.contains(.I) else {
-            return nil
-        }
-
+    func handleIRQ() -> UInt {
         pushStack(word: registers.PC)
         pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
@@ -44,11 +61,7 @@ extension CPU {
         return 7
     }
 
-    func handleBRK() -> UInt? {
-        guard !registers.P.contains(.I) else {
-            return nil
-        }
-
+    func handleBRK() -> UInt {
         registers.PC &+= 1
         pushStack(word: registers.PC)
         pushStack(registers.P.rawValue)

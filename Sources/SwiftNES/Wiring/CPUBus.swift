@@ -14,6 +14,8 @@ final class CPUBus: Memory {
     }
 
     func read(at address: UInt16) -> UInt8 {
+        CPU.tick()
+
         switch address {
         case 0x0000...0x1FFF:
             return wram.read(at: address)
@@ -29,6 +31,8 @@ final class CPUBus: Memory {
     }
 
     func write(_ value: UInt8, at address: UInt16) {
+        CPU.tick()
+
         switch address {
         case 0x0000...0x07FF:
             wram.write(value, at: address)

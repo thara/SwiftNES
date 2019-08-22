@@ -22,11 +22,11 @@ public final class NES {
         let currentFrame = ppu.frames
 
         repeat {
-            cycle()
+            step()
         } while currentFrame == ppu.frames
     }
 
-    public func cycle() {
+    public func step() {
         let cpuCycles = cpu.step()
 
         var ppuCycles = cpuCycles &* 3

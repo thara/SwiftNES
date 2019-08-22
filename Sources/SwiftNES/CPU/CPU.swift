@@ -10,6 +10,9 @@ final class CPU {
 
     private var instructions: [Instruction?]
 
+    // TODO Cycle-accurate
+    private static var cycles: UInt = 0
+
     init(memory: Memory, interruptLine: InterruptLine) {
         self.registers = Registers()
         self.memory = memory
@@ -29,30 +32,37 @@ final class CPU {
     }
 
     func step() -> UInt {
-        switch interruptLine.get() {
-        case .RESET:
-            return reset()
-        case .NMI:
-            return handleNMI()
-        case .IRQ:
-            return handleIRQ() ?? run()
-        case .BRK:
-            return handleBRK() ?? run()
-        default:
-            return run()
+        // let before = CPU.cycles
+
+        if let cycles = interrupt() {
+            return cycles
         }
+
+        let opcode = fetch()
+        let instruction = decode(opcode)
+        return execute(instruction)
+
+        // print("\(before) \(CPU.cycles)")
+        // if before <= CPU.cycles {
+        //     return CPU.cycles &- before
+        // } else {
+        //     return UInt.max &- before &+ CPU.cycles
+        // }
+    }
+
+    @inline(__always)
+    static func tick(function: String = #function) {
+        cycles += 1
+    }
+
+    @inline(__always)
+    static func tick(count: UInt) {
+        cycles += count
     }
 }
 
 // MARK: - CPU.run implementation
 extension CPU {
-    func run() -> UInt {
-        let opcode = fetch()
-        let instruction = decode(opcode)
-        let cycle = execute(instruction)
-
-        return cycle
-    }
 
     func fetch() -> OpCode {
         let opcode = memory.read(at: registers.PC)
