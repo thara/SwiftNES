@@ -10,6 +10,8 @@ final class CPU {
 
     private var instructions: [Instruction?]
 
+    var nestestLog: NESTestLogEntry = NESTestLogEntry()
+
     // TODO Cycle-accurate
     private static var cycles: UInt = 0
 
@@ -65,27 +67,22 @@ final class CPU {
 extension CPU {
 
     func fetch() -> OpCode {
+        nestestLog.pc = registers.PC
+
         let opcode = memory.read(at: registers.PC)
         registers.PC &+= 1
         return opcode
     }
 
     func decode(_ opcode: OpCode) -> Instruction {
-        if let ins = instructions[Int(opcode)] {
-            return ins
-        }
-        return Instruction.NOP
+        return instructions[Int(opcode)]!
     }
 
     func execute(_ instruction: Instruction) -> UInt {
-        let (operand, pc) = fetchOperand(in: instruction.addressingMode)
-
+        let operand = instruction.addressingMode()
 #if nestest
-        logNestest(registers.PC &- 1, pc, operand, instruction)
+        logNestest(operand, instruction)
 #endif
-
-        registers.PC &+= pc
-
         let result = instruction.exec(operand)
 
         switch result {

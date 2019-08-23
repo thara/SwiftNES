@@ -1,13 +1,20 @@
+struct NESTestLogEntry {
+    var pc: UInt16 = 0x00
+    var addressingMode: AddressingMode?
+}
+
 extension CPU {
-    func logNestest(_ pc: UInt16, _ operandPC: UInt16, _ operand: UInt16?, _ instruction: Instruction) {
-        let opcodePC = pc.hex4
+    func logNestest(_ operand: UInt16?, _ instruction: Instruction) {
+        let pc = nestestLog.pc
 
         let operand8_1 = memory.read(at: pc &+ 1)
         let operand8_2 = memory.read(at: pc &+ 2)
         let operand16 = operand8_1.u16 | (operand8_2.u16 << 8)
 
+        let addressingMode = nestestLog.addressingMode!
+
         let machineCode: String
-        switch instruction.addressingMode {
+        switch addressingMode {
         case .immediate, .zeroPage, .zeroPageX, .zeroPageY, .relative, .indirectIndexed, .indexedIndirect:
             machineCode = "\(instruction.opcode.hex2) \(operand8_1.hex2)"
         case .indirect, .absolute, .absoluteX, .absoluteY:
@@ -16,16 +23,16 @@ extension CPU {
             machineCode = "\(instruction.opcode.hex2)"
         }
 
-        var operandString = toOperandString(addressingMode: instruction.addressingMode, pc: pc, operand8_1: operand8_1, operand8_2: operand8_2, operand16: operand16)
+        var operandString = toOperandString(addressingMode: addressingMode, pc: pc, operand8_1: operand8_1, operand8_2: operand8_2, operand16: operand16)
 
         switch instruction.mnemonic {
         case .JMP, .JSR:
-            if instruction.addressingMode == .absolute {
-                let addr = decodeAddress(instruction.addressingMode, pc, operand8_1, operand16)
+            if addressingMode == .absolute {
+                let addr = decodeAddress(addressingMode, pc, operand8_1, operand16)
                 operandString = String(format: "$%04X", addr)
             }
         case .LSR, .ASL, .ROR, .ROL:
-            if instruction.addressingMode == .accumulator {
+            if addressingMode == .accumulator {
                 operandString = "A"
             }
         default:
@@ -34,7 +41,7 @@ extension CPU {
         let prefix = undocumentedOpcodes.contains(Int(instruction.opcode)) ? "*" : " "
         let assemblyCode = "\(prefix)\(instruction.mnemonic) \(operandString)"
 
-        print("\(opcodePC)  \(machineCode.padding(9))\(assemblyCode.padding(33))\(registers)")
+        print("\(pc.hex4)  \(machineCode.padding(9))\(assemblyCode.padding(33))\(registers)")
     }
 
     func decodeAddress(_ addressingMode: AddressingMode, _ pc: UInt16, _ operand8_1: UInt8, _ operand16: UInt16) -> UInt16 {
