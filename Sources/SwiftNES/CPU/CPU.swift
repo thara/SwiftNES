@@ -41,13 +41,11 @@ final class CPU {
     func step() -> UInt {
         let before = cycles
 
-        if let cycles = interrupt() {
-            return cycles
+        if !interrupt() {
+            let opcode = fetch()
+            let instruction = decode(opcode)
+            execute(instruction)
         }
-
-        let opcode = fetch()
-        let instruction = decode(opcode)
-        execute(instruction)
 
         if before <= cycles {
             return cycles &- before
