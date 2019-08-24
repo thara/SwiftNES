@@ -7,7 +7,7 @@ class InstructionSpec: QuickSpec {
     override func spec() {
         var cpu: CPU!
         beforeEach {
-            cpu = CPU(ram: CycleTestRAM())
+            cpu = CPU()
         }
 
         describe("LDA") {
@@ -1517,28 +1517,5 @@ class InstructionSpec: QuickSpec {
                 }
             }
         }
-    }
-}
-
-private class CycleTestRAM: Memory {
-
-    var ram = [UInt8](repeating: 0x00, count: 65536)
-
-    func read(at address: UInt16) -> UInt8 {
-        CPU.tick()
-        return ram[Int(address)]
-    }
-
-    func write(_ value: UInt8, at address: UInt16) {
-        CPU.tick()
-        ram[Int(address)] = value
-    }
-
-    func clear() {
-        ram = [UInt8](repeating: 0x00, count: ram.count)
-    }
-
-    func fill(_ value: UInt8) {
-        ram = [UInt8](repeating: value, count: ram.count)
     }
 }
