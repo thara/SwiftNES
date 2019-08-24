@@ -87,16 +87,7 @@ extension CPU {
 #if nestest
         logNestest(operand, instruction)
 #endif
-        let result = instruction.exec(operand)
-
-        switch result {
-        case .jump(let addr):
-            registers.PC = addr
-        case .branch(let offset):
-            registers.PC = UInt16(Int(registers.PC) &+ Int(offset))
-        case .next:
-            break // NOP
-        }
+        registers.PC = instruction.exec(operand)
     }
 }
 

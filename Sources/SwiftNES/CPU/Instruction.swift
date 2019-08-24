@@ -1,13 +1,7 @@
 typealias Operand = UInt16
+typealias NextPC = UInt16
 
-typealias Operation = ((Operand?) -> PCUpdate)
-
-/// How to update program counter in registers after operation are executed
-enum PCUpdate {
-    case jump(addr: UInt16)
-    case branch(offset: Int8)
-    case next
-}
+typealias Operation = ((Operand) -> NextPC)
 
 struct Instruction {
     let opcode: UInt8

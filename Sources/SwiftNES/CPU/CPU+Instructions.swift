@@ -454,7 +454,7 @@ extension CPU {
             return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: absoluteX, exec: rotateRightAndAddWithCarry)
 
         default:
-            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: implicit, exec: { _ in .next })
+            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: implicit, exec: doNothing)
         }
     }
 }
