@@ -28,7 +28,7 @@ extension CPU {
         interruptLine.clear(.RESET)
         return 7
 #else
-        registers.PC = memory.readWord(at: 0xFFFC)
+        registers.PC = readWord(at: 0xFFFC)
         registers.P.formUnion(.I)
         registers.S -= 3
 
@@ -43,7 +43,7 @@ extension CPU {
         pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
 
-        registers.PC = memory.readWord(at: 0xFFFA)
+        registers.PC = readWord(at: 0xFFFA)
 
         interruptLine.clear(.NMI)
 
@@ -54,7 +54,7 @@ extension CPU {
         pushStack(word: registers.PC)
         pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
-        registers.PC = memory.readWord(at: 0xFFFE)
+        registers.PC = readWord(at: 0xFFFE)
 
         interruptLine.clear(.IRQ)
 
@@ -66,7 +66,7 @@ extension CPU {
         pushStack(word: registers.PC)
         pushStack(registers.P.rawValue)
         registers.P.formUnion(.I)
-        registers.PC = memory.readWord(at: 0xFFFE)
+        registers.PC = readWord(at: 0xFFFE)
 
         interruptLine.clear(.BRK)
 

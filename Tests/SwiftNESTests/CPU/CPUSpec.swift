@@ -32,7 +32,6 @@ class CPUSpec: QuickSpec {
                 it("select an instruction by opcode") {
                     let instruction = cpu.decode(0x24)
                     expect(instruction.mnemonic).to(equal(.BIT))
-                    expect(instruction.cycle).to(equal(3))
                 }
             }
 
@@ -40,7 +39,6 @@ class CPUSpec: QuickSpec {
                 it("return NOP instruction") {
                     let instruction = cpu.decode(0x02)
                     expect(instruction.mnemonic).to(equal(.NOP))
-                    expect(instruction.cycle).to(equal(2))
                 }
             }
         }

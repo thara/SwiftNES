@@ -1,40 +1,47 @@
+// swiftlint:disable file_length
+
 extension CPU {
 
     // Implements for Load/Store Operations
 
     /// LDA
     func loadAccumulator(operand: Operand?) -> PCUpdate {
-        registers.A = memory.read(at: operand!)
+        registers.A = read(at: operand!)
         return .next
     }
 
     /// LDX
     func loadXRegister(operand: Operand?) -> PCUpdate {
-        registers.X = memory.read(at: operand!)
+        registers.X = read(at: operand!)
         return .next
     }
 
     /// LDY
     func loadYRegister(operand: Operand?) -> PCUpdate {
-        registers.Y = memory.read(at: operand!)
+        registers.Y = read(at: operand!)
         return .next
     }
 
     /// STA
     func storeAccumulator(operand: Operand?) -> PCUpdate {
-        memory.write(registers.A, at: operand!)
+        write(registers.A, at: operand!)
+
+        if [.absoluteX, .absoluteY, .indirectIndexed].contains(currentStep.addressingMode) {
+            tick()
+        }
+
         return .next
     }
 
     /// STX
     func storeXRegister(operand: Operand?) -> PCUpdate {
-        memory.write(registers.X, at: operand!)
+        write(registers.X, at: operand!)
         return .next
     }
 
     /// STY
     func storeYRegister(operand: Operand?) -> PCUpdate {
-        memory.write(registers.Y, at: operand!)
+        write(registers.Y, at: operand!)
         return .next
     }
 
@@ -43,36 +50,42 @@ extension CPU {
     /// TAX
     func transferAccumulatorToX(operand: Operand?) -> PCUpdate {
         registers.X = registers.A
+        tick()
         return .next
     }
 
     /// TSX
     func transferStackPointerToX(operand: Operand?) -> PCUpdate {
         registers.X = registers.S
+        tick()
         return .next
     }
 
     /// TAY
     func transferAccumulatorToY(operand: Operand?) -> PCUpdate {
         registers.Y = registers.A
+        tick()
         return .next
     }
 
     /// TXA
     func transferXtoAccumulator(operand: Operand?) -> PCUpdate {
         registers.A = registers.X
+        tick()
         return .next
     }
 
     /// TXS
     func transferXtoStackPointer(operand: Operand?) -> PCUpdate {
         registers.S = registers.X
+        tick()
         return .next
     }
 
     /// TYA
     func transferYtoAccumulator(operand: Operand?) -> PCUpdate {
         registers.A = registers.Y
+        tick()
         return .next
     }
 
@@ -81,6 +94,7 @@ extension CPU {
     /// PHA
     func pushAccumulator(operand: Operand?) -> PCUpdate {
         pushStack(registers.A)
+        tick()
         return .next
     }
 
@@ -89,12 +103,14 @@ extension CPU {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         pushStack(registers.P.rawValue | Status.operatedB.rawValue)
+        tick()
         return .next
     }
 
     /// PLA
     func pullAccumulator(operand: Operand?) -> PCUpdate {
         registers.A = pullStack()
+        tick()
         return .next
     }
 
@@ -103,6 +119,7 @@ extension CPU {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
+        tick(count: 2)
         return .next
     }
 
@@ -110,25 +127,25 @@ extension CPU {
 
     /// AND
     func bitwiseANDwithAccumulator(operand: Operand?) -> PCUpdate {
-        registers.A &= memory.read(at: operand!)
+        registers.A &= read(at: operand!)
         return .next
     }
 
     /// EOR
     func bitwiseExclusiveOR(operand: Operand?) -> PCUpdate {
-        registers.A ^= memory.read(at: operand!)
+        registers.A ^= read(at: operand!)
         return .next
     }
 
     /// ORA
     func bitwiseORwithAccumulator(operand: Operand?) -> PCUpdate {
-        registers.A |= memory.read(at: operand!)
+        registers.A |= read(at: operand!)
         return .next
     }
 
     /// BIT
     func testBits(operand: Operand?) -> PCUpdate {
-        let value = memory.read(at: operand!)
+        let value = read(at: operand!)
         let data = registers.A & value
         registers.P.remove([.Z, .V, .N])
         if data == 0 { registers.P.formUnion(.Z) } else { registers.P.remove(.Z) }
@@ -142,7 +159,7 @@ extension CPU {
     /// ADC
     func addWithCarry(operand: Operand?) -> PCUpdate {
         let a = registers.A
-        let val = memory.read(at: operand!)
+        let val = read(at: operand!)
         var result = a &+ val
 
         if registers.P.contains(.C) { result &+= 1 }
@@ -165,7 +182,7 @@ extension CPU {
     /// SBC
     func subtractWithCarry(operand: Operand?) -> PCUpdate {
         let a = registers.A
-        let val = ~memory.read(at: operand!)
+        let val = ~read(at: operand!)
         var result = a &+ val
 
         if registers.P.contains(.C) { result &+= 1 }
@@ -187,7 +204,7 @@ extension CPU {
 
     /// CMP
     func compareAccumulator(operand: Operand?) -> PCUpdate {
-        let cmp = Int16(registers.A) &- Int16(memory.read(at: operand!))
+        let cmp = Int16(registers.A) &- Int16(read(at: operand!))
 
         registers.P.remove([.C, .Z, .N])
         registers.P.setZN(cmp)
@@ -198,7 +215,7 @@ extension CPU {
 
     /// CPX
     func compareXRegister(operand: Operand?) -> PCUpdate {
-        let value = memory.read(at: operand!)
+        let value = read(at: operand!)
         let cmp = registers.X &- value
 
         registers.P.remove([.C, .Z, .N])
@@ -210,7 +227,7 @@ extension CPU {
 
     /// CPY
     func compareYRegister(operand: Operand?) -> PCUpdate {
-        let value = memory.read(at: operand!)
+        let value = read(at: operand!)
         let cmp = registers.Y &- value
 
         registers.P.remove([.C, .Z, .N])
@@ -224,10 +241,12 @@ extension CPU {
 
     /// INC
     func incrementMemory(operand: Operand?) -> PCUpdate {
-        let result = memory.read(at: operand!) &+ 1
+        let result = read(at: operand!) &+ 1
 
         registers.P.setZN(result)
-        memory.write(result, at: operand!)
+        write(result, at: operand!)
+
+        tick()
 
         return .next
     }
@@ -246,11 +265,13 @@ extension CPU {
 
     /// DEC
     func decrementMemory(operand: Operand?) -> PCUpdate {
-        let result = memory.read(at: operand!) &- 1
+        let result = read(at: operand!) &- 1
 
         registers.P.setZN(result)
 
-        memory.write(result, at: operand!)
+        write(result, at: operand!)
+
+        tick()
 
         return .next
     }
@@ -258,12 +279,14 @@ extension CPU {
     /// DEX
     func decrementX(operand: Operand?) -> PCUpdate {
         registers.X = registers.X &- 1
+        tick()
         return .next
     }
 
     /// DEY
     func decrementY(operand: Operand?) -> PCUpdate {
         registers.Y = registers.Y &- 1
+        tick()
         return .next
     }
 
@@ -271,7 +294,7 @@ extension CPU {
 
     /// ASL
     func arithmeticShiftLeft(operand: Operand?) -> PCUpdate {
-        var data = memory.read(at: operand!)
+        var data = read(at: operand!)
 
         registers.P.remove([.C, .Z, .N])
         if data[7] == 1 { registers.P.formUnion(.C) }
@@ -280,8 +303,9 @@ extension CPU {
 
         registers.P.setZN(data)
 
-        memory.write(data, at: operand!)
+        write(data, at: operand!)
 
+        tick()
         return .next
     }
 
@@ -291,12 +315,13 @@ extension CPU {
 
         registers.A <<= 1
 
+        tick()
         return .next
     }
 
     /// LSR
     func logicalShiftRight(operand: Operand?) -> PCUpdate {
-        var data = memory.read(at: operand!)
+        var data = read(at: operand!)
 
         registers.P.remove([.C, .Z, .N])
         if data[0] == 1 { registers.P.formUnion(.C) }
@@ -305,8 +330,9 @@ extension CPU {
 
         registers.P.setZN(data)
 
-        memory.write(data, at: operand!)
+        write(data, at: operand!)
 
+        tick()
         return .next
     }
 
@@ -316,12 +342,13 @@ extension CPU {
 
         registers.A >>= 1
 
+        tick()
         return .next
     }
 
     /// ROL
     func rotateLeft(operand: Operand?) -> PCUpdate {
-        var data = memory.read(at: operand!)
+        var data = read(at: operand!)
         let c = data & 0x80
 
         data <<= 1
@@ -332,8 +359,9 @@ extension CPU {
 
         registers.P.setZN(data)
 
-        memory.write(data, at: operand!)
+        write(data, at: operand!)
 
+        tick()
         return .next
     }
 
@@ -347,12 +375,14 @@ extension CPU {
         if c == 0x80 { registers.P.formUnion(.C) }
 
         registers.A = a
+
+        tick()
         return .next
     }
 
     /// ROR
     func rotateRight(operand: Operand?) -> PCUpdate {
-        var data = memory.read(at: operand!)
+        var data = read(at: operand!)
         let c = data & 0x01
 
         data >>= 1
@@ -363,7 +393,9 @@ extension CPU {
 
         registers.P.setZN(data)
 
-        memory.write(data, at: operand!)
+        write(data, at: operand!)
+
+        tick()
         return .next
     }
 
@@ -377,6 +409,8 @@ extension CPU {
         if c == 1 { registers.P.formUnion(.C) }
 
         registers.A = a
+
+        tick()
         return .next
     }
 
@@ -390,11 +424,13 @@ extension CPU {
     /// JSR
     func jumpToSubroutine(operand: Operand?) -> PCUpdate {
         pushStack(word: registers.PC &- 1)
+        tick()
         return .jump(addr: operand!)
     }
 
     /// RTS
     func returnFromSubroutine(operand: Operand?) -> PCUpdate {
+        tick(count: 3)
         return .jump(addr: pullStack() &+ 1)
     }
 
@@ -402,6 +438,7 @@ extension CPU {
     func returnFromInterrupt(operand: Operand?) -> PCUpdate {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        tick(count: 2)
         registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
         return .jump(addr: pullStack())
     }
@@ -411,6 +448,7 @@ extension CPU {
     /// BCC
     func branchIfCarryClear(operand: Operand?) -> PCUpdate {
         if !registers.P.contains(.C) {
+            tick()
             return .branch(offset: operand!.i8)
         }
         return .next
@@ -419,6 +457,7 @@ extension CPU {
     /// BCS
     func branchIfCarrySet(operand: Operand?) -> PCUpdate {
         if registers.P.contains(.C) {
+            tick()
             return .branch(offset: operand!.i8)
         }
         return .next
@@ -427,6 +466,7 @@ extension CPU {
     /// BEQ
     func branchIfEqual(operand: Operand?) -> PCUpdate {
         if registers.P.contains(.Z) {
+            tick()
             return .branch(offset: operand!.i8)
         }
         return .next
@@ -435,6 +475,7 @@ extension CPU {
     /// BMI
     func branchIfMinus(operand: Operand?) -> PCUpdate {
         if registers.P.contains(.N) {
+            tick()
             return .branch(offset: operand!.i8)
         }
         return .next
@@ -443,6 +484,7 @@ extension CPU {
     /// BNE
     func branchIfNotEqual(operand: Operand?) -> PCUpdate {
         if !registers.P.contains(.Z) {
+            tick()
             return .branch(offset: operand!.i8)
         }
         return .next
@@ -451,6 +493,7 @@ extension CPU {
     /// BPL
     func branchIfPlus(operand: Operand?) -> PCUpdate {
         if !registers.P.contains(.N) {
+            tick()
             return .branch(offset: operand!.i8)
         }
         return .next
@@ -459,6 +502,7 @@ extension CPU {
     /// BVC
     func branchIfOverflowClear(operand: Operand?) -> PCUpdate {
         if !registers.P.contains(.V) {
+            tick()
             return .branch(offset: operand!.i8)
         }
         return .next
@@ -467,6 +511,7 @@ extension CPU {
     /// BVS
     func branchIfOverflowSet(operand: Operand?) -> PCUpdate {
         if registers.P.contains(.V) {
+            tick()
             return .branch(offset: operand!.i8)
         }
         return .next
@@ -477,42 +522,49 @@ extension CPU {
     /// CLC
     func clearCarry(operand: Operand?) -> PCUpdate {
         registers.P.remove(.C)
+        tick()
         return .next
     }
 
     /// CLD
     func clearDecimal(operand: Operand?) -> PCUpdate {
         registers.P.remove(.D)
+        tick()
         return .next
     }
 
     /// CLI
     func clearInterrupt(operand: Operand?) -> PCUpdate {
         registers.P.remove(.I)
+        tick()
         return .next
     }
 
     /// CLV
     func clearOverflow(operand: Operand?) -> PCUpdate {
         registers.P.remove(.V)
+        tick()
         return .next
     }
 
     /// SEC
     func setCarryFlag(operand: Operand?) -> PCUpdate {
         registers.P.formUnion(.C)
+        tick()
         return .next
     }
 
     /// SED
     func setDecimalFlag(operand: Operand?) -> PCUpdate {
         registers.P.formUnion(.D)
+        tick()
         return .next
     }
 
     /// SEI
     func setInterruptDisable(operand: Operand?) -> PCUpdate {
         registers.P.formUnion(.I)
+        tick()
         return .next
     }
 
@@ -524,7 +576,8 @@ extension CPU {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         pushStack(registers.P.rawValue | Status.interruptedB.rawValue)
-        registers.PC = memory.readWord(at: 0xFFFE)
+        registers.PC = readWord(at: 0xFFFE)
+        tick()
         return .next
     }
 
@@ -537,7 +590,7 @@ extension CPU {
 
     /// LAX
     func loadAccumulatorAndX(operand: Operand?) -> PCUpdate {
-        let data = memory.read(at: operand!)
+        let data = read(at: operand!)
         registers.A = data
         registers.X = data
         return .next
@@ -545,7 +598,7 @@ extension CPU {
 
     /// SAX
     func storeAccumulatorAndX(operand: Operand?) -> PCUpdate {
-        memory.write(registers.A & registers.X, at: operand!)
+        write(registers.A & registers.X, at: operand!)
         return .next
     }
 

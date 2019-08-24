@@ -5,8 +5,8 @@ typealias OpCode = UInt8
 final class CPU {
 
     struct Step {
-        var pc: UInt16? = nil
-        var addressingMode: AddressingMode? = nil
+        var pc: UInt16?
+        var addressingMode: AddressingMode?
     }
 
     var registers: Registers
@@ -19,7 +19,7 @@ final class CPU {
     var currentStep: Step = Step()
 
     // TODO Cycle-accurate
-    private static var cycles: UInt = 0
+    private var cycles: UInt = 0
 
     init(memory: Memory, interruptLine: InterruptLine) {
         self.registers = Registers()
@@ -32,15 +32,14 @@ final class CPU {
 
     func powerOn() {
         registers.powerOn()
-        memory.clear()
+        clear()
 
         interruptLine.clear([.NMI, .IRQ])
-
         interruptLine.send(.RESET)
     }
 
     func step() -> UInt {
-        // let before = CPU.cycles
+        let before = cycles
 
         if let cycles = interrupt() {
             return cycles
@@ -48,24 +47,23 @@ final class CPU {
 
         let opcode = fetch()
         let instruction = decode(opcode)
-        return execute(instruction)
+        execute(instruction)
 
-        // print("\(before) \(CPU.cycles)")
-        // if before <= CPU.cycles {
-        //     return CPU.cycles &- before
-        // } else {
-        //     return UInt.max &- before &+ CPU.cycles
-        // }
+        if before <= cycles {
+            return cycles &- before
+        } else {
+            return UInt.max &- before &+ cycles
+        }
     }
 
     @inline(__always)
-    static func tick(function: String = #function) {
-        cycles += 1
+    func tick() {
+        cycles &+= 1
     }
 
     @inline(__always)
-    static func tick(count: UInt) {
-        cycles += count
+    func tick(count: UInt) {
+        cycles &+= count
     }
 }
 
@@ -75,7 +73,7 @@ extension CPU {
     func fetch() -> OpCode {
         currentStep.pc = registers.PC
 
-        let opcode = memory.read(at: registers.PC)
+        let opcode = read(at: registers.PC)
         registers.PC &+= 1
         return opcode
     }
@@ -84,7 +82,7 @@ extension CPU {
         return instructions[Int(opcode)]!
     }
 
-    func execute(_ instruction: Instruction) -> UInt {
+    func execute(_ instruction: Instruction) {
         let operand = instruction.addressingMode()
 #if nestest
         logNestest(operand, instruction)
@@ -96,19 +94,37 @@ extension CPU {
             registers.PC = addr
         case .branch(let offset):
             registers.PC = UInt16(Int(registers.PC) &+ Int(offset))
-            return instruction.cycle &+ 1
         case .next:
             break // NOP
         }
+    }
+}
 
-        return instruction.cycle
+// MARK: - Memory
+extension CPU: Memory {
+
+    @inline(__always)
+    func read(at address: UInt16) -> UInt8 {
+        tick()
+        return memory.read(at: address)
+    }
+
+    @inline(__always)
+    func write(_ value: UInt8, at address: UInt16) {
+        tick()
+        memory.write(value, at: address)
+    }
+
+    @inline(__always)
+    func clear() {
+        memory.clear()
     }
 }
 
 // MARK: - Stack
 extension CPU {
     func pushStack(_ value: UInt8) {
-        memory.write(value, at: registers.S.u16 &+ 0x100)
+        write(value, at: registers.S.u16 &+ 0x100)
         registers.S &-= 1
     }
 
@@ -119,7 +135,7 @@ extension CPU {
 
     func pullStack() -> UInt8 {
         registers.S &+= 1
-        return memory.read(at: registers.S.u16 &+ 0x100)
+        return read(at: registers.S.u16 &+ 0x100)
     }
 
     func pullStack() -> UInt16 {
