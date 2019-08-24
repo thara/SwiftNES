@@ -64,7 +64,7 @@ extension CPU {
         case .indirectIndexed:
             return readOnIndirect(operand: (operand16 &+ registers.X.u16) & 0xFF)
         case .indexedIndirect:
-            return readOnIndirect(operand: operand16) + registers.Y.u16
+            return readOnIndirect(operand: operand16) &+ registers.Y.u16
         default:
             return 0x00
         }

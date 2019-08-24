@@ -150,6 +150,6 @@ extension CPU {
     }
 
     func pageCrossed(_ a: UInt16, _ b: UInt8) -> Bool {
-        return ((a + b.u16) & 0xFF00) != (a & 0xFF00)
+        return ((a &+ b.u16) & 0xFF00) != (a & 0xFF00)
     }
 }
