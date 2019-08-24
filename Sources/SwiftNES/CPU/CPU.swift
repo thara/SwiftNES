@@ -3,6 +3,12 @@ import Logging
 typealias OpCode = UInt8
 
 final class CPU {
+
+    struct Step {
+        var pc: UInt16? = nil
+        var addressingMode: AddressingMode? = nil
+    }
+
     var registers: Registers
     var memory: Memory
 
@@ -10,7 +16,7 @@ final class CPU {
 
     private var instructions: [Instruction?]
 
-    var nestestLog: NESTestLogEntry = NESTestLogEntry()
+    var currentStep: Step = Step()
 
     // TODO Cycle-accurate
     private static var cycles: UInt = 0
@@ -67,7 +73,7 @@ final class CPU {
 extension CPU {
 
     func fetch() -> OpCode {
-        nestestLog.pc = registers.PC
+        currentStep.pc = registers.PC
 
         let opcode = memory.read(at: registers.PC)
         registers.PC &+= 1

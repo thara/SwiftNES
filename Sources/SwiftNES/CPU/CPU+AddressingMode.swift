@@ -19,19 +19,19 @@ enum AddressingMode {
 extension CPU {
 
     func implicit() -> UInt16 {
-        nestestLog.addressingMode = .implicit
+        currentStep.addressingMode = .implicit
 
         return 0x00
     }
 
     func accumulator() -> UInt16 {
-        nestestLog.addressingMode = .accumulator
+        currentStep.addressingMode = .accumulator
 
         return registers.A.u16
     }
 
     func immediate() -> UInt16 {
-        nestestLog.addressingMode = .immediate
+        currentStep.addressingMode = .immediate
 
         let operand = registers.PC
         registers.PC &+= 1
@@ -39,7 +39,7 @@ extension CPU {
     }
 
     func zeroPage() -> UInt16 {
-        nestestLog.addressingMode = .zeroPage
+        currentStep.addressingMode = .zeroPage
 
         let operand = memory.read(at: registers.PC).u16 & 0xFF
         registers.PC &+= 1
@@ -47,7 +47,7 @@ extension CPU {
     }
 
     func zeroPageX() -> UInt16 {
-        nestestLog.addressingMode = .zeroPageX
+        currentStep.addressingMode = .zeroPageX
 
         let operand = (memory.read(at: registers.PC).u16 &+ registers.X.u16) & 0xFF
         registers.PC &+= 1
@@ -55,7 +55,7 @@ extension CPU {
     }
 
     func zeroPageY() -> UInt16 {
-        nestestLog.addressingMode = .zeroPageY
+        currentStep.addressingMode = .zeroPageY
 
         let operand = (memory.read(at: registers.PC).u16 &+ registers.Y.u16) & 0xFF
         registers.PC &+= 1
@@ -63,7 +63,7 @@ extension CPU {
     }
 
     func absolute() -> UInt16 {
-        nestestLog.addressingMode = .absolute
+        currentStep.addressingMode = .absolute
 
         let operand = memory.readWord(at: registers.PC)
         registers.PC &+= 2
@@ -71,7 +71,7 @@ extension CPU {
     }
 
     func absoluteX() -> UInt16 {
-        nestestLog.addressingMode = .absoluteX
+        currentStep.addressingMode = .absoluteX
 
         let data = memory.readWord(at: registers.PC)
         let operand = data &+ registers.X.u16 & 0xFFFF
@@ -80,7 +80,7 @@ extension CPU {
     }
 
     func absoluteY() -> UInt16 {
-        nestestLog.addressingMode = .absoluteY
+        currentStep.addressingMode = .absoluteY
 
         let data = memory.readWord(at: registers.PC)
         let operand = data &+ registers.Y.u16 & 0xFFFF
@@ -89,7 +89,7 @@ extension CPU {
     }
 
     func relative() -> UInt16 {
-        nestestLog.addressingMode = .relative
+        currentStep.addressingMode = .relative
 
         let operand = memory.read(at: registers.PC).u16
         registers.PC &+= 1
@@ -97,7 +97,7 @@ extension CPU {
     }
 
     func indirect() -> UInt16 {
-        nestestLog.addressingMode = .indirect
+        currentStep.addressingMode = .indirect
 
         let data = memory.readWord(at: registers.PC)
         let operand = readOnIndirect(operand: data)
@@ -106,7 +106,7 @@ extension CPU {
     }
 
     func indexedIndirect() -> UInt16 {
-        nestestLog.addressingMode = .indexedIndirect
+        currentStep.addressingMode = .indexedIndirect
 
         let data = memory.read(at: registers.PC)
         let operand = readOnIndirect(operand: (data &+ registers.X).u16 & 0xFF)
@@ -115,7 +115,7 @@ extension CPU {
     }
 
     func indirectIndexed() -> UInt16 {
-        nestestLog.addressingMode = .indirectIndexed
+        currentStep.addressingMode = .indirectIndexed
 
         let data = memory.read(at: registers.PC).u16
         let operand = readOnIndirect(operand: data) &+ registers.Y.u16

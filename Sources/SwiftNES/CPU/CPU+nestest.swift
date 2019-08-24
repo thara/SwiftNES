@@ -1,17 +1,12 @@
-struct NESTestLogEntry {
-    var pc: UInt16 = 0x00
-    var addressingMode: AddressingMode?
-}
-
 extension CPU {
     func logNestest(_ operand: UInt16?, _ instruction: Instruction) {
-        let pc = nestestLog.pc
+        let pc = currentStep.pc!
 
         let operand8_1 = memory.read(at: pc &+ 1)
         let operand8_2 = memory.read(at: pc &+ 2)
         let operand16 = operand8_1.u16 | (operand8_2.u16 << 8)
 
-        let addressingMode = nestestLog.addressingMode!
+        let addressingMode = currentStep.addressingMode!
 
         let machineCode: String
         switch addressingMode {
