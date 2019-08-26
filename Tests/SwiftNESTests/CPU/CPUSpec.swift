@@ -47,7 +47,7 @@ class CPUSpec: QuickSpec {
             it("reset registers & memory state") {
                 let cpu = CPU()
 
-                cpu.registers = Registers(
+                cpu.registers = CPURegisters(
                     A: 0xFA,
                     X: 0x1F,
                     Y: 0x59,

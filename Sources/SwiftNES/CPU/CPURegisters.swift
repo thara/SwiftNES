@@ -1,4 +1,4 @@
-struct Registers {
+struct CPURegisters {
     /// Accumulator
     var A: UInt8 = 0x00 {
         didSet {

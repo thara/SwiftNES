@@ -7,7 +7,7 @@ QCKMain([
     AddressingModeSpec.self,
     CPUSpec.self,
     InstructionSpec.self,
-    RegisterSpec.self,
+    CPURegisterSpec.self,
 
     PPUSpec.self,
     PPUPortSpec.self,

@@ -9,7 +9,7 @@ final class CPU {
         var addressingMode: AddressingMode?
     }
 
-    var registers: Registers
+    var registers: CPURegisters
     var memory: Memory
 
     let interruptLine: InterruptLine
@@ -22,7 +22,7 @@ final class CPU {
     private var cycles: UInt = 0
 
     init(memory: Memory, interruptLine: InterruptLine) {
-        self.registers = Registers()
+        self.registers = CPURegisters()
         self.memory = memory
         self.interruptLine = interruptLine
 
