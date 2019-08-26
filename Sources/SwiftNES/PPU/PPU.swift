@@ -202,14 +202,18 @@ extension PPU {
             ? background.getPaletteIndex(fineX: registers.fineX)
             : 0
 
-        let (sprite, spriteAttr) = registers.mask.contains(.sprite)
+        let (sprite, spriteAttr, spriteZeroHit) = registers.mask.contains(.sprite)
             ? spriteOAM.getPalleteIndex(
                 x: x, y: scan.line, baseAddr: registers.controller.baseSpriteTableAddr, memory: &memory)
-            : (0, [])
+            : (0, [], false)
 
         let idx = renderingEnabled
             ? selectPalleteIndex(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
             : 0
+
+        if spriteZeroHit && 0 < bg && renderingEnabled {
+            registers.status.formUnion(.spriteZeroHit)
+        }
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
         lineBuffer[x] = palletes[Int(palleteNo)]

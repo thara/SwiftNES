@@ -8,6 +8,8 @@ struct Sprite {
     /// X position of left
     let x: UInt8
 
+    let zero: Bool
+
     var valid: Bool {
         return y != 0xFF && tileIdx != 0xFF && x != 0xFF
     }
@@ -61,7 +63,7 @@ struct SpriteOAM {
     init() {
         self.primary = [UInt8](repeating: 0x00, count: oamSize)
         self.secondary = [UInt8](repeating: 0x00, count: oamSize)
-        self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIdx: 0x00, attr: [], x: 0x00), count: spriteLimit)
+        self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIdx: 0x00, attr: [], x: 0x00, zero: false), count: spriteLimit)
     }
 
     mutating func clearSecondaryOAM() {
@@ -82,10 +84,6 @@ struct SpriteOAM {
             }
             found &+= 1
 
-            if i == 0 {
-                registers.status.formUnion(.spriteZeroHit)
-            }
-
             secondary[s..<(s &+ spriteSize)] = primary[s..<(s &+ spriteSize)]
             if spriteLimit < found {
                 return true
@@ -102,12 +100,13 @@ struct SpriteOAM {
                 y: secondary[n],
                 tileIdx: secondary[n + 1],
                 attr: SpriteAttribute(rawValue: secondary[n + 2]),
-                x: secondary[n + 3]
+                x: secondary[n + 3],
+                zero: i == 0
             )
         }
     }
 
-    func getPalleteIndex(x: Int, y: Int, baseAddr: UInt16, memory: inout Memory) -> (Int, SpriteAttribute) {
+    func getPalleteIndex(x: Int, y: Int, baseAddr: UInt16, memory: inout Memory) -> (Int, SpriteAttribute, Bool) {
         for sprite in sprites {
             guard sprite.valid else {
                 break
@@ -130,9 +129,9 @@ struct SpriteOAM {
                 continue
             }
 
-            return (Int(pixel &+ 0x10), sprite.attr)   // from 0x3F10
+            return (Int(pixel &+ 0x10), sprite.attr, sprite.zero)   // from 0x3F10
         }
 
-        return (0, [])
+        return (0, [], false)
     }
 }
