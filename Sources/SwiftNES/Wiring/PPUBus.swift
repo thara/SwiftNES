@@ -27,7 +27,7 @@ final class PPUBus: Memory {
     func write(_ value: UInt8, at address: UInt16) {
         switch address {
         case 0x0000...0x1FFF:
-            ppuBusLogger.warning("[PPU] Unsupported write access to cartridge : addr=\(address.radix16) value=\(value.radix16)")
+            cartridge?.write(value, at: address)
         case 0x2000...0x3EFF:
             nameTable.write(value, at: toNameTableAddress(address))
         case 0x3F00...0x3F1F:

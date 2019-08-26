@@ -40,7 +40,11 @@ public struct NESFile {
         return readBytes(from: first, count: header.programROMSizeOfUnit * romSize)
     }
 
-    func readCharacterROM(from first: Int, romSize: Int) -> ([UInt8], Int) {
+    func readCharacterROM(from first: Int, romSize: Int) -> ([UInt8], Int)? {
+        if header.characterROMSizeOfUnit == 0 {
+            // Use CHA RAM
+            return nil
+        }
         return readBytes(from: first, count: header.characterROMSizeOfUnit * romSize)
     }
 }

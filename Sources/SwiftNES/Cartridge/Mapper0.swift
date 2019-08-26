@@ -1,7 +1,7 @@
 final class Mapper0: Mapper {
 
     let program: [UInt8]
-    let characterData: [UInt8]
+    var characterData: [UInt8]
 
     let mirroring: Mirroring
 
@@ -10,7 +10,11 @@ final class Mapper0: Mapper {
     init(file: NESFile) {
         var next: Int
         (program, next) = file.readProgramROM(from: NESFileHeader.size, romSize: 0x4000)
-        (characterData, _) = file.readCharacterROM(from: next, romSize: 0x2000)
+        if let (chrROM, _) = file.readCharacterROM(from: next, romSize: 0x2000) {
+            self.characterData = chrROM
+        } else {
+            self.characterData = [UInt8](repeating: 0x00, count: 0x2000)
+        }
 
         mirroring = file.header.flags6 & 1 == 0 ? .horizontal : .vertical
 
@@ -39,6 +43,12 @@ final class Mapper0: Mapper {
     }
 
     func write(_ value: UInt8, at address: UInt16) {
-        //NOP
+        switch address {
+        case 0x0000...0x1FFF:
+            // for CHA RAM
+            characterData[Int(address)] = value
+        default:
+            break
+        }
     }
 }
