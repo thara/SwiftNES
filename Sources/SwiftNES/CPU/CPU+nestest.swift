@@ -1,89 +1,65 @@
 extension CPU {
     func logNestest(_ operand: UInt16?, _ instruction: Instruction) {
-        let pc = currentStep.pc!
+        let pc = currentStep.pc
 
-        let operand8_1 = memory.read(at: pc &+ 1)
-        let operand8_2 = memory.read(at: pc &+ 2)
-        let operand16 = operand8_1.u16 | (operand8_2.u16 << 8)
+        currentStep.operand1 = memory.read(at: pc &+ 1)
+        currentStep.operand2 = memory.read(at: pc &+ 2)
 
-        let addressingMode = currentStep.addressingMode!
-
-        let machineCode: String
-        switch addressingMode {
-        case .immediate, .zeroPage, .zeroPageX, .zeroPageY, .relative, .indirectIndexed, .indexedIndirect:
-            machineCode = "\(instruction.opcode.hex2) \(operand8_1.hex2)"
-        case .indirect, .absolute, .absoluteX, .absoluteY:
-            machineCode = "\(instruction.opcode.hex2) \(operand8_1.hex2) \(operand8_2.hex2)"
-        default:
-            machineCode = "\(instruction.opcode.hex2)"
-        }
-
-        var operandString = toOperandString(addressingMode: addressingMode, pc: pc, operand8_1: operand8_1, operand8_2: operand8_2, operand16: operand16)
-
-        switch instruction.mnemonic {
-        case .JMP, .JSR:
-            if addressingMode == .absolute {
-                let addr = decodeAddress(addressingMode, pc, operand8_1, operand16)
-                operandString = String(format: "$%04X", addr)
-            }
-        case .LSR, .ASL, .ROR, .ROL:
-            if addressingMode == .accumulator {
-                operandString = "A"
-            }
-        default:
-            break
-        }
-        let prefix = undocumentedOpcodes.contains(Int(instruction.opcode)) ? "*" : " "
-        let assemblyCode = "\(prefix)\(instruction.mnemonic) \(operandString)"
+        let machineCode = makeMachineCode(from: instruction.opcode)
+        let assemblyCode = makeAssemblyCode(for: instruction)
 
         print("\(pc.hex4)  \(machineCode.padding(9))\(assemblyCode.padding(33))\(registers)")
     }
 
-    func decodeAddress(_ addressingMode: AddressingMode, _ pc: UInt16, _ operand8_1: UInt8, _ operand16: UInt16) -> UInt16 {
-        switch addressingMode {
-        case .implicit:
-            return 0x00
-        case .immediate:
-            return pc
-        case .zeroPage:
-            return operand8_1.u16
-        case .zeroPageX:
-            return (operand8_1 &+ registers.X).u16 & 0xFF
-        case .zeroPageY:
-            return (operand8_1 &+ registers.Y).u16 & 0xFF
-        case .absolute:
-            return operand16
-        case .absoluteX:
-            return operand16 &+ registers.X.u16
-        case .absoluteY:
-            return operand16 &+ registers.Y.u16
-        case .relative:
-            return pc
-        case .indirect:
-            return readOnIndirect(operand: operand16)
-        case .indirectIndexed:
-            return readOnIndirect(operand: (operand16 &+ registers.X.u16) & 0xFF)
-        case .indexedIndirect:
-            return readOnIndirect(operand: operand16) &+ registers.Y.u16
+    func makeMachineCode(from opcode: UInt8) -> String {
+        switch currentStep.addressingMode {
+        case .immediate, .zeroPage, .zeroPageX, .zeroPageY, .relative, .indirectIndexed, .indexedIndirect:
+            return "\(opcode.hex2) \(currentStep.operand1.hex2)"
+        case .indirect, .absolute, .absoluteX, .absoluteY:
+            return "\(opcode.hex2) \(currentStep.operand1.hex2) \(currentStep.operand2.hex2)"
         default:
-            return 0x00
+            return "\(opcode.hex2)"
         }
     }
 
-    func toOperandString(addressingMode: AddressingMode, pc: UInt16, operand8_1: UInt8, operand8_2: UInt8, operand16: UInt16) -> String {
-        let operand16 = operand8_1.u16 | (operand8_2.u16 << 8)
+    func makeAssemblyCode(for instruction: Instruction) -> String {
+        let operandString = makeAssemblyOperand(for: instruction.mnemonic)
+        let prefix = undocumentedOpcodes.contains(Int(instruction.opcode)) ? "*" : " "
+        return "\(prefix)\(instruction.mnemonic) \(operandString)"
+    }
 
-        switch addressingMode {
+    func makeAssemblyOperand(for mnemonic: Mnemonic) -> String {
+        switch mnemonic {
+        case .JMP, .JSR:
+            if currentStep.addressingMode == .absolute {
+                return String(format: "$%04X", decodeAddress())
+            }
+        case .LSR, .ASL, .ROR, .ROL:
+            if currentStep.addressingMode == .accumulator {
+                return "A"
+            }
+        default:
+            break
+        }
+
+        return makeAssemblyOperand()
+    }
+
+    func makeAssemblyOperand() -> String {
+        let operand1 = currentStep.operand1
+        let operand16 = currentStep.operand16
+
+        switch currentStep.addressingMode {
         case .implicit, .accumulator:
             return " "
         case .immediate:
-            return String(format: "#$%02X", operand8_1)
+            return String(format: "#$%02X", operand1)
         case .zeroPage:
-            return String(format: "$%02X = %02X", operand8_1, memory.read(at: operand8_1.u16))
+            return String(format: "$%02X = %02X", operand1, memory.read(at: operand1.u16))
         case .zeroPageX:
-            return String(format: "$%02X,X @ %02X = %02X", operand8_1, operand8_1 &+ registers.X, memory.read(at: (operand8_1 &+ registers.X).u16))
+            return String(format: "$%02X,X @ %02X = %02X", operand1, operand1 &+ registers.X, memory.read(at: (operand1 &+ registers.X).u16))
         case .zeroPageY:
-            return String(format: "$%02X,Y @ %02X = %02X", operand8_1, operand8_1 &+ registers.Y, memory.read(at: (operand8_1 &+ registers.Y).u16))
+            return String(format: "$%02X,Y @ %02X = %02X", operand1, operand1 &+ registers.Y, memory.read(at: (operand1 &+ registers.Y).u16))
         case .absolute:
             return String(format: "$%04X = %02X", operand16, memory.read(at: operand16))
         case .absoluteX:
@@ -91,15 +67,46 @@ extension CPU {
         case .absoluteY:
             return String(format: "$%04X,Y @ %04X = %02X", operand16, operand16 &+ registers.Y.u16, memory.read(at: operand16 &+ registers.Y.u16))
         case .relative:
-            return String(format: "$%04X", Int(pc) &+ 2 &+ Int(operand8_1.i8))
+            return String(format: "$%04X", Int(currentStep.pc) &+ 2 &+ Int(operand1.i8))
         case .indirect:
             return String(format: "($%04X) = %04X", operand16, readOnIndirect(operand: operand16))
         case .indexedIndirect:
-            let operandX = registers.X &+ operand8_1
-            return String(format: "($%02X,X) @ %02X = %04X = %02X", operand8_1, operandX, readOnIndirect(operand: operandX.u16), memory.read(at: readOnIndirect(operand: operandX.u16)))
+            let operandX = registers.X &+ operand1
+            return String(format: "($%02X,X) @ %02X = %04X = %02X", operand1, operandX, readOnIndirect(operand: operandX.u16), memory.read(at: readOnIndirect(operand: operandX.u16)))
         case .indirectIndexed:
-            let data = readOnIndirect(operand: operand8_1.u16)
-            return String(format: "($%02X),Y = %04X @ %04X = %02X", operand8_1, data, data &+ registers.Y.u16, memory.read(at: data &+ registers.Y.u16))
+            let data = readOnIndirect(operand: operand1.u16)
+            return String(format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ registers.Y.u16, memory.read(at: data &+ registers.Y.u16))
+        }
+    }
+
+    func decodeAddress() -> UInt16 {
+        switch currentStep.addressingMode {
+        case .implicit:
+            return 0x00
+        case .immediate:
+            return currentStep.pc
+        case .zeroPage:
+            return currentStep.operand1.u16
+        case .zeroPageX:
+            return (currentStep.operand1 &+ registers.X).u16 & 0xFF
+        case .zeroPageY:
+            return (currentStep.operand1 &+ registers.Y).u16 & 0xFF
+        case .absolute:
+            return currentStep.operand16
+        case .absoluteX:
+            return currentStep.operand16 &+ registers.X.u16
+        case .absoluteY:
+            return currentStep.operand16 &+ registers.Y.u16
+        case .relative:
+            return currentStep.pc
+        case .indirect:
+            return memory.readOnIndirect(operand: currentStep.operand16)
+        case .indirectIndexed:
+            return memory.readOnIndirect(operand: (currentStep.operand16 &+ registers.X.u16) & 0xFF)
+        case .indexedIndirect:
+            return memory.readOnIndirect(operand: currentStep.operand16) &+ registers.Y.u16
+        default:
+            return 0x00
         }
     }
 }

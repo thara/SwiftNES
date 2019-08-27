@@ -143,13 +143,15 @@ extension CPU {
         return operand
     }
 
+    func pageCrossed(_ a: UInt16, _ b: UInt8) -> Bool {
+        return ((a &+ b.u16) & 0xFF00) != (a & 0xFF00)
+    }
+}
+
+extension Memory {
     func readOnIndirect(operand: UInt16) -> UInt16 {
         let low = read(at: operand).u16
         let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8   // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
         return low | high
-    }
-
-    func pageCrossed(_ a: UInt16, _ b: UInt8) -> Bool {
-        return ((a &+ b.u16) & 0xFF00) != (a & 0xFF00)
     }
 }

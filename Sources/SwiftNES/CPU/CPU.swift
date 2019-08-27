@@ -5,8 +5,14 @@ typealias OpCode = UInt8
 final class CPU {
 
     struct Step {
-        var pc: UInt16?
-        var addressingMode: AddressingMode?
+        var pc: UInt16 = 0x00
+        var addressingMode: AddressingMode = .implicit
+
+        var operand1: UInt8 = 0x00
+        var operand2: UInt8 = 0x00
+        var operand16: UInt16 {
+            return operand1.u16 | (operand2.u16 << 8)
+        }
     }
 
     var registers: CPURegisters
