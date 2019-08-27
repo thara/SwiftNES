@@ -3,13 +3,6 @@ typealias NextPC = UInt16
 
 typealias Operation = ((Operand) -> NextPC)
 
-struct Instruction {
-    let opcode: UInt8
-    let mnemonic: Mnemonic
-    let addressingMode: AddressingMode.FetchOperand
-    let exec: Operation
-}
-
 // http://obelisk.me.uk/6502/reference.html
 enum Mnemonic {
     // MARK: - Load/Store Operations

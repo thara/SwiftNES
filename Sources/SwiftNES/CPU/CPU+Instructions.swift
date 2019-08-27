@@ -1,460 +1,505 @@
+struct Instruction {
+    let opcode: UInt8
+    let mnemonic: Mnemonic
+    let addressingMode: AddressingMode
+    let fetchOperand: AddressingMode.FetchOperand
+    let exec: Operation
+}
+
 extension CPU {
 
-    func buildInstructionTable() -> [Instruction?] {
+    func buildInstructionTable() -> [Instruction] {
         var table: [Instruction?] = Array(repeating: nil, count: 0x100)
         for i in 0x00...0xFF {
-            table[i] = buildInstruction(opcode: UInt8(i))
+            let opcode = UInt8(i)
+
+            let (mnemonic, addressingMode, operation) = decodeInstruction(for: opcode)
+            table[i] = Instruction(
+                opcode: opcode, mnemonic: mnemonic, addressingMode: addressingMode,
+                fetchOperand: decodeToFetchOperand(addressingMode: addressingMode),
+                exec: operation)
         }
-        return table
+        return table.compactMap { $0 }
     }
 
     // swiftlint:disable cyclomatic_complexity function_body_length line_length
-    private func buildInstruction(opcode: UInt8) -> Instruction? {
+    private func decodeInstruction(for opcode: UInt8) -> (Mnemonic, AddressingMode, Operation) {
         switch opcode {
 
         case 0xA9:
-            return Instruction(opcode: opcode, mnemonic: .LDA, addressingMode: immediate, exec: loadAccumulator)
+            return (.LDA, .immediate, loadAccumulator)
         case 0xA5:
-            return Instruction(opcode: opcode, mnemonic: .LDA, addressingMode: zeroPage, exec: loadAccumulator)
+            return (.LDA, .zeroPage, loadAccumulator)
         case 0xB5:
-            return Instruction(opcode: opcode, mnemonic: .LDA, addressingMode: zeroPageX, exec: loadAccumulator)
+            return (.LDA, .zeroPageX, loadAccumulator)
         case 0xAD:
-            return Instruction(opcode: opcode, mnemonic: .LDA, addressingMode: absolute, exec: loadAccumulator)
+            return (.LDA, .absolute, loadAccumulator)
         case 0xBD:
-            return Instruction(opcode: opcode, mnemonic: .LDA, addressingMode: absoluteX, exec: loadAccumulator)
+            return (.LDA, .absoluteX, loadAccumulator)
         case 0xB9:
-            return Instruction(opcode: opcode, mnemonic: .LDA, addressingMode: absoluteY, exec: loadAccumulator)
+            return (.LDA, .absoluteY, loadAccumulator)
         case 0xA1:
-            return Instruction(opcode: opcode, mnemonic: .LDA, addressingMode: indexedIndirect, exec: loadAccumulator)
+            return (.LDA, .indexedIndirect, loadAccumulator)
         case 0xB1:
-            return Instruction(opcode: opcode, mnemonic: .LDA, addressingMode: indirectIndexed, exec: loadAccumulator)
+            return (.LDA, .indirectIndexed, loadAccumulator)
         case 0xA2:
-            return Instruction(opcode: opcode, mnemonic: .LDX, addressingMode: immediate, exec: loadXRegister)
+            return (.LDX, .immediate, loadXRegister)
         case 0xA6:
-            return Instruction(opcode: opcode, mnemonic: .LDX, addressingMode: zeroPage, exec: loadXRegister)
+            return (.LDX, .zeroPage, loadXRegister)
         case 0xB6:
-            return Instruction(opcode: opcode, mnemonic: .LDX, addressingMode: zeroPageY, exec: loadXRegister)
+            return (.LDX, .zeroPageY, loadXRegister)
         case 0xAE:
-            return Instruction(opcode: opcode, mnemonic: .LDX, addressingMode: absolute, exec: loadXRegister)
+            return (.LDX, .absolute, loadXRegister)
         case 0xBE:
-            return Instruction(opcode: opcode, mnemonic: .LDX, addressingMode: absoluteY, exec: loadXRegister)
+            return (.LDX, .absoluteY, loadXRegister)
         case 0xA0:
-            return Instruction(opcode: opcode, mnemonic: .LDY, addressingMode: immediate, exec: loadYRegister)
+            return (.LDY, .immediate, loadYRegister)
         case 0xA4:
-            return Instruction(opcode: opcode, mnemonic: .LDY, addressingMode: zeroPage, exec: loadYRegister)
+            return (.LDY, .zeroPage, loadYRegister)
         case 0xB4:
-            return Instruction(opcode: opcode, mnemonic: .LDY, addressingMode: zeroPageX, exec: loadYRegister)
+            return (.LDY, .zeroPageX, loadYRegister)
         case 0xAC:
-            return Instruction(opcode: opcode, mnemonic: .LDY, addressingMode: absolute, exec: loadYRegister)
+            return (.LDY, .absolute, loadYRegister)
         case 0xBC:
-            return Instruction(opcode: opcode, mnemonic: .LDY, addressingMode: absoluteX, exec: loadYRegister)
+            return (.LDY, .absoluteX, loadYRegister)
         case 0x85:
-            return Instruction(opcode: opcode, mnemonic: .STA, addressingMode: zeroPage, exec: storeAccumulator)
+            return (.STA, .zeroPage, storeAccumulator)
         case 0x95:
-            return Instruction(opcode: opcode, mnemonic: .STA, addressingMode: zeroPageX, exec: storeAccumulator)
+            return (.STA, .zeroPageX, storeAccumulator)
         case 0x8D:
-            return Instruction(opcode: opcode, mnemonic: .STA, addressingMode: absolute, exec: storeAccumulator)
+            return (.STA, .absolute, storeAccumulator)
         case 0x9D:
-            return Instruction(opcode: opcode, mnemonic: .STA, addressingMode: absoluteX, exec: storeAccumulator)
+            return (.STA, .absoluteX, storeAccumulator)
         case 0x99:
-            return Instruction(opcode: opcode, mnemonic: .STA, addressingMode: absoluteY, exec: storeAccumulator)
+            return (.STA, .absoluteY, storeAccumulator)
         case 0x81:
-            return Instruction(opcode: opcode, mnemonic: .STA, addressingMode: indexedIndirect, exec: storeAccumulator)
+            return (.STA, .indexedIndirect, storeAccumulator)
         case 0x91:
-            return Instruction(opcode: opcode, mnemonic: .STA, addressingMode: indirectIndexed, exec: storeAccumulator)
+            return (.STA, .indirectIndexed, storeAccumulator)
         case 0x86:
-            return Instruction(opcode: opcode, mnemonic: .STX, addressingMode: zeroPage, exec: storeXRegister)
+            return (.STX, .zeroPage, storeXRegister)
         case 0x96:
-            return Instruction(opcode: opcode, mnemonic: .STX, addressingMode: zeroPageY, exec: storeXRegister)
+            return (.STX, .zeroPageY, storeXRegister)
         case 0x8E:
-            return Instruction(opcode: opcode, mnemonic: .STX, addressingMode: absolute, exec: storeXRegister)
+            return (.STX, .absolute, storeXRegister)
         case 0x84:
-            return Instruction(opcode: opcode, mnemonic: .STY, addressingMode: zeroPage, exec: storeYRegister)
+            return (.STY, .zeroPage, storeYRegister)
         case 0x94:
-            return Instruction(opcode: opcode, mnemonic: .STY, addressingMode: zeroPageX, exec: storeYRegister)
+            return (.STY, .zeroPageX, storeYRegister)
         case 0x8C:
-            return Instruction(opcode: opcode, mnemonic: .STY, addressingMode: absolute, exec: storeYRegister)
+            return (.STY, .absolute, storeYRegister)
         case 0xAA:
-            return Instruction(opcode: opcode, mnemonic: .TAX, addressingMode: implicit, exec: transferAccumulatorToX)
+            return (.TAX, .implicit, transferAccumulatorToX)
         case 0xBA:
-            return Instruction(opcode: opcode, mnemonic: .TSX, addressingMode: implicit, exec: transferStackPointerToX)
+            return (.TSX, .implicit, transferStackPointerToX)
         case 0xA8:
-            return Instruction(opcode: opcode, mnemonic: .TAY, addressingMode: implicit, exec: transferAccumulatorToY)
+            return (.TAY, .implicit, transferAccumulatorToY)
         case 0x8A:
-            return Instruction(opcode: opcode, mnemonic: .TXA, addressingMode: implicit, exec: transferXtoAccumulator)
+            return (.TXA, .implicit, transferXtoAccumulator)
         case 0x9A:
-            return Instruction(opcode: opcode, mnemonic: .TXS, addressingMode: implicit, exec: transferXtoStackPointer)
+            return (.TXS, .implicit, transferXtoStackPointer)
         case 0x98:
-            return Instruction(opcode: opcode, mnemonic: .TYA, addressingMode: implicit, exec: transferYtoAccumulator)
+            return (.TYA, .implicit, transferYtoAccumulator)
 
         case 0x48:
-            return Instruction(opcode: opcode, mnemonic: .PHA, addressingMode: implicit, exec: pushAccumulator)
+            return (.PHA, .implicit, pushAccumulator)
         case 0x08:
-            return Instruction(opcode: opcode, mnemonic: .PHP, addressingMode: implicit, exec: pushProcessorStatus)
+            return (.PHP, .implicit, pushProcessorStatus)
         case 0x68:
-            return Instruction(opcode: opcode, mnemonic: .PLA, addressingMode: implicit, exec: pullAccumulator)
+            return (.PLA, .implicit, pullAccumulator)
         case 0x28:
-            return Instruction(opcode: opcode, mnemonic: .PLP, addressingMode: implicit, exec: pullProcessorStatus)
+            return (.PLP, .implicit, pullProcessorStatus)
 
         case 0x29:
-            return Instruction(opcode: opcode, mnemonic: .AND, addressingMode: immediate, exec: bitwiseANDwithAccumulator)
+            return (.AND, .immediate, bitwiseANDwithAccumulator)
         case 0x25:
-            return Instruction(opcode: opcode, mnemonic: .AND, addressingMode: zeroPage, exec: bitwiseANDwithAccumulator)
+            return (.AND, .zeroPage, bitwiseANDwithAccumulator)
         case 0x35:
-            return Instruction(opcode: opcode, mnemonic: .AND, addressingMode: zeroPageX, exec: bitwiseANDwithAccumulator)
+            return (.AND, .zeroPageX, bitwiseANDwithAccumulator)
         case 0x2D:
-            return Instruction(opcode: opcode, mnemonic: .AND, addressingMode: absolute, exec: bitwiseANDwithAccumulator)
+            return (.AND, .absolute, bitwiseANDwithAccumulator)
         case 0x3D:
-            return Instruction(opcode: opcode, mnemonic: .AND, addressingMode: absoluteX, exec: bitwiseANDwithAccumulator)
+            return (.AND, .absoluteX, bitwiseANDwithAccumulator)
         case 0x39:
-            return Instruction(opcode: opcode, mnemonic: .AND, addressingMode: absoluteY, exec: bitwiseANDwithAccumulator)
+            return (.AND, .absoluteY, bitwiseANDwithAccumulator)
         case 0x21:
-            return Instruction(opcode: opcode, mnemonic: .AND, addressingMode: indexedIndirect, exec: bitwiseANDwithAccumulator)
+            return (.AND, .indexedIndirect, bitwiseANDwithAccumulator)
         case 0x31:
-            return Instruction(opcode: opcode, mnemonic: .AND, addressingMode: indirectIndexed, exec: bitwiseANDwithAccumulator)
+            return (.AND, .indirectIndexed, bitwiseANDwithAccumulator)
         case 0x49:
-            return Instruction(opcode: opcode, mnemonic: .EOR, addressingMode: immediate, exec: bitwiseExclusiveOR)
+            return (.EOR, .immediate, bitwiseExclusiveOR)
         case 0x45:
-            return Instruction(opcode: opcode, mnemonic: .EOR, addressingMode: zeroPage, exec: bitwiseExclusiveOR)
+            return (.EOR, .zeroPage, bitwiseExclusiveOR)
         case 0x55:
-            return Instruction(opcode: opcode, mnemonic: .EOR, addressingMode: zeroPageX, exec: bitwiseExclusiveOR)
+            return (.EOR, .zeroPageX, bitwiseExclusiveOR)
         case 0x4D:
-            return Instruction(opcode: opcode, mnemonic: .EOR, addressingMode: absolute, exec: bitwiseExclusiveOR)
+            return (.EOR, .absolute, bitwiseExclusiveOR)
         case 0x5D:
-            return Instruction(opcode: opcode, mnemonic: .EOR, addressingMode: absoluteX, exec: bitwiseExclusiveOR)
+            return (.EOR, .absoluteX, bitwiseExclusiveOR)
         case 0x59:
-            return Instruction(opcode: opcode, mnemonic: .EOR, addressingMode: absoluteY, exec: bitwiseExclusiveOR)
+            return (.EOR, .absoluteY, bitwiseExclusiveOR)
         case 0x41:
-            return Instruction(opcode: opcode, mnemonic: .EOR, addressingMode: indexedIndirect, exec: bitwiseExclusiveOR)
+            return (.EOR, .indexedIndirect, bitwiseExclusiveOR)
         case 0x51:
-            return Instruction(opcode: opcode, mnemonic: .EOR, addressingMode: indirectIndexed, exec: bitwiseExclusiveOR)
+            return (.EOR, .indirectIndexed, bitwiseExclusiveOR)
         case 0x09:
-            return Instruction(opcode: opcode, mnemonic: .ORA, addressingMode: immediate, exec: bitwiseORwithAccumulator)
+            return (.ORA, .immediate, bitwiseORwithAccumulator)
         case 0x05:
-            return Instruction(opcode: opcode, mnemonic: .ORA, addressingMode: zeroPage, exec: bitwiseORwithAccumulator)
+            return (.ORA, .zeroPage, bitwiseORwithAccumulator)
         case 0x15:
-            return Instruction(opcode: opcode, mnemonic: .ORA, addressingMode: zeroPageX, exec: bitwiseORwithAccumulator)
+            return (.ORA, .zeroPageX, bitwiseORwithAccumulator)
         case 0x0D:
-            return Instruction(opcode: opcode, mnemonic: .ORA, addressingMode: absolute, exec: bitwiseORwithAccumulator)
+            return (.ORA, .absolute, bitwiseORwithAccumulator)
         case 0x1D:
-            return Instruction(opcode: opcode, mnemonic: .ORA, addressingMode: absoluteX, exec: bitwiseORwithAccumulator)
+            return (.ORA, .absoluteX, bitwiseORwithAccumulator)
         case 0x19:
-            return Instruction(opcode: opcode, mnemonic: .ORA, addressingMode: absoluteY, exec: bitwiseORwithAccumulator)
+            return (.ORA, .absoluteY, bitwiseORwithAccumulator)
         case 0x01:
-            return Instruction(opcode: opcode, mnemonic: .ORA, addressingMode: indexedIndirect, exec: bitwiseORwithAccumulator)
+            return (.ORA, .indexedIndirect, bitwiseORwithAccumulator)
         case 0x11:
-            return Instruction(opcode: opcode, mnemonic: .ORA, addressingMode: indirectIndexed, exec: bitwiseORwithAccumulator)
+            return (.ORA, .indirectIndexed, bitwiseORwithAccumulator)
         case 0x24:
-            return Instruction(opcode: opcode, mnemonic: .BIT, addressingMode: zeroPage, exec: testBits)
+            return (.BIT, .zeroPage, testBits)
         case 0x2C:
-            return Instruction(opcode: opcode, mnemonic: .BIT, addressingMode: absolute, exec: testBits)
+            return (.BIT, .absolute, testBits)
 
         case 0x69:
-            return Instruction(opcode: opcode, mnemonic: .ADC, addressingMode: immediate, exec: addWithCarry)
+            return (.ADC, .immediate, addWithCarry)
         case 0x65:
-            return Instruction(opcode: opcode, mnemonic: .ADC, addressingMode: zeroPage, exec: addWithCarry)
+            return (.ADC, .zeroPage, addWithCarry)
         case 0x75:
-            return Instruction(opcode: opcode, mnemonic: .ADC, addressingMode: zeroPageX, exec: addWithCarry)
+            return (.ADC, .zeroPageX, addWithCarry)
         case 0x6D:
-            return Instruction(opcode: opcode, mnemonic: .ADC, addressingMode: absolute, exec: addWithCarry)
+            return (.ADC, .absolute, addWithCarry)
         case 0x7D:
-            return Instruction(opcode: opcode, mnemonic: .ADC, addressingMode: absoluteX, exec: addWithCarry)
+            return (.ADC, .absoluteX, addWithCarry)
         case 0x79:
-            return Instruction(opcode: opcode, mnemonic: .ADC, addressingMode: absoluteY, exec: addWithCarry)
+            return (.ADC, .absoluteY, addWithCarry)
         case 0x61:
-            return Instruction(opcode: opcode, mnemonic: .ADC, addressingMode: indexedIndirect, exec: addWithCarry)
+            return (.ADC, .indexedIndirect, addWithCarry)
         case 0x71:
-            return Instruction(opcode: opcode, mnemonic: .ADC, addressingMode: indirectIndexed, exec: addWithCarry)
+            return (.ADC, .indirectIndexed, addWithCarry)
         case 0xE9:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: immediate, exec: subtractWithCarry)
+            return (.SBC, .immediate, subtractWithCarry)
         case 0xE5:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: zeroPage, exec: subtractWithCarry)
+            return (.SBC, .zeroPage, subtractWithCarry)
         case 0xF5:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: zeroPageX, exec: subtractWithCarry)
+            return (.SBC, .zeroPageX, subtractWithCarry)
         case 0xED:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: absolute, exec: subtractWithCarry)
+            return (.SBC, .absolute, subtractWithCarry)
         case 0xFD:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: absoluteX, exec: subtractWithCarry)
+            return (.SBC, .absoluteX, subtractWithCarry)
         case 0xF9:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: absoluteY, exec: subtractWithCarry)
+            return (.SBC, .absoluteY, subtractWithCarry)
         case 0xE1:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: indexedIndirect, exec: subtractWithCarry)
+            return (.SBC, .indexedIndirect, subtractWithCarry)
         case 0xF1:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: indirectIndexed, exec: subtractWithCarry)
+            return (.SBC, .indirectIndexed, subtractWithCarry)
         case 0xC9:
-            return Instruction(opcode: opcode, mnemonic: .CMP, addressingMode: immediate, exec: compareAccumulator)
+            return (.CMP, .immediate, compareAccumulator)
         case 0xC5:
-            return Instruction(opcode: opcode, mnemonic: .CMP, addressingMode: zeroPage, exec: compareAccumulator)
+            return (.CMP, .zeroPage, compareAccumulator)
         case 0xD5:
-            return Instruction(opcode: opcode, mnemonic: .CMP, addressingMode: zeroPageX, exec: compareAccumulator)
+            return (.CMP, .zeroPageX, compareAccumulator)
         case 0xCD:
-            return Instruction(opcode: opcode, mnemonic: .CMP, addressingMode: absolute, exec: compareAccumulator)
+            return (.CMP, .absolute, compareAccumulator)
         case 0xDD:
-            return Instruction(opcode: opcode, mnemonic: .CMP, addressingMode: absoluteX, exec: compareAccumulator)
+            return (.CMP, .absoluteX, compareAccumulator)
         case 0xD9:
-            return Instruction(opcode: opcode, mnemonic: .CMP, addressingMode: absoluteY, exec: compareAccumulator)
+            return (.CMP, .absoluteY, compareAccumulator)
         case 0xC1:
-            return Instruction(opcode: opcode, mnemonic: .CMP, addressingMode: indexedIndirect, exec: compareAccumulator)
+            return (.CMP, .indexedIndirect, compareAccumulator)
         case 0xD1:
-            return Instruction(opcode: opcode, mnemonic: .CMP, addressingMode: indirectIndexed, exec: compareAccumulator)
+            return (.CMP, .indirectIndexed, compareAccumulator)
         case 0xE0:
-            return Instruction(opcode: opcode, mnemonic: .CPX, addressingMode: immediate, exec: compareXRegister)
+            return (.CPX, .immediate, compareXRegister)
         case 0xE4:
-            return Instruction(opcode: opcode, mnemonic: .CPX, addressingMode: zeroPage, exec: compareXRegister)
+            return (.CPX, .zeroPage, compareXRegister)
         case 0xEC:
-            return Instruction(opcode: opcode, mnemonic: .CPX, addressingMode: absolute, exec: compareXRegister)
+            return (.CPX, .absolute, compareXRegister)
         case 0xC0:
-            return Instruction(opcode: opcode, mnemonic: .CPY, addressingMode: immediate, exec: compareYRegister)
+            return (.CPY, .immediate, compareYRegister)
         case 0xC4:
-            return Instruction(opcode: opcode, mnemonic: .CPY, addressingMode: zeroPage, exec: compareYRegister)
+            return (.CPY, .zeroPage, compareYRegister)
         case 0xCC:
-            return Instruction(opcode: opcode, mnemonic: .CPY, addressingMode: absolute, exec: compareYRegister)
+            return (.CPY, .absolute, compareYRegister)
 
         case 0xE6:
-            return Instruction(opcode: opcode, mnemonic: .INC, addressingMode: zeroPage, exec: incrementMemory)
+            return (.INC, .zeroPage, incrementMemory)
         case 0xF6:
-            return Instruction(opcode: opcode, mnemonic: .INC, addressingMode: zeroPageX, exec: incrementMemory)
+            return (.INC, .zeroPageX, incrementMemory)
         case 0xEE:
-            return Instruction(opcode: opcode, mnemonic: .INC, addressingMode: absolute, exec: incrementMemory)
+            return (.INC, .absolute, incrementMemory)
         case 0xFE:
-            return Instruction(opcode: opcode, mnemonic: .INC, addressingMode: absoluteX, exec: incrementMemory)
+            return (.INC, .absoluteX, incrementMemory)
         case 0xE8:
-            return Instruction(opcode: opcode, mnemonic: .INX, addressingMode: implicit, exec: incrementX)
+            return (.INX, .implicit, incrementX)
         case 0xC8:
-            return Instruction(opcode: opcode, mnemonic: .INY, addressingMode: implicit, exec: incrementY)
+            return (.INY, .implicit, incrementY)
         case 0xC6:
-            return Instruction(opcode: opcode, mnemonic: .DEC, addressingMode: zeroPage, exec: decrementMemory)
+            return (.DEC, .zeroPage, decrementMemory)
         case 0xD6:
-            return Instruction(opcode: opcode, mnemonic: .DEC, addressingMode: zeroPageX, exec: decrementMemory)
+            return (.DEC, .zeroPageX, decrementMemory)
         case 0xCE:
-            return Instruction(opcode: opcode, mnemonic: .DEC, addressingMode: absolute, exec: decrementMemory)
+            return (.DEC, .absolute, decrementMemory)
         case 0xDE:
-            return Instruction(opcode: opcode, mnemonic: .DEC, addressingMode: absoluteX, exec: decrementMemory)
+            return (.DEC, .absoluteX, decrementMemory)
         case 0xCA:
-            return Instruction(opcode: opcode, mnemonic: .DEX, addressingMode: implicit, exec: decrementX)
+            return (.DEX, .implicit, decrementX)
         case 0x88:
-            return Instruction(opcode: opcode, mnemonic: .DEY, addressingMode: implicit, exec: decrementY)
+            return (.DEY, .implicit, decrementY)
 
         case 0x0A:
-            return Instruction(opcode: opcode, mnemonic: .ASL, addressingMode: accumulator, exec: arithmeticShiftLeftForAccumulator)
+            return (.ASL, .accumulator, arithmeticShiftLeftForAccumulator)
         case 0x06:
-            return Instruction(opcode: opcode, mnemonic: .ASL, addressingMode: zeroPage, exec: arithmeticShiftLeft)
+            return (.ASL, .zeroPage, arithmeticShiftLeft)
         case 0x16:
-            return Instruction(opcode: opcode, mnemonic: .ASL, addressingMode: zeroPageX, exec: arithmeticShiftLeft)
+            return (.ASL, .zeroPageX, arithmeticShiftLeft)
         case 0x0E:
-            return Instruction(opcode: opcode, mnemonic: .ASL, addressingMode: absolute, exec: arithmeticShiftLeft)
+            return (.ASL, .absolute, arithmeticShiftLeft)
         case 0x1E:
-            return Instruction(opcode: opcode, mnemonic: .ASL, addressingMode: absoluteX, exec: arithmeticShiftLeft)
+            return (.ASL, .absoluteX, arithmeticShiftLeft)
         case 0x4A:
-            return Instruction(opcode: opcode, mnemonic: .LSR, addressingMode: accumulator, exec: logicalShiftRightForAccumulator)
+            return (.LSR, .accumulator, logicalShiftRightForAccumulator)
         case 0x46:
-            return Instruction(opcode: opcode, mnemonic: .LSR, addressingMode: zeroPage, exec: logicalShiftRight)
+            return (.LSR, .zeroPage, logicalShiftRight)
         case 0x56:
-            return Instruction(opcode: opcode, mnemonic: .LSR, addressingMode: zeroPageX, exec: logicalShiftRight)
+            return (.LSR, .zeroPageX, logicalShiftRight)
         case 0x4E:
-            return Instruction(opcode: opcode, mnemonic: .LSR, addressingMode: absolute, exec: logicalShiftRight)
+            return (.LSR, .absolute, logicalShiftRight)
         case 0x5E:
-            return Instruction(opcode: opcode, mnemonic: .LSR, addressingMode: absoluteX, exec: logicalShiftRight)
+            return (.LSR, .absoluteX, logicalShiftRight)
         case 0x2A:
-            return Instruction(opcode: opcode, mnemonic: .ROL, addressingMode: accumulator, exec: rotateLeftForAccumulator)
+            return (.ROL, .accumulator, rotateLeftForAccumulator)
         case 0x26:
-            return Instruction(opcode: opcode, mnemonic: .ROL, addressingMode: zeroPage, exec: rotateLeft)
+            return (.ROL, .zeroPage, rotateLeft)
         case 0x36:
-            return Instruction(opcode: opcode, mnemonic: .ROL, addressingMode: zeroPageX, exec: rotateLeft)
+            return (.ROL, .zeroPageX, rotateLeft)
         case 0x2E:
-            return Instruction(opcode: opcode, mnemonic: .ROL, addressingMode: absolute, exec: rotateLeft)
+            return (.ROL, .absolute, rotateLeft)
         case 0x3E:
-            return Instruction(opcode: opcode, mnemonic: .ROL, addressingMode: absoluteX, exec: rotateLeft)
+            return (.ROL, .absoluteX, rotateLeft)
         case 0x6A:
-            return Instruction(opcode: opcode, mnemonic: .ROR, addressingMode: accumulator, exec: rotateRightForAccumulator)
+            return (.ROR, .accumulator, rotateRightForAccumulator)
         case 0x66:
-            return Instruction(opcode: opcode, mnemonic: .ROR, addressingMode: zeroPage, exec: rotateRight)
+            return (.ROR, .zeroPage, rotateRight)
         case 0x76:
-            return Instruction(opcode: opcode, mnemonic: .ROR, addressingMode: zeroPageX, exec: rotateRight)
+            return (.ROR, .zeroPageX, rotateRight)
         case 0x6E:
-            return Instruction(opcode: opcode, mnemonic: .ROR, addressingMode: absolute, exec: rotateRight)
+            return (.ROR, .absolute, rotateRight)
         case 0x7E:
-            return Instruction(opcode: opcode, mnemonic: .ROR, addressingMode: absoluteX, exec: rotateRight)
+            return (.ROR, .absoluteX, rotateRight)
 
         case 0x4C:
-            return Instruction(opcode: opcode, mnemonic: .JMP, addressingMode: absolute, exec: jump)
+            return (.JMP, .absolute, jump)
         case 0x6C:
-            return Instruction(opcode: opcode, mnemonic: .JMP, addressingMode: indirect, exec: jump)
+            return (.JMP, .indirect, jump)
         case 0x20:
-            return Instruction(opcode: opcode, mnemonic: .JSR, addressingMode: absolute, exec: jumpToSubroutine)
+            return (.JSR, .absolute, jumpToSubroutine)
         case 0x60:
-            return Instruction(opcode: opcode, mnemonic: .RTS, addressingMode: implicit, exec: returnFromSubroutine)
+            return (.RTS, .implicit, returnFromSubroutine)
         case 0x40:
-            return Instruction(opcode: opcode, mnemonic: .RTI, addressingMode: implicit, exec: returnFromInterrupt)
+            return (.RTI, .implicit, returnFromInterrupt)
 
         case 0x90:
-            return Instruction(opcode: opcode, mnemonic: .BCC, addressingMode: relative, exec: branchIfCarryClear)
+            return (.BCC, .relative, branchIfCarryClear)
         case 0xB0:
-            return Instruction(opcode: opcode, mnemonic: .BCS, addressingMode: relative, exec: branchIfCarrySet)
+            return (.BCS, .relative, branchIfCarrySet)
         case 0xF0:
-            return Instruction(opcode: opcode, mnemonic: .BEQ, addressingMode: relative, exec: branchIfEqual)
+            return (.BEQ, .relative, branchIfEqual)
         case 0x30:
-            return Instruction(opcode: opcode, mnemonic: .BMI, addressingMode: relative, exec: branchIfMinus)
+            return (.BMI, .relative, branchIfMinus)
         case 0xD0:
-            return Instruction(opcode: opcode, mnemonic: .BNE, addressingMode: relative, exec: branchIfNotEqual)
+            return (.BNE, .relative, branchIfNotEqual)
         case 0x10:
-            return Instruction(opcode: opcode, mnemonic: .BPL, addressingMode: relative, exec: branchIfPlus)
+            return (.BPL, .relative, branchIfPlus)
         case 0x50:
-            return Instruction(opcode: opcode, mnemonic: .BVC, addressingMode: relative, exec: branchIfOverflowClear)
+            return (.BVC, .relative, branchIfOverflowClear)
         case 0x70:
-            return Instruction(opcode: opcode, mnemonic: .BVS, addressingMode: relative, exec: branchIfOverflowSet)
+            return (.BVS, .relative, branchIfOverflowSet)
 
         case 0x18:
-            return Instruction(opcode: opcode, mnemonic: .CLC, addressingMode: implicit, exec: clearCarry)
+            return (.CLC, .implicit, clearCarry)
         case 0xD8:
-            return Instruction(opcode: opcode, mnemonic: .CLD, addressingMode: implicit, exec: clearDecimal)
+            return (.CLD, .implicit, clearDecimal)
         case 0x58:
-            return Instruction(opcode: opcode, mnemonic: .CLI, addressingMode: implicit, exec: clearInterrupt)
+            return (.CLI, .implicit, clearInterrupt)
         case 0xB8:
-            return Instruction(opcode: opcode, mnemonic: .CLV, addressingMode: implicit, exec: clearOverflow)
+            return (.CLV, .implicit, clearOverflow)
 
         case 0x38:
-            return Instruction(opcode: opcode, mnemonic: .SEC, addressingMode: implicit, exec: setCarryFlag)
+            return (.SEC, .implicit, setCarryFlag)
         case 0xF8:
-            return Instruction(opcode: opcode, mnemonic: .SED, addressingMode: implicit, exec: setDecimalFlag)
+            return (.SED, .implicit, setDecimalFlag)
         case 0x78:
-            return Instruction(opcode: opcode, mnemonic: .SEI, addressingMode: implicit, exec: setInterruptDisable)
+            return (.SEI, .implicit, setInterruptDisable)
 
         case 0x00:
-            return Instruction(opcode: opcode, mnemonic: .BRK, addressingMode: implicit, exec: forceInterrupt)
+            return (.BRK, .implicit, forceInterrupt)
 
         // Undocumented
 
         case 0xEB:
-            return Instruction(opcode: opcode, mnemonic: .SBC, addressingMode: immediate, exec: subtractWithCarry)
+            return (.SBC, .immediate, subtractWithCarry)
 
         case 0x04, 0x44, 0x64:
-            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: zeroPage, exec: doNothing)
+            return (.NOP, .zeroPage, doNothing)
         case 0x0C:
-            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: absolute, exec: doNothing)
+            return (.NOP, .absolute, doNothing)
         case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
-            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: zeroPageX, exec: doNothing)
+            return (.NOP, .zeroPageX, doNothing)
         case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
-            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: implicit, exec: doNothing)
+            return (.NOP, .implicit, doNothing)
         case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
-            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: absoluteX, exec: doNothing)
+            return (.NOP, .absoluteX, doNothing)
         case 0x80, 0x82, 0x89, 0xC2, 0xE2:
-            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: immediate, exec: doNothing)
+            return (.NOP, .immediate, doNothing)
 
         case 0xA3:
-            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: indexedIndirect, exec: loadAccumulatorAndX)
+            return (.LAX, .indexedIndirect, loadAccumulatorAndX)
         case 0xA7:
-            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: zeroPage, exec: loadAccumulatorAndX)
+            return (.LAX, .zeroPage, loadAccumulatorAndX)
         case 0xAF:
-            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: absolute, exec: loadAccumulatorAndX)
+            return (.LAX, .absolute, loadAccumulatorAndX)
         case 0xB3:
-            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: indirectIndexed, exec: loadAccumulatorAndX)
+            return (.LAX, .indirectIndexed, loadAccumulatorAndX)
         case 0xB7:
-            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: zeroPageY, exec: loadAccumulatorAndX)
+            return (.LAX, .zeroPageY, loadAccumulatorAndX)
         case 0xBF:
-            return Instruction(opcode: opcode, mnemonic: .LAX, addressingMode: absoluteY, exec: loadAccumulatorAndX)
+            return (.LAX, .absoluteY, loadAccumulatorAndX)
 
         case 0x83:
-            return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: indexedIndirect, exec: storeAccumulatorAndX)
+            return (.SAX, .indexedIndirect, storeAccumulatorAndX)
         case 0x87:
-            return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: zeroPage, exec: storeAccumulatorAndX)
+            return (.SAX, .zeroPage, storeAccumulatorAndX)
         case 0x8F:
-            return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: absolute, exec: storeAccumulatorAndX)
+            return (.SAX, .absolute, storeAccumulatorAndX)
         case 0x97:
-            return Instruction(opcode: opcode, mnemonic: .SAX, addressingMode: zeroPageY, exec: storeAccumulatorAndX)
+            return (.SAX, .zeroPageY, storeAccumulatorAndX)
 
         case 0xC3:
-            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: indexedIndirect, exec: decrementMemoryAndCompareAccumulator)
+            return (.DCP, .indexedIndirect, decrementMemoryAndCompareAccumulator)
         case 0xC7:
-            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: zeroPage, exec: decrementMemoryAndCompareAccumulator)
+            return (.DCP, .zeroPage, decrementMemoryAndCompareAccumulator)
         case 0xCF:
-            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: absolute, exec: decrementMemoryAndCompareAccumulator)
+            return (.DCP, .absolute, decrementMemoryAndCompareAccumulator)
         case 0xD3:
-            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: indirectIndexed, exec: decrementMemoryAndCompareAccumulator)
+            return (.DCP, .indirectIndexed, decrementMemoryAndCompareAccumulator)
         case 0xD7:
-            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: zeroPageX, exec: decrementMemoryAndCompareAccumulator)
+            return (.DCP, .zeroPageX, decrementMemoryAndCompareAccumulator)
         case 0xDB:
-            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: absoluteY, exec: decrementMemoryAndCompareAccumulator)
+            return (.DCP, .absoluteY, decrementMemoryAndCompareAccumulator)
         case 0xDF:
-            return Instruction(opcode: opcode, mnemonic: .DCP, addressingMode: absoluteX, exec: decrementMemoryAndCompareAccumulator)
+            return (.DCP, .absoluteX, decrementMemoryAndCompareAccumulator)
 
         case 0xE3:
-            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: indexedIndirect, exec: incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .indexedIndirect, incrementMemoryAndSubtractWithCarry)
         case 0xE7:
-            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: zeroPage, exec: incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .zeroPage, incrementMemoryAndSubtractWithCarry)
         case 0xEF:
-            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: absolute, exec: incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .absolute, incrementMemoryAndSubtractWithCarry)
         case 0xF3:
-            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: indirectIndexed, exec: incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .indirectIndexed, incrementMemoryAndSubtractWithCarry)
         case 0xF7:
-            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: zeroPageX, exec: incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .zeroPageX, incrementMemoryAndSubtractWithCarry)
         case 0xFB:
-            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: absoluteY, exec: incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .absoluteY, incrementMemoryAndSubtractWithCarry)
         case 0xFF:
-            return Instruction(opcode: opcode, mnemonic: .ISB, addressingMode: absoluteX, exec: incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .absoluteX, incrementMemoryAndSubtractWithCarry)
 
         case 0x03:
-            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: indexedIndirect, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .indexedIndirect, arithmeticShiftLeftAndBitwiseORwithAccumulator)
         case 0x07:
-            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: zeroPage, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .zeroPage, arithmeticShiftLeftAndBitwiseORwithAccumulator)
         case 0x0F:
-            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: absolute, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .absolute, arithmeticShiftLeftAndBitwiseORwithAccumulator)
         case 0x13:
-            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: indirectIndexed, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .indirectIndexed, arithmeticShiftLeftAndBitwiseORwithAccumulator)
         case 0x17:
-            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: zeroPageX, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .zeroPageX, arithmeticShiftLeftAndBitwiseORwithAccumulator)
         case 0x1B:
-            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: absoluteY, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .absoluteY, arithmeticShiftLeftAndBitwiseORwithAccumulator)
         case 0x1F:
-            return Instruction(opcode: opcode, mnemonic: .SLO, addressingMode: absoluteX, exec: arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .absoluteX, arithmeticShiftLeftAndBitwiseORwithAccumulator)
 
         case 0x23:
-            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: indexedIndirect, exec: rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .indexedIndirect, rotateLeftAndBitwiseANDwithAccumulator)
         case 0x27:
-            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: zeroPage, exec: rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .zeroPage, rotateLeftAndBitwiseANDwithAccumulator)
         case 0x2F:
-            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: absolute, exec: rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .absolute, rotateLeftAndBitwiseANDwithAccumulator)
         case 0x33:
-            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: indirectIndexed, exec: rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .indirectIndexed, rotateLeftAndBitwiseANDwithAccumulator)
         case 0x37:
-            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: zeroPageX, exec: rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .zeroPageX, rotateLeftAndBitwiseANDwithAccumulator)
         case 0x3B:
-            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: absoluteY, exec: rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .absoluteY, rotateLeftAndBitwiseANDwithAccumulator)
         case 0x3F:
-            return Instruction(opcode: opcode, mnemonic: .RLA, addressingMode: absoluteX, exec: rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .absoluteX, rotateLeftAndBitwiseANDwithAccumulator)
 
         case 0x43:
-            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: indexedIndirect, exec: logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .indexedIndirect, logicalShiftRightAndBitwiseExclusiveOR)
         case 0x47:
-            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: zeroPage, exec: logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .zeroPage, logicalShiftRightAndBitwiseExclusiveOR)
         case 0x4F:
-            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: absolute, exec: logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .absolute, logicalShiftRightAndBitwiseExclusiveOR)
         case 0x53:
-            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: indirectIndexed, exec: logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .indirectIndexed, logicalShiftRightAndBitwiseExclusiveOR)
         case 0x57:
-            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: zeroPageX, exec: logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .zeroPageX, logicalShiftRightAndBitwiseExclusiveOR)
         case 0x5B:
-            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: absoluteY, exec: logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .absoluteY, logicalShiftRightAndBitwiseExclusiveOR)
         case 0x5F:
-            return Instruction(opcode: opcode, mnemonic: .SRE, addressingMode: absoluteX, exec: logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .absoluteX, logicalShiftRightAndBitwiseExclusiveOR)
 
         case 0x63:
-            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: indexedIndirect, exec: rotateRightAndAddWithCarry)
+            return (.RRA, .indexedIndirect, rotateRightAndAddWithCarry)
         case 0x67:
-            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: zeroPage, exec: rotateRightAndAddWithCarry)
+            return (.RRA, .zeroPage, rotateRightAndAddWithCarry)
         case 0x6F:
-            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: absolute, exec: rotateRightAndAddWithCarry)
+            return (.RRA, .absolute, rotateRightAndAddWithCarry)
         case 0x73:
-            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: indirectIndexed, exec: rotateRightAndAddWithCarry)
+            return (.RRA, .indirectIndexed, rotateRightAndAddWithCarry)
         case 0x77:
-            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: zeroPageX, exec: rotateRightAndAddWithCarry)
+            return (.RRA, .zeroPageX, rotateRightAndAddWithCarry)
         case 0x7B:
-            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: absoluteY, exec: rotateRightAndAddWithCarry)
+            return (.RRA, .absoluteY, rotateRightAndAddWithCarry)
         case 0x7F:
-            return Instruction(opcode: opcode, mnemonic: .RRA, addressingMode: absoluteX, exec: rotateRightAndAddWithCarry)
+            return (.RRA, .absoluteX, rotateRightAndAddWithCarry)
 
         default:
-            return Instruction(opcode: opcode, mnemonic: .NOP, addressingMode: implicit, exec: doNothing)
+            return (.NOP, .implicit, doNothing)
+        }
+    }
+
+    fileprivate func decodeToFetchOperand(addressingMode: AddressingMode) -> AddressingMode.FetchOperand {
+        switch addressingMode {
+        case .implicit:
+            return implicit
+        case .accumulator:
+            return accumulator
+        case .immediate:
+            return immediate
+        case .zeroPage:
+            return zeroPage
+        case .zeroPageX:
+            return zeroPageX
+        case .zeroPageY:
+            return zeroPageY
+        case .absolute:
+            return absolute
+        case .absoluteX:
+            return absoluteX
+        case .absoluteY:
+            return absoluteY
+        case .relative:
+            return relative
+        case .indirect:
+            return indirect
+        case .indexedIndirect:
+            return indexedIndirect
+        case .indirectIndexed:
+            return indirectIndexed
         }
     }
 }

@@ -87,7 +87,7 @@ extension CPU {
     }
 
     func execute(_ instruction: Instruction) {
-        let operand = instruction.addressingMode()
+        let operand = instruction.fetchOperand()
 #if nestest
         logNestest(operand, instruction)
 #endif
