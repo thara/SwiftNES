@@ -25,11 +25,12 @@ extension CPU {
     /// STA
     func storeAccumulator(operand: Operand) -> NextPC {
         write(registers.A, at: operand)
+        return registers.PC
+    }
 
-        if [.absoluteX, .absoluteY, .indirectIndexed].contains(currentStep.addressingMode) {
-            tick()
-        }
-
+    func storeAccumulatorWithTick(operand: Operand) -> NextPC {
+        write(registers.A, at: operand)
+        tick()
         return registers.PC
     }
 

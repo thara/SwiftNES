@@ -19,35 +19,26 @@ enum AddressingMode {
 extension CPU {
 
     func implicit() -> UInt16 {
-        currentStep.addressingMode = .implicit
-
         return 0x00
     }
 
     func accumulator() -> UInt16 {
-        currentStep.addressingMode = .accumulator
-
         return registers.A.u16
     }
 
     func immediate() -> UInt16 {
-        currentStep.addressingMode = .immediate
-
         let operand = registers.PC
         registers.PC &+= 1
         return operand
     }
 
     func zeroPage() -> UInt16 {
-        currentStep.addressingMode = .zeroPage
-
         let operand = read(at: registers.PC).u16 & 0xFF
         registers.PC &+= 1
         return operand
     }
 
     func zeroPageX() -> UInt16 {
-        currentStep.addressingMode = .zeroPageX
         tick()
 
         let operand = (read(at: registers.PC).u16 &+ registers.X.u16) & 0xFF
@@ -56,7 +47,6 @@ extension CPU {
     }
 
     func zeroPageY() -> UInt16 {
-        currentStep.addressingMode = .zeroPageY
         tick()
 
         let operand = (read(at: registers.PC).u16 &+ registers.Y.u16) & 0xFF
@@ -65,16 +55,12 @@ extension CPU {
     }
 
     func absolute() -> UInt16 {
-        currentStep.addressingMode = .absolute
-
         let operand = readWord(at: registers.PC)
         registers.PC &+= 2
         return operand
     }
 
     func absoluteX() -> UInt16 {
-        currentStep.addressingMode = .absoluteX
-
         let data = readWord(at: registers.PC)
         let operand = data &+ registers.X.u16 & 0xFFFF
         registers.PC &+= 2
@@ -87,8 +73,6 @@ extension CPU {
     }
 
     func absoluteY() -> UInt16 {
-        currentStep.addressingMode = .absoluteY
-
         let data = readWord(at: registers.PC)
         let operand = data &+ registers.Y.u16 & 0xFFFF
         registers.PC &+= 2
@@ -101,16 +85,12 @@ extension CPU {
     }
 
     func relative() -> UInt16 {
-        currentStep.addressingMode = .relative
-
         let operand = read(at: registers.PC).u16
         registers.PC &+= 1
         return operand
     }
 
     func indirect() -> UInt16 {
-        currentStep.addressingMode = .indirect
-
         let data = readWord(at: registers.PC)
         let operand = readOnIndirect(operand: data)
         registers.PC &+= 2
@@ -118,8 +98,6 @@ extension CPU {
     }
 
     func indexedIndirect() -> UInt16 {
-        currentStep.addressingMode = .indexedIndirect
-
         let data = read(at: registers.PC)
         let operand = readOnIndirect(operand: (data &+ registers.X).u16 & 0xFF)
         registers.PC &+= 1
@@ -130,8 +108,6 @@ extension CPU {
     }
 
     func indirectIndexed() -> UInt16 {
-        currentStep.addressingMode = .indirectIndexed
-
         let data = read(at: registers.PC).u16
         let operand = readOnIndirect(operand: data) &+ registers.Y.u16
         registers.PC &+= 1

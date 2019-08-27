@@ -5,51 +5,51 @@ extension CPU {
         currentStep.operand1 = memory.read(at: pc &+ 1)
         currentStep.operand2 = memory.read(at: pc &+ 2)
 
-        let machineCode = makeMachineCode(from: instruction.opcode)
+        let machineCode = makeMachineCode(for: instruction)
         let assemblyCode = makeAssemblyCode(for: instruction)
 
         print("\(pc.hex4)  \(machineCode.padding(9))\(assemblyCode.padding(33))\(registers)")
     }
 
-    func makeMachineCode(from opcode: UInt8) -> String {
-        switch currentStep.addressingMode {
+    func makeMachineCode(for instruction: Instruction) -> String {
+        switch instruction.addressingMode {
         case .immediate, .zeroPage, .zeroPageX, .zeroPageY, .relative, .indirectIndexed, .indexedIndirect:
-            return "\(opcode.hex2) \(currentStep.operand1.hex2)"
+            return "\(instruction.opcode.hex2) \(currentStep.operand1.hex2)"
         case .indirect, .absolute, .absoluteX, .absoluteY:
-            return "\(opcode.hex2) \(currentStep.operand1.hex2) \(currentStep.operand2.hex2)"
+            return "\(instruction.opcode.hex2) \(currentStep.operand1.hex2) \(currentStep.operand2.hex2)"
         default:
-            return "\(opcode.hex2)"
+            return "\(instruction.opcode.hex2)"
         }
     }
 
     func makeAssemblyCode(for instruction: Instruction) -> String {
-        let operandString = makeAssemblyOperand(for: instruction.mnemonic)
+        let operandString = makeAssemblyOperand(for: instruction)
         let prefix = undocumentedOpcodes.contains(Int(instruction.opcode)) ? "*" : " "
         return "\(prefix)\(instruction.mnemonic) \(operandString)"
     }
 
-    func makeAssemblyOperand(for mnemonic: Mnemonic) -> String {
-        switch mnemonic {
+    func makeAssemblyOperand(for instruction: Instruction) -> String {
+        switch instruction.mnemonic {
         case .JMP, .JSR:
-            if currentStep.addressingMode == .absolute {
-                return String(format: "$%04X", decodeAddress())
+            if instruction.addressingMode == .absolute {
+                return String(format: "$%04X", decodeAddress(from: instruction.addressingMode))
             }
         case .LSR, .ASL, .ROR, .ROL:
-            if currentStep.addressingMode == .accumulator {
+            if instruction.addressingMode == .accumulator {
                 return "A"
             }
         default:
             break
         }
 
-        return makeAssemblyOperand()
+        return makeAssemblyOperand(addressingMode: instruction.addressingMode)
     }
 
-    func makeAssemblyOperand() -> String {
+    func makeAssemblyOperand(addressingMode: AddressingMode) -> String {
         let operand1 = currentStep.operand1
         let operand16 = currentStep.operand16
 
-        switch currentStep.addressingMode {
+        switch addressingMode {
         case .implicit, .accumulator:
             return " "
         case .immediate:
@@ -79,8 +79,8 @@ extension CPU {
         }
     }
 
-    func decodeAddress() -> UInt16 {
-        switch currentStep.addressingMode {
+    func decodeAddress(from addressingMode: AddressingMode) -> UInt16 {
+        switch addressingMode {
         case .implicit:
             return 0x00
         case .immediate:

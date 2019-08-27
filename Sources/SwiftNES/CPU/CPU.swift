@@ -6,7 +6,6 @@ final class CPU {
 
     struct Step {
         var pc: UInt16 = 0x00
-        var addressingMode: AddressingMode = .implicit
 
         var operand1: UInt8 = 0x00
         var operand2: UInt8 = 0x00

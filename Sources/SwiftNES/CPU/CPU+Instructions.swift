@@ -69,13 +69,13 @@ extension CPU {
         case 0x8D:
             return (.STA, .absolute, storeAccumulator)
         case 0x9D:
-            return (.STA, .absoluteX, storeAccumulator)
+            return (.STA, .absoluteX, storeAccumulatorWithTick)
         case 0x99:
-            return (.STA, .absoluteY, storeAccumulator)
+            return (.STA, .absoluteY, storeAccumulatorWithTick)
         case 0x81:
             return (.STA, .indexedIndirect, storeAccumulator)
         case 0x91:
-            return (.STA, .indirectIndexed, storeAccumulator)
+            return (.STA, .indirectIndexed, storeAccumulatorWithTick)
         case 0x86:
             return (.STX, .zeroPage, storeXRegister)
         case 0x96:
