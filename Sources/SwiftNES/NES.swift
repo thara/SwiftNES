@@ -11,11 +11,15 @@ public final class NES {
     public static let height = 240
     public static let width = 256
 
+    private var nestest: NESTest
+
     init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive, controllerPort: ControllerPort) {
         self.cpu = cpu
         self.ppu = ppu
         self.cartridgeDrive = cartridgeDrive
         self.controllerPort = controllerPort
+
+        nestest = NESTest(disassembler: Disassembler(cpu: cpu))
     }
 
     public func runFrame() {
@@ -27,6 +31,11 @@ public final class NES {
     }
 
     public func step() {
+#if nestest
+        nestest.before(cpu: cpu)
+        defer { nestest.print() }
+#endif
+
         let cpuCycles = cpu.step()
 
         var ppuCycles = cpuCycles &* 3

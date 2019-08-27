@@ -30,6 +30,11 @@ extension UInt8 {
     subscript(n: UInt8) -> UInt8 {
         return (self &>> n) & 1
     }
+
+    @inline(__always)
+    var hex2: String {
+        return String(format: "%02X", self)
+    }
 }
 
 extension UInt16 {
@@ -46,6 +51,16 @@ extension UInt16 {
     @inline(__always)
     subscript(n: UInt8) -> UInt16 {
         return (self &>> n) & 1
+    }
+
+    @inline(__always)
+    var hex2: String {
+        return String(format: "%02X", self)
+    }
+
+    @inline(__always)
+    var hex4: String {
+        return String(format: "%04X", self)
     }
 }
 

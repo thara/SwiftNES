@@ -4,24 +4,12 @@ typealias OpCode = UInt8
 
 final class CPU {
 
-    struct Step {
-        var pc: UInt16 = 0x00
-
-        var operand1: UInt8 = 0x00
-        var operand2: UInt8 = 0x00
-        var operand16: UInt16 {
-            return operand1.u16 | (operand2.u16 << 8)
-        }
-    }
-
     var registers: CPURegisters
     var memory: Memory
 
     let interruptLine: InterruptLine
 
     private var instructions: [Instruction?]
-
-    var currentStep: Step = Step()
 
     // TODO Cycle-accurate
     private var cycles: UInt = 0
@@ -74,8 +62,6 @@ final class CPU {
 extension CPU {
 
     func fetch() -> OpCode {
-        currentStep.pc = registers.PC
-
         let opcode = read(at: registers.PC)
         registers.PC &+= 1
         return opcode
@@ -87,9 +73,6 @@ extension CPU {
 
     func execute(_ instruction: Instruction) {
         let operand = instruction.fetchOperand()
-#if nestest
-        logNestest(operand, instruction)
-#endif
         registers.PC = instruction.exec(operand)
     }
 }

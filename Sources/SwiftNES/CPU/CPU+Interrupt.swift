@@ -1,5 +1,9 @@
 extension CPU {
 
+    var interrupted: Bool {
+        return !interruptLine.get().isEmpty
+    }
+
     func interrupt() -> Bool {
         switch interruptLine.get() {
         case .RESET:
