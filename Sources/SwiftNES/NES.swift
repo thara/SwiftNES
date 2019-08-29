@@ -13,6 +13,8 @@ public final class NES {
 
     private var nestest: NESTest
 
+    private var cycles: UInt = 0
+
     init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive, controllerPort: ControllerPort) {
         self.cpu = cpu
         self.ppu = ppu
@@ -32,11 +34,17 @@ public final class NES {
 
     public func step() {
 #if nestest
-        nestest.before(cpu: cpu)
-        defer { nestest.print() }
+        let interrupted = cpu.interrupted
+        if !interrupted { nestest.before(cpu: cpu) }
 #endif
 
         let cpuCycles = cpu.step()
+
+#if nestest
+        nestest.print(ppu: ppu, cycles: cycles)
+        cycles &+= cpuCycles
+        if interrupted { return }
+#endif
 
         var ppuCycles = cpuCycles &* 3
         while 0 < ppuCycles {

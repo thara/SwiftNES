@@ -19,9 +19,12 @@ struct NESTest {
         }
     }
 
-    func print() {
+    func print(ppu: PPU, cycles: UInt) {
         if enabled {
-            let log = "\(registers.PC.hex4)  \(machineCode.padding(9))\(assemblyCode.padding(33))\(registers!)"
+            let log = String(format: "%04X  %@%@%@ PPU:%3d,%3d CYC:%d",
+                   registers.PC,
+                   machineCode.padding(9), assemblyCode.padding(33), registers!.description,
+                   UInt(ppu.scan.dot), UInt(ppu.scan.line), cycles)
             Swift.print(log)
         }
     }
