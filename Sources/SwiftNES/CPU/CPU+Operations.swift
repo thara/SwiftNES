@@ -583,6 +583,7 @@ extension CPU {
 
     /// NOP
     func doNothing(_ operand: Operand) -> NextPC {
+        tick()
         return registers.PC
     }
 
