@@ -1,3 +1,5 @@
+import Foundation
+
 struct NESTest {
     let disassembler: Disassembler
 
