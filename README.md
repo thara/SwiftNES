@@ -59,7 +59,7 @@
 
 ## Goals
 
-Run and play cartridges I bought in childhood.
+Run and play games in cartridges I bought in childhood.
 
 - [ ] [『スーパーマリオブラザーズ』(Super Mario Bros.) ](https://ja.wikipedia.org/wiki/スーパーマリオブラザーズ)
 - [ ] [『スーパーマリオブラザーズ3』(スーパーマリオブラザーズスリー、SUPER MARIO BROS. 3)](https://ja.wikipedia.org/wiki/スーパーマリオブラザーズ3)
