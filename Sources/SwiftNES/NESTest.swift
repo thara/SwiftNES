@@ -23,10 +23,9 @@ struct NESTest {
 
     func print(ppu: PPU, cycles: UInt) {
         if enabled {
-            let log = String(format: "%04X  %@%@%@ PPU:%3d,%3d CYC:%d",
-                   registers.PC,
-                   machineCode.padding(9), assemblyCode.padding(33), registers!.description,
-                   UInt(ppu.scan.dot), UInt(ppu.scan.line), cycles)
+            let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(registers!.description)"
+            let ppuState = String(format: "%3d,%3d", ppu.scan.dot, ppu.scan.line)
+            let log = "\(registers.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
             Swift.print(log)
         }
     }
