@@ -6,8 +6,8 @@ enum AddressingMode {
     case zeroPageX
     case zeroPageY
     case absolute
-    case absoluteX
-    case absoluteY
+    case absoluteX(extraCycle: Bool)
+    case absoluteY(extraCycle: Bool)
     case relative
     case indirect
     case indexedIndirect
@@ -64,6 +64,14 @@ extension CPU {
         let data = readWord(at: registers.PC)
         let operand = data &+ registers.X.u16 & 0xFFFF
         registers.PC &+= 2
+        tick()
+        return operand
+    }
+
+    func absoluteXWithExtraCycle() -> UInt16 {
+        let data = readWord(at: registers.PC)
+        let operand = data &+ registers.X.u16 & 0xFFFF
+        registers.PC &+= 2
 
         if pageCrossed(data, registers.X) {
             tick()
@@ -73,6 +81,14 @@ extension CPU {
     }
 
     func absoluteY() -> UInt16 {
+        let data = readWord(at: registers.PC)
+        let operand = data &+ registers.Y.u16 & 0xFFFF
+        registers.PC &+= 2
+        tick()
+        return operand
+    }
+
+    func absoluteYWithExtraCycle() -> UInt16 {
         let data = readWord(at: registers.PC)
         let operand = data &+ registers.Y.u16 & 0xFFFF
         registers.PC &+= 2
@@ -112,7 +128,7 @@ extension CPU {
         let operand = readOnIndirect(operand: data) &+ registers.Y.u16
         registers.PC &+= 1
 
-        if pageCrossed(data &- registers.Y.u16, registers.Y) {
+        if pageCrossed(operand &- registers.Y.u16, registers.Y) {
             tick()
         }
 

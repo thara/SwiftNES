@@ -504,7 +504,7 @@ class InstructionSpec: QuickSpec {
 
                     expect(cpu.registers.A).to(equal(0xA2))
                     expect(cpu.registers.PC).to(equal(0x0303))
-                    expect(cycle).to(equal(3))
+                    expect(cycle).to(equal(4))
                 }
             }
         }

@@ -60,11 +60,11 @@ class Disassembler {
     private func makeAssemblyOperand(step: CPUStep, instruction: Instruction) -> String {
         switch instruction.mnemonic {
         case .JMP, .JSR:
-            if instruction.addressingMode == .absolute {
+            if case .absolute = instruction.addressingMode {
                 return String(format: "$%04X", decodeAddress(step: step, addressingMode: instruction.addressingMode))
             }
         case .LSR, .ASL, .ROR, .ROL:
-            if instruction.addressingMode == .accumulator {
+            if case .accumulator = instruction.addressingMode {
                 return "A"
             }
         default:

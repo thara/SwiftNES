@@ -111,7 +111,7 @@ extension CPU {
     /// PLA
     func pullAccumulator(operand: Operand) -> NextPC {
         registers.A = pullStack()
-        tick()
+        tick(count: 2)
         return registers.PC
     }
 
@@ -255,12 +255,14 @@ extension CPU {
     /// INX
     func incrementX(_: Operand) -> NextPC {
         registers.X = registers.X &+ 1
+        tick()
         return registers.PC
     }
 
     /// INY
     func incrementY(operand: Operand) -> NextPC {
         registers.Y = registers.Y &+ 1
+        tick()
         return registers.PC
     }
 
@@ -605,31 +607,68 @@ extension CPU {
 
     /// DCP
     func decrementMemoryAndCompareAccumulator(operand: Operand) -> NextPC {
-        _  = decrementMemory(operand: operand)
+        // decrementMemory excluding tick
+        let result = read(at: operand) &- 1
+        registers.P.setZN(result)
+        write(result, at: operand)
+
         return compareAccumulator(operand: operand)
     }
 
     /// ISB
     func incrementMemoryAndSubtractWithCarry(operand: Operand) -> NextPC {
-        _ = incrementMemory(operand: operand)
+        // incrementMemory excluding tick
+        let result = read(at: operand) &+ 1
+        registers.P.setZN(result)
+        write(result, at: operand)
+
         return subtractWithCarry(operand: operand)
     }
 
     /// SLO
     func arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: Operand) -> NextPC {
-        _ = arithmeticShiftLeft(operand: operand)
+        // arithmeticShiftLeft excluding tick
+        var data = read(at: operand)
+        registers.P.remove([.C, .Z, .N])
+        if data[7] == 1 { registers.P.formUnion(.C) }
+
+        data <<= 1
+        registers.P.setZN(data)
+        write(data, at: operand)
+
         return bitwiseORwithAccumulator(operand: operand)
     }
 
     /// RLA
     func rotateLeftAndBitwiseANDwithAccumulator(operand: Operand) -> NextPC {
-        _ = rotateLeft(operand: operand)
+        // rotateLeft excluding tick
+        var data = read(at: operand)
+        let c = data & 0x80
+
+        data <<= 1
+        if registers.P.contains(.C) { data |= 0x01 }
+
+        registers.P.remove([.C, .Z, .N])
+        if c == 0x80 { registers.P.formUnion(.C) }
+
+        registers.P.setZN(data)
+        write(data, at: operand)
+
         return bitwiseANDwithAccumulator(operand: operand)
     }
 
     /// SRE
     func logicalShiftRightAndBitwiseExclusiveOR(operand: Operand) -> NextPC {
-        _ = logicalShiftRight(operand: operand)
+        // logicalShiftRight excluding tick
+        var data = read(at: operand)
+        registers.P.remove([.C, .Z, .N])
+        if data[0] == 1 { registers.P.formUnion(.C) }
+
+        data >>= 1
+
+        registers.P.setZN(data)
+        write(data, at: operand)
+
         return bitwiseExclusiveOR(operand: operand)
     }
 
