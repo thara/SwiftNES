@@ -77,10 +77,7 @@ extension CPU {
         let operand = data &+ registers.X.u16 & 0xFFFF
         registers.PC &+= 2
 
-        if pageCrossed(data, registers.X) {
-            tick()
-        }
-
+        tickOnPageCrossed(value: data, operand: registers.X)
         return operand
     }
 
@@ -97,10 +94,7 @@ extension CPU {
         let operand = data &+ registers.Y.u16 & 0xFFFF
         registers.PC &+= 2
 
-        if pageCrossed(data, registers.Y) {
-            tick()
-        }
-
+        tickOnPageCrossed(value: data, operand: registers.Y)
         return operand
     }
 
@@ -132,15 +126,18 @@ extension CPU {
         let operand = readOnIndirect(operand: data) &+ registers.Y.u16
         registers.PC &+= 1
 
-        if pageCrossed(operand &- registers.Y.u16, registers.Y) {
-            tick()
-        }
-
+        tickOnPageCrossed(value: operand &- registers.Y.u16, operand: registers.Y)
         return operand
     }
 
-    func pageCrossed(_ a: UInt16, _ b: UInt8) -> Bool {
-        return ((a &+ b.u16) & 0xFF00) != (a & 0xFF00)
+    func tickOnPageCrossed(value: UInt16, operand: UInt8) {
+        tickOnPageCrossed(value: value, operand: operand.u16)
+    }
+
+    func tickOnPageCrossed(value: UInt16, operand: UInt16) {
+        if ((value &+ operand) & 0xFF00) != (value & 0xFF00) {
+            tick()
+        }
     }
 }
 

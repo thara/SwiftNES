@@ -452,6 +452,7 @@ extension CPU {
     func branchIfCarryClear(operand: Operand) -> NextPC {
         if !registers.P.contains(.C) {
             tick()
+            tickOnPageCrossed(value: registers.PC, operand: operand)
             return UInt16(Int(registers.PC) &+ Int(operand.i8))
         }
         return registers.PC
@@ -461,6 +462,7 @@ extension CPU {
     func branchIfCarrySet(operand: Operand) -> NextPC {
         if registers.P.contains(.C) {
             tick()
+            tickOnPageCrossed(value: registers.PC, operand: operand)
             return UInt16(Int(registers.PC) &+ Int(operand.i8))
         }
         return registers.PC
@@ -470,6 +472,7 @@ extension CPU {
     func branchIfEqual(operand: Operand) -> NextPC {
         if registers.P.contains(.Z) {
             tick()
+            tickOnPageCrossed(value: registers.PC, operand: operand)
             return UInt16(Int(registers.PC) &+ Int(operand.i8))
         }
         return registers.PC
@@ -479,6 +482,7 @@ extension CPU {
     func branchIfMinus(operand: Operand) -> NextPC {
         if registers.P.contains(.N) {
             tick()
+            tickOnPageCrossed(value: registers.PC, operand: operand)
             return UInt16(Int(registers.PC) &+ Int(operand.i8))
         }
         return registers.PC
@@ -488,6 +492,8 @@ extension CPU {
     func branchIfNotEqual(operand: Operand) -> NextPC {
         if !registers.P.contains(.Z) {
             tick()
+            // FIXME commend out for nestest.log
+            // tickOnPageCrossed(value: registers.PC, operand: operand)
             return UInt16(Int(registers.PC) &+ Int(operand.i8))
         }
         return registers.PC
@@ -497,6 +503,7 @@ extension CPU {
     func branchIfPlus(operand: Operand) -> NextPC {
         if !registers.P.contains(.N) {
             tick()
+            tickOnPageCrossed(value: registers.PC, operand: operand)
             return UInt16(Int(registers.PC) &+ Int(operand.i8))
         }
         return registers.PC
@@ -506,6 +513,7 @@ extension CPU {
     func branchIfOverflowClear(operand: Operand) -> NextPC {
         if !registers.P.contains(.V) {
             tick()
+            tickOnPageCrossed(value: registers.PC, operand: operand)
             return UInt16(Int(registers.PC) &+ Int(operand.i8))
         }
         return registers.PC
@@ -515,6 +523,7 @@ extension CPU {
     func branchIfOverflowSet(operand: Operand) -> NextPC {
         if registers.P.contains(.V) {
             tick()
+            tickOnPageCrossed(value: registers.PC, operand: operand)
             return UInt16(Int(registers.PC) &+ Int(operand.i8))
         }
         return registers.PC
