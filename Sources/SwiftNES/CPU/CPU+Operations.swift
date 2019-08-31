@@ -683,7 +683,19 @@ extension CPU {
 
     /// RRA
     func rotateRightAndAddWithCarry(operand: Operand) -> NextPC {
-        _ = rotateRight(operand: operand)
+        // rotateRight excluding tick
+        var data = read(at: operand)
+        let c = data & 0x01
+
+        data >>= 1
+        if registers.P.contains(.C) { data |= 0x80 }
+
+        registers.P.remove([.C, .Z, .N])
+        if c == 1 { registers.P.formUnion(.C) }
+
+        registers.P.setZN(data)
+        write(data, at: operand)
+
         return addWithCarry(operand: operand)
     }
 }
