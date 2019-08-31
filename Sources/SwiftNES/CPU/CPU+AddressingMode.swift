@@ -139,6 +139,12 @@ extension CPU {
             tick()
         }
     }
+
+    func tickOnPageCrossed(value: Int, operand: Int) {
+        if ((value &+ operand) & 0xFF00) != (value & 0xFF00) {
+            tick()
+        }
+    }
 }
 
 extension Memory {

@@ -448,85 +448,55 @@ extension CPU {
 
     // MARK: - Branch instructions
 
-    /// BCC
-    func branchIfCarryClear(operand: Operand) -> NextPC {
-        if !registers.P.contains(.C) {
+    fileprivate func branch(operand: Operand, test: Bool) -> NextPC {
+        if test {
             tick()
-            tickOnPageCrossed(value: registers.PC, operand: operand)
-            return UInt16(Int(registers.PC) &+ Int(operand.i8))
+            let pc = Int(registers.PC)
+            let offset = Int(operand.i8)
+            tickOnPageCrossed(value: pc, operand: offset)
+            return UInt16(pc &+ offset)
         }
         return registers.PC
+    }
+
+    /// BCC
+    func branchIfCarryClear(operand: Operand) -> NextPC {
+        return branch(operand: operand, test: !registers.P.contains(.C))
     }
 
     /// BCS
     func branchIfCarrySet(operand: Operand) -> NextPC {
-        if registers.P.contains(.C) {
-            tick()
-            tickOnPageCrossed(value: registers.PC, operand: operand)
-            return UInt16(Int(registers.PC) &+ Int(operand.i8))
-        }
-        return registers.PC
+        return branch(operand: operand, test: registers.P.contains(.C))
     }
 
     /// BEQ
     func branchIfEqual(operand: Operand) -> NextPC {
-        if registers.P.contains(.Z) {
-            tick()
-            tickOnPageCrossed(value: registers.PC, operand: operand)
-            return UInt16(Int(registers.PC) &+ Int(operand.i8))
-        }
-        return registers.PC
+        return branch(operand: operand, test: registers.P.contains(.Z))
     }
 
     /// BMI
     func branchIfMinus(operand: Operand) -> NextPC {
-        if registers.P.contains(.N) {
-            tick()
-            tickOnPageCrossed(value: registers.PC, operand: operand)
-            return UInt16(Int(registers.PC) &+ Int(operand.i8))
-        }
-        return registers.PC
+        return branch(operand: operand, test: registers.P.contains(.N))
     }
 
     /// BNE
     func branchIfNotEqual(operand: Operand) -> NextPC {
-        if !registers.P.contains(.Z) {
-            tick()
-            // FIXME commend out for nestest.log
-            // tickOnPageCrossed(value: registers.PC, operand: operand)
-            return UInt16(Int(registers.PC) &+ Int(operand.i8))
-        }
-        return registers.PC
+        return branch(operand: operand, test: !registers.P.contains(.Z))
     }
 
     /// BPL
     func branchIfPlus(operand: Operand) -> NextPC {
-        if !registers.P.contains(.N) {
-            tick()
-            tickOnPageCrossed(value: registers.PC, operand: operand)
-            return UInt16(Int(registers.PC) &+ Int(operand.i8))
-        }
-        return registers.PC
+        return branch(operand: operand, test: !registers.P.contains(.N))
     }
 
     /// BVC
     func branchIfOverflowClear(operand: Operand) -> NextPC {
-        if !registers.P.contains(.V) {
-            tick()
-            tickOnPageCrossed(value: registers.PC, operand: operand)
-            return UInt16(Int(registers.PC) &+ Int(operand.i8))
-        }
-        return registers.PC
+        return branch(operand: operand, test: !registers.P.contains(.V))
     }
 
     /// BVS
     func branchIfOverflowSet(operand: Operand) -> NextPC {
-        if registers.P.contains(.V) {
-            tick()
-            tickOnPageCrossed(value: registers.PC, operand: operand)
-            return UInt16(Int(registers.PC) &+ Int(operand.i8))
-        }
-        return registers.PC
+        return branch(operand: operand, test: registers.P.contains(.V))
     }
 
     // MARK: - Flag control instructions
