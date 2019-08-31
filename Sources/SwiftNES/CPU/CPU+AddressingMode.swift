@@ -6,14 +6,18 @@ enum AddressingMode {
     case zeroPageX
     case zeroPageY
     case absolute
-    case absoluteX(extraCycle: Bool)
-    case absoluteY(extraCycle: Bool)
+    case absoluteX(cycles: CycleConsumption)
+    case absoluteY(cycles: CycleConsumption)
     case relative
     case indirect
     case indexedIndirect
     case indirectIndexed
 
     typealias FetchOperand = () -> UInt16
+
+    enum CycleConsumption {
+        case fixed, onlyIfPageCrossed
+    }
 }
 
 extension CPU {
@@ -68,7 +72,7 @@ extension CPU {
         return operand
     }
 
-    func absoluteXWithExtraCycle() -> UInt16 {
+    func absoluteXWithPenalty() -> UInt16 {
         let data = readWord(at: registers.PC)
         let operand = data &+ registers.X.u16 & 0xFFFF
         registers.PC &+= 2
@@ -88,7 +92,7 @@ extension CPU {
         return operand
     }
 
-    func absoluteYWithExtraCycle() -> UInt16 {
+    func absoluteYWithPenalty() -> UInt16 {
         let data = readWord(at: registers.PC)
         let operand = data &+ registers.Y.u16 & 0xFFFF
         registers.PC &+= 2
