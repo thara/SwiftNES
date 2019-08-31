@@ -42,7 +42,12 @@ public func nestest(romPath: String) throws {
     let nes = makeNES(renderer: DummyRenderer())
     nes.insert(cartridge: cartridge)
 
-    nes.runFrame()
+    while true {
+        nes.step()
+        if 26554 < nes.cycles {
+            break
+        }
+    }
 }
 
 private class DummyRenderer: Renderer {

@@ -13,7 +13,7 @@ public final class NES {
 
     private var nestest: NESTest
 
-    private var cycles: UInt = 0
+    private(set) var cycles: UInt = 0
 
     init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive, controllerPort: ControllerPort) {
         self.cpu = cpu
