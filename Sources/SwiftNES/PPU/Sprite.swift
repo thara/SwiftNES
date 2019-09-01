@@ -50,10 +50,9 @@ struct SpriteAttribute: OptionSet {
     }
 }
 
-let spriteSize: Int = 4
 let spriteCount: Int = 64
 let spriteLimit: Int = 8
-let oamSize = spriteSize * spriteCount
+let oamSize = 4 * spriteCount
 
 struct SpriteOAM {
     var primary: [UInt8]
@@ -74,33 +73,39 @@ struct SpriteOAM {
 
     /// the sprite evaluation phase
     mutating func evalSprites(line: Int, registers: inout PPURegisters) -> Bool {
+        let spriteSize = registers.spriteSize
+
         var found = 0
         for i in 0..<spriteCount {
-            let s = i &* spriteSize
-            let y = line &- Int(primary[s])
+            let y = i &* 4
+            secondary[y] = primary[y]
 
-            guard 0 <= y && y < 8 else {
+            let row = line &- Int(primary[y])
+            guard 0 <= row && row < spriteSize else {
                 continue
             }
+
             found &+= 1
 
-            secondary[s..<(s &+ spriteSize)] = primary[s..<(s &+ spriteSize)]
-            if spriteLimit < found {
-                return true
+            if found <= spriteLimit {
+                secondary[y &+ 1] = primary[y &+ 1]
+                secondary[y &+ 2] = primary[y &+ 2]
+                secondary[y &+ 3] = primary[y &+ 3]
             }
         }
-        return false
+
+        return spriteLimit < found
     }
 
     /// the sprite fetch phase
     mutating func fetchSprites() {
         for i in 0..<spriteLimit {
-            let n = i &* spriteSize
+            let n = i &* 4
             sprites[i] = Sprite(
                 y: secondary[n],
-                tileIdx: secondary[n + 1],
-                attr: SpriteAttribute(rawValue: secondary[n + 2]),
-                x: secondary[n + 3],
+                tileIdx: secondary[n &+ 1],
+                attr: SpriteAttribute(rawValue: secondary[n &+ 2]),
+                x: secondary[n &+ 3],
                 zero: i == 0
             )
         }

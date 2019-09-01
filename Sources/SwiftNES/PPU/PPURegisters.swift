@@ -32,6 +32,10 @@ struct PPURegisters: CustomStringConvertible {
             """
     }
 
+    var spriteSize: Int {
+        return controller.contains(.spriteSize) ? 16 : 8
+    }
+
     mutating func clear() {
         controller = []
         mask = []
