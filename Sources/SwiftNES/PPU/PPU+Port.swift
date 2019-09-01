@@ -12,7 +12,14 @@ extension PPU: IOPort {
             return spriteOAM.primary[Int(registers.objectAttributeMemoryAddress)]
         case 0x2007:
             defer { registers.incrV() }
-            return memory.read(at: registers.v)
+
+            if registers.v <= 0x3EFF {
+                let data = registers.data
+                registers.data = memory.read(at: registers.v)
+                return data
+            } else {
+                return memory.read(at: registers.v)
+            }
         default:
             return 0x00
         }

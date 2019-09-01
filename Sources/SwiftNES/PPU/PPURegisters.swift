@@ -5,6 +5,8 @@ struct PPURegisters: CustomStringConvertible {
     var mask: PPUMask = []
     /// PPUSTATUS
     var status: PPUStatus = []
+    /// PPUDATA
+    var data: UInt8 = 0x00
     /// OAMADDR
     var objectAttributeMemoryAddress: UInt8 = 0x00
 
@@ -34,6 +36,7 @@ struct PPURegisters: CustomStringConvertible {
         controller = []
         mask = []
         status = []
+        data = 0x00
     }
 
     mutating func incrV() {
