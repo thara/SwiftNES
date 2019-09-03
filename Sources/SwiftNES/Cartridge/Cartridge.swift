@@ -1,3 +1,5 @@
+import Foundation
+
 public final class Cartridge {
     private let mapper: Mapper
 
@@ -5,12 +7,12 @@ public final class Cartridge {
         self.mapper = mapper
     }
 
-    public init?(file: NESFile) {
+    public init(file: NESFile) throws {
         switch file.header.mapperNo {
         case 0:
             mapper = Mapper0(file: file)
         default:
-            return nil
+            throw MapperError.unsupportedMapper(no: file.header.mapperNo)
         }
     }
 
@@ -27,5 +29,18 @@ public final class Cartridge {
     @inline(__always)
     func applyMirroring(to ppuBus: PPUBus) {
         ppuBus.mirroring = mapper.mirroring
+    }
+}
+
+enum MapperError: Error {
+    case unsupportedMapper(no: UInt8)
+}
+
+extension MapperError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .unsupportedMapper(let no):
+            return "Unsupported mapper: no=\(no)"
+        }
     }
 }

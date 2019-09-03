@@ -55,9 +55,7 @@ final class Emulator {
     }
 
     func loadNESFile(path: String) throws {
-        guard let cartridge = Cartridge(file: try NESFile(path: path)) else {
-            fatalError("Unsupported mapper")
-        }
+        let cartridge = try Cartridge(file: try NESFile(path: path))
         nes.insert(cartridge: cartridge)
     }
 

@@ -33,11 +33,7 @@ struct NESTest {
 
 #if nestest
 public func nestest(romPath: String) throws {
-    let rom = try NESFile(path: romPath)
-
-    guard let cartridge = Cartridge(file: rom) else {
-        fatalError("Unsupported mapper")
-    }
+    let cartridge = try Cartridge(file: try NESFile(path: romPath))
 
     let nes = makeNES(renderer: DummyRenderer())
     nes.insert(cartridge: cartridge)
