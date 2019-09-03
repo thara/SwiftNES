@@ -110,9 +110,14 @@ struct SpriteOAM {
             )
         }
     }
+}
 
-    func getPalleteIndex(x: Int, y: Int, baseAddr: UInt16, memory: inout Memory) -> (Int, SpriteAttribute, Bool) {
-        for sprite in sprites {
+extension PPU {
+
+    func getSprite(x: Int, y: Int) -> (palleteIndex: Int, attribute: SpriteAttribute, spriteZero: Bool) {
+        let base = registers.controller.baseSpriteTableAddr
+
+        for sprite in spriteOAM.sprites {
             guard sprite.valid else {
                 break
             }
@@ -123,7 +128,7 @@ struct SpriteOAM {
             let row = sprite.row(lineNumber: y)
             let col = sprite.col(x: x)
 
-            let tileAddr = baseAddr &+ sprite.tileIdx.u16 &* 16 &+ row
+            let tileAddr = base &+ sprite.tileIdx.u16 &* 16 &+ row
             let low = memory.read(at: tileAddr)
             let high = memory.read(at: tileAddr &+ 8)
 

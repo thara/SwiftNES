@@ -199,8 +199,7 @@ extension PPU {
             : 0
 
         let (sprite, spriteAttr, spriteZeroHit) = registers.isEnabledSprite(at: x)
-            ? spriteOAM.getPalleteIndex(
-                x: x, y: scan.line, baseAddr: registers.controller.baseSpriteTableAddr, memory: &memory)
+            ? getSprite(x: x, y: scan.line)
             : (0, [], false)
 
         let idx = renderingEnabled
