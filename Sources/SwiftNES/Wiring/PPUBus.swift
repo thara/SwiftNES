@@ -15,9 +15,11 @@ final class PPUBus: Memory {
         switch address {
         case 0x0000...0x1FFF:
             return cartridge?.read(at: address) ?? 0x00
-        case 0x2000...0x3EFF:
+        case 0x2000...0x2FFF:
             return nameTable.read(at: toNameTableAddress(address))
-        case 0x3F00...0x3F1F:
+        case 0x3000...0x3EFF:
+            return nameTable.read(at: toNameTableAddress(address &- 0x1000))
+        case 0x3F00...0x3FFF:
             return paletteRAMIndexes.read(at: toPalleteAddress(address))
         default:
             return 0x00
@@ -28,9 +30,11 @@ final class PPUBus: Memory {
         switch address {
         case 0x0000...0x1FFF:
             cartridge?.write(value, at: address)
-        case 0x2000...0x3EFF:
+        case 0x2000...0x2FFF:
             nameTable.write(value, at: toNameTableAddress(address))
-        case 0x3F00...0x3F1F:
+        case 0x3000...0x3EFF:
+            nameTable.write(value, at: toNameTableAddress(address &- 0x1000))
+        case 0x3F00...0x3FFF:
             paletteRAMIndexes.write(value, at: toPalleteAddress(address))
         default:
             break // NOP
@@ -42,7 +46,7 @@ final class PPUBus: Memory {
         case .vertical?:
             return baseAddress % 0x0800
         case .horizontal?:
-            return ((baseAddress / 2) % 0x400) + (baseAddress % 0x400)
+            return ((baseAddress / 2) % 0x400) &+ (baseAddress % 0x400)
         default:
             return baseAddress &- 0x2000
         }
@@ -50,10 +54,12 @@ final class PPUBus: Memory {
 
     func toPalleteAddress(_ baseAddress: UInt16) -> UInt16 {
         // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
-        if baseAddress % 4 == 0 {
-            return (baseAddress | 0x10) & 0xFF
+        let addr = baseAddress % 32
+
+        if addr % 4 == 0 {
+            return (addr | 0x10)
         } else {
-            return baseAddress & 0xFF
+            return addr
         }
     }
 
