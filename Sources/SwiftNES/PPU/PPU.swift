@@ -92,10 +92,10 @@ extension PPU {
     func updateSprites(preRendering: Bool) {
         switch scan.dot {
         case 1:
-            spriteOAM.clearSecondaryOAM()
             if preRendering {
-                registers.status.remove([.spriteOverflow, .spriteZeroHit])
+                registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
             }
+            spriteOAM.clearSecondaryOAM()
         case 257:
             if spriteOAM.evalSprites(line: scan.line, registers: &registers) {
                 registers.status.formUnion(.spriteOverflow)
@@ -112,9 +112,6 @@ extension PPU {
         switch scan.dot {
         case 1:
             background.addressNameTableEntry(using: registers.v)
-            if preRendering {
-                registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
-            }
         case 321:
             // No reload shift
             background.addressNameTableEntry(using: registers.v)
@@ -187,7 +184,6 @@ extension PPU {
     // swiftlint:enable cyclomatic_complexity
 
     func updatePixel() {
-
         defer {
             background.shift()
         }
@@ -198,11 +194,11 @@ extension PPU {
             return
         }
 
-        let bg = registers.mask.contains(.background)
+        let bg = registers.isEnabledBackground(at: x)
             ? background.getPaletteIndex(fineX: registers.fineX)
             : 0
 
-        let (sprite, spriteAttr, spriteZeroHit) = registers.mask.contains(.sprite)
+        let (sprite, spriteAttr, spriteZeroHit) = registers.isEnabledSprite(at: x)
             ? spriteOAM.getPalleteIndex(
                 x: x, y: scan.line, baseAddr: registers.controller.baseSpriteTableAddr, memory: &memory)
             : (0, [], false)
