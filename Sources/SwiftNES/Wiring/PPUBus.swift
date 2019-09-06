@@ -46,7 +46,11 @@ final class PPUBus: Memory {
         case .vertical?:
             return baseAddress % 0x0800
         case .horizontal?:
-            return ((baseAddress / 2) % 0x400) &+ (baseAddress % 0x400)
+            if 0x2800 <= baseAddress {
+                return 0x0800 &+ baseAddress % 0x0400
+            } else {
+                return baseAddress % 0x0400
+            }
         default:
             return baseAddress &- 0x2000
         }

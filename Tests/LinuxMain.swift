@@ -15,6 +15,7 @@ QCKMain([
     BackgroundSpec.self,
 
     CPUBusSpec.self,
+    PPUBusSpec.self,
 
     NESFileSpec.self,
 ])
