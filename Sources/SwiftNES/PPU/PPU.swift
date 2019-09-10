@@ -202,32 +202,43 @@ extension PPU {
             ? getSprite(x: x, y: scan.line)
             : (0, [], false)
 
-        let idx = renderingEnabled
-            ? selectPalleteIndex(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
-            : 0
-
-        if spriteZeroHit && 0 < bg && renderingEnabled {
-            registers.status.formUnion(.spriteZeroHit)
+        let idx: Int
+        if renderingEnabled {
+            switch getPriority(bg: bg, sprite: sprite, spriteAttr: spriteAttr) {
+            case .background:
+                idx = bg
+            case .sprite:
+                idx = sprite
+                if spriteZeroHit && 0 < bg && x == 0 /* && 0 < sprite && !(0 <= x && x <= 7) && x != 255 && !registers.status.contains(.spriteZeroHit)*/ {
+                    registers.status.formUnion(.spriteZeroHit)
+                }
+            }
+        } else {
+            idx = 0
         }
 
         let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
         lineBuffer[x] = palletes[Int(palleteNo)]
     }
 
-    func selectPalleteIndex(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> Int {
+    func getPriority(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> PixelPriority {
         switch (bg, sprite, spriteAttr.contains(.behindBackground)) {
         case (0, 0, _):
-            return bg
+            return .background
         case (0, let p, _) where 0 < p:
-            return sprite
+            return .sprite
         case (let p, 0, _) where 0 < p:
-            return bg
+            return .background
         case (_, _, false):
-            return sprite
+            return .sprite
         case (_, _, true):
-            return bg
+            return .background
         }
     }
+}
+
+enum PixelPriority {
+    case background, sprite
 }
 
 private extension BinaryInteger {

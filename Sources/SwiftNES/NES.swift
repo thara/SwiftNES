@@ -5,8 +5,8 @@ public final class NES {
     private let cartridgeDrive: CartridgeDrive
     private let controllerPort: ControllerPort
 
-    public static let maxDot = 341
-    public static let maxLine = 261
+    public static let maxDot = 340
+    public static let maxLine = 262
 
     public static let height = 240
     public static let width = 256
