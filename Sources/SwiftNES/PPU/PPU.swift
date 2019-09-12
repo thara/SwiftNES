@@ -1,6 +1,3 @@
-private let maxDot: UInt16 = 341
-private let maxLine: UInt16 = 261
-
 final class PPU {
     var registers: PPURegisters
     var memory: Memory
@@ -67,12 +64,20 @@ extension PPU {
         switch scan.line {
         case 261:
             // Pre Render
-            preRendering = true
+            defer {
+                if scan.dot == 1 {
+                    registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
+                }
+                if scan.dot == 341 && renderingEnabled && frames.isOdd {
+                    // Skip 0 cycle on visible frame
+                    scan.skip()
+                }
+            }
+
             fallthrough
         case 0...239:
             // Visible
-            updateSprites(preRendering: preRendering)
-            updateBackground(preRendering: preRendering)
+            renderPixel()
         case 240:
             // Post Render
             break
@@ -89,121 +94,18 @@ extension PPU {
         }
     }
 
-    func updateSprites(preRendering: Bool) {
-        switch scan.dot {
-        case 1:
-            spriteOAM.clearSecondaryOAM()
-            if preRendering {
-                registers.status.remove([.spriteZeroHit, .spriteOverflow])
-            }
-        case 257:
-            if spriteOAM.evalSprites(line: scan.line, registers: &registers) {
-                registers.status.formUnion(.spriteOverflow)
-            }
-        case 321:
-            spriteOAM.fetchSprites()
-        default:
-            break
-        }
-    }
-
-    // swiftlint:disable cyclomatic_complexity
-    func updateBackground(preRendering: Bool = false) {
-        switch scan.dot {
-        case 1:
-            background.addressNameTableEntry(using: registers.v)
-            if preRendering {
-                registers.status.remove(.vblank)
-            }
-        case 321:
-            // No reload shift
-            background.addressNameTableEntry(using: registers.v)
-        case 2...255, 322...336:
-            updatePixel()
-
-            switch scan.dot % 8 {
-            // name table
-            case 1:
-                background.addressNameTableEntry(using: registers.v)
-                background.reloadShift()
-            case 2:
-                background.fetchNameTableEntry(from: memory)
-            // attribute table
-            case 3:
-                background.addressAttrTableEntry(using: registers.v)
-            case 4:
-                background.fetchAttrTableEntry(from: memory, v: registers.v)
-
-            // tile bitmap low
-            case 5:
-                background.addressTileBitmapLow(using: registers.v, controller: registers.controller)
-            case 6:
-                background.fetchTileBitmapLow(from: memory)
-            // tile bitmap high
-            case 7:
-                background.addressTileBitmapHigh()
-            case 0:
-                background.fetchTileBitmapHigh(from: memory)
-                if renderingEnabled {
-                    registers.incrCoarseX()
-                }
-            default:
-                break
-            }
-        case 256:
-            updatePixel()
-            background.fetchTileBitmapHigh(from: memory)
-            if renderingEnabled {
-                registers.incrY()
-            }
-        case 257:
-            updatePixel()
-            background.reloadShift()
-            if renderingEnabled {
-                registers.copyX()
-            }
-        case 280...304:
-            if preRendering && renderingEnabled {
-                registers.copyY()
-            }
-        // Unused name table fetches
-        case 337:
-            updatePixel()
-            background.addressNameTableEntry(using: registers.v)
-        case 338:
-            background.fetchNameTableEntry(from: memory)
-        case 339:
-            background.addressNameTableEntry(using: registers.v)
-        case 340:
-            background.fetchNameTableEntry(from: memory)
-            if preRendering && renderingEnabled && frames.isOdd {
-                // Skip 0 cycle on visible frame
-                scan.skip()
-            }
-        default:
-            break
-        }
-    }
-    // swiftlint:enable cyclomatic_complexity
-
-    func updatePixel() {
+    func renderPixel() {
         let x = scan.dot &- 2
+
+        let bg = getBackgroundPixel(x: x)
+        let (sprite, spriteAttr, spriteZeroHit) = getSpritePixel(x: x)
+
+        fetchBackgroundPixel()
+        fetchSpritePixel()
 
         guard scan.line < NES.height && 0 <= x && x < NES.width else {
             return
         }
-
-        defer {
-            background.shift()
-        }
-
-        let bg = registers.isEnabledBackground(at: x)
-            ? background.getPaletteIndex(fineX: registers.fineX)
-            : 0
-
-        let (sprite, spriteAttr, spriteZeroHit) = registers.isEnabledSprite(at: x)
-            ? getSprite(x: x, y: scan.line)
-            : (0, [], false)
 
         let idx = renderingEnabled
             ? selectPalleteIndex(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
@@ -213,11 +115,13 @@ extension PPU {
             registers.status.formUnion(.spriteZeroHit)
         }
 
-        let palleteNo = memory.read(at: UInt16(0x3F00 + idx))
+        let palleteNo = memory.read(at: UInt16(0x3F00) &+ idx)
         lineBuffer[x] = palletes[Int(palleteNo)]
+
+        background.shift()
     }
 
-    func selectPalleteIndex(bg: Int, sprite: Int, spriteAttr: SpriteAttribute) -> Int {
+    func selectPalleteIndex(bg: UInt16, sprite: UInt16, spriteAttr: SpriteAttribute) -> UInt16 {
         switch (bg, sprite, spriteAttr.contains(.behindBackground)) {
         case (0, 0, _):
             return bg

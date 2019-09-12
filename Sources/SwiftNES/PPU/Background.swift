@@ -101,3 +101,91 @@ struct Background {
         tileAttrHighLatch = attrTableEntry[1] == 1
     }
 }
+
+extension PPU {
+
+    func fetchBackgroundPixel() {
+        switch scan.dot {
+        case 1:
+            background.addressNameTableEntry(using: registers.v)
+        case 321:
+            // No reload shift
+            background.addressNameTableEntry(using: registers.v)
+        case 2...255, 322...336:
+            switch scan.dot % 8 {
+            // name table
+            case 1:
+                background.addressNameTableEntry(using: registers.v)
+                background.reloadShift()
+            case 2:
+                background.fetchNameTableEntry(from: memory)
+            // attribute table
+            case 3:
+                background.addressAttrTableEntry(using: registers.v)
+            case 4:
+                background.fetchAttrTableEntry(from: memory, v: registers.v)
+            // tile bitmap low
+            case 5:
+                background.addressTileBitmapLow(using: registers.v, controller: registers.controller)
+            case 6:
+                background.fetchTileBitmapLow(from: memory)
+            // tile bitmap high
+            case 7:
+                background.addressTileBitmapHigh()
+            case 0:
+                background.fetchTileBitmapHigh(from: memory)
+                if renderingEnabled {
+                    registers.incrCoarseX()
+                }
+            default:
+                break
+            }
+        case 256:
+            background.fetchTileBitmapHigh(from: memory)
+            if renderingEnabled {
+                registers.incrY()
+            }
+        case 257:
+            background.reloadShift()
+            if renderingEnabled {
+                registers.copyX()
+            }
+        case 280...304:
+            if scan.line == 261 && renderingEnabled {
+                registers.copyY()
+            }
+        // Unused name table fetches
+        case 337:
+            background.addressNameTableEntry(using: registers.v)
+        case 338:
+            background.fetchNameTableEntry(from: memory)
+        case 339:
+            background.addressNameTableEntry(using: registers.v)
+        case 340:
+            background.fetchNameTableEntry(from: memory)
+        default:
+            break
+        }
+    }
+
+    /// Returns pallete index for fine X
+    func getBackgroundPixel(x: Int) -> UInt16 {
+        guard registers.isEnabledBackground(at: x) else {
+            return 0
+        }
+
+        let fineX = registers.fineX
+
+        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
+        let pixelIdx = 15 &- fineX
+        let pixel = (background.tilePatternSecond[pixelIdx] &<< 1) | background.tilePatternFirst[pixelIdx]
+
+        guard pixel != 0 else {
+            return pixel
+        }
+
+        let palleteIdx = 7 &- fineX
+        let pallete = (background.tileAttrHigh[palleteIdx] &<< 1) | background.tileAttrLow[palleteIdx]
+        return pixel | (pallete &<< 2).u16
+    }
+}

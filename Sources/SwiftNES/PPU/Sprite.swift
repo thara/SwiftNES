@@ -22,8 +22,8 @@ struct Sprite {
         return row
     }
 
-    func col(x: Int) -> UInt8 {
-        var col = 7 &- (x &- Int(self.x))
+    func col(x: UInt8) -> UInt8 {
+        var col = 7 &- (x &- self.x)
         if attr.contains(.flipHorizontally) {
             col = 8 &- 1 &- col
         }
@@ -114,7 +114,28 @@ struct SpriteOAM {
 
 extension PPU {
 
-    func getSprite(x: Int, y: Int) -> (palleteIndex: Int, attribute: SpriteAttribute, spriteZero: Bool) {
+    func fetchSpritePixel() {
+        switch scan.dot {
+        case 1:
+            spriteOAM.clearSecondaryOAM()
+        case 257:
+            if spriteOAM.evalSprites(line: scan.line, registers: &registers) {
+                registers.status.formUnion(.spriteOverflow)
+            }
+        case 321:
+            spriteOAM.fetchSprites()
+        default:
+            break
+        }
+    }
+
+    func getSpritePixel(x: Int) -> (palleteIndex: UInt16, attribute: SpriteAttribute, spriteZero: Bool) {
+        let y = scan.line
+
+        guard registers.isEnabledSprite(at: x) else {
+            return (0, [], false)
+        }
+
         let base = registers.controller.baseSpriteTableAddr
 
         for sprite in spriteOAM.sprites {
@@ -126,7 +147,7 @@ extension PPU {
             }
 
             let row = sprite.row(lineNumber: y)
-            let col = sprite.col(x: x)
+            let col = sprite.col(x: UInt8(x))
 
             let tileAddr = base &+ sprite.tileIdx.u16 &* 16 &+ row
             let low = memory.read(at: tileAddr)
@@ -139,7 +160,7 @@ extension PPU {
                 continue
             }
 
-            return (Int(pixel &+ 0x10), sprite.attr, sprite.zero)   // from 0x3F10
+            return (UInt16(pixel &+ 0x10), sprite.attr, sprite.zero)   // from 0x3F10
         }
 
         return (0, [], false)
