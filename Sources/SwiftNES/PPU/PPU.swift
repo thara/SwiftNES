@@ -14,6 +14,9 @@ final class PPU {
     var lineBuffer: [UInt32]
     let renderer: Renderer
 
+    // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
+    var internalDataBus: UInt8 = 0x00
+
     init(memory: Memory, interruptLine: InterruptLine, renderer: Renderer) {
         self.registers = PPURegisters()
         self.memory = memory

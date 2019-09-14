@@ -5,24 +5,27 @@ extension PPU: IOPort {
     }
 
     func read(from address: UInt16) -> UInt8 {
+        let result: UInt8
+
         switch address {
         case 0x2002:
-            return registers.readStatus()
+            result = registers.readStatus() | (internalDataBus & 0b11111)
         case 0x2004:
-            return spriteOAM.primary[Int(registers.objectAttributeMemoryAddress)]
+            result = spriteOAM.primary[Int(registers.objectAttributeMemoryAddress)]
         case 0x2007:
-            defer { registers.incrV() }
-
             if registers.v <= 0x3EFF {
-                let data = registers.data
+                result = registers.data
                 registers.data = memory.read(at: registers.v)
-                return data
             } else {
-                return memory.read(at: registers.v)
+                result = memory.read(at: registers.v)
             }
+            registers.incrV()
         default:
-            return 0x00
+            result = 0x00
         }
+
+        internalDataBus = result
+        return result
     }
 
     func write(_ value: UInt8, to address: UInt16) {
