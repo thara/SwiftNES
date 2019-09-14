@@ -22,8 +22,8 @@ struct Sprite {
         return row
     }
 
-    func col(x: UInt8) -> UInt8 {
-        var col = 7 &- (x &- self.x)
+    func col(x: UInt16) -> UInt8 {
+        var col = 7 &- (x &- self.x.u16)
         if attr.contains(.flipHorizontally) {
             col = 8 &- 1 &- col
         }
@@ -147,7 +147,7 @@ extension PPU {
             }
 
             let row = sprite.row(lineNumber: y)
-            let col = sprite.col(x: UInt8(x))
+            let col = sprite.col(x: UInt16(x))
 
             let tileAddr = base &+ sprite.tileIdx.u16 &* 16 &+ row
             let low = memory.read(at: tileAddr)
