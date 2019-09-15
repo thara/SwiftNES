@@ -103,6 +103,11 @@ extension PPU {
         let x = scan.dot &- 2
 
         let bg = getBackgroundPixel(x: x)
+
+        if (1 <= scan.dot && scan.dot <= 256) || (321 <= scan.dot && scan.dot <= 336) {
+            background.shift()
+        }
+
         let (sprite, spriteAttr, spriteZeroHit) = getSpritePixel(x: x)
 
         fetchBackgroundPixel()
@@ -122,8 +127,6 @@ extension PPU {
 
         let palleteNo = memory.read(at: UInt16(0x3F00) &+ idx)
         lineBuffer[x] = palletes[Int(palleteNo)]
-
-        background.shift()
     }
 
     func selectPalleteIndex(bg: UInt16, sprite: UInt16, spriteAttr: SpriteAttribute) -> UInt16 {
