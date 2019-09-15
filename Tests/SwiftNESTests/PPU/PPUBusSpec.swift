@@ -15,9 +15,13 @@ class PPUBusSpec: QuickSpec {
 
                 it("mirror correctly") {
                     expect(bus.toNameTableAddress(0x2000)) == 0
+                    expect(bus.toNameTableAddress(0x23FF)) == 0x03FF
                     expect(bus.toNameTableAddress(0x2400)) == 0x0400
+                    expect(bus.toNameTableAddress(0x27FF)) == 0x07FF
                     expect(bus.toNameTableAddress(0x2800)) == 0
+                    expect(bus.toNameTableAddress(0x2BFF)) == 0x03FF
                     expect(bus.toNameTableAddress(0x2C00)) == 0x0400
+                    expect(bus.toNameTableAddress(0x2FFF)) == 0x07FF
                 }
             }
 
@@ -28,9 +32,13 @@ class PPUBusSpec: QuickSpec {
 
                 it("mirror correctly") {
                     expect(bus.toNameTableAddress(0x2000)) == 0
+                    expect(bus.toNameTableAddress(0x23FF)) == 0x03FF
                     expect(bus.toNameTableAddress(0x2400)) == 0
+                    expect(bus.toNameTableAddress(0x27FF)) == 0x03FF
                     expect(bus.toNameTableAddress(0x2800)) == 0x0800
+                    expect(bus.toNameTableAddress(0x2BFF)) == 0x0BFF
                     expect(bus.toNameTableAddress(0x2C00)) == 0x0800
+                    expect(bus.toNameTableAddress(0x2FFF)) == 0x0BFF
                 }
             }
         }
