@@ -5,11 +5,15 @@ extension PPU: IOPort {
     }
 
     func read(from address: UInt16) -> UInt8 {
-        let result: UInt8
+        var result: UInt8
 
         switch address {
         case 0x2002:
             result = registers.readStatus() | (internalDataBus & 0b11111)
+            // Race Condition
+            if scan.line == startVerticalBlank && scan.dot < 2 {
+                result &= ~0x80
+            }
         case 0x2004:
             result = spriteOAM.primary[Int(registers.objectAttributeMemoryAddress)]
         case 0x2007:

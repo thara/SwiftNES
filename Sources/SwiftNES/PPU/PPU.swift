@@ -1,3 +1,5 @@
+let startVerticalBlank = 241
+
 final class PPU {
     var registers: PPURegisters
     var memory: Memory
@@ -84,7 +86,7 @@ extension PPU {
         case 240:
             // Post Render
             break
-        case 241:
+        case startVerticalBlank:
             // begin VBLANK
             if scan.dot == 1 {
                 registers.status.formUnion(.vblank)
@@ -106,7 +108,7 @@ extension PPU {
         fetchBackgroundPixel()
         fetchSpritePixel()
 
-        guard scan.line < NES.height && 0 <= x && x < NES.width else {
+        guard scan.line < NES.maxLine && 0 <= x && x < NES.width else {
             return
         }
 
