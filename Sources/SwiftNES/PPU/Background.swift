@@ -103,7 +103,7 @@ struct Background {
 }
 
 extension PPU {
-
+    // swiftlint:disable cyclomatic_complexity
     func fetchBackgroundPixel() {
         switch scan.dot {
         case 321:
@@ -165,6 +165,7 @@ extension PPU {
             break
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 
     /// Returns pallete index for fine X
     func getBackgroundPixel(x: Int) -> UInt16 {
