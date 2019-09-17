@@ -103,11 +103,6 @@ extension PPU {
         let x = scan.dot &- 2
 
         let bg = getBackgroundPixel(x: x)
-
-        if (1 <= scan.dot && scan.dot <= 256) || (321 <= scan.dot && scan.dot <= 336) {
-            background.shift()
-        }
-
         let (sprite, spriteAttr, spriteZeroHit) = getSpritePixel(x: x)
 
         fetchBackgroundPixel()
@@ -121,7 +116,7 @@ extension PPU {
             ? selectPalleteIndex(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
             : 0
 
-        if spriteZeroHit && 0 < bg && renderingEnabled {
+        if spriteZeroHit && 0 < bg && renderingEnabled && !registers.status.contains(.spriteZeroHit) {
             registers.status.formUnion(.spriteZeroHit)
         }
 

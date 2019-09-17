@@ -106,12 +106,10 @@ extension PPU {
 
     func fetchBackgroundPixel() {
         switch scan.dot {
-        case 1:
-            background.addressNameTableEntry(using: registers.v)
         case 321:
             // No reload shift
             background.addressNameTableEntry(using: registers.v)
-        case 2...255, 322...336:
+        case 1...255, 322...336:
             switch scan.dot % 8 {
             // name table
             case 1:
@@ -170,22 +168,27 @@ extension PPU {
 
     /// Returns pallete index for fine X
     func getBackgroundPixel(x: Int) -> UInt16 {
-        guard registers.isEnabledBackground(at: x) else {
-            return 0
-        }
-
         let fineX = registers.fineX
 
         // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
         let pixelIdx = 15 &- fineX
         let pixel = (background.tilePatternSecond[pixelIdx] &<< 1) | background.tilePatternFirst[pixelIdx]
 
+        let palleteIdx = 7 &- fineX
+        let pallete = (background.tileAttrHigh[palleteIdx] &<< 1) | background.tileAttrLow[palleteIdx]
+
+        if (1 <= scan.dot && scan.dot <= 256) || (321 <= scan.dot && scan.dot <= 336) {
+            background.shift()
+        }
+
+        guard registers.isEnabledBackground(at: x) else {
+            return 0
+        }
+
         guard pixel != 0 else {
             return pixel
         }
 
-        let palleteIdx = 7 &- fineX
-        let pallete = (background.tileAttrHigh[palleteIdx] &<< 1) | background.tileAttrLow[palleteIdx]
         return pixel | (pallete &<< 2).u16
     }
 }
