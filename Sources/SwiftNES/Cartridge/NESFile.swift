@@ -107,7 +107,7 @@ extension NESFileError: LocalizedError {
         case .notEnoughHeaderSize(let size):
             return "Not enough header size : expected=16, actual=\(size)"
         case .invalidHeader(let bytes):
-            return "Invalid header: bytes=\(bytes)"
+            return "Invalid header: bytes=\(bytes.map {$0.radix16})"
         }
     }
 }
