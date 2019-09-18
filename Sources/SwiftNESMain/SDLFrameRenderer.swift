@@ -23,10 +23,10 @@ final class SDLFrameRenderer: Renderer {
         self.screenRect = screenRect
 
         frameTexture = try SDLTexture(
-            renderer: renderer, format: .argb8888, access: .streaming, width: 256, height: 240
+            renderer: renderer, format: .argb8888, access: .streaming, width: NES.width, height: NES.height
         )
 
-        frameBuffer = [UInt32](repeating: 0x00, count: 256 * 240)
+        frameBuffer = [UInt32](repeating: 0x00, count: NES.width * NES.height)
     }
 
     func newLine(number: Int, pixels: [UInt32]) {
