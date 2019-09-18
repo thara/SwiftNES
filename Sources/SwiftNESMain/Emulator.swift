@@ -3,6 +3,9 @@ import SDL
 
 import SwiftNES
 
+let screenWidth = NES.width
+let screenHeight = 224
+
 final class Emulator {
 
     private let nes: NES
@@ -22,8 +25,8 @@ final class Emulator {
         self.windowTitle = windowTitle
 
         let windowSize = (
-            width: NES.width * windowScale,
-            height: NES.height * windowScale)
+            width: screenWidth * windowScale,
+            height: screenHeight * windowScale)
         window = try SDLWindow(title: windowTitle,
                                frame: (
                                    x: .centered,

@@ -3,10 +3,12 @@ import SDL
 
 import SwiftNES
 
-private let rowPixels = NES.width
+private let rowPixels = screenWidth
 private let pitch = {
     rowPixels * MemoryLayout<UInt32>.stride
 }()
+
+private let safeAreaHeight = (NES.height &- screenHeight) / 2
 
 final class SDLFrameRenderer: Renderer {
 
@@ -23,26 +25,31 @@ final class SDLFrameRenderer: Renderer {
         self.screenRect = screenRect
 
         frameTexture = try SDLTexture(
-            renderer: renderer, format: .argb8888, access: .streaming, width: NES.width, height: NES.height
+            renderer: renderer, format: .argb8888, access: .streaming, width: screenWidth, height: screenHeight
         )
 
-        frameBuffer = [UInt32](repeating: 0x00, count: NES.width * NES.height)
+        frameBuffer = [UInt32](repeating: 0x00, count: rowPixels * screenHeight)
     }
 
     func newLine(number: Int, pixels: [UInt32]) {
-        guard number < NES.height else {
-            return
-        }
+        switch number {
+        case 0..<safeAreaHeight:
+            // in top safe area
+            break
+        case (NES.height &- safeAreaHeight)...Int.max:
+            // in bottom safe area
+            if NES.maxLine <= line {
+                line = 0
+                render()
+            }
+        default:
+            let row = number &- safeAreaHeight
 
-        let start = number * rowPixels
-        let end = (number + 1) * rowPixels
-        frameBuffer[start..<end] = pixels[..<rowPixels]
+            let start = row * rowPixels
+            let end = (row + 1) * rowPixels
+            frameBuffer[start..<end] = pixels[..<rowPixels]
 
-        line &+= 1
-
-        if NES.maxLine <= line {
-            line = 0
-            render()
+            line &+= 1
         }
     }
 
