@@ -112,7 +112,19 @@ struct SpriteOAM {
     }
 }
 
-extension PPU {
+protocol SpriteRenderer: class {
+    var registers: PPURegisters { get set }
+    var memory: Memory { get }
+
+    var spriteOAM: SpriteOAM { get set }
+
+    var scan: Scan { get }
+
+    func fetchSpritePixel()
+    func getSpritePixel(x: Int) -> (palleteIndex: UInt16, attribute: SpriteAttribute, spriteZero: Bool)
+}
+
+extension SpriteRenderer {
 
     func fetchSpritePixel() {
         switch scan.dot {

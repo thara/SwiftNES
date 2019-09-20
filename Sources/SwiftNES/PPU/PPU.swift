@@ -1,6 +1,6 @@
 let startVerticalBlank = 241
 
-final class PPU {
+final class PPU: BackgroundRenderer, SpriteRenderer {
     var registers: PPURegisters
     var memory: Memory
 

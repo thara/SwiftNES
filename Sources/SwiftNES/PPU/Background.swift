@@ -102,7 +102,20 @@ struct Background {
     }
 }
 
-extension PPU {
+protocol BackgroundRenderer: class {
+    var registers: PPURegisters { get set }
+    var memory: Memory { get }
+
+    var background: Background { get set }
+    var scan: Scan { get }
+
+    var renderingEnabled: Bool { get }
+
+    func fetchBackgroundPixel()
+    func getBackgroundPixel(x: Int) -> UInt16
+}
+
+extension BackgroundRenderer {
     // swiftlint:disable cyclomatic_complexity
     func fetchBackgroundPixel() {
         switch scan.dot {
