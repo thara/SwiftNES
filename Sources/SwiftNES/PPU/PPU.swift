@@ -108,16 +108,16 @@ extension PPU {
         fetchBackgroundPixel()
         fetchSpritePixel()
 
-        guard scan.line < NES.maxLine && 0 <= x && x < NES.width else {
-            return
-        }
-
         let idx = renderingEnabled
             ? selectPalleteIndex(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
             : 0
 
-        if spriteZeroHit && 0 < bg && renderingEnabled && !registers.status.contains(.spriteZeroHit) {
+        if spriteZeroHit && 0 < bg && x < 255 && renderingEnabled && !registers.status.contains(.spriteZeroHit) {
             registers.status.formUnion(.spriteZeroHit)
+        }
+
+        guard scan.line < NES.maxLine && 0 <= x && x < NES.width else {
+            return
         }
 
         let palleteNo = memory.read(at: UInt16(0x3F00) &+ idx)
