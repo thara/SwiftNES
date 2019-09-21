@@ -2,7 +2,7 @@ struct Sprite {
     /// Y position of top
     let y: UInt8
     /// Tile index number
-    let tileIdx: UInt8
+    let tileIndex: UInt8
     /// Attributes
     let attr: SpriteAttribute
     /// X position of left
@@ -11,13 +11,13 @@ struct Sprite {
     let zero: Bool
 
     var valid: Bool {
-        return y != 0xFF && tileIdx != 0xFF && x != 0xFF
+        return x != 0xFF && y != 0xFF && tileIndex != 0xFF
     }
 
-    func row(lineNumber: Int) -> UInt16 {
+    func row(lineNumber: Int, spriteHeight: Int) -> UInt16 {
         var row = UInt16(lineNumber) &- y.u16 &- 1
         if attr.contains(.flipVertically) {
-            row = 8 &- 1 &- row
+            row = UInt16(spriteHeight) &- 1 &- row
         }
         return row
     }
@@ -62,7 +62,7 @@ struct SpriteOAM {
     init() {
         self.primary = [UInt8](repeating: 0x00, count: oamSize)
         self.secondary = [UInt8](repeating: 0x00, count: oamSize)
-        self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIdx: 0x00, attr: [], x: 0x00, zero: false), count: spriteLimit)
+        self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIndex: 0x00, attr: [], x: 0x00, zero: false), count: spriteLimit)
     }
 
     mutating func clearSecondaryOAM() {
@@ -103,7 +103,7 @@ struct SpriteOAM {
             let n = i &* 4
             sprites[i] = Sprite(
                 y: secondary[n],
-                tileIdx: secondary[n &+ 1],
+                tileIndex: secondary[n &+ 1],
                 attr: SpriteAttribute(rawValue: secondary[n &+ 2]),
                 x: secondary[n &+ 3],
                 zero: i == 0
@@ -148,8 +148,6 @@ extension SpriteRenderer {
             return (0, [], false)
         }
 
-        let base = registers.controller.baseSpriteTableAddr
-
         for sprite in spriteOAM.sprites {
             guard sprite.valid else {
                 break
@@ -158,10 +156,23 @@ extension SpriteRenderer {
                 continue
             }
 
-            let row = sprite.row(lineNumber: y)
+            var row = sprite.row(lineNumber: y, spriteHeight: registers.spriteSize)
             let col = sprite.col(x: UInt16(x))
+            var tileIndex = sprite.tileIndex.u16
 
-            let tileAddr = base &+ sprite.tileIdx.u16 &* 16 &+ row
+            let base: UInt16
+            if registers.controller.sprite8x16pixels {
+                tileIndex &= 0xFE
+                if 7 < row {
+                    tileIndex += 1
+                    row -= 8
+                }
+                base = tileIndex & 1
+            } else {
+                base = registers.controller.baseSpriteTableAddr
+            }
+
+            let tileAddr = base &+ tileIndex &* 16 &+ row
             let low = memory.read(at: tileAddr)
             let high = memory.read(at: tileAddr &+ 8)
 

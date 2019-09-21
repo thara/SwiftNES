@@ -197,6 +197,10 @@ struct PPUController: OptionSet {
         return contains(.spriteTableAddr) ? 0x1000 : 0x0000
     }
 
+    var sprite8x16pixels: Bool {
+        return contains(.spriteSize)
+    }
+
     var vramIncrement: UInt16 {
         return contains(.vramAddrIncr) ? 32 : 1
     }
