@@ -8,8 +8,6 @@ struct Sprite {
     /// X position of left
     let x: UInt8
 
-    let zero: Bool
-
     var valid: Bool {
         return x != 0xFF && y != 0xFF && tileIndex != 0xFF
     }
@@ -62,53 +60,7 @@ struct SpriteOAM {
     init() {
         self.primary = [UInt8](repeating: 0x00, count: oamSize)
         self.secondary = [UInt8](repeating: 0x00, count: oamSize)
-        self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIndex: 0x00, attr: [], x: 0x00, zero: false), count: spriteLimit)
-    }
-
-    mutating func clearSecondaryOAM() {
-        for i in 0..<oamSize {
-            secondary[i] = 0xFF
-        }
-    }
-
-    /// the sprite evaluation phase
-    mutating func evalSprites(line: Int, registers: inout PPURegisters) -> Bool {
-        let spriteSize = registers.spriteSize
-
-        var found = 0
-        for i in 0..<spriteCount {
-            let y = i &* 4
-            secondary[y] = primary[y]
-
-            let row = line &- Int(primary[y])
-            guard 0 <= row && row < spriteSize else {
-                continue
-            }
-
-            found &+= 1
-
-            if found <= spriteLimit {
-                secondary[y &+ 1] = primary[y &+ 1]
-                secondary[y &+ 2] = primary[y &+ 2]
-                secondary[y &+ 3] = primary[y &+ 3]
-            }
-        }
-
-        return spriteLimit < found
-    }
-
-    /// the sprite fetch phase
-    mutating func fetchSprites() {
-        for i in 0..<spriteLimit {
-            let n = i &* 4
-            sprites[i] = Sprite(
-                y: secondary[n],
-                tileIndex: secondary[n &+ 1],
-                attr: SpriteAttribute(rawValue: secondary[n &+ 2]),
-                x: secondary[n &+ 3],
-                zero: i == 0
-            )
-        }
+        self.sprites = [Sprite](repeating: Sprite(y: 0x00, tileIndex: 0x00, attr: [], x: 0x00), count: spriteLimit)
     }
 }
 
@@ -116,7 +68,7 @@ protocol SpriteRenderer: class {
     var registers: PPURegisters { get set }
     var memory: Memory { get }
 
-    var spriteOAM: SpriteOAM { get set }
+    var oam: SpriteOAM { get set }
 
     var scan: Scan { get }
 
@@ -129,13 +81,40 @@ extension SpriteRenderer {
     func fetchSpritePixel() {
         switch scan.dot {
         case 1:
-            spriteOAM.clearSecondaryOAM()
-        case 257:
-            if spriteOAM.evalSprites(line: scan.line, registers: &registers) {
-                registers.status.formUnion(.spriteOverflow)
+            for i in 0..<oamSize {
+                oam.secondary[i] = 0xFF
             }
-        case 321:
-            spriteOAM.fetchSprites()
+        case 257:
+            // the sprite evaluation phase
+            let spriteSize = registers.spriteSize
+            var n = 0
+
+            for i in 0..<spriteCount {
+                let first = i &* 4
+                let y = oam.primary[first]
+                oam.secondary[first] = y
+                if n < spriteLimit {
+                    let row = scan.line &- Int(oam.primary[first])
+                    guard 0 <= row && row < spriteSize else {
+                        continue
+                    }
+                    oam.secondary[first &+ 1] = oam.primary[first &+ 1]
+                    oam.secondary[first &+ 2] = oam.primary[first &+ 2]
+                    oam.secondary[first &+ 3] = oam.primary[first &+ 3]
+
+                    n &+= 1
+                }
+            }
+
+        case 257...320:
+            let i = (scan.dot &- 257) / 8
+            let n = i &* 4
+            oam.sprites[i] = Sprite(
+                y: oam.secondary[n],
+                tileIndex: oam.secondary[n &+ 1],
+                attr: SpriteAttribute(rawValue: oam.secondary[n &+ 2]),
+                x: oam.secondary[n &+ 3]
+            )
         default:
             break
         }
@@ -148,7 +127,7 @@ extension SpriteRenderer {
             return (0, [], false)
         }
 
-        for sprite in spriteOAM.sprites {
+        for (i, sprite) in oam.sprites.enumerated() {
             guard sprite.valid else {
                 break
             }
@@ -183,7 +162,7 @@ extension SpriteRenderer {
                 continue
             }
 
-            return (UInt16(pixel &+ 0x10), sprite.attr, sprite.zero)   // from 0x3F10
+            return (UInt16(pixel &+ 0x10), sprite.attr, i == 0)   // from 0x3F10
         }
 
         return (0, [], false)

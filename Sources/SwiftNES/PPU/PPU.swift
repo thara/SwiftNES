@@ -5,7 +5,7 @@ final class PPU: BackgroundRenderer, SpriteRenderer {
     var memory: Memory
 
     var background: Background
-    var spriteOAM: SpriteOAM
+    var oam: SpriteOAM
 
     private(set) var frames: UInt = 0
 
@@ -24,7 +24,7 @@ final class PPU: BackgroundRenderer, SpriteRenderer {
         self.memory = memory
         self.background = Background()
 
-        self.spriteOAM = SpriteOAM()
+        self.oam = SpriteOAM()
 
         self.scan = Scan()
         self.lineBuffer = [UInt32](repeating: 0x00, count: NES.maxDot)
