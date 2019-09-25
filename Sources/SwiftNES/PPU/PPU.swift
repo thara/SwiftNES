@@ -1,10 +1,17 @@
 let startVerticalBlank = 241
 
-final class PPU: BackgroundRenderer, SpriteRenderer {
+final class PPU: SpriteRenderer {
     var registers: PPURegisters
     var memory: Memory
 
-    var background: Background
+    // Background registers
+    var nameTableEntry: UInt8 = 0x00
+    var attrTableEntry: UInt8 = 0x00
+    var bgTempAddr: UInt16 = 0x00
+    /// Background tiles
+    var tile = Tile()
+    var nextPattern = TilePattern()
+
     var oam: SpriteOAM
 
     private(set) var frames: UInt = 0
@@ -22,7 +29,6 @@ final class PPU: BackgroundRenderer, SpriteRenderer {
     init(memory: Memory, interruptLine: InterruptLine, renderer: Renderer) {
         self.registers = PPURegisters()
         self.memory = memory
-        self.background = Background()
 
         self.oam = SpriteOAM()
 
@@ -137,6 +143,96 @@ extension PPU {
         case (_, _, true):
             return bg
         }
+    }
+}
+
+// MARK: - Background
+extension PPU {
+
+    // swiftlint:disable cyclomatic_complexity
+    func fetchBackgroundPixel() {
+        switch scan.dot {
+        case 321:
+            // No reload shift
+            bgTempAddr = nameTableFirst | registers.v.nameTableAddressIndex
+        case 1...255, 322...336:
+            switch scan.dot % 8 {
+            case 1:
+                // Fetch nametable byte : step 1
+                bgTempAddr = nameTableFirst | registers.v.nameTableAddressIndex
+                tile.reload(for: nextPattern, attribute: attrTableEntry)
+            case 2:
+                // Fetch nametable byte : step 2
+                nameTableEntry = memory.read(at: bgTempAddr)
+            case 3:
+                // Fetch attribute table byte : step 1
+                bgTempAddr = attributeTableFirst | registers.v.attributeAddressIndex
+            case 4:
+                // Fetch attribute table byte : step 2
+                attrTableEntry = memory.read(at: bgTempAddr)
+                // select area
+                if registers.v.coarseXScroll[1] == 1 { attrTableEntry &>>= 2 }
+                if registers.v.coarseYScroll[1] == 1 { attrTableEntry &>>= 4 }
+            case 5:
+                // Fetch tile bitmap low byte : step 1
+                let base: UInt16 = registers.controller.contains(.bgTableAddr) ? 0x1000 : 0x0000
+                let index = nameTableEntry.u16 &* tileHeight &* 2
+                bgTempAddr = base &+ index &+ registers.v.fineYScroll.u16
+            case 6:
+                // Fetch tile bitmap low byte : step 2
+                nextPattern.low = memory.read(at: bgTempAddr).u16
+            case 7:
+                // Fetch tile bitmap high byte : step 1
+                bgTempAddr &+= tileHeight
+            case 0:
+                // Fetch tile bitmap high byte : step 2
+                nextPattern.high = memory.read(at: bgTempAddr).u16
+                if renderingEnabled {
+                    registers.incrCoarseX()
+                }
+            default:
+                break
+            }
+        case 256:
+            nextPattern.high = memory.read(at: bgTempAddr).u16
+            if renderingEnabled {
+                registers.incrY()
+            }
+        case 257:
+            tile.reload(for: nextPattern, attribute: attrTableEntry)
+            if renderingEnabled {
+                registers.copyX()
+            }
+        case 280...304:
+            if scan.line == 261 && renderingEnabled {
+                registers.copyY()
+            }
+        // Unused name table fetches
+        case 337, 339:
+            bgTempAddr = nameTableFirst | registers.v.nameTableAddressIndex
+        case 338, 340:
+            nameTableEntry = memory.read(at: bgTempAddr)
+        default:
+            break
+        }
+    }
+    // swiftlint:enable cyclomatic_complexity
+
+    /// Returns pallete index for fine X
+    func getBackgroundPixel(x: Int) -> UInt16 {
+        let (pixel, pallete) = tile[registers.fineX]
+
+        if (1 <= scan.dot && scan.dot <= 256) || (321 <= scan.dot && scan.dot <= 336) {
+            tile.shift()
+        }
+
+        guard registers.isEnabledBackground(at: x) else {
+            return 0x00
+        }
+        guard pixel != 0 else {
+            return pixel
+        }
+        return pixel | (pallete &<< 2)
     }
 }
 

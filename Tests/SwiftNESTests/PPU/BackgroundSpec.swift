@@ -6,131 +6,117 @@ import Nimble
 class BackgroundSpec: QuickSpec {
     override func spec() {
         describe("Background") {
-            var bg: Background!
+            var tile: Tile!
             beforeEach {
-                bg = Background()
+                tile = Tile()
             }
 
             describe("shift") {
                 it("shift registers") {
-                    bg.tilePatternFirst = 0b10101001
-                    bg.tilePatternSecond = 0b00101101
-                    bg.tileAttrLow = 0b11001010
-                    bg.tileAttrHigh = 0b01111100
+                    tile.pattern.low = 0b10101001
+                    tile.pattern.high = 0b00101101
+                    tile.attribute.low = 0b11001010
+                    tile.attribute.high = 0b01111100
 
-                    bg.tileAttrLowLatch = true
-                    bg.tileAttrHighLatch = false
+                    tile.attribute.lowLatch = true
+                    tile.attribute.highLatch = false
 
-                    bg.shift()
+                    tile.shift()
 
-                    expect(bg.tilePatternFirst).to(equal(0b101010010))
-                    expect(bg.tilePatternSecond).to(equal(0b01011010))
-                    expect(bg.tileAttrLow).to(equal(0b10010101))
-                    expect(bg.tileAttrHigh).to(equal(0b11111000))
+                    expect(tile.pattern.low).to(equal(0b101010010))
+                    expect(tile.pattern.high).to(equal(0b01011010))
+                    expect(tile.attribute.low).to(equal(0b10010101))
+                    expect(tile.attribute.high).to(equal(0b11111000))
                 }
             }
 
             describe("reloadShift") {
                 it("reload shift registers") {
-                    bg.tilePatternFirst = 0b1010100100101101
-                    bg.tilePatternSecond = 0b1110110100011001
-                    bg.tileAttrLowLatch = false
-                    bg.tileAttrHighLatch = false
+                    tile.pattern.low = 0b1010100100101101
+                    tile.pattern.high = 0b1110110100011001
+                    tile.attribute.lowLatch = false
+                    tile.attribute.highLatch = false
 
-                    bg.tempTileFirst = 0b11111111
-                    bg.tempTileSecond = 0b00000000
-                    bg.attrTableEntry = 0b1010110
+                    var nextPattern = TilePattern()
+                    nextPattern.low = 0b11111111
+                    nextPattern.high = 0b00000000
 
-                    bg.reloadShift()
+                    tile.reload(for: nextPattern, attribute: 0b1010110)
 
-                    expect(bg.tilePatternFirst).to(equal(0b1010100111111111))
-                    expect(bg.tilePatternSecond).to(equal(0b1110110100000000))
-                    expect(bg.tileAttrLowLatch).to(beFalsy())
-                    expect(bg.tileAttrHighLatch).to(beTruthy())
+                    expect(tile.pattern.low).to(equal(0b1010100111111111))
+                    expect(tile.pattern.high).to(equal(0b1110110100000000))
+                    expect(tile.attribute.lowLatch).to(beFalsy())
+                    expect(tile.attribute.highLatch).to(beTruthy())
                 }
             }
 
-            describe("getPaletteIndex") {
-                it("create correct pallet index") {
-                    bg.tilePatternFirst = 0b010100100101101
-                    bg.tilePatternSecond = 0b101110100011001
-                    bg.tileAttrLow = 0b1111010
-                    bg.tileAttrHigh = 0b1001100
+            // describe("addressNameTableEntry") {
+            //     it("set name table address to tempAddr") {
+            //         let v = vramAddress(nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
 
-                    let result = bg.getPaletteIndex(fineX: 3)
+            //         bg.addressNameTableEntry(using: v)
 
-                    expect(result & 0b0011).to(equal(0b0010))
-                    expect(result & 0b1100).to(equal(0b0100))
-                }
-            }
+            //         expect(bg.tempAddr).to(equal(0x2B3D))  // 0b10101100111101
+            //         expect(bg.tempAddr) >= 0x2800 // begin address in second name table
+            //         expect(bg.tempAddr) <= 0x2BBF // end address in second name table
+            //     }
+            // }
 
-            describe("addressNameTableEntry") {
-                it("set name table address to tempTableAddr") {
-                    let v = vramAddress(nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
+            // describe("addressAttrTableEntry") {
+            //     it("set attribute table address to tempAddr") {
+            //         let v = vramAddress(nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
 
-                    bg.addressNameTableEntry(using: v)
+            //         bg.addressAttrTableEntry(using: v)
 
-                    expect(bg.tempTableAddr).to(equal(0x2B3D))  // 0b10101100111101
-                    expect(bg.tempTableAddr) >= 0x2800 // begin address in second name table
-                    expect(bg.tempTableAddr) <= 0x2BBF // end address in second name table
-                }
-            }
+            //         expect(bg.tempAddr).to(equal(0x2BF7))  // 0b10101111110111
+            //         expect(bg.tempAddr) >= 0x2Bc0 // begin address in second attribute table
+            //         expect(bg.tempAddr) <= 0x2BFF // end address in second attribute table
+            //     }
+            // }
 
-            describe("addressAttrTableEntry") {
-                it("set attribute table address to tempTableAddr") {
-                    let v = vramAddress(nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
+            // describe("addressTileBitmapLow") {
+            //     context("controller bgTableAddr off") {
+            //         it("set pattern table address to tempAddr") {
+            //             let v = vramAddress(fineYScroll: 0b101, nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
+            //             bg.nameTableEntry = 0x03
 
-                    bg.addressAttrTableEntry(using: v)
+            //             bg.addressTileBitmapLow(using: v, controller: [])
 
-                    expect(bg.tempTableAddr).to(equal(0x2BF7))  // 0b10101111110111
-                    expect(bg.tempTableAddr) >= 0x2Bc0 // begin address in second attribute table
-                    expect(bg.tempTableAddr) <= 0x2BFF // end address in second attribute table
-                }
-            }
+            //             expect(bg.tempAddr).to(equal(0x0035))
+            //         }
+            //     }
 
-            describe("addressTileBitmapLow") {
-                context("controller bgTableAddr off") {
-                    it("set pattern table address to tempTableAddr") {
-                        let v = vramAddress(fineYScroll: 0b101, nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
-                        bg.nameTableEntry = 0x03
+            //     context("controller bgTableAddr on") {
+            //         it("set pattern table address to tempAddr") {
+            //             let v = vramAddress(fineYScroll: 0b101, nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
+            //             bg.nameTableEntry = 0x03
 
-                        bg.addressTileBitmapLow(using: v, controller: [])
+            //             bg.addressTileBitmapLow(using: v, controller: .bgTableAddr)
 
-                        expect(bg.tempTableAddr).to(equal(0x0035))
-                    }
-                }
+            //             expect(bg.tempAddr).to(equal(0x1035))
+            //         }
+            //     }
+            // }
 
-                context("controller bgTableAddr on") {
-                    it("set pattern table address to tempTableAddr") {
-                        let v = vramAddress(fineYScroll: 0b101, nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
-                        bg.nameTableEntry = 0x03
+            // describe("getPaletteIndex") {
 
-                        bg.addressTileBitmapLow(using: v, controller: .bgTableAddr)
+            //     it("return pallete index at fineX from tile patterns and attributes") {
+            //         bg.tilePatternFirst  = 0b0101010101010101
+            //         bg.tilePatternSecond = 0b0110110110110110
+            //         bg.tileAttrLow       = 0b10110011
+            //         bg.tileAttrHigh      = 0b00100101
 
-                        expect(bg.tempTableAddr).to(equal(0x1035))
-                    }
-                }
-            }
-
-            describe("getPaletteIndex") {
-
-                it("return pallete index at fineX from tile patterns and attributes") {
-                    bg.tilePatternFirst  = 0b0101010101010101
-                    bg.tilePatternSecond = 0b0110110110110110
-                    bg.tileAttrLow       = 0b10110011
-                    bg.tileAttrHigh      = 0b00100101
-
-                    // NOTE: fine X is a value in range of 0...7
-                    expect(bg.getPaletteIndex(fineX: 0)).to(equal(0b0000))
-                    expect(bg.getPaletteIndex(fineX: 1)).to(equal(0b0011))
-                    expect(bg.getPaletteIndex(fineX: 2)).to(equal(0b1110))
-                    expect(bg.getPaletteIndex(fineX: 3)).to(equal(0b0101))
-                    expect(bg.getPaletteIndex(fineX: 4)).to(equal(0b0010))
-                    expect(bg.getPaletteIndex(fineX: 5)).to(equal(0b1011))
-                    expect(bg.getPaletteIndex(fineX: 6)).to(equal(0b0000))
-                    expect(bg.getPaletteIndex(fineX: 7)).to(equal(0b1111))
-                }
-            }
+            //         // NOTE: fine X is a value in range of 0...7
+            //         expect(bg.getPaletteIndex(fineX: 0)).to(equal(0b0000))
+            //         expect(bg.getPaletteIndex(fineX: 1)).to(equal(0b0011))
+            //         expect(bg.getPaletteIndex(fineX: 2)).to(equal(0b1110))
+            //         expect(bg.getPaletteIndex(fineX: 3)).to(equal(0b0101))
+            //         expect(bg.getPaletteIndex(fineX: 4)).to(equal(0b0010))
+            //         expect(bg.getPaletteIndex(fineX: 5)).to(equal(0b1011))
+            //         expect(bg.getPaletteIndex(fineX: 6)).to(equal(0b0000))
+            //         expect(bg.getPaletteIndex(fineX: 7)).to(equal(0b1111))
+            //     }
+            // }
         }
     }
 }

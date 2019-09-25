@@ -27,35 +27,35 @@ class PPUSpec: QuickSpec {
                     _ = ppu.scan.nextDot()
 
                     ppu.fetchBackgroundPixel()
-                    expect(ppu.background.tempTableAddr).to(equal(0x2B3D))
+                    expect(ppu.bgTempAddr).to(equal(0x2B3D))
 
                     _ = ppu.scan.nextDot()
                     ppu.fetchBackgroundPixel()
-                    expect(ppu.background.nameTableEntry).to(equal(0x03))
+                    expect(ppu.nameTableEntry).to(equal(0x03))
 
                     _ = ppu.scan.nextDot()
                     ppu.fetchBackgroundPixel()
-                    expect(ppu.background.tempTableAddr).to(equal(0x2BF7))
+                    expect(ppu.bgTempAddr).to(equal(0x2BF7))
 
                     _ = ppu.scan.nextDot()
                     ppu.fetchBackgroundPixel()
-                    expect(ppu.background.attrTableEntry).to(equal(0x41))
+                    expect(ppu.attrTableEntry).to(equal(0x41))
 
                     _ = ppu.scan.nextDot()
                     ppu.fetchBackgroundPixel()
-                    expect(ppu.background.tempTableAddr).to(equal(0x0035))
+                    expect(ppu.bgTempAddr).to(equal(0x0035))
 
                     _ = ppu.scan.nextDot()
                     ppu.fetchBackgroundPixel()
-                    expect(ppu.background.tempTileFirst).to(equal(0x11))
+                    expect(ppu.nextPattern.low).to(equal(0x11))
 
                     _ = ppu.scan.nextDot()
                     ppu.fetchBackgroundPixel()
-                    expect(ppu.background.tempTableAddr).to(equal(0x003D))
+                    expect(ppu.bgTempAddr).to(equal(0x003D))
 
                     _ = ppu.scan.nextDot()
                     ppu.fetchBackgroundPixel()
-                    expect(ppu.background.tempTileSecond).to(equal(0x81))
+                    expect(ppu.nextPattern.high).to(equal(0x81))
                 }
             }
         }

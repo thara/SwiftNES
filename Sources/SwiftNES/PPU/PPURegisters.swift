@@ -149,6 +149,10 @@ struct PPURegisters: CustomStringConvertible {
         // v: IHGF.ED CBA..... = t: IHGF.ED CBA.....
         v = (v & ~0b111101111100000) | (t & 0b111101111100000)
     }
+
+    var backgroundPatternTableAddrBase: UInt16 {
+        return controller.contains(.bgTableAddr) ? 0x1000 : 0x0000
+    }
 }
 
 struct PPUController: OptionSet {
