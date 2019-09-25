@@ -1,208 +1,62 @@
-let nameTableFirstAddr: UInt16 = 0x2000
-let attrTableFirstAddr: UInt16 = 0x23C0
+let nameTableFirst: UInt16 = 0x2000
+let attributeTableFirst: UInt16 = 0x23C0
 
 let tileHeight: UInt16 = 8
 
-struct Background {
-    /// value of name table
-    var nameTableEntry: UInt8 = 0x00
-    /// value of attribute table
-    var attrTableEntry: UInt8 = 0x00
+struct Tile {
+    var pattern = Pattern()
+    var attribute = PalleteAttribute()
 
-    /// 2 planes of 1 tile pattern
-    var tempTileFirst: UInt8 = 0x00
-    var tempTileSecond: UInt8 = 0x00
+    @inline(__always)
+    subscript(x: UInt8) -> (pattern: UInt16, pallete: UInt16) {
+        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
+        let patternX = 15 &- x
+        let pixel = (pattern.high[patternX] &<< 1) | pattern.low[patternX]
 
-    /// general temporary address
-    var tempTableAddr: UInt16 = 0x00
+        let attributeX = 7 &- x
+        let attr = (attribute.high[attributeX] &<< 1) | attribute.low[attributeX]
 
-    /// 2 planes of 1 tile pattern
-    var tilePatternFirst: UInt16 = 0x00
-    var tilePatternSecond: UInt16 = 0x00
+        return (pixel, attr.u16)
+    }
 
-    var tileAttrLow: UInt8 = 0x00
-    var tileAttrHigh: UInt8 = 0x00
+    @inline(__always)
+    mutating func shift() {
+        pattern.low &<<= 1
+        pattern.high &<<= 1
+
+        attribute.low = (attribute.low &<< 1) | unsafeBitCast(attribute.lowLatch, to: UInt8.self)
+        attribute.high = (attribute.high &<< 1) | unsafeBitCast(attribute.highLatch, to: UInt8.self)
+    }
+
+    @inline(__always)
+    mutating func reload(for next: Pattern, attribute attrEntry: UInt8) {
+        pattern.low = (pattern.low & 0xFF00) | next.low
+        pattern.high = (pattern.high & 0xFF00) | next.high
+        attribute.lowLatch = attrEntry[0] == 1
+        attribute.highLatch = attrEntry[1] == 1
+    }
+}
+
+struct Pattern {
+    var low: UInt16 = 0x00
+    var high: UInt16 = 000
+
+    @inline(__always)
+    subscript(n: UInt8) -> UInt16 {
+        return (high[n] &<< 1) | low[n]
+    }
+}
+
+struct PalleteAttribute {
+    var low: UInt8 = 0x00
+    var high: UInt8 = 0x00
 
     /// 1 quadrant of attrTableEntry
-    var tileAttrLowLatch: Bool = false
-    var tileAttrHighLatch: Bool = false
+    var lowLatch: Bool = false
+    var highLatch: Bool = false
 
-    /// Returns pallete index for fine X
-    func getPaletteIndex(fineX: UInt8) -> Int {
-        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
-        let pixelIdx = 15 &- fineX
-        let pixel = (tilePatternSecond[pixelIdx] &<< 1) | tilePatternFirst[pixelIdx]
-
-        guard pixel != 0 else {
-            return Int(pixel)
-        }
-
-        let palleteIdx = 7 &- fineX
-        let pallete = (tileAttrHigh[palleteIdx] &<< 1) | tileAttrLow[palleteIdx]
-        return Int(pixel | (pallete &<< 2).u16)
-    }
-
-    /// Fetch nametable byte : step 1
-    mutating func addressNameTableEntry(using v: UInt16) {
-        tempTableAddr = nameTableFirstAddr | v.nameTableAddressIndex
-    }
-
-    /// Fetch nametable byte : step 2
-    mutating func fetchNameTableEntry(from memory: Memory) {
-        nameTableEntry = memory.read(at: tempTableAddr)
-    }
-
-    /// Fetch attribute table byte : step 1
-    mutating func addressAttrTableEntry(using v: UInt16) {
-        tempTableAddr = attrTableFirstAddr | v.attributeAddressIndex
-    }
-
-    /// Fetch attribute table byte : step 2
-    mutating func fetchAttrTableEntry(from memory: Memory, v: UInt16) {
-        attrTableEntry = memory.read(at: tempTableAddr)
-
-        // select area
-        if v.coarseXScroll[1] == 1 { attrTableEntry &>>= 2 }
-        if v.coarseYScroll[1] == 1 { attrTableEntry &>>= 4 }
-    }
-
-    /// Fetch tile bitmap low byte : step 1
-    mutating func addressTileBitmapLow(using v: UInt16, controller: PPUController) {
-        tempTableAddr = controller.bgPatternTableAddrBase &+ (nameTableEntry.u16 &* tileHeight &* 2) &+ v.fineYScroll.u16
-    }
-
-    /// Fetch tile bitmap low byte : step 2
-    mutating func fetchTileBitmapLow(from memory: Memory) {
-        tempTileFirst = memory.read(at: tempTableAddr)
-    }
-
-    /// Fetch tile bitmap high byte : step 1
-    mutating func addressTileBitmapHigh() {
-        tempTableAddr &+= tileHeight
-    }
-
-    /// Fetch tile bitmap high byte : step 2
-    mutating func fetchTileBitmapHigh(from memory: Memory) {
-        tempTileSecond = memory.read(at: tempTableAddr)
-    }
-
-    mutating func shift() {
-        tilePatternFirst &<<= 1
-        tilePatternSecond &<<= 1
-        tileAttrLow = (tileAttrLow &<< 1) | unsafeBitCast(tileAttrLowLatch, to: UInt8.self)
-        tileAttrHigh = (tileAttrHigh &<< 1) | unsafeBitCast(tileAttrHighLatch, to: UInt8.self)
-    }
-
-    mutating func reloadShift() {
-        tilePatternFirst = (tilePatternFirst & 0xFF00) | tempTileFirst.u16
-        tilePatternSecond = (tilePatternSecond & 0xFF00) | tempTileSecond.u16
-
-        tileAttrLowLatch = attrTableEntry[0] == 1
-        tileAttrHighLatch = attrTableEntry[1] == 1
-    }
-}
-
-protocol BackgroundRenderer: class {
-    var registers: PPURegisters { get set }
-    var memory: Memory { get }
-
-    var background: Background { get set }
-    var scan: Scan { get }
-
-    var renderingEnabled: Bool { get }
-
-    func fetchBackgroundPixel()
-    func getBackgroundPixel(x: Int) -> UInt16
-}
-
-extension BackgroundRenderer {
-    // swiftlint:disable cyclomatic_complexity
-    func fetchBackgroundPixel() {
-        switch scan.dot {
-        case 321:
-            // No reload shift
-            background.addressNameTableEntry(using: registers.v)
-        case 1...255, 322...336:
-            switch scan.dot % 8 {
-            // name table
-            case 1:
-                background.addressNameTableEntry(using: registers.v)
-                background.reloadShift()
-            case 2:
-                background.fetchNameTableEntry(from: memory)
-            // attribute table
-            case 3:
-                background.addressAttrTableEntry(using: registers.v)
-            case 4:
-                background.fetchAttrTableEntry(from: memory, v: registers.v)
-            // tile bitmap low
-            case 5:
-                background.addressTileBitmapLow(using: registers.v, controller: registers.controller)
-            case 6:
-                background.fetchTileBitmapLow(from: memory)
-            // tile bitmap high
-            case 7:
-                background.addressTileBitmapHigh()
-            case 0:
-                background.fetchTileBitmapHigh(from: memory)
-                if renderingEnabled {
-                    registers.incrCoarseX()
-                }
-            default:
-                break
-            }
-        case 256:
-            background.fetchTileBitmapHigh(from: memory)
-            if renderingEnabled {
-                registers.incrY()
-            }
-        case 257:
-            background.reloadShift()
-            if renderingEnabled {
-                registers.copyX()
-            }
-        case 280...304:
-            if scan.line == 261 && renderingEnabled {
-                registers.copyY()
-            }
-        // Unused name table fetches
-        case 337:
-            background.addressNameTableEntry(using: registers.v)
-        case 338:
-            background.fetchNameTableEntry(from: memory)
-        case 339:
-            background.addressNameTableEntry(using: registers.v)
-        case 340:
-            background.fetchNameTableEntry(from: memory)
-        default:
-            break
-        }
-    }
-    // swiftlint:enable cyclomatic_complexity
-
-    /// Returns pallete index for fine X
-    func getBackgroundPixel(x: Int) -> UInt16 {
-        let fineX = registers.fineX
-
-        // http://wiki.nesdev.com/w/index.php/PPU_palettes#Memory_Map
-        let pixelIdx = 15 &- fineX
-        let pixel = (background.tilePatternSecond[pixelIdx] &<< 1) | background.tilePatternFirst[pixelIdx]
-
-        let palleteIdx = 7 &- fineX
-        let pallete = (background.tileAttrHigh[palleteIdx] &<< 1) | background.tileAttrLow[palleteIdx]
-
-        if (1 <= scan.dot && scan.dot <= 256) || (321 <= scan.dot && scan.dot <= 336) {
-            background.shift()
-        }
-
-        guard registers.isEnabledBackground(at: x) else {
-            return 0
-        }
-
-        guard pixel != 0 else {
-            return pixel
-        }
-
-        return pixel | (pallete &<< 2).u16
+    @inline(__always)
+    subscript(n: UInt8) -> UInt8 {
+        return (high[n] &<< 1) | low[n]
     }
 }
