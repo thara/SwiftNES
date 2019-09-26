@@ -15,7 +15,7 @@ extension PPU: IOPort {
                 result &= ~0x80
             }
         case 0x2004:
-            result = oam.primary[Int(registers.objectAttributeMemoryAddress)]
+            result = primaryOAM[Int(registers.objectAttributeMemoryAddress)]
         case 0x2007:
             if registers.v <= 0x3EFF {
                 result = registers.data
@@ -41,7 +41,7 @@ extension PPU: IOPort {
         case 0x2003:
             registers.objectAttributeMemoryAddress = value
         case 0x2004:
-            oam.primary[Int(registers.objectAttributeMemoryAddress)] = value
+            primaryOAM[Int(registers.objectAttributeMemoryAddress)] = value
             registers.objectAttributeMemoryAddress &+= 1
         case 0x2005:
             registers.writeScroll(position: value)

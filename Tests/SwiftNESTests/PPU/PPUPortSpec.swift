@@ -68,7 +68,7 @@ class PPUPortSpec: QuickSpec {
 
             context("read") {
                 it("read oam data") {
-                    ppu.oam.primary[0x09] = 0xA3
+                    ppu.primaryOAM[0x09] = 0xA3
                     ppu.write(0x09, to: 0x2003)
 
                     expect(ppu.read(from: address)).to(equal(0xA3))
@@ -80,7 +80,7 @@ class PPUPortSpec: QuickSpec {
                     ppu.write(0xAB, to: 0x2003)
                     ppu.write(0x32, to: address)
 
-                    expect(ppu.oam.primary[0xAB]).to(equal(0x32))
+                    expect(ppu.primaryOAM[0xAB]).to(equal(0x32))
                 }
             }
         }
