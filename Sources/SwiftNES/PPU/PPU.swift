@@ -1,7 +1,7 @@
 let startVerticalBlank = 241
 
 final class PPU {
-    var registers: PPURegisters
+    var registers = PPURegisters()
     var memory: Memory
 
     // Background registers
@@ -22,21 +22,16 @@ final class PPU {
 
     private let interruptLine: InterruptLine
 
-    var scan: Scan
+    var scan = Scan()
 
-    var lineBuffer: [UInt32]
+    var lineBuffer = [UInt32](repeating: 0x00, count: NES.maxDot)
     let renderer: Renderer
 
     // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
     var internalDataBus: UInt8 = 0x00
 
     init(memory: Memory, interruptLine: InterruptLine, renderer: Renderer) {
-        self.registers = PPURegisters()
         self.memory = memory
-
-        self.scan = Scan()
-        self.lineBuffer = [UInt32](repeating: 0x00, count: NES.maxDot)
-
         self.interruptLine = interruptLine
         self.renderer = renderer
     }
