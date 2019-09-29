@@ -1,4 +1,4 @@
-struct Interrupt: OptionSet {
+struct Interrupt: OptionSet, CustomDebugStringConvertible {
 
     let rawValue: UInt8
 
@@ -6,14 +6,21 @@ struct Interrupt: OptionSet {
     static let NMI = Interrupt(rawValue: 1 << 2)
     static let IRQ = Interrupt(rawValue: 1 << 1)
     static let BRK = Interrupt(rawValue: 1 << 0)
+
+    var debugDescription: String {
+        var s: [String] = []
+        if contains(.RESET) { s.append("RESET") }
+        if contains(.NMI) { s.append("NMI") }
+        if contains(.IRQ) { s.append("IRQ") }
+        if contains(.BRK) { s.append("BRK") }
+        return s.joined(separator: ",")
+    }
 }
 
 final class InterruptLine {
     private var current: Interrupt = []
 
     func send(_ interrupt: Interrupt) {
-        interruptLogger.debug("Send \(interrupt)")
-
         current.formUnion(interrupt)
     }
 
@@ -22,8 +29,6 @@ final class InterruptLine {
     }
 
     func clear(_ interrupt: Interrupt) {
-        interruptLogger.debug("Clear \(interrupt)")
-
         current.remove(interrupt)
     }
 }

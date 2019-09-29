@@ -1,4 +1,4 @@
-struct Scan {
+struct Scan: CustomDebugStringConvertible {
     var dot: Int = 0
     var line: Int = 0
 
@@ -28,6 +28,10 @@ struct Scan {
         } else {
             return .dot
         }
+    }
+
+    var debugDescription: String {
+        return "dot:\(dot), line:\(line)"
     }
 }
 

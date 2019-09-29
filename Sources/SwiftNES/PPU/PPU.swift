@@ -117,6 +117,7 @@ extension PPU {
 
         if spriteZeroHit && 0 < bg && x < 255 && renderingEnabled && !registers.status.contains(.spriteZeroHit) {
             registers.status.formUnion(.spriteZeroHit)
+            eventLogger.info("PPU sprite 0 hit - \(scan)")
         }
 
         guard scan.line < NES.maxLine && 0 <= x && x < NES.width else {
