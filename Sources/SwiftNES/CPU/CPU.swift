@@ -86,13 +86,33 @@ extension CPU: Memory {
 
     @inline(__always)
     func write(_ value: UInt8, at address: UInt16) {
-        tick()
-        memory.write(value, at: address)
+        if address == 0x4014 { // OAMDMA
+            writeOAM(value)
+        } else {
+            tick()
+            memory.write(value, at: address)
+        }
     }
 
     @inline(__always)
     func clear() {
         memory.clear()
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_registers#OAM_DMA_.28.244014.29_.3E_write
+    func writeOAM(_ value: UInt8) {
+        let start = value.u16 &* 0x100
+        for address in start...(start &+ 0xFF) {
+            let data = read(at: address)
+            write(data, at: 0x2004)
+        }
+
+        // dummy cycles
+        tick()
+        if cycles % 2 == 1 {
+            tick()
+        }
+        eventLogger.info("OAM DMA 0x\(start.radix16) to 0x\((start &+ 0xFF).radix16)")
     }
 }
 
