@@ -15,7 +15,13 @@ extension PPU: IOPort {
                 result &= ~0x80
             }
         case 0x2004:
-            result = primaryOAM[Int(registers.objectAttributeMemoryAddress)]
+            // https://wiki.nesdev.com/w/index.php/PPU_sprite_evaluation
+            if scan.line < 240 && 1 <= scan.dot && scan.dot <= 64 {
+                // during sprite evaluation
+                result = 0xFF
+            } else {
+                result = primaryOAM[Int(registers.objectAttributeMemoryAddress)]
+            }
         case 0x2007:
             if registers.v <= 0x3EFF {
                 result = registers.data
