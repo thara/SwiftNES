@@ -106,7 +106,7 @@ extension PPU {
         let x = scan.dot &- 2
 
         let bg = getBackgroundPixel(x: x)
-        let (sprite, spriteAttr, spriteZeroHit) = getSpritePixel(x: x)
+        let (sprite, spriteAttr) = getSpritePixel(x: x, background: bg)
 
         fetchBackgroundPixel()
         fetchSpritePixel()
@@ -114,11 +114,6 @@ extension PPU {
         let idx = renderingEnabled
             ? selectPalleteIndex(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
             : 0
-
-        if spriteZeroHit && 0 < bg && x < 255 && renderingEnabled && !registers.status.contains(.spriteZeroHit) {
-            registers.status.formUnion(.spriteZeroHit)
-            eventLogger.info("PPU sprite 0 hit - \(scan)")
-        }
 
         guard scan.line < NES.maxLine && 0 <= x && x < NES.width else {
             return
@@ -279,9 +274,9 @@ extension PPU {
         }
     }
 
-    func getSpritePixel(x: Int) -> (palleteIndex: UInt16, attribute: SpriteAttribute, spriteZero: Bool) {
+    func getSpritePixel(x: Int, background bg: UInt16) -> (palleteIndex: UInt16, attribute: SpriteAttribute) {
         guard registers.isEnabledSprite(at: x) else {
-            return (0, [], false)
+            return (0, [])
         }
 
         let y = scan.line
@@ -317,9 +312,15 @@ extension PPU {
             if pixel == 0 { // transparent
                 continue
             }
-            return (UInt16(pixel &+ 0x10), sprite.attr, i == 0)   // from 0x3F10
+
+            if i == 0 && renderingEnabled && !registers.status.contains(.spriteZeroHit) && sprite.x != 0xFF && x < 0xFF && 0 < bg {
+                registers.status.formUnion(.spriteZeroHit)
+                eventLogger.info("PPU sprite 0 hit - \(scan)")
+            }
+
+            return (UInt16(pixel &+ 0x10), sprite.attr)   // from 0x3F10
         }
-        return (0, [], false)
+        return (0, [])
     }
 }
 

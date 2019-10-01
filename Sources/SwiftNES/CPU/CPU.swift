@@ -103,8 +103,9 @@ extension CPU: Memory {
     func writeOAM(_ value: UInt8) {
         let start = value.u16 &* 0x100
         for address in start...(start &+ 0xFF) {
-            let data = read(at: address)
-            write(data, at: 0x2004)
+            let data = memory.read(at: address)
+            memory.write(data, at: 0x2004)
+            tick(count: 2)
         }
 
         // dummy cycles
