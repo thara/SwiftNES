@@ -47,7 +47,7 @@ struct SpriteAttribute: OptionSet {
     static let pallete2 = SpriteAttribute(rawValue: 1 << 1)
     static let pallete1 = SpriteAttribute(rawValue: 1)
 
-    func pallete() -> UInt8 {
+    var pallete: UInt8 {
         return rawValue & 0b11
     }
 }

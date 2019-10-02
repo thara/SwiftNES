@@ -106,35 +106,29 @@ extension PPU {
         let x = scan.dot &- 2
 
         let bg = getBackgroundPixel(x: x)
-        let (sprite, spriteAttr) = getSpritePixel(x: x, background: bg)
+        let sprite = getSpritePixel(x: x, background: bg)
 
         fetchBackgroundPixel()
         fetchSpritePixel()
-
-        let idx = renderingEnabled
-            ? selectPalleteIndex(bg: bg, sprite: sprite, spriteAttr: spriteAttr)
-            : 0
 
         guard scan.line < NES.maxLine && 0 <= x && x < NES.width else {
             return
         }
 
-        let palleteNo = memory.read(at: UInt16(0x3F00) &+ idx)
-        lineBuffer[x] = palletes[Int(palleteNo)]
+        let pixel = renderingEnabled ? selectPixel(bg: bg, sprite: sprite) : 0
+        lineBuffer[x] = palletes[pixel]
     }
 
-    func selectPalleteIndex(bg: UInt16, sprite: UInt16, spriteAttr: SpriteAttribute) -> UInt16 {
-        switch (bg, sprite, spriteAttr.contains(.behindBackground)) {
-        case (0, 0, _):
-            return bg
-        case (0, let p, _) where 0 < p:
-            return sprite
-        case (let p, 0, _) where 0 < p:
-            return bg
-        case (_, _, false):
-            return sprite
-        case (_, _, true):
-            return bg
+    func selectPixel(bg: BackgroundPixel, sprite: SpritePixel) -> Int {
+        switch (bg.enabled, sprite.enabled) {
+        case (false, false):
+            return Int(memory.read(at: 0x3F00))
+        case (false, true):
+            return sprite.color
+        case (true, false):
+            return bg.color
+        case (true, true):
+            return sprite.priority ? bg.color : sprite.color
         }
     }
 }
@@ -212,7 +206,7 @@ extension PPU {
     // swiftlint:enable cyclomatic_complexity
 
     /// Returns pallete index for fine X
-    func getBackgroundPixel(x: Int) -> UInt16 {
+    func getBackgroundPixel(x: Int) -> BackgroundPixel {
         let (pixel, pallete) = tile[registers.fineX]
 
         if (1 <= scan.dot && scan.dot <= 256) || (321 <= scan.dot && scan.dot <= 336) {
@@ -220,12 +214,11 @@ extension PPU {
         }
 
         guard registers.isEnabledBackground(at: x) else {
-            return 0x00
+            return .zero
         }
-        guard pixel != 0 else {
-            return pixel
-        }
-        return pixel | (pallete &<< 2)
+        return BackgroundPixel(
+            enabled: pixel != 0,
+            color: Int(memory.read(at: 0x3F00 &+ pallete &* 4 &+ pixel)))
     }
 }
 
@@ -258,7 +251,9 @@ extension PPU {
                     n &+= 1
                 }
             }
-
+            if spriteLimit <= n && renderingEnabled {
+                registers.status.formUnion(.spriteOverflow)
+            }
         case 257...320:
             // the sprite fetch phase
             let i = (scan.dot &- 257) / 8
@@ -274,9 +269,9 @@ extension PPU {
         }
     }
 
-    func getSpritePixel(x: Int, background bg: UInt16) -> (palleteIndex: UInt16, attribute: SpriteAttribute) {
+    func getSpritePixel(x: Int, background bg: BackgroundPixel) -> SpritePixel {
         guard registers.isEnabledSprite(at: x) else {
-            return (0, [])
+            return .zero
         }
 
         let y = scan.line
@@ -313,18 +308,36 @@ extension PPU {
                 continue
             }
 
-            if i == 0 && renderingEnabled && !registers.status.contains(.spriteZeroHit) && sprite.x != 0xFF && x < 0xFF && 0 < bg {
+            if i == 0 && renderingEnabled && !registers.status.contains(.spriteZeroHit) && sprite.x != 0xFF && x < 0xFF && bg.enabled {
                 registers.status.formUnion(.spriteZeroHit)
                 eventLogger.info("PPU sprite 0 hit - \(scan)")
             }
 
-            return (UInt16(pixel &+ 0x10), sprite.attr)   // from 0x3F10
+            return SpritePixel(
+                enabled: pixel != 0,
+                color: Int(memory.read(at: 0x3F10 &+ sprite.attr.pallete.u16 &* 4 &+ pixel.u16)),
+                priority: sprite.attr.contains(.behindBackground))
         }
-        return (0, [])
+        return .zero
     }
 }
 
 private extension BinaryInteger {
     @inline(__always)
     var isOdd: Bool { return self.magnitude % 2 != 0 }
+}
+
+struct BackgroundPixel {
+    var enabled: Bool
+    var color: Int
+
+    static let zero = BackgroundPixel(enabled: false, color: 0x00)
+}
+
+struct SpritePixel {
+    var enabled: Bool
+    var color: Int
+    var priority: Bool
+
+    static let zero = SpritePixel(enabled: false, color: 0x00, priority: true)
 }
