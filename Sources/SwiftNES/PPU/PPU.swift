@@ -23,17 +23,15 @@ final class PPU {
     private let interruptLine: InterruptLine
 
     var scan = Scan()
-
-    var lineBuffer = [UInt32](repeating: 0x00, count: NES.maxDot)
-    let renderer: Renderer
+    public var lineBuffer: LineBuffer
 
     // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
     var internalDataBus: UInt8 = 0x00
 
-    init(memory: Memory, interruptLine: InterruptLine, renderer: Renderer) {
+    init(memory: Memory, interruptLine: InterruptLine, lineBuffer: LineBuffer = LineBuffer()) {
         self.memory = memory
         self.interruptLine = interruptLine
-        self.renderer = renderer
+        self.lineBuffer = lineBuffer
     }
 
     var renderingEnabled: Bool {
@@ -44,10 +42,10 @@ final class PPU {
         process()
 
         switch scan.nextDot() {
-        case .line(let last):
-            renderer.newLine(number: last, pixels: lineBuffer)
-        case .frame(let last):
-            renderer.newLine(number: last, pixels: lineBuffer)
+        case .line(let lastLine):
+            lineBuffer.flush(to: lastLine)
+        case .frame(let lastLine):
+            lineBuffer.flush(to: lastLine)
             frames += 1
         default:
             break
@@ -58,7 +56,7 @@ final class PPU {
         registers.clear()
         memory.clear()
         scan.clear()
-        lineBuffer = [UInt32](repeating: 0x00, count: NES.maxDot)
+        lineBuffer.clear()
         frames = 0
     }
 }
@@ -116,7 +114,7 @@ extension PPU {
         }
 
         let pixel = renderingEnabled ? selectPixel(bg: bg, sprite: sprite) : 0
-        lineBuffer[x] = palletes[pixel]
+        lineBuffer.write(pixel, bg.color, sprite.color, at: x)
     }
 
     func selectPixel(bg: BackgroundPixel, sprite: SpritePixel) -> Int {

@@ -16,11 +16,11 @@ extension CPU {
 
 extension PPU {
     convenience init() {
-        self.init(memory: [UInt8](repeating: 0x00, count: 65534), interruptLine: InterruptLine(), renderer: DummyRenderer())
+        self.init(memory: [UInt8](repeating: 0x00, count: 65534), interruptLine: InterruptLine())
     }
 
     convenience init(memory: Memory) {
-        self.init(memory: memory, interruptLine: InterruptLine(), renderer: DummyRenderer())
+        self.init(memory: memory, interruptLine: InterruptLine())
     }
 }
 

@@ -47,7 +47,7 @@ final class Emulator {
 
         controller = VirtualStandardController()
 
-        nes = makeNES(renderer: frameRenderer)
+        nes = makeNES(lineBuffer: LineBuffer(renderer: frameRenderer, renderingMode: .prioring))
         nes.connect(controller1: controller.nesController, controller2: nil)
 
         event = SDL_Event()
