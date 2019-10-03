@@ -9,6 +9,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
 
         .package(url: "https://github.com/thara/SDL.git", .branch("swiftnes")),
+        .package(url: "https://github.com/twostraws/SwiftGD.git", from: "2.0.0"),
 
         .package(url: "https://github.com/Quick/Quick.git", from: "2.1.0"),
         .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.0"),
@@ -22,6 +23,9 @@ let package = Package(
         .target(
             name: "SwiftNESMain",
             dependencies: ["SwiftNES", "SDL", "Logging", "Commander"]),
+        .target(
+            name: "DumpSpriteImage",
+            dependencies: ["SwiftNES", "SwiftGD", "Logging", "Commander"]),
         .testTarget(
             name: "SwiftNESTests",
             dependencies: ["SwiftNES", "Quick", "Nimble"]),

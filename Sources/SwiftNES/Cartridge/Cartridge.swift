@@ -1,7 +1,7 @@
 import Foundation
 
 public final class Cartridge {
-    private let mapper: Mapper
+    let mapper: Mapper
 
     init(mapper: Mapper) {
         self.mapper = mapper

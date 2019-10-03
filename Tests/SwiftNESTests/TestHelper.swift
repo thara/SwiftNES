@@ -33,6 +33,8 @@ extension Cartridge {
 class DummyMapper: Mapper {
 
     var ram: [UInt8]
+    var program: [UInt8] = []
+    var characterData: [UInt8] = []
 
     var mirroring: Mirroring = .vertical
 

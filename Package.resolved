@@ -54,6 +54,15 @@
           "revision": "f4240bf022a69815241a883c03645444b58ac553",
           "version": "1.1.0"
         }
+      },
+      {
+        "package": "SwiftGD",
+        "repositoryURL": "https://github.com/twostraws/SwiftGD.git",
+        "state": {
+          "branch": null,
+          "revision": "1960998971b453101e740f25bc6d9fb01e0ba225",
+          "version": "2.5.0"
+        }
       }
     ]
   },

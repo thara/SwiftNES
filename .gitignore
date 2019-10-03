@@ -124,3 +124,4 @@ iOSInjectionProject/
 # End of https://www.gitignore.io/api/osx,swift,xcode
 
 .log
+dist
