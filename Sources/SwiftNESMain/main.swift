@@ -36,6 +36,14 @@ Group {
         }
     }
 
+    $0.command("sprite") { (romPath: String) in
+        run {
+            let emulator = try Emulator(windowTitle: "SwiftNES", windowScale: 3)
+            try emulator.loadNESFile(path: romPath)
+            try emulator.runLoop()
+        }
+    }
+
 #if nestest
     $0.command("nestest") { (romPath: String?) in
         run {
