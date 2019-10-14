@@ -5,6 +5,9 @@
 ROM = Tests/SwiftNESTests/fixtures/helloworld/sample1.nes
 NESTEST_ROM = nestest.nes
 
+lint:  ## Run lint
+	@swiftlint autocorrect -- && swiftlint
+
 run:  ## Run emulator
 	@mkdir -p .log
 	@rm -f .log/debug.log
