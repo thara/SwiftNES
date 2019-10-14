@@ -39,7 +39,7 @@ final class Emulator {
         let driver = SDLRenderer.Driver.default
 
         let renderer = try SDLRenderer(window: window, driver: driver, options: [.accelerated, .presentVsync])
-        renderer.setLogicalSize(w: Int32(windowSize.width), h: Int32(windowSize.height))
+        try renderer.setLogicalSize(width: Int32(windowSize.width), height: Int32(windowSize.height))
 
         let screenRect = SDL_Rect(x: 0, y: 0, w: Int32(windowSize.width), h: Int32(windowSize.height))
 
@@ -98,7 +98,7 @@ final class Emulator {
             let frameTicks = Double(endTicks - startTicks) / 1000
 
             if 0 < frameTicks {
-                window.setWindowTitle("\(windowTitle) - \(toString(1 / frameTicks)) fps")
+                window.title = "\(windowTitle) - \(toString(1 / frameTicks)) fps"
             }
         }
     }
