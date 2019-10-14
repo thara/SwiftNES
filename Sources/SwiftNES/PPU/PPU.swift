@@ -237,12 +237,12 @@ extension PPU {
             let spriteSize = registers.spriteSize
             var n = 0
 
-            var oam2Address = 0
+            let oamIterator = Iterator(limit: secondaryOAM.count)
             for i in 0..<spriteCount {
                 let first = i &* 4
                 let y = primaryOAM[first]
 
-                if oam2Address < 32 {
+                if oamIterator.hasNext {
                     let row = scan.line &- Int(primaryOAM[first])
                     guard 0 <= row && row < spriteSize else {
                         continue
@@ -250,14 +250,10 @@ extension PPU {
                     if n == 0 {
                         spriteZeroOnLine = true
                     }
-                    secondaryOAM[oam2Address] = y
-                    oam2Address += 1
-                    secondaryOAM[oam2Address] = primaryOAM[first &+ 1]
-                    oam2Address += 1
-                    secondaryOAM[oam2Address] = primaryOAM[first &+ 2]
-                    oam2Address += 1
-                    secondaryOAM[oam2Address] = primaryOAM[first &+ 3]
-                    oam2Address += 1
+                    secondaryOAM[oamIterator] = y
+                    secondaryOAM[oamIterator] = primaryOAM[first &+ 1]
+                    secondaryOAM[oamIterator] = primaryOAM[first &+ 2]
+                    secondaryOAM[oamIterator] = primaryOAM[first &+ 3]
                     n &+= 1
                 }
             }
