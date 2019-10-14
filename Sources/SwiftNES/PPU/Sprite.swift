@@ -15,7 +15,7 @@ struct Sprite {
     static let defaultValue = Sprite(y: 0x00, tileIndex: 0x00, attr: [], x: 0x00)
 
     var valid: Bool {
-        return x != 0xFF && y != 0xFF && tileIndex != 0xFF
+        return !(x == 0xFF && y == 0xFF && tileIndex == 0xFF && attr.rawValue == 0xFF)
     }
 
     func row(lineNumber: Int, spriteHeight: Int) -> UInt16 {
