@@ -5,7 +5,7 @@ let tileHeight: UInt16 = 8
 
 struct Tile {
     var currentPattern = BackgroundTileShiftRegisters()
-    var attribute = PalleteAttribute()
+    var currentAttribute = BackgroundAttributeShiftRegisters()
 
     @inline(__always)
     subscript(x: UInt8) -> (pattern: UInt16, pallete: UInt16) {
@@ -14,7 +14,7 @@ struct Tile {
         let pixel = (currentPattern.high[patternX] &<< 1) | currentPattern.low[patternX]
 
         let attributeX = 7 &- x
-        let attr = (attribute.high[attributeX] &<< 1) | attribute.low[attributeX]
+        let attr = (currentAttribute.high[attributeX] &<< 1) | currentAttribute.low[attributeX]
 
         return (pixel, attr.u16)
     }
@@ -24,16 +24,16 @@ struct Tile {
         currentPattern.low &<<= 1
         currentPattern.high &<<= 1
 
-        attribute.low = (attribute.low &<< 1) | unsafeBitCast(attribute.lowLatch, to: UInt8.self)
-        attribute.high = (attribute.high &<< 1) | unsafeBitCast(attribute.highLatch, to: UInt8.self)
+        currentAttribute.low = (currentAttribute.low &<< 1) | unsafeBitCast(currentAttribute.lowLatch, to: UInt8.self)
+        currentAttribute.high = (currentAttribute.high &<< 1) | unsafeBitCast(currentAttribute.highLatch, to: UInt8.self)
     }
 
     @inline(__always)
-    mutating func reload(for next: BackgroundTileShiftRegisters, attribute attrEntry: UInt8) {
+    mutating func reload(for next: BackgroundTileShiftRegisters, with nextAttribute: UInt8) {
         currentPattern.low = (currentPattern.low & 0xFF00) | next.low
         currentPattern.high = (currentPattern.high & 0xFF00) | next.high
-        attribute.lowLatch = attrEntry[0] == 1
-        attribute.highLatch = attrEntry[1] == 1
+        currentAttribute.lowLatch = nextAttribute[0] == 1
+        currentAttribute.highLatch = nextAttribute[1] == 1
     }
 }
 
@@ -47,7 +47,7 @@ struct BackgroundTileShiftRegisters {
     }
 }
 
-struct PalleteAttribute {
+struct BackgroundAttributeShiftRegisters {
     var low: UInt8 = 0x00
     var high: UInt8 = 0x00
 

@@ -145,7 +145,7 @@ extension PPU {
             case 1:
                 // Fetch nametable byte : step 1
                 bgTempAddr = nameTableFirst | registers.v.nameTableAddressIndex
-                tile.reload(for: nextPattern, attribute: attrTableEntry)
+                tile.reload(for: nextPattern, with: attrTableEntry)
             case 2:
                 // Fetch nametable byte : step 2
                 nameTableEntry = memory.read(at: bgTempAddr)
@@ -184,7 +184,7 @@ extension PPU {
                 registers.incrY()
             }
         case 257:
-            tile.reload(for: nextPattern, attribute: attrTableEntry)
+            tile.reload(for: nextPattern, with: attrTableEntry)
             if renderingEnabled {
                 registers.copyX()
             }

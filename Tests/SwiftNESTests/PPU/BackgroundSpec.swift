@@ -15,18 +15,18 @@ class BackgroundSpec: QuickSpec {
                 it("shift registers") {
                     tile.currentPattern.low = 0b10101001
                     tile.currentPattern.high = 0b00101101
-                    tile.attribute.low = 0b11001010
-                    tile.attribute.high = 0b01111100
+                    tile.currentAttribute.low = 0b11001010
+                    tile.currentAttribute.high = 0b01111100
 
-                    tile.attribute.lowLatch = true
-                    tile.attribute.highLatch = false
+                    tile.currentAttribute.lowLatch = true
+                    tile.currentAttribute.highLatch = false
 
                     tile.shift()
 
                     expect(tile.currentPattern.low).to(equal(0b101010010))
                     expect(tile.currentPattern.high).to(equal(0b01011010))
-                    expect(tile.attribute.low).to(equal(0b10010101))
-                    expect(tile.attribute.high).to(equal(0b11111000))
+                    expect(tile.currentAttribute.low).to(equal(0b10010101))
+                    expect(tile.currentAttribute.high).to(equal(0b11111000))
                 }
             }
 
@@ -34,19 +34,19 @@ class BackgroundSpec: QuickSpec {
                 it("reload shift registers") {
                     tile.currentPattern.low = 0b1010100100101101
                     tile.currentPattern.high = 0b1110110100011001
-                    tile.attribute.lowLatch = false
-                    tile.attribute.highLatch = false
+                    tile.currentAttribute.lowLatch = false
+                    tile.currentAttribute.highLatch = false
 
                     var nextPattern = BackgroundTileShiftRegisters()
                     nextPattern.low = 0b11111111
                     nextPattern.high = 0b00000000
 
-                    tile.reload(for: nextPattern, attribute: 0b1010110)
+                    tile.reload(for: nextPattern, with: 0b1010110)
 
                     expect(tile.currentPattern.low).to(equal(0b1010100111111111))
                     expect(tile.currentPattern.high).to(equal(0b1110110100000000))
-                    expect(tile.attribute.lowLatch).to(beFalsy())
-                    expect(tile.attribute.highLatch).to(beTruthy())
+                    expect(tile.currentAttribute.lowLatch).to(beFalsy())
+                    expect(tile.currentAttribute.highLatch).to(beTruthy())
                 }
             }
 
