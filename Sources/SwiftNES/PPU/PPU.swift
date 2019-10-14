@@ -15,8 +15,10 @@ final class PPU {
 
     // Sprite OAM
     var primaryOAM = [UInt8](repeating: 0x00, count: oamSize)
-    var secondaryOAM = [UInt8](repeating: 0x00, count: oamSize)
+    var secondaryOAM = [UInt8](repeating: 0x00, count: 32)
     var sprites = [Sprite](repeating: .defaultValue, count: spriteLimit)
+
+    var spriteZeroOnLine = false
 
     private(set) var frames: UInt = 0
 
@@ -106,8 +108,10 @@ extension PPU {
         let bg = getBackgroundPixel(x: x)
         let sprite = getSpritePixel(x: x, background: bg)
 
-        fetchBackgroundPixel()
-        fetchSpritePixel()
+        if renderingEnabled {
+            fetchBackgroundPixel()
+            fetchSpritePixel()
+        }
 
         guard scan.line < NES.maxLine && 0 <= x && x < NES.width else {
             return
@@ -225,27 +229,35 @@ extension PPU {
 
     func fetchSpritePixel() {
         switch scan.dot {
-        case 1:
-            for i in 0..<oamSize {
-                secondaryOAM[i] = 0xFF
-            }
-        case 257:
+        case 0:
+            secondaryOAM.fill(0xFF)
+            spriteZeroOnLine = false
+
             // the sprite evaluation phase
             let spriteSize = registers.spriteSize
             var n = 0
 
+            var oam2Address = 0
             for i in 0..<spriteCount {
                 let first = i &* 4
                 let y = primaryOAM[first]
-                secondaryOAM[first] = y
-                if n < spriteLimit {
+
+                if oam2Address < 32 {
                     let row = scan.line &- Int(primaryOAM[first])
                     guard 0 <= row && row < spriteSize else {
                         continue
                     }
-                    secondaryOAM[first &+ 1] = primaryOAM[first &+ 1]
-                    secondaryOAM[first &+ 2] = primaryOAM[first &+ 2]
-                    secondaryOAM[first &+ 3] = primaryOAM[first &+ 3]
+                    if n == 0 {
+                        spriteZeroOnLine = true
+                    }
+                    secondaryOAM[oam2Address] = y
+                    oam2Address += 1
+                    secondaryOAM[oam2Address] = primaryOAM[first &+ 1]
+                    oam2Address += 1
+                    secondaryOAM[oam2Address] = primaryOAM[first &+ 2]
+                    oam2Address += 1
+                    secondaryOAM[oam2Address] = primaryOAM[first &+ 3]
+                    oam2Address += 1
                     n &+= 1
                 }
             }
@@ -306,9 +318,13 @@ extension PPU {
                 continue
             }
 
-            if i == 0 && renderingEnabled && !registers.status.contains(.spriteZeroHit) && sprite.x != 0xFF && x < 0xFF && bg.enabled {
+            if i == 0
+                && spriteZeroOnLine
+                && renderingEnabled
+                && !registers.status.contains(.spriteZeroHit)
+                && sprite.x != 0xFF && x < 0xFF
+                && bg.enabled {
                 registers.status.formUnion(.spriteZeroHit)
-                eventLogger.info("PPU sprite 0 hit - \(scan)")
             }
 
             return SpritePixel(

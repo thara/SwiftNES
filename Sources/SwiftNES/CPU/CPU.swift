@@ -113,7 +113,6 @@ extension CPU: Memory {
         if cycles % 2 == 1 {
             tick()
         }
-        eventLogger.info("OAM DMA 0x\(start.radix16) to 0x\((start &+ 0xFF).radix16)")
     }
 }
 
