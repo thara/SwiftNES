@@ -11,7 +11,7 @@ final class PPU {
 
     /// Background tiles
     var tile = Tile()
-    var nextPattern = TilePattern()
+    var nextPattern = BackgroundTileShiftRegisters()
 
     // Sprite OAM
     var primaryOAM = [UInt8](repeating: 0x00, count: oamSize)
