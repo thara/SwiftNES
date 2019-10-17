@@ -9,8 +9,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Prepare swiftlint
-      run: brew install swiftlint
+    - name: Install dependencies
+      run: brew install sdl2 gd swiftlint
     - name: Lint
       run: make lint
     - name: Build
