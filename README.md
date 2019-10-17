@@ -1,6 +1,6 @@
 # SwiftNES
 
-[![CircleCI](https://circleci.com/gh/thara/SwiftNES.svg?style=svg)](https://circleci.com/gh/thara/SwiftNES)
+![](https://github.com/thara/SwiftNES/workflows/Swift/badge.svg)
 
 [WIP] Cross-platform NES Emulator written in Swift
 
@@ -62,7 +62,7 @@
 
 Run and play games in cartridges I bought in childhood.
 
-- [ ] [『スーパーマリオブラザーズ』(Super Mario Bros.) ](https://ja.wikipedia.org/wiki/スーパーマリオブラザーズ)
+- [x] [『スーパーマリオブラザーズ』(Super Mario Bros.) ](https://ja.wikipedia.org/wiki/スーパーマリオブラザーズ)
 - [ ] [『スーパーマリオブラザーズ3』(SUPER MARIO BROS. 3)](https://ja.wikipedia.org/wiki/スーパーマリオブラザーズ3)
 - [ ] [『4人打ち麻雀』(Four Player Strike Mahjong)](https://ja.wikipedia.org/wiki/ジャン狂)
 - [ ] [『ゼルダの伝説』(The Legend of Zelda)](https://ja.wikipedia.org/wiki/ゼルダの伝説)
