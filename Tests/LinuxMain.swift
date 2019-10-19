@@ -14,8 +14,8 @@ QCKMain([
     PPURegistersSpec.self,
     BackgroundSpec.self,
 
-    CPUBusSpec.self,
-    PPUBusSpec.self,
+    CPUMemoryMapSpec.self,
+    PPUMemoryMapSpec.self,
 
     NESFileSpec.self,
 ])

@@ -25,11 +25,6 @@ public final class Cartridge {
     func write(_ value: UInt8, at address: UInt16) {
         mapper.write(value, at: address)
     }
-
-    @inline(__always)
-    func applyMirroring(to ppuBus: PPUBus) {
-        ppuBus.mirroring = mapper.mirroring
-    }
 }
 
 enum MapperError: Error {

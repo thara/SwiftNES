@@ -15,11 +15,21 @@ public final class NES {
 
     private(set) var cycles: UInt = 0
 
-    init(cpu: CPU, ppu: PPU, cartridgeDrive: CartridgeDrive, controllerPort: ControllerPort) {
-        self.cpu = cpu
-        self.ppu = ppu
-        self.cartridgeDrive = cartridgeDrive
-        self.controllerPort = controllerPort
+    public init(lineBuffer: LineBuffer) {
+        let interruptLine = InterruptLine()
+
+        let cpuMemoryMap = CPUMemoryMap()
+        cpu = CPU(memory: cpuMemoryMap, interruptLine: interruptLine)
+
+        let ppuMemoryMap = PPUMemoryMap()
+        ppu = PPU(memory: ppuMemoryMap, interruptLine: interruptLine, lineBuffer: lineBuffer)
+
+        cpuMemoryMap.ppuPort = ppu.port
+
+        controllerPort = ControllerPort()
+        cpuMemoryMap.controllerPort = controllerPort
+
+        cartridgeDrive = BusConnectedCartridgeDrive(cpuMemoryMap: cpuMemoryMap, ppuMemoryMap: ppuMemoryMap)
 
         nestest = NESTest(disassembler: Disassembler(cpu: cpu))
     }
