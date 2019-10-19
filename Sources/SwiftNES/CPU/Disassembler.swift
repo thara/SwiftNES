@@ -11,6 +11,7 @@ struct CPUStep {
     }
 }
 
+// swiftlint:disable cyclomatic_complexity
 class Disassembler {
     let cpu: CPU
 
@@ -142,6 +143,7 @@ class Disassembler {
         }
     }
 }
+// swiftlint:enable cyclomatic_complexity
 
 private let undocumentedOpcodes = [
     0xEB, 0x04, 0x44, 0x64, 0x0C, 0x14, 0x34, 0x54,

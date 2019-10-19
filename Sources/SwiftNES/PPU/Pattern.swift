@@ -3,12 +3,10 @@ public struct Pattern {
     var high = [UInt8](repeating: 0x00, count: 8)
 
     subscript(row: Int, column: Int) -> Int {
-        get {
-            let col = UInt8(7 &- column)
-            let l = low[row]
-            let h = high[row]
-            return Int((h[col] &<< 1) | l[col])
-        }
+        let col = UInt8(7 &- column)
+        let l = low[row]
+        let h = high[row]
+        return Int((h[col] &<< 1) | l[col])
     }
 
     public func toArray() -> [(x: Int, y: Int, pixel: Int)] {

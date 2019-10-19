@@ -670,7 +670,6 @@ class InstructionSpec: QuickSpec {
         }
 
         describe("ADC") {
-            // TODO more test patterns
             describe("absolute") {
                 it("add with carry") {
                     let opcode: UInt8 = 0x6D

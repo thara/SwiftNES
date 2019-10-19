@@ -8,15 +8,13 @@ struct VirtualStandardController {
 
     func update(keys: UnsafeBufferPointer<UInt8>) {
         var state: UInt8 = 0
-        for (scancode, button) in VirtualStandardController.keys {
-            if 0 < keys[scancode] {
-                state |= button
-            }
+        for (scancode, button) in keys where 0 < keys[scancode] {
+            state |= button
         }
         nesController.update(button: StandardController.Button(rawValue: state))
     }
 
-    static let keys: [Int: UInt8] = [
+    let keys: [Int: UInt8] = [
         Int(SDL_SCANCODE_W.rawValue): StandardController.Button.up.rawValue,
         Int(SDL_SCANCODE_A.rawValue): StandardController.Button.left.rawValue,
         Int(SDL_SCANCODE_S.rawValue): StandardController.Button.down.rawValue,
