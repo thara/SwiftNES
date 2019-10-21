@@ -8,7 +8,7 @@ struct VirtualStandardController {
 
     func update(keys: UnsafeBufferPointer<UInt8>) {
         var state: UInt8 = 0
-        for (scancode, button) in keys where 0 < keys[scancode] {
+        for (scancode, button) in self.keys where 0 < keys[scancode] {
             state |= button
         }
         nesController.update(button: StandardController.Button(rawValue: state))
