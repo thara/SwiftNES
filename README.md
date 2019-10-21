@@ -32,15 +32,18 @@
   - [ ] hardware accurate emulation
 - [x] Sprite zero hit
 - [x] DMA
-- [ ] Other flags
+- [x] Other flags
 - SDL
   - [x] Rendering by line buffer
 
 ### APU
 
-- [ ] Registers
-- [ ] Memory map
-- ???
+- [ ] Pulse wave channels
+- [ ] Triangle wave channel
+- [ ] Noise channel
+- [ ] Sampling by DMC
+- [ ] Frame Counter
+- [ ] Mixer
 
 ### Controllers
 
