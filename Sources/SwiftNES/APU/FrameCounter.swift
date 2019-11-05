@@ -20,13 +20,15 @@ class FrameCounter {
         let (quarterFrame, halfFrame, frameInterrupt) = occurredClocks()
 
         if quarterFrame {
-            envelopGenerators.forEach { $0.clock() }
-            triangleLinearCounter.clock()
+            //TODO
+            // envelopGenerators.forEach { $0.clock() }
+            // triangleLinearCounter.clock()
         }
 
         if halfFrame {
-            lengthCounter.clock()
-            sweepUnits.forEach { $0.clock(rawTimerPeriod: period) }
+            //TODO
+            // lengthCounter.clock()
+            // sweepUnits.forEach { $0.clock(rawTimerPeriod: period) }
         }
 
         if frameInterrupt && !interruptInhibitFlag {
@@ -54,6 +56,8 @@ class FrameCounter {
                 return (true, true, true)
             case 0:
                 return (false, false, true)
+            default:
+                break
             }
         case .fiveStep:
             switch cycles {
@@ -74,7 +78,11 @@ class FrameCounter {
                 return (true, true, false)
             case 0:
                 return (false, false, false)
+            default:
+                break
             }
         }
+
+        return (false, false, false)
     }
 }

@@ -1,20 +1,24 @@
 // http://wiki.nesdev.com/w/index.php/APU#Glossary
-struct Divider {
+class Divider {
 
-    var P: UInt = 0
+    var period: UInt = 0
     var counter: UInt = 0
 
     var nextClock: () -> ()
+
+    init(nextClock: @escaping () -> ()) {
+        self.nextClock = nextClock
+    }
 
     var zero: Bool {
         return counter == 0
     }
 
-    mutating func reload() {
-        counter = P
+    func reload() {
+        counter = period
     }
 
-    mutating func clock() {
+    func clock() {
         if counter == 0 {
             reload()
             nextClock()

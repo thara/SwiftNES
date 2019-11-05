@@ -1,20 +1,17 @@
 // http://wiki.nesdev.com/w/index.php/APU_Envelope
 class EnvelopeGenerator {
 
-    var startFlag: Bool
+    var startFlag = false
 
-    var divider: Divider
-    var decayLevelCounter: UInt = 0
-
-    var constantVolumeFlag: Bool = false
-
-    init() {
-        decalLevelCounter = DecalLevelCounter()
-        divider = Divider {
-            loadV()
-            decalLevelCounter.clock()
+    lazy var divider: Divider = {
+        Divider {
+            self.loadV()
+            self.decayLevelCounter.clock()
         }
-    }
+    }()
+    var decayLevelCounter = DecayLevelCounter()
+
+    var constantVolumeFlag = false
 
     func loadV() {
         // constantVolumeFlag = XXXX
@@ -23,7 +20,7 @@ class EnvelopeGenerator {
     func clock() {
         if startFlag {
             startFlag = false
-            decalLevelCounter.reload()
+            decayLevelCounter.reload()
             divider.reload()
         } else {
             divider.clock()
@@ -47,7 +44,7 @@ class EnvelopeGenerator {
     }
 }
 
-struct DecalLevelCounter: APUComponent {
+class DecayLevelCounter {
     var counter: UInt16 = 0
 
     var loopFlag: Bool = false
@@ -58,7 +55,7 @@ struct DecalLevelCounter: APUComponent {
 
     func clock() {
         if counter != 0 {
-            counter &- 1
+            counter &-= 1
             if loopFlag {
                 counter = 15
             }
