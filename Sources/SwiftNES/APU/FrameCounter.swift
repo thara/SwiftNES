@@ -26,7 +26,7 @@ class FrameCounter {
 
         if halfFrame {
             lengthCounter.clock()
-            sweepUnits.forEach { $0.clock() }
+            sweepUnits.forEach { $0.clock(rawTimerPeriod: period) }
         }
 
         if frameInterrupt && !interruptInhibitFlag {
