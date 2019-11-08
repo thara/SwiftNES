@@ -17,7 +17,7 @@ class PluseWaveChannel {
         sweepUnit.connect(to: timer).connect(to: sequencer)
     }
 
-    func output() -> UInt8 {
+    func output() -> UInt16 {
         return envelopeGenerator.output()
             |> sweepUnit.gate
             |> sequencer.gate
