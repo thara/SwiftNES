@@ -17,6 +17,15 @@ class SweepUnit {
     init() {
     }
 
+    func update(by data: UInt8) {
+        enabled = data.enabled
+        divider.updatePeriod(using: data.dividerPeriod)
+        negate = data.negateFlag
+        shiftCount = data.shiftCount
+
+        reloadFlag = true
+    }
+
     func connect(to timer: Timer) -> Timer {
         self.timer = timer
         return timer
@@ -55,5 +64,29 @@ class SweepUnit {
         } else {
             return 0
         }
+    }
+}
+
+// MARK: - for Sweep Unit
+private extension UInt8 {
+
+    @inline(__always)
+    var enabled: Bool {
+        return self[7] == 1
+    }
+
+    @inline(__always)
+    var dividerPeriod: UInt8 {
+        return (self & 0b01110000) >> 4
+    }
+
+    @inline(__always)
+    var negateFlag: Bool {
+        return self[3] == 1
+    }
+
+    @inline(__always)
+    var shiftCount: UInt16 {
+        return UInt16(self & 0b111)
     }
 }

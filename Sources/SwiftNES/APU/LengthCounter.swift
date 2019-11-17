@@ -10,15 +10,16 @@ class LengthCounter {
             }
         }
     }
-    var haltFlag = false
+
+    var halt = false
 
     func clock() {
-        if counter != 0 && !haltFlag {
+        if counter != 0 && !halt {
             counter &-= 1
         }
     }
 
-    func reload(value: UInt8) {
+    func reload(by value: UInt8) {
         if enabled {
             counter = lookupLength(value)
         }

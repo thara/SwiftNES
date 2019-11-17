@@ -14,6 +14,10 @@ class Divider {
         return counter == 0
     }
 
+    func updatePeriod(using value: UInt8) {
+        period = UInt(value + 1)
+    }
+
     func reload() {
         counter = period
     }

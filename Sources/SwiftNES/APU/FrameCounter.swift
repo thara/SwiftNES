@@ -14,6 +14,11 @@ class FrameCounter {
 
     var mode: SequenceMode = .fourStep
 
+    func update(by data: UInt8) {
+        mode = data[7] == 0 ? .fourStep : .fiveStep
+        interruptInhibitFlag = data[6] == 1
+    }
+
     func clock() {
         cycles &+= 1
 

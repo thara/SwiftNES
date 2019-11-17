@@ -1,14 +1,14 @@
 
 class PluseWaveChannel {
 
-    var envelopeGenerator: EnvelopeGenerator
+    var envelope: EnvelopeGenerator
     var sweepUnit: SweepUnit
     var timer: Timer
     var sequencer: Sequencer
     var lengthCounter: LengthCounter
 
     init() {
-        envelopeGenerator = EnvelopeGenerator()
+        envelope = EnvelopeGenerator()
         sweepUnit = SweepUnit()
         timer = Timer()
         sequencer = Sequencer()
@@ -18,7 +18,7 @@ class PluseWaveChannel {
     }
 
     func output() -> UInt16 {
-        return envelopeGenerator.output()
+        return envelope.output()
             |> sweepUnit.gate
             |> sequencer.gate
             |> lengthCounter.gate
