@@ -13,21 +13,14 @@ extension APU: Memory {
     func read(at address: UInt16) -> UInt8 {
         switch address {
         case 0x4015:
-            let dmcInterrupt = 0
+            let dmcInterrupt: UInt8 = 0
             let frameInterrupt = unsafeBitCast(frameCounter.frameInterruptFlag, to: UInt8.self)
-            let dmcActive = 0
-            let noiseLength = 0
-            let triangleLength = 0
-            let pulse2 = 0
+            let dmcActive: UInt8 = 0
+            let noiseLength: UInt8 = 0
+            let triangleLength: UInt8 = 0
+            let pulse2: UInt8 = 0
             let pulse1 = unsafeBitCast(0 < self.pulse1.lengthCounter.counter, to: UInt8.self)
-            return (
-                (dmcInterrupt << 7)
-                | (frameInterrupt << 6)
-                | (dmcActive << 4)
-                | (noiseLength << 3)
-                | (triangleLength << 2)
-                | (pulse2 << 1)
-                | pulse1
+            return ((dmcInterrupt << 7) | (frameInterrupt << 6) | (dmcActive << 4) | (noiseLength << 3) | (triangleLength << 2) | (pulse2 << 1) | pulse1
             )
         default:
             break
@@ -66,7 +59,7 @@ extension APU: Memory {
 
         case 0x4015:
             pulse1.lengthCounter.enabled = value[0] == 1
-            //FIXME pulse2, triangle, noise, DMC
+            //TODO pulse2, triangle, noise, DMC
 
         case 0x4017:
             frameCounter.update(by: value)
