@@ -24,4 +24,3 @@ extension UInt8 {
         return self & 0b1111
     }
 }
-

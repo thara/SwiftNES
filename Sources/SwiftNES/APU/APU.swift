@@ -5,7 +5,6 @@ class APU {
     var frameCounter = FrameCounter()
 }
 
-
 // MARK: - Memory Map
 extension APU: Memory {
 

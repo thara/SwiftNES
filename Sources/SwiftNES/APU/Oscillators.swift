@@ -1,4 +1,3 @@
-
 class PluseWaveChannel {
 
     var envelope: EnvelopeGenerator

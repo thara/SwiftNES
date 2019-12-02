@@ -4,9 +4,9 @@ class Divider {
     var period: UInt = 0
     var counter: UInt = 0
 
-    var nextClock: () -> ()
+    var nextClock: () -> Void
 
-    init(nextClock: @escaping () -> ()) {
+    init(nextClock: @escaping () -> Void) {
         self.nextClock = nextClock
     }
 

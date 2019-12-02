@@ -12,7 +12,7 @@ class SweepUnit {
     lazy var divider: Divider = {
         Divider { self.timer?.update(newPeriod: self.targetPeriod) }
     }()
-    var timer: Timer? = nil
+    var timer: Timer?
 
     init() {
     }
