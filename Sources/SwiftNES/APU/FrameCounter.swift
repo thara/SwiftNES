@@ -9,7 +9,6 @@ class FrameCounter {
     enum SequenceMode {
         case fourStep
         case fiveStep
-
     }
 
     var mode: SequenceMode = .fourStep
