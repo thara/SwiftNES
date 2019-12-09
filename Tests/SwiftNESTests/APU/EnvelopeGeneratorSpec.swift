@@ -12,15 +12,19 @@ class EnvelopeGeneratorSpec: QuickSpec {
 
         describe("update") {
             context("constant valume flag on") {
-                envelope.update(by: 0b00010000)
+                it("applies the parameter") {
+                    envelope.update(by: 0b00011011)
 
-                expect(envelope.parameter) == 0b00010000
+                    expect(envelope.parameter) == 0b1011
+                }
             }
 
             context("constant valume flag off") {
-                envelope.update(by: 0b11101111)
+                it("does'nt apply the parameter") {
+                    envelope.update(by: 0b11101111)
 
-                expect(envelope.parameter) == 0
+                    expect(envelope.parameter) == 0
+                }
             }
         }
     }
