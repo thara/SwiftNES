@@ -8,7 +8,7 @@ class PluseWaveChannel {
 
     init() {
         envelope = EnvelopeGenerator()
-        sweepUnit = SweepUnit()
+        sweepUnit = SweepUnit(carryMode: .onesComplement)
         timer = Timer()
         sequencer = Sequencer()
         lengthCounter = LengthCounter()

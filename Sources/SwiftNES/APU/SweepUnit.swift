@@ -14,7 +14,13 @@ class SweepUnit {
     }()
     var timer: Timer?
 
-    init() {
+    enum CarryMode {
+        case onesComplement, twosComplement
+    }
+    let carryMode: CarryMode
+
+    init(carryMode: CarryMode) {
+        self.carryMode = carryMode
     }
 
     func update(by data: UInt8) {
@@ -32,11 +38,16 @@ class SweepUnit {
     }
 
     func calculateTargetPeriod(_ period: UInt16) -> UInt16 {
-        // TODO
-        // Pulse 1 adds the ones' complement (−c − 1). Making 20 negative produces a change amount of −21.
-        // Pulse 2 adds the two's complement (−c). Making 20 negative produces a change amount of −20.
-        let changeAmount = Int(period >> shiftCount) * (negate ? -1 : 1)
-        return UInt16(Int(period) &+ changeAmount)
+        var changeAmount = Int16(period >> shiftCount)
+        if negate {
+            switch carryMode {
+            case .onesComplement:
+                changeAmount = changeAmount * -1 - 1
+            case .twosComplement:
+                changeAmount = changeAmount * -1      // swiftlint:disable shorthand_operator
+            }
+        }
+        return UInt16(Int16(period) &+ changeAmount)
     }
 
     var mutated: Bool {
