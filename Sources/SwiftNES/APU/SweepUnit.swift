@@ -59,7 +59,7 @@ class SweepUnit {
             // The pulse's period is adjusted.
             targetPeriod = calculateTargetPeriod(rawTimerPeriod)
         }
-        //FIXME Modify divider internal state
+        //FIXME Fix modify divider internal state
         if divider.zero || reloadFlag {
             reloadFlag = false
             divider.reload()
