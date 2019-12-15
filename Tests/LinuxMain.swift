@@ -14,6 +14,13 @@ QCKMain([
     PPURegistersSpec.self,
     BackgroundSpec.self,
 
+    DividerSpec.self,
+    EnvelopeGeneratorSpec.self,
+    LengthCounterSpec.self,
+    SequencerSpec.self,
+    SweepUnitSpec.self,
+    TimerSpec.self,
+
     CPUMemoryMapSpec.self,
     PPUMemoryMapSpec.self,
 
