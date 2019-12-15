@@ -37,12 +37,9 @@ class EnvelopeGenerator {
             divider.reload()
         } else {
             divider.clock()
-            let zero = divider.zero
-
-            guard zero else {
+            guard divider.zero else {
                 return
             }
-
             decayLevelCounter.clock()
         }
     }
