@@ -1,8 +1,13 @@
 class APU {
 
-    var sequencer = Sequencer()
-    var pulse1 = PluseWaveChannel()
-    var frameCounter = FrameCounter()
+    let sequencer = Sequencer()
+    let pulse1 = PluseWaveChannel()
+    let frameCounter = FrameCounter()
+
+    init() {
+        frameCounter.envelopeGenerators.append(pulse1.envelope)
+        frameCounter.sweepUnits.append(pulse1.sweepUnit)
+    }
 }
 
 // MARK: - Memory Map

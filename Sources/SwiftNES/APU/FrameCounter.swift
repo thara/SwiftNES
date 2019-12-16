@@ -6,6 +6,10 @@ class FrameCounter {
     var interruptInhibitFlag: Bool = false
     var frameInterruptFlag: Bool = false
 
+    var envelopeGenerators: [EnvelopeGenerator] = []
+    let lengthCounter = LengthCounter()
+    var sweepUnits: [SweepUnit] = []
+
     enum SequenceMode {
         case fourStep
         case fiveStep
@@ -24,14 +28,14 @@ class FrameCounter {
         let (quarterFrame, halfFrame, frameInterrupt) = occurredClocks()
 
         if quarterFrame {
+            envelopeGenerators.forEach { $0.clock() }
             //TODO
-            // envelopGenerators.forEach { $0.clock() }
             // triangleLinearCounter.clock()
         }
 
         if halfFrame {
             //TODO
-            // lengthCounter.clock()
+            lengthCounter.clock()
             // sweepUnits.forEach { $0.clock(rawTimerPeriod: period) }
         }
 
