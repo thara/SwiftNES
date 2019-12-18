@@ -7,6 +7,7 @@ class APU {
     init() {
         frameCounter.envelopeGenerators.append(pulse1.envelope)
         frameCounter.sweepUnits.append(pulse1.sweepUnit)
+        frameCounter.timers.append(pulse1.timer)
     }
 }
 
