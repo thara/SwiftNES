@@ -9,6 +9,11 @@ class APU {
         frameCounter.sweepUnits.append(pulse1.sweepUnit)
         frameCounter.timers.append(pulse1.timer)
     }
+
+    @inline(__always)
+    func clock() {
+        frameCounter.clock()
+    }
 }
 
 // MARK: - Memory Map
