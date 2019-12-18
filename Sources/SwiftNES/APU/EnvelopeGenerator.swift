@@ -3,26 +3,19 @@ class EnvelopeGenerator {
 
     var startFlag = false
 
-    var envelopeVolumeLoader: EnvelopeVolumeLoader?
-
     lazy var divider: Divider = {
         Divider {
-            self.parameter = self.envelopeVolumeLoader!.loadEnvelopeVolume()
             self.decayLevelCounter.clock()
         }
     }()
     var decayLevelCounter = DecayLevelCounter()
 
-    var useConstantValume = false
-
-    var parameter: UInt16 = 0
+    var useConstantVolume = false
+    var constantVolume: UInt16 = 0
 
     func update(by value: UInt8) {
-        useConstantValume = value.constantVolumeFlag
-        if useConstantValume {
-            parameter = UInt16(value.value)
-        }
-
+        useConstantVolume = value.constantVolumeFlag
+        constantVolume = UInt16(value.value)
         divider.updatePeriod(using: value.value)
     }
 
@@ -45,8 +38,8 @@ class EnvelopeGenerator {
     }
 
     func output() -> UInt16 {
-        if useConstantValume {
-            return parameter
+        if useConstantVolume {
+            return constantVolume
         } else {
             return decayLevelCounter.counter
         }
@@ -70,8 +63,4 @@ class DecayLevelCounter {
             }
         }
     }
-}
-
-protocol EnvelopeVolumeLoader: class {
-    func loadEnvelopeVolume() -> UInt16
 }

@@ -19,10 +19,10 @@ class EnvelopeGeneratorSpec: QuickSpec {
                 }
             }
             context("constantVolumeFlag is on") {
-                it("updates the parameter and the divider's period") {
+                it("updates the constant volume and the divider's period") {
                     envelope.update(by: 0b00010101)
 
-                    expect(envelope.parameter) == 0b101
+                    expect(envelope.constantVolume) == 0b101
                     expect(envelope.divider.period) == 0b110
                 }
             }

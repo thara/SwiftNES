@@ -77,11 +77,3 @@ extension APU: Memory {
         //TODO
     }
 }
-
-// MARK: - for EnvelopeGenerator
-extension APU: EnvelopeVolumeLoader {
-    func loadEnvelopeVolume() -> UInt16 {
-        return 0
-        //return read(at: )
-    }
-}
