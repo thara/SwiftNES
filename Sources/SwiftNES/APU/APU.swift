@@ -47,15 +47,14 @@ extension APU: Memory {
     func read(at address: UInt16) -> UInt8 {
         switch address {
         case 0x4015:
-            let dmcInterrupt: UInt8 = 0
-            let frameInterrupt = unsafeBitCast(frameCounter.frameInterruptFlag, to: UInt8.self)
+            let dmcInt: UInt8 = 0
+            let frameInt = unsafeBitCast(frameCounter.frameInterruptFlag, to: UInt8.self)
             let dmcActive: UInt8 = 0
-            let noiseLength: UInt8 = 0
-            let triangleLength: UInt8 = 0
-            let pulse2 = unsafeBitCast(0 < self.pulse2.lengthCounter.counter, to: UInt8.self)
-            let pulse1 = unsafeBitCast(0 < self.pulse1.lengthCounter.counter, to: UInt8.self)
-            return ((dmcInterrupt << 7) | (frameInterrupt << 6) | (dmcActive << 4) | (noiseLength << 3) | (triangleLength << 2) | (pulse2 << 1) | pulse1
-            )
+            let noiseLen: UInt8 = 0
+            let triangleLen: UInt8 = 0
+            let p2 = unsafeBitCast(0 < self.pulse2.lengthCounter.counter, to: UInt8.self)
+            let p1 = unsafeBitCast(0 < self.pulse1.lengthCounter.counter, to: UInt8.self)
+            return ((dmcInt << 7) | (frameInt << 6) | (dmcActive << 4) | (noiseLen << 3) | (triangleLen << 2) | (p2 << 1) | p1)
         default:
             break
         }
