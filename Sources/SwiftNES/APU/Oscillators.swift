@@ -6,9 +6,17 @@ class PluseWaveChannel {
     var sequencer: Sequencer
     var lengthCounter: LengthCounter
 
-    init() {
+    static func pulse1() -> PluseWaveChannel {
+        return PluseWaveChannel(sweepUnitCarryMode: .onesComplement)
+    }
+
+    static func pulse2() -> PluseWaveChannel {
+        return PluseWaveChannel(sweepUnitCarryMode: .twosComplement)
+    }
+
+    init(sweepUnitCarryMode: SweepUnit.CarryMode) {
         envelope = EnvelopeGenerator()
-        sweepUnit = SweepUnit(carryMode: .onesComplement)
+        sweepUnit = SweepUnit(carryMode: sweepUnitCarryMode)
         timer = Timer()
         sequencer = Sequencer()
         lengthCounter = LengthCounter()

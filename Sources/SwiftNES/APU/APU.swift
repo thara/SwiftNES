@@ -1,8 +1,15 @@
 class APU {
 
     let sequencer = Sequencer()
-    let pulse1 = PluseWaveChannel()
+    let pulse1: PluseWaveChannel = .pulse1()
+    let pulse2: PluseWaveChannel = .pulse2()
     let frameCounter = FrameCounter()
+
+    let mixer = Mixer()
+
+    static let sampleRate: Double = 96000
+
+    private var cycles: UInt = 0
 
     init() {
         frameCounter.envelopeGenerators.append(pulse1.envelope)
@@ -10,9 +17,23 @@ class APU {
         frameCounter.timers.append(pulse1.timer)
     }
 
-    @inline(__always)
-    func clock() {
+    func step() {
+        let before = cycles
+        cycles &+= 1
+        let after = cycles
+
+        if cycles % 2 == 0 {
+            pulse1.timer.clock()
+        }
+
         frameCounter.clock()
+
+        if Double(before) / APU.sampleRate != Double(after) / APU.sampleRate {
+            let p1 = pulse1.output()
+            let p2 = pulse2.output()
+            //TODO Write to audio buffer
+            _ = mixer.mix(pulse1: p1, pulse2: p2)
+        }
     }
 }
 
