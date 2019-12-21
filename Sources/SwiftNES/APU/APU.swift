@@ -1,6 +1,5 @@
 class APU {
 
-    let sequencer = Sequencer()
     let pulse1: PluseWaveChannel = .pulse1()
     let pulse2: PluseWaveChannel = .pulse2()
     let frameCounter = FrameCounter()
@@ -15,6 +14,9 @@ class APU {
         frameCounter.envelopeGenerators.append(pulse1.envelope)
         frameCounter.sweepUnits.append(pulse1.sweepUnit)
         frameCounter.timers.append(pulse1.timer)
+        frameCounter.envelopeGenerators.append(pulse2.envelope)
+        frameCounter.sweepUnits.append(pulse2.sweepUnit)
+        frameCounter.timers.append(pulse2.timer)
     }
 
     func step() {
@@ -24,6 +26,7 @@ class APU {
 
         if cycles % 2 == 0 {
             pulse1.timer.clock()
+            pulse2.timer.clock()
         }
 
         frameCounter.clock()
@@ -49,7 +52,7 @@ extension APU: Memory {
             let dmcActive: UInt8 = 0
             let noiseLength: UInt8 = 0
             let triangleLength: UInt8 = 0
-            let pulse2: UInt8 = 0
+            let pulse2 = unsafeBitCast(0 < self.pulse2.lengthCounter.counter, to: UInt8.self)
             let pulse1 = unsafeBitCast(0 < self.pulse1.lengthCounter.counter, to: UInt8.self)
             return ((dmcInterrupt << 7) | (frameInterrupt << 6) | (dmcActive << 4) | (noiseLength << 3) | (triangleLength << 2) | (pulse2 << 1) | pulse1
             )
@@ -62,8 +65,9 @@ extension APU: Memory {
     @inline(__always)
     func write(_ value: UInt8, at address: UInt16) {
         switch address {
+        // Pluse 1
         case 0x4000:
-            sequencer.update(duty: value.dutyCycle)
+            pulse1.sequencer.update(duty: value.dutyCycle)
             pulse1.lengthCounter.halt = value.lengthCounterHalt
             pulse1.envelope.update(by: value)
         case 0x4001:
@@ -75,9 +79,20 @@ extension APU: Memory {
             pulse1.timer.high = value & 0b111
             pulse1.envelope.restart()
 
-        //TODO Pulse 2
-        case 0x4004...0x4007:
-            break
+        // Pulse 2
+        case 0x4004:
+            pulse2.sequencer.update(duty: value.dutyCycle)
+            pulse2.lengthCounter.halt = value.lengthCounterHalt
+            pulse2.envelope.update(by: value)
+        case 0x4005:
+            pulse2.sweepUnit.update(by: value)
+        case 0x4006:
+            pulse2.timer.low = value
+        case 0x4007:
+            pulse2.lengthCounter.reload(by: value)
+            pulse2.timer.high = value & 0b111
+            pulse2.envelope.restart()
+
         //TODO Triangle
         case 0x4008...0x400B:
             break
