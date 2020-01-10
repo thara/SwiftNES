@@ -1,6 +1,8 @@
 struct NESState {
     var cpu = CPUState()
-    var ram = [UInt8]()
+    var wram = [UInt8](repeating: 0x00, count: 32767)
+
+    var ppu = PPUState()
 
     var clocks: UInt
 
@@ -22,4 +24,57 @@ struct CPUState {
     var P: UInt8 = 0
     /// Program Counter
     var PC: UInt16 = 0x00
+}
+
+struct PPUState {
+    var PPUCTRL: PPUController = []
+    var PPUMASK: PPUMask = []
+    var PPUSTATUS: PPUStatus = []
+    var PPUDATA: UInt8 = 0x00
+    var OAMADDR: UInt8 = 0x00
+
+    // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
+    var internalDataBus: UInt8 = 0x00
+
+    /// current VRAM address
+    var v: UInt16 = 0x00
+    /// temporary VRAM address
+    var t: UInt16 = 0x00
+    /// Fine X scroll
+    var fineX: UInt8 = 0x00
+
+    var writeToggle: Bool = false
+
+    var bg = PPUBackground()
+    var sprite = PPUSprite()
+
+    var frames: UInt = 0
+    var scan = Scan()
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#.242002_read
+    mutating func readStatus() -> UInt8 {
+        let s = PPUSTATUS
+        PPUSTATUS.remove(.vblank)
+        writeToggle = false
+        return s.rawValue
+    }
+}
+
+struct PPUBackground {
+    // Background registers
+    var nameTableEntry: UInt8 = 0x00
+    var attrTableEntry: UInt8 = 0x00
+    var bgTempAddr: UInt16 = 0x00
+
+    /// Background tiles
+    var tile = Tile()
+    var nextPattern = BackgroundTileShiftRegisters()
+}
+
+struct PPUSprite {
+    var primaryOAM = [UInt8](repeating: 0x00, count: oamSize)
+    var secondaryOAM = [UInt8](repeating: 0x00, count: 32)
+    var sprites = [Sprite](repeating: .defaultValue, count: spriteLimit)
+
+    var spriteZeroOnLine = false
 }
