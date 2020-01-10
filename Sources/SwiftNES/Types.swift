@@ -1,6 +1,12 @@
-struct Console {
-    var cpu = CPUState{}
+struct NESState {
+    var cpu = CPUState()
     var ram = [UInt8]()
+
+    var clocks: UInt
+
+    mutating func tick() {
+        clocks += 1
+    }
 }
 
 struct CPUState {
