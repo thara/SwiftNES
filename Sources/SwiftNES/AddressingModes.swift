@@ -1,120 +1,128 @@
 typealias AddressingModeFunc = (inout CPUState, inout CPUMemory) -> UInt16
 
-func implicit(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    return 0x00
-}
+struct AddressingModes {
+    private let delegate: AddressingModeFunc
 
-func accumulator(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    return cpu.A.u16
-}
-
-func immediate(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer { cpu.PC &+= 1 }
-    return cpu.PC
-}
-
-func zeroPage(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer { cpu.PC &+= 1 }
-    return memory[cpu.PC].u16 & 0xFF
-}
-
-func zeroPageX(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.tick()
-        cpu.PC &+= 1
+    init(f: @escaping AddressingModeFunc) {
+        self.delegate = f
     }
-    return (memory[cpu.PC].u16 &+ cpu.X.u16) & 0xFF
-}
 
-func zeroPageY(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.tick()
-        cpu.PC &+= 1
+    func callAsFunction(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
+        return delegate(&cpu, &memory)
     }
-    return (memory[cpu.PC].u16 &+ cpu.Y.u16) & 0xFF
-}
 
-func absolute(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer { cpu.PC &+= 2 }
-    return memory.readWord(at: cpu.PC)
-}
+    static let implicit = AddressingModes { _, _ in 0x00 }
 
-func absoluteX(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.tick()
-        cpu.PC &+= 2
-    }
-    let data = memory.readWord(at: cpu.PC)
-    return data &+ cpu.X.u16 & 0xFFFF
-}
+    static let accumulator = AddressingModes { cpu, _ in cpu.A.u16 }
 
-func absoluteXWithPenalty(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.PC &+= 2
+    static let immediate = AddressingModes { cpu, memory in
+        defer { cpu.PC &+= 1 }
+        return cpu.PC
     }
-    let data = memory.readWord(at: cpu.PC)
-    let operand = data &+ cpu.X.u16 & 0xFFFF
-    if pageCrossed(value: data, operand: cpu.X) {
-        cpu.tick()
-    }
-    return operand
-}
 
-func absoluteY(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.tick()
-        cpu.PC &+= 2
+    static let zeroPage = AddressingModes { cpu, memory in
+        defer { cpu.PC &+= 1 }
+        return memory[cpu.PC].u16 & 0xFF
     }
-    let data = memory.readWord(at: cpu.PC)
-    return data &+ cpu.Y.u16 & 0xFFFF
-}
 
-func absoluteYWithPenalty(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.PC &+= 2
+    static let zeroPageX = AddressingModes { cpu, memory in
+        defer {
+            cpu.tick()
+            cpu.PC &+= 1
+        }
+        return (memory[cpu.PC].u16 &+ cpu.X.u16) & 0xFF
     }
-    let data = memory.readWord(at: cpu.PC)
-    let operand = data &+ cpu.Y.u16 & 0xFFFF
-    if pageCrossed(value: data, operand: cpu.Y) {
-        cpu.tick()
-    }
-    return operand
-}
 
-func relative(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.PC &+= 1
+    static let zeroPageY = AddressingModes { cpu, memory in
+        defer {
+            cpu.tick()
+            cpu.PC &+= 1
+        }
+        return (memory[cpu.PC].u16 &+ cpu.Y.u16) & 0xFF
     }
-    return memory[cpu.PC].u16
-}
 
-func indirect(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.PC &+= 2
+    static let absolute = AddressingModes { cpu, memory in
+        defer { cpu.PC &+= 2 }
+        return memory.readWord(at: cpu.PC)
     }
-    let data = memory.readWord(at: cpu.PC)
-    return readOnIndirect(operand: data, from: &memory)
-}
 
-func indexedIndirect(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.tick()
-        cpu.PC &+= 1
+    static let absoluteX = AddressingModes { cpu, memory in
+        defer {
+            cpu.tick()
+            cpu.PC &+= 2
+        }
+        let data = memory.readWord(at: cpu.PC)
+        return data &+ cpu.X.u16 & 0xFFFF
     }
-    let data = memory[cpu.PC]
-    return readOnIndirect(operand: (data &+ cpu.X).u16 & 0xFF, from: &memory)
-}
 
-func indirectIndexed(cpu: inout CPUState, memory: inout CPUMemory) -> UInt16 {
-    defer {
-        cpu.PC &+= 1
+    static let absoluteXWithPenalty = AddressingModes { cpu, memory in
+        defer {
+            cpu.PC &+= 2
+        }
+        let data = memory.readWord(at: cpu.PC)
+        let operand = data &+ cpu.X.u16 & 0xFFFF
+        if pageCrossed(value: data, operand: cpu.X) {
+            cpu.tick()
+        }
+        return operand
     }
-    let data = memory[cpu.PC].u16
-    let operand = readOnIndirect(operand: data, from: &memory) &+ cpu.Y.u16
-    if pageCrossed(value: operand &- cpu.Y.u16, operand: cpu.Y) {
-        cpu.tick()
+
+    static let absoluteY = AddressingModes { cpu, memory in
+        defer {
+            cpu.tick()
+            cpu.PC &+= 2
+        }
+        let data = memory.readWord(at: cpu.PC)
+        return data &+ cpu.Y.u16 & 0xFFFF
     }
-    return operand
+
+    static let absoluteYWithPenalty = AddressingModes { cpu, memory in
+        defer {
+            cpu.PC &+= 2
+        }
+        let data = memory.readWord(at: cpu.PC)
+        let operand = data &+ cpu.Y.u16 & 0xFFFF
+        if pageCrossed(value: data, operand: cpu.Y) {
+            cpu.tick()
+        }
+        return operand
+    }
+
+    static let relative = AddressingModes { cpu, memory in
+        defer {
+            cpu.PC &+= 1
+        }
+        return memory[cpu.PC].u16
+    }
+
+    static let indirect = AddressingModes { cpu, memory in
+        defer {
+            cpu.PC &+= 2
+        }
+        let data = memory.readWord(at: cpu.PC)
+        return readOnIndirect(operand: data, from: &memory)
+    }
+
+    static let indexedIndirect = AddressingModes { cpu, memory in
+        defer {
+            cpu.tick()
+            cpu.PC &+= 1
+        }
+        let data = memory[cpu.PC]
+        return readOnIndirect(operand: (data &+ cpu.X).u16 & 0xFF, from: &memory)
+    }
+
+    static let indirectIndexed = AddressingModes { cpu, memory in
+        defer {
+            cpu.PC &+= 1
+        }
+        let data = memory[cpu.PC].u16
+        let operand = readOnIndirect(operand: data, from: &memory) &+ cpu.Y.u16
+        if pageCrossed(value: operand &- cpu.Y.u16, operand: cpu.Y) {
+            cpu.tick()
+        }
+        return operand
+    }
 }
 
 func pageCrossed(value: UInt16, operand: UInt8) -> Bool {
