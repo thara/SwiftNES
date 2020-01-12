@@ -3,12 +3,6 @@ struct NESState {
     var wram = [UInt8](repeating: 0x00, count: 32767)
 
     var ppu = PPUState()
-
-    var clocks: UInt
-
-    mutating func tick() {
-        clocks += 1
-    }
 }
 
 struct CPUState {
@@ -24,10 +18,22 @@ struct CPUState {
     var P: UInt8 = 0
     /// Program Counter
     var PC: UInt16 = 0x00
+
+    var clocks: UInt = 0
+
+    mutating func tick() {
+        clocks += 1
+    }
 }
 
 protocol CPUMemory {
     subscript(address: UInt16) -> UInt8 { get set }
+}
+
+extension CPUMemory {
+    func readWord(at address: UInt16) -> UInt16 {
+        return self[address].u16 | (self[address + 1].u16 << 8)
+    }
 }
 
 struct PPUState {
