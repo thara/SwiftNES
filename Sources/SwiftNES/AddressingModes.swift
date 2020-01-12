@@ -15,7 +15,7 @@ struct AddressingModes {
 
     static let accumulator = AddressingModes { cpu, _ in cpu.A.u16 }
 
-    static let immediate = AddressingModes { cpu, memory in
+    static let immediate = AddressingModes { cpu, _ in
         defer { cpu.PC &+= 1 }
         return cpu.PC
     }
