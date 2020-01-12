@@ -1,3 +1,13 @@
+struct CPUAddressSpace: CPUMemory {
+    var read: (UInt16) -> UInt8
+    var write: (UInt16) -> Void
+
+    subscript(address: UInt16) -> UInt8 {
+        get { return read(address) }
+        set { write(address) }
+    }
+}
+
 func read(at address: UInt16, from nes: inout NESState) -> UInt8 {
     switch address {
     case 0x0000...0x1FFF:

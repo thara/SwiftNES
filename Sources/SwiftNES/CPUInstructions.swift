@@ -1,6 +1,6 @@
 // swiftlint:disable file_length, large_tuple
 
-typealias OperationFunc = (inout NESState, AddressingModeFunc) -> Void
+typealias OperationFunc = (UInt16, inout CPUState, inout CPUMemory) -> Void
 
 struct CPUInstruction {
     var opcode: UInt8
@@ -29,10 +29,12 @@ func buildInstructionTable() -> [CPUInstruction] {
     return table.compactMap { $0 }
 }
 
-func NOP(nes: inout NESState, addressingMode operand: AddressingModeFunc) {
+func NOP(operand: UInt16, cpu: inout CPUState, memory: inout CPUMemory) {
     // nop
 }
 
-func LDA(nes: inout NESState, addressingMode operand: AddressingModeFunc) {
-    nes.cpu.A = read(at: operand(&nes), from: &nes)
+// Implements for Load/Store Operations
+
+func LDA(operand: UInt16, cpu: inout CPUState, memory: inout CPUMemory) {
+    cpu.A = memory[operand]
 }

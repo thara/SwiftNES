@@ -26,6 +26,10 @@ struct CPUState {
     var PC: UInt16 = 0x00
 }
 
+protocol CPUMemory {
+    subscript(address: UInt16) -> UInt8 { get set }
+}
+
 struct PPUState {
     var PPUCTRL: PPUController = []
     var PPUMASK: PPUMask = []
