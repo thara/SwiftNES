@@ -18,10 +18,10 @@ class CPUSpec: QuickSpec {
 
                 cpu.registers.PC = 0x9052
 
-                var opcode = CPU.fetch(cpu: cpu, memory: &memory)
+                var opcode = fetch(cpu: cpu, memory: &memory)
                 expect(opcode).to(equal(0x3F))
 
-                opcode = CPU.fetch(cpu: cpu, memory: &memory)
+                opcode = fetch(cpu: cpu, memory: &memory)
                 expect(opcode).to(equal(0x81))
             }
         }
@@ -45,7 +45,7 @@ class CPUSpec: QuickSpec {
                 memory.write(127, at: 0xFFFD)
                 memory.write(64, at: 0xFFFE)
 
-                _ = cpu.reset(memory: &memory)
+                _ = reset(registers: &cpu.registers, memory: &memory)
 
                 expect(cpu.registers.A).to(equal(0xFA))
                 expect(cpu.registers.X).to(equal(0x1F))

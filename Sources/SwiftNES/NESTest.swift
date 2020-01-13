@@ -2,6 +2,7 @@ import Foundation
 
 struct NESTest {
     let disassembler: Disassembler
+    let interruptLine: InterruptLine
 
     var registers: CPURegisters! = nil
     var enabled: Bool = false
@@ -9,12 +10,13 @@ struct NESTest {
     var machineCode: String = ""
     var assemblyCode: String = ""
 
-    init(disassembler: Disassembler) {
+    init(disassembler: Disassembler, interruptLine: InterruptLine) {
         self.disassembler = disassembler
+        self.interruptLine = interruptLine
     }
 
     mutating func before(cpu: CPU) {
-        enabled = !cpu.interrupted
+        enabled = !interruptLine.interrupted
         // if enabled {
         //     (machineCode, assemblyCode) = disassembler.disassemble()
         //     registers = cpu.registers

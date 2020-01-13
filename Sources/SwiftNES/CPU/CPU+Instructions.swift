@@ -1,454 +1,451 @@
 // swiftlint:disable file_length cyclomatic_complexity function_body_length
 
-extension CPU {
+@inline(__always)
+func excuteInstruction(opcode: UInt8, cpu: CPU, memory: inout Memory) {
+    switch opcode {
+    case 0xA9:
+        LDA(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA5:
+        LDA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB5:
+        LDA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xAD:
+        LDA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xBD:
+        LDA(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB9:
+        LDA(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA1:
+        LDA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB1:
+        LDA(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA2:
+        LDX(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA6:
+        LDX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB6:
+        LDX(operand: .zeroPageY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xAE:
+        LDX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xBE:
+        LDX(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA0:
+        LDY(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA4:
+        LDY(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB4:
+        LDY(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xAC:
+        LDY(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xBC:
+        LDY(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x85:
+        STA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x95:
+        STA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x8D:
+        STA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x9D:
+        STA(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x99:
+        STA(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x81:
+        STA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x91:
+        STAWithTick(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x86:
+        STX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x96:
+        STX(operand: .zeroPageY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x8E:
+        STX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x84:
+        STY(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x94:
+        STY(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x8C:
+        STY(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xAA:
+        TAX(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xBA:
+        TSX(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA8:
+        TAY(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x8A:
+        TXA(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x9A:
+        TXS(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x98:
+        TYA(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-    @inline(__always)
-    static func excuteInstruction(opcode: UInt8, cpu: CPU, memory: inout Memory) {
-        switch opcode {
-        case 0xA9:
-            LDA(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xA5:
-            LDA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB5:
-            LDA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xAD:
-            LDA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xBD:
-            LDA(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB9:
-            LDA(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xA1:
-            LDA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB1:
-            LDA(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xA2:
-            LDX(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xA6:
-            LDX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB6:
-            LDX(operand: .zeroPageY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xAE:
-            LDX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xBE:
-            LDX(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xA0:
-            LDY(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xA4:
-            LDY(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB4:
-            LDY(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xAC:
-            LDY(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xBC:
-            LDY(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x85:
-            STA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x95:
-            STA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x8D:
-            STA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x9D:
-            STA(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x99:
-            STA(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x81:
-            STA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x91:
-            STAWithTick(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x86:
-            STX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x96:
-            STX(operand: .zeroPageY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x8E:
-            STX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x84:
-            STY(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x94:
-            STY(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x8C:
-            STY(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xAA:
-            TAX(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xBA:
-            TSX(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xA8:
-            TAY(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x8A:
-            TXA(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x9A:
-            TXS(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x98:
-            TYA(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x48:
+        PHA(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x08:
+        PHP(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x68:
+        PLA(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x28:
+        PLP(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x48:
-            PHA(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x08:
-            PHP(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x68:
-            PLA(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x28:
-            PLP(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x29:
+        AND(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x25:
+        AND(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x35:
+        AND(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x2D:
+        AND(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x3D:
+        AND(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x39:
+        AND(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x21:
+        AND(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x31:
+        AND(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x49:
+        EOR(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x45:
+        EOR(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x55:
+        EOR(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x4D:
+        EOR(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x5D:
+        EOR(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x59:
+        EOR(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x41:
+        EOR(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x51:
+        EOR(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x09:
+        ORA(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x05:
+        ORA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x15:
+        ORA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x0D:
+        ORA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x1D:
+        ORA(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x19:
+        ORA(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x01:
+        ORA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x11:
+        ORA(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x24:
+        BIT(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x2C:
+        BIT(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x29:
-            AND(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x25:
-            AND(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x35:
-            AND(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x2D:
-            AND(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x3D:
-            AND(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x39:
-            AND(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x21:
-            AND(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x31:
-            AND(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x49:
-            EOR(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x45:
-            EOR(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x55:
-            EOR(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x4D:
-            EOR(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x5D:
-            EOR(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x59:
-            EOR(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x41:
-            EOR(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x51:
-            EOR(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x09:
-            ORA(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x05:
-            ORA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x15:
-            ORA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x0D:
-            ORA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x1D:
-            ORA(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x19:
-            ORA(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x01:
-            ORA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x11:
-            ORA(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x24:
-            BIT(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x2C:
-            BIT(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x69:
+        ADC(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x65:
+        ADC(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x75:
+        ADC(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x6D:
+        ADC(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x7D:
+        ADC(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x79:
+        ADC(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x61:
+        ADC(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x71:
+        ADC(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE9:
+        SBC(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE5:
+        SBC(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xF5:
+        SBC(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xED:
+        SBC(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xFD:
+        SBC(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xF9:
+        SBC(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE1:
+        SBC(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xF1:
+        SBC(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC9:
+        CMP(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC5:
+        CMP(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xD5:
+        CMP(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xCD:
+        CMP(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xDD:
+        CMP(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xD9:
+        CMP(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC1:
+        CMP(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xD1:
+        CMP(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE0:
+        CPX(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE4:
+        CPX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xEC:
+        CPX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC0:
+        CPY(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC4:
+        CPY(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xCC:
+        CPY(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x69:
-            ADC(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x65:
-            ADC(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x75:
-            ADC(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x6D:
-            ADC(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x7D:
-            ADC(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x79:
-            ADC(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x61:
-            ADC(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x71:
-            ADC(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xE9:
-            SBC(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xE5:
-            SBC(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xF5:
-            SBC(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xED:
-            SBC(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xFD:
-            SBC(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xF9:
-            SBC(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xE1:
-            SBC(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xF1:
-            SBC(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xC9:
-            CMP(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xC5:
-            CMP(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xD5:
-            CMP(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xCD:
-            CMP(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xDD:
-            CMP(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xD9:
-            CMP(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xC1:
-            CMP(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xD1:
-            CMP(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xE0:
-            CPX(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xE4:
-            CPX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xEC:
-            CPX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xC0:
-            CPY(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xC4:
-            CPY(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xCC:
-            CPY(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE6:
+        INC(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xF6:
+        INC(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xEE:
+        INC(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xFE:
+        INC(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE8:
+        INX(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC8:
+        INY(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC6:
+        DEC(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xD6:
+        DEC(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xCE:
+        DEC(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xDE:
+        DEC(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xCA:
+        DEX(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x88:
+        DEY(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0xE6:
-            INC(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xF6:
-            INC(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xEE:
-            INC(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xFE:
-            INC(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xE8:
-            INX(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xC8:
-            INY(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xC6:
-            DEC(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xD6:
-            DEC(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xCE:
-            DEC(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xDE:
-            DEC(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xCA:
-            DEX(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x88:
-            DEY(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x0A:
+        ASLForAccumulator(operand: .accumulator(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x06:
+        ASL(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x16:
+        ASL(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x0E:
+        ASL(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x1E:
+        ASL(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x4A:
+        LSRForAccumulator(operand: .accumulator(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x46:
+        LSR(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x56:
+        LSR(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x4E:
+        LSR(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x5E:
+        LSR(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x2A:
+        ROLForAccumulator(operand: .accumulator(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x26:
+        ROL(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x36:
+        ROL(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x2E:
+        ROL(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x3E:
+        ROL(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x6A:
+        RORForAccumulator(operand: .accumulator(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x66:
+        ROR(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x76:
+        ROR(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x6E:
+        ROR(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x7E:
+        ROR(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x0A:
-            ASLForAccumulator(operand: .accumulator(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x06:
-            ASL(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x16:
-            ASL(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x0E:
-            ASL(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x1E:
-            ASL(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x4A:
-            LSRForAccumulator(operand: .accumulator(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x46:
-            LSR(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x56:
-            LSR(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x4E:
-            LSR(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x5E:
-            LSR(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x2A:
-            ROLForAccumulator(operand: .accumulator(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x26:
-            ROL(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x36:
-            ROL(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x2E:
-            ROL(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x3E:
-            ROL(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x6A:
-            RORForAccumulator(operand: .accumulator(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x66:
-            ROR(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x76:
-            ROR(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x6E:
-            ROR(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x7E:
-            ROR(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x4C:
+        JMP(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x6C:
+        JMP(operand: .indirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x20:
+        JSR(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x60:
+        RTS(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x40:
+        RTI(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x4C:
-            JMP(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x6C:
-            JMP(operand: .indirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x20:
-            JSR(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x60:
-            RTS(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x40:
-            RTI(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x90:
+        BCC(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB0:
+        BCS(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xF0:
+        BEQ(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x30:
+        BMI(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xD0:
+        BNE(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x10:
+        BPL(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x50:
+        BVC(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x70:
+        BVS(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x90:
-            BCC(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB0:
-            BCS(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xF0:
-            BEQ(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x30:
-            BMI(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xD0:
-            BNE(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x10:
-            BPL(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x50:
-            BVC(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x70:
-            BVS(operand: .relative(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x18:
+        CLC(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xD8:
+        CLD(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x58:
+        CLI(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB8:
+        CLV(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x18:
-            CLC(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xD8:
-            CLD(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x58:
-            CLI(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB8:
-            CLV(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x38:
+        SEC(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xF8:
+        SED(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x78:
+        SEI(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x38:
-            SEC(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xF8:
-            SED(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x78:
-            SEI(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x00:
+        BRK(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x00:
-            BRK(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    // Undocumented
 
-        // Undocumented
+    case 0xEB:
+        SBC(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0xEB:
-            SBC(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x04, 0x44, 0x64:
+        NOP(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x0C:
+        NOP(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
+        NOP(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
+        NOP(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
+        NOP(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x80, 0x82, 0x89, 0xC2, 0xE2:
+        NOP(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x04, 0x44, 0x64:
-            NOP(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x0C:
-            NOP(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
-            NOP(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
-            NOP(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
-            NOP(operand: .absoluteXWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x80, 0x82, 0x89, 0xC2, 0xE2:
-            NOP(operand: .immediate(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA3:
+        LAX(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xA7:
+        LAX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xAF:
+        LAX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB3:
+        LAX(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xB7:
+        LAX(operand: .zeroPageY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xBF:
+        LAX(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0xA3:
-            LAX(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xA7:
-            LAX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xAF:
-            LAX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB3:
-            LAX(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xB7:
-            LAX(operand: .zeroPageY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xBF:
-            LAX(operand: .absoluteYWithPenalty(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x83:
+        SAX(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x87:
+        SAX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x8F:
+        SAX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x97:
+        SAX(operand: .zeroPageY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x83:
-            SAX(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x87:
-            SAX(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x8F:
-            SAX(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x97:
-            SAX(operand: .zeroPageY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC3:
+        DCP(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xC7:
+        DCP(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xCF:
+        DCP(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xD3:
+        DCP(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xD7:
+        DCP(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xDB:
+        DCP(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xDF:
+        DCP(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0xC3:
-            DCP(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xC7:
-            DCP(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xCF:
-            DCP(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xD3:
-            DCP(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xD7:
-            DCP(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xDB:
-            DCP(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xDF:
-            DCP(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE3:
+        ISB(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xE7:
+        ISB(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xEF:
+        ISB(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xF3:
+        ISB(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xF7:
+        ISB(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xFB:
+        ISB(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0xFF:
+        ISB(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0xE3:
-            ISB(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xE7:
-            ISB(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xEF:
-            ISB(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xF3:
-            ISB(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xF7:
-            ISB(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xFB:
-            ISB(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0xFF:
-            ISB(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x03:
+        SLO(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x07:
+        SLO(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x0F:
+        SLO(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x13:
+        SLO(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x17:
+        SLO(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x1B:
+        SLO(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x1F:
+        SLO(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x03:
-            SLO(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x07:
-            SLO(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x0F:
-            SLO(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x13:
-            SLO(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x17:
-            SLO(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x1B:
-            SLO(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x1F:
-            SLO(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x23:
+        RLA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x27:
+        RLA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x2F:
+        RLA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x33:
+        RLA(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x37:
+        RLA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x3B:
+        RLA(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x3F:
+        RLA(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x23:
-            RLA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x27:
-            RLA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x2F:
-            RLA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x33:
-            RLA(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x37:
-            RLA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x3B:
-            RLA(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x3F:
-            RLA(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x43:
+        SRE(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x47:
+        SRE(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x4F:
+        SRE(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x53:
+        SRE(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x57:
+        SRE(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x5B:
+        SRE(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x5F:
+        SRE(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x43:
-            SRE(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x47:
-            SRE(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x4F:
-            SRE(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x53:
-            SRE(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x57:
-            SRE(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x5B:
-            SRE(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x5F:
-            SRE(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x63:
+        RRA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x67:
+        RRA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x6F:
+        RRA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x73:
+        RRA(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x77:
+        RRA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x7B:
+        RRA(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
+    case 0x7F:
+        RRA(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
 
-        case 0x63:
-            RRA(operand: .indexedIndirect(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x67:
-            RRA(operand: .zeroPage(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x6F:
-            RRA(operand: .absolute(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x73:
-            RRA(operand: .indirectIndexed(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x77:
-            RRA(operand: .zeroPageX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x7B:
-            RRA(operand: .absoluteY(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        case 0x7F:
-            RRA(operand: .absoluteX(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-
-        default:
-            NOP(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
-        }
+    default:
+        NOP(operand: .implicit(cpu: cpu, memory: &memory), registers: &cpu.registers, memory: &memory)
     }
 }
 
