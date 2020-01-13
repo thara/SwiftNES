@@ -477,41 +477,41 @@ extension CPU {
     fileprivate func decodeToFetchOperand(addressingMode: AddressingMode) -> AddressingMode.FetchOperand {
         switch addressingMode {
         case .implicit:
-            return implicit
+            return CPU.implicit
         case .accumulator:
-            return accumulator
+            return CPU.accumulator
         case .immediate:
-            return immediate
+            return CPU.immediate
         case .zeroPage:
-            return zeroPage
+            return CPU.zeroPage
         case .zeroPageX:
-            return zeroPageX
+            return CPU.zeroPageX
         case .zeroPageY:
-            return zeroPageY
+            return CPU.zeroPageY
         case .absolute:
-            return absolute
+            return CPU.absolute
         case .absoluteX(let cycles):
             switch cycles {
             case .fixed:
-                return absoluteX
+                return CPU.absoluteX
             case .onlyIfPageCrossed:
-                return absoluteXWithPenalty
+                return CPU.absoluteXWithPenalty
             }
         case .absoluteY(let cycles):
             switch cycles {
             case .fixed:
-                return absoluteY
+                return CPU.absoluteY
             case .onlyIfPageCrossed:
-                return absoluteYWithPenalty
+                return CPU.absoluteYWithPenalty
             }
         case .relative:
-            return relative
+            return CPU.relative
         case .indirect:
-            return indirect
+            return CPU.indirect
         case .indexedIndirect:
-            return indexedIndirect
+            return CPU.indexedIndirect
         case .indirectIndexed:
-            return indirectIndexed
+            return CPU.indirectIndexed
         }
     }
 }
@@ -519,128 +519,130 @@ extension CPU {
 // MARK: - Addressing Mode
 extension CPU {
 
-    func implicit() -> UInt16 {
+    static func implicit(cpu: CPU) -> UInt16 {
         return 0x00
     }
 
-    func accumulator() -> UInt16 {
-        return registers.A.u16
+    static func accumulator(cpu: CPU) -> UInt16 {
+        return cpu.registers.A.u16
     }
 
-    func immediate() -> UInt16 {
-        let operand = registers.PC
-        registers.PC &+= 1
+    static func immediate(cpu: CPU) -> UInt16 {
+        let operand = cpu.registers.PC
+        cpu.registers.PC &+= 1
         return operand
     }
 
-    func zeroPage() -> UInt16 {
-        let operand = read(at: registers.PC).u16 & 0xFF
-        registers.PC &+= 1
+    static func zeroPage(cpu: CPU) -> UInt16 {
+        let operand = cpu.read(at: cpu.registers.PC).u16 & 0xFF
+        cpu.registers.PC &+= 1
         return operand
     }
 
-    func zeroPageX() -> UInt16 {
-        tick()
+    static func zeroPageX(cpu: CPU) -> UInt16 {
+        cpu.tick()
 
-        let operand = (read(at: registers.PC).u16 &+ registers.X.u16) & 0xFF
-        registers.PC &+= 1
+        let operand = (cpu.read(at: cpu.registers.PC).u16 &+ cpu.registers.X.u16) & 0xFF
+        cpu.registers.PC &+= 1
         return operand
     }
 
-    func zeroPageY() -> UInt16 {
-        tick()
+    static func zeroPageY(cpu: CPU) -> UInt16 {
+        cpu.tick()
 
-        let operand = (read(at: registers.PC).u16 &+ registers.Y.u16) & 0xFF
-        registers.PC &+= 1
+        let operand = (cpu.read(at: cpu.registers.PC).u16 &+ cpu.registers.Y.u16) & 0xFF
+        cpu.registers.PC &+= 1
         return operand
     }
 
-    func absolute() -> UInt16 {
-        let operand = readWord(at: registers.PC)
-        registers.PC &+= 2
+    static func absolute(cpu: CPU) -> UInt16 {
+        let operand = cpu.readWord(at: cpu.registers.PC)
+        cpu.registers.PC &+= 2
         return operand
     }
 
-    func absoluteX() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = data &+ registers.X.u16 & 0xFFFF
-        registers.PC &+= 2
-        tick()
+    static func absoluteX(cpu: CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.registers.PC)
+        let operand = data &+ cpu.registers.X.u16 & 0xFFFF
+        cpu.registers.PC &+= 2
+        cpu.tick()
         return operand
     }
 
-    func absoluteXWithPenalty() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = data &+ registers.X.u16 & 0xFFFF
-        registers.PC &+= 2
+    static func absoluteXWithPenalty(cpu: CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.registers.PC)
+        let operand = data &+ cpu.registers.X.u16 & 0xFFFF
+        cpu.registers.PC &+= 2
 
-        tickOnPageCrossed(value: data, operand: registers.X)
-        return operand
-    }
-
-    func absoluteY() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = data &+ registers.Y.u16 & 0xFFFF
-        registers.PC &+= 2
-        tick()
-        return operand
-    }
-
-    func absoluteYWithPenalty() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = data &+ registers.Y.u16 & 0xFFFF
-        registers.PC &+= 2
-
-        tickOnPageCrossed(value: data, operand: registers.Y)
-        return operand
-    }
-
-    func relative() -> UInt16 {
-        let operand = read(at: registers.PC).u16
-        registers.PC &+= 1
-        return operand
-    }
-
-    func indirect() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = readOnIndirect(operand: data)
-        registers.PC &+= 2
-        return operand
-    }
-
-    func indexedIndirect() -> UInt16 {
-        let data = read(at: registers.PC)
-        let operand = readOnIndirect(operand: (data &+ registers.X).u16 & 0xFF)
-        registers.PC &+= 1
-
-        tick()
-
-        return operand
-    }
-
-    func indirectIndexed() -> UInt16 {
-        let data = read(at: registers.PC).u16
-        let operand = readOnIndirect(operand: data) &+ registers.Y.u16
-        registers.PC &+= 1
-
-        tickOnPageCrossed(value: operand &- registers.Y.u16, operand: registers.Y)
-        return operand
-    }
-
-    func tickOnPageCrossed(value: UInt16, operand: UInt8) {
-        tickOnPageCrossed(value: value, operand: operand.u16)
-    }
-
-    func tickOnPageCrossed(value: UInt16, operand: UInt16) {
-        if ((value &+ operand) & 0xFF00) != (value & 0xFF00) {
-            tick()
+        if CPU.pageCrossed(value: data, operand: cpu.registers.X) {
+            cpu.tick()
         }
+        return operand
     }
 
-    func tickOnPageCrossed(value: Int, operand: Int) {
-        if ((value &+ operand) & 0xFF00) != (value & 0xFF00) {
-            tick()
+    static func absoluteY(cpu: CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.registers.PC)
+        let operand = data &+ cpu.registers.Y.u16 & 0xFFFF
+        cpu.registers.PC &+= 2
+        cpu.tick()
+        return operand
+    }
+
+    static func absoluteYWithPenalty(cpu: CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.registers.PC)
+        let operand = data &+ cpu.registers.Y.u16 & 0xFFFF
+        cpu.registers.PC &+= 2
+
+        if CPU.pageCrossed(value: data, operand: cpu.registers.Y) {
+            cpu.tick()
         }
+        return operand
+    }
+
+    static func relative(cpu: CPU) -> UInt16 {
+        let operand = cpu.read(at: cpu.registers.PC).u16
+        cpu.registers.PC &+= 1
+        return operand
+    }
+
+    static func indirect(cpu: CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.registers.PC)
+        let operand = cpu.readOnIndirect(operand: data)
+        cpu.registers.PC &+= 2
+        return operand
+    }
+
+    static func indexedIndirect(cpu: CPU) -> UInt16 {
+        let data = cpu.read(at: cpu.registers.PC)
+        let operand = cpu.readOnIndirect(operand: (data &+ cpu.registers.X).u16 & 0xFF)
+        cpu.registers.PC &+= 1
+
+        cpu.tick()
+
+        return operand
+    }
+
+    static func indirectIndexed(cpu: CPU) -> UInt16 {
+        let data = cpu.read(at: cpu.registers.PC).u16
+        let operand = cpu.readOnIndirect(operand: data) &+ cpu.registers.Y.u16
+        cpu.registers.PC &+= 1
+
+        if CPU.pageCrossed(value: operand &- cpu.registers.Y.u16, operand: cpu.registers.Y) {
+            cpu.tick()
+        }
+        return operand
+    }
+
+    static func pageCrossed(value: UInt16, operand: UInt8) -> Bool {
+        return CPU.pageCrossed(value: value, operand: operand.u16)
+    }
+
+    static func pageCrossed(value: UInt16, operand: UInt16) -> Bool {
+        return ((value &+ operand) & 0xFF00) != (value & 0xFF00)
+    }
+
+    static func pageCrossed(value: Int, operand: Int) -> Bool {
+        return ((value &+ operand) & 0xFF00) != (value & 0xFF00)
     }
 }
 
@@ -1065,7 +1067,9 @@ extension CPU {
             tick()
             let pc = Int(registers.PC)
             let offset = Int(operand.i8)
-            tickOnPageCrossed(value: pc, operand: offset)
+            if CPU.pageCrossed(value: pc, operand: offset) {
+                tick()
+            }
             registers.PC = UInt16(pc &+ offset)
         }
     }
