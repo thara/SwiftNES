@@ -13,10 +13,10 @@ class AddressingModeSpec: QuickSpec {
                 cpu = CPU()
                 memory = [UInt8](repeating: 0x00, count: 65536)
 
-                cpu.registers.PC = 0x8234
+                cpu.PC = 0x8234
 
-                cpu.registers.X = 0x05
-                cpu.registers.Y = 0x80
+                cpu.X = 0x05
+                cpu.Y = 0x80
 
                 memory.write(0x90, at: 0x8234)
                 memory.write(0x94, at: 0x8235)
@@ -38,7 +38,7 @@ class AddressingModeSpec: QuickSpec {
 
             context("accumulator") {
                 it("return data on accumulator") {
-                    cpu.registers.A = 0xFA
+                    cpu.A = 0xFA
 
                     let (operand, pc) = cpu.measurePC(Operand.accumulator, memory: &memory)
                     expect(operand).to(equal(0xFA))
@@ -102,7 +102,7 @@ class AddressingModeSpec: QuickSpec {
 
             context("relative") {
                 it("return offset") {
-                    cpu.registers.PC = 0x50
+                    cpu.PC = 0x50
                     memory.write(120, at: 0x50)
 
                     let (operand, pc) = cpu.measurePC(Operand.relative, memory: &memory)
@@ -146,9 +146,9 @@ class AddressingModeSpec: QuickSpec {
 
 private extension CPU {
 
-    func measurePC(_ closure: AddressingMode.FetchOperand, memory: inout Memory) -> (UInt16, UInt16) {
-        let pc = registers.PC
-        let operand = closure(self, &memory)
-        return (operand, registers.PC - pc)
+    mutating func measurePC(_ closure: AddressingMode.FetchOperand, memory: inout Memory) -> (UInt16, UInt16) {
+        let pc = PC
+        let operand = closure(&self, &memory)
+        return (operand, PC - pc)
     }
 }

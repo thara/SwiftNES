@@ -4,7 +4,7 @@ struct NESTest {
     let disassembler: Disassembler
     let interruptLine: InterruptLine
 
-    var registers: CPURegisters! = nil
+    // var registers: CPURegisters! = nil
     var enabled: Bool = false
 
     var machineCode: String = ""
@@ -15,7 +15,7 @@ struct NESTest {
         self.interruptLine = interruptLine
     }
 
-    mutating func before(cpu: CPU) {
+    mutating func before(cpu: inout CPU) {
         enabled = !interruptLine.interrupted
         // if enabled {
         //     (machineCode, assemblyCode) = disassembler.disassemble()
@@ -59,7 +59,7 @@ fileprivate extension String {
     }
 }
 
-extension CPURegisters: CustomStringConvertible {
+extension CPU: CustomStringConvertible {
     var description: String {
         return "A:\(A.hex2) X:\(X.hex2) Y:\(Y.hex2) P:\(P.rawValue.hex2) SP:\(S.hex2)"
     }

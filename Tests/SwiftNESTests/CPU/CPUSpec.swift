@@ -5,10 +5,21 @@ import Nimble
 
 class CPUSpec: QuickSpec {
     override func spec() {
+        describe("registers") {
+            it("Sync N to bit 7 of A") {
+                var reg = CPU(A: 0, X: 0, Y: 0, S: 0, P: [], PC: 0)
+
+                reg.A = 0b00101111
+                expect(reg.P.contains(.N)).to(beFalsy())
+
+                reg.A = 0b10101111
+                expect(reg.P.contains(.N)).to(beTruthy())
+            }
+        }
 
         describe("fetch") {
             it("read opcode at address indicated by PC") {
-                let cpu = CPU()
+                var cpu = CPU()
                 var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
                 memory.write(0x90, at: 0x9051)
@@ -16,22 +27,22 @@ class CPUSpec: QuickSpec {
                 memory.write(0x81, at: 0x9053)
                 memory.write(0x90, at: 0x9054)
 
-                cpu.registers.PC = 0x9052
+                cpu.PC = 0x9052
 
-                var opcode = fetch(cpu: cpu, memory: &memory)
+                var opcode = fetch(cpu: &cpu, memory: &memory)
                 expect(opcode).to(equal(0x3F))
 
-                opcode = fetch(cpu: cpu, memory: &memory)
+                opcode = fetch(cpu: &cpu, memory: &memory)
                 expect(opcode).to(equal(0x81))
             }
         }
 
         describe("reset") {
             it("reset registers & memory state") {
-                let cpu = CPU()
+                var cpu = CPU()
                 var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
-                cpu.registers = CPURegisters(
+                cpu = CPU(
                     A: 0xFA,
                     X: 0x1F,
                     Y: 0x59,
@@ -45,41 +56,41 @@ class CPUSpec: QuickSpec {
                 memory.write(127, at: 0xFFFD)
                 memory.write(64, at: 0xFFFE)
 
-                _ = reset(registers: &cpu.registers, memory: &memory)
+                _ = reset(cpu: &cpu, memory: &memory)
 
-                expect(cpu.registers.A).to(equal(0xFA))
-                expect(cpu.registers.X).to(equal(0x1F))
-                expect(cpu.registers.Y).to(equal(0x59))
-                expect(cpu.registers.S).to(equal(0x34))
-                expect(cpu.registers.P).to(equal([Status.N, Status.V, Status.I]))
-                expect(cpu.registers.PC).to(equal(0b0111111100100000))
+                expect(cpu.A).to(equal(0xFA))
+                expect(cpu.X).to(equal(0x1F))
+                expect(cpu.Y).to(equal(0x59))
+                expect(cpu.S).to(equal(0x34))
+                expect(cpu.P).to(equal([Status.N, Status.V, Status.I]))
+                expect(cpu.PC).to(equal(0b0111111100100000))
             }
         }
 
         describe("stack") {
 
             it("push data, and pull the same") {
-                let cpu = CPU()
-                cpu.registers.S = 0xFF
+                var cpu = CPU()
+                cpu.S = 0xFF
                 var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
-                pushStack(0x83, registers: &cpu.registers, memory: &memory)
-                pushStack(0x14, registers: &cpu.registers, memory: &memory)
+                pushStack(0x83, cpu: &cpu, memory: &memory)
+                pushStack(0x14, cpu: &cpu, memory: &memory)
 
-                expect(pullStack(registers: &cpu.registers, memory: &memory) as UInt8).to(equal(0x14))
-                expect(pullStack(registers: &cpu.registers, memory: &memory) as UInt8).to(equal(0x83))
+                expect(pullStack(cpu: &cpu, memory: &memory) as UInt8).to(equal(0x14))
+                expect(pullStack(cpu: &cpu, memory: &memory) as UInt8).to(equal(0x83))
             }
 
             it("push word, and pull the same") {
-                let cpu = CPU()
-                cpu.registers.S = 0xFF
+                var cpu = CPU()
+                cpu.S = 0xFF
                 var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
-                pushStack(word: 0x98AF, registers: &cpu.registers, memory: &memory)
-                pushStack(word: 0x003A, registers: &cpu.registers, memory: &memory)
+                pushStack(word: 0x98AF, cpu: &cpu, memory: &memory)
+                pushStack(word: 0x003A, cpu: &cpu, memory: &memory)
 
-                expect(pullStack(registers: &cpu.registers, memory: &memory) as UInt16).to(equal(0x003A))
-                expect(pullStack(registers: &cpu.registers, memory: &memory) as UInt16).to(equal(0x98AF))
+                expect(pullStack(cpu: &cpu, memory: &memory) as UInt16).to(equal(0x003A))
+                expect(pullStack(cpu: &cpu, memory: &memory) as UInt16).to(equal(0x98AF))
             }
         }
     }

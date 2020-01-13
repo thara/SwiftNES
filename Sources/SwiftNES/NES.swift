@@ -1,5 +1,5 @@
 public final class NES {
-    private let cpu: CPU
+    private var cpu: CPU
     private let ppu: PPU
 
     private var cpuMemory: Memory
@@ -36,7 +36,7 @@ public final class NES {
 
         cartridgeDrive = BusConnectedCartridgeDrive(cpuMemoryMap: cpuMemoryMap, ppuMemoryMap: ppuMemoryMap)
 
-        nestest = NESTest(disassembler: Disassembler(cpu: cpu), interruptLine: interruptLine)
+        nestest = NESTest(disassembler: Disassembler(), interruptLine: interruptLine)
     }
 
     public func runFrame() {
@@ -49,10 +49,10 @@ public final class NES {
 
     public func step() {
 #if nestest
-        if !interruptLine.interrupted { nestest.before(cpu: cpu) }
+        if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
 #endif
 
-        let cpuCycles = SwiftNES.step(cpu: cpu, memory: &cpuMemory, interruptLine: interruptLine)
+        let cpuCycles = SwiftNES.step(cpu: &cpu, memory: &cpuMemory, interruptLine: interruptLine)
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)

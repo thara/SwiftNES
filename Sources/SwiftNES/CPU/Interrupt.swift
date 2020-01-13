@@ -1,20 +1,19 @@
-
-func interrupt(registers: inout CPURegisters, memory: inout Memory, from interruptLine: InterruptLine) -> Bool {
+func interrupt(cpu: inout CPU, memory: inout Memory, from interruptLine: InterruptLine) -> Bool {
     switch interruptLine.get() {
     case .RESET:
-        reset(registers: &registers, memory: &memory)
+        reset(cpu: &cpu, memory: &memory)
         interruptLine.clear(.RESET)
     case .NMI:
-        handleNMI(registers: &registers, memory: &memory)
+        handleNMI(cpu: &cpu, memory: &memory)
         interruptLine.clear(.NMI)
     case .IRQ:
-        if registers.P.contains(.I) {
-            handleIRQ(registers: &registers, memory: &memory)
+        if cpu.P.contains(.I) {
+            handleIRQ(cpu: &cpu, memory: &memory)
             interruptLine.clear(.IRQ)
         }
     case .BRK:
-        if registers.P.contains(.I) {
-            handleBRK(registers: &registers, memory: &memory)
+        if cpu.P.contains(.I) {
+            handleBRK(cpu: &cpu, memory: &memory)
             interruptLine.clear(.BRK)
         }
     default:
@@ -25,49 +24,49 @@ func interrupt(registers: inout CPURegisters, memory: inout Memory, from interru
 }
 
 /// Reset registers & memory state
-func reset(registers: inout CPURegisters, memory: inout Memory) {
-    registers.tick(count: 5)
+func reset(cpu: inout CPU, memory: inout Memory) {
+    cpu.tick(count: 5)
 #if nestest
-    registers.PC = 0xC000
+    cpu.PC = 0xC000
     interruptLine.clear(.RESET)
-    registers.tick(count: 2)
+    cpu.tick(count: 2)
 #else
-    registers.PC = registers.readWord(at: 0xFFFC, from: &memory)
-    registers.P.formUnion(.I)
-    registers.S -= 3
+    cpu.PC = cpu.readWord(at: 0xFFFC, from: &memory)
+    cpu.P.formUnion(.I)
+    cpu.S -= 3
 #endif
 }
 
-func handleNMI(registers: inout CPURegisters, memory: inout Memory) {
-    registers.tick(count: 2)
+func handleNMI(cpu: inout CPU, memory: inout Memory) {
+    cpu.tick(count: 2)
 
-    pushStack(word: registers.PC, registers: &registers, memory: &memory)
+    pushStack(word: cpu.PC, cpu: &cpu, memory: &memory)
     // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
     // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    pushStack(registers.P.rawValue | Status.interruptedB.rawValue, registers: &registers, memory: &memory)
-    registers.P.formUnion(.I)
-    registers.PC = registers.readWord(at: 0xFFFA, from: &memory)
+    pushStack(cpu.P.rawValue | Status.interruptedB.rawValue, cpu: &cpu, memory: &memory)
+    cpu.P.formUnion(.I)
+    cpu.PC = cpu.readWord(at: 0xFFFA, from: &memory)
 }
 
-func handleIRQ(registers: inout CPURegisters, memory: inout Memory) {
-    registers.tick(count: 2)
+func handleIRQ(cpu: inout CPU, memory: inout Memory) {
+    cpu.tick(count: 2)
 
-    pushStack(word: registers.PC, registers: &registers, memory: &memory)
+    pushStack(word: cpu.PC, cpu: &cpu, memory: &memory)
     // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
     // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    pushStack(registers.P.rawValue | Status.interruptedB.rawValue, registers: &registers, memory: &memory)
-    registers.P.formUnion(.I)
-    registers.PC = registers.readWord(at: 0xFFFE, from: &memory)
+    pushStack(cpu.P.rawValue | Status.interruptedB.rawValue, cpu: &cpu, memory: &memory)
+    cpu.P.formUnion(.I)
+    cpu.PC = cpu.readWord(at: 0xFFFE, from: &memory)
 }
 
-func handleBRK(registers: inout CPURegisters, memory: inout Memory) {
-    registers.tick(count: 2)
+func handleBRK(cpu: inout CPU, memory: inout Memory) {
+    cpu.tick(count: 2)
 
-    registers.PC &+= 1
-    pushStack(word: registers.PC, registers: &registers, memory: &memory)
+    cpu.PC &+= 1
+    pushStack(word: cpu.PC, cpu: &cpu, memory: &memory)
     // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
     // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    pushStack(registers.P.rawValue | Status.interruptedB.rawValue, registers: &registers, memory: &memory)
-    registers.P.formUnion(.I)
-    registers.PC = registers.readWord(at: 0xFFFE, from: &memory)
+    pushStack(cpu.P.rawValue | Status.interruptedB.rawValue, cpu: &cpu, memory: &memory)
+    cpu.P.formUnion(.I)
+    cpu.PC = cpu.readWord(at: 0xFFFE, from: &memory)
 }

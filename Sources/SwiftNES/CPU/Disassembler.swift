@@ -12,8 +12,6 @@ struct CPUStep {
     var operand1: UInt8 = 0x00
     var operand2: UInt8 = 0x00
 
-    var registers: CPURegisters
-
     var operand16: UInt16 {
         return operand1.u16 | (operand2.u16 << 8)
     }
@@ -21,11 +19,11 @@ struct CPUStep {
 
 // swiftlint:disable cyclomatic_complexity
 class Disassembler {
-    let cpu: CPU
+    // let cpu: CPU
 
-    init(cpu: CPU) {
-        self.cpu = cpu
-    }
+    // init(cpu: CPU) {
+    //     self.cpu = cpu
+    // }
 
     // func disassemble() -> (machineCode: String, assemblyCode: String) {
     //     let currentStep = makeCurrentStep()

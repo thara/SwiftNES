@@ -1,4 +1,4 @@
-extension CPURegisters {
+extension CPU {
     mutating func read(at address: UInt16, from memory: inout Memory) -> UInt8 {
         tick()
         return memory.read(at: address)
