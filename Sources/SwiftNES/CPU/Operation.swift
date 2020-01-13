@@ -20,7 +20,7 @@ enum AddressingMode {
     case indexedIndirect
     case indirectIndexed
 
-    typealias FetchOperand = (CPU) -> UInt16
+    typealias FetchOperand = (CPU, inout Memory) -> UInt16
 
     enum CycleConsumption {
         case fixed, onlyIfPageCrossed

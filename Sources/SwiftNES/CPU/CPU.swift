@@ -3,124 +3,41 @@ import Logging
 final class CPU {
 
     var registers: CPURegisters
-    var memory: Memory
-
     let interruptLine: InterruptLine
 
-    // TODO Cycle-accurate
-    private var cycles: UInt = 0
+    // var cycles: UInt = 0
 
-    init(memory: Memory, interruptLine: InterruptLine) {
+    init(interruptLine: InterruptLine) {
         self.registers = CPURegisters()
-        self.memory = memory
         self.interruptLine = interruptLine
     }
 
     func powerOn() {
         registers.powerOn()
-        clear()
 
         interruptLine.clear([.NMI, .IRQ])
         interruptLine.send(.RESET)
     }
 
-    func step() -> UInt {
-        let before = cycles
+    static func step(cpu: CPU, memory: inout Memory) -> UInt {
+        let before = cpu.registers.cycles
 
-        if !interrupt() {
-            excuteInstruction(opcode: fetch())
+        if !cpu.interrupt(memory: &memory) {
+            let opcode = fetch(cpu: cpu, memory: &memory)
+            excuteInstruction(opcode: opcode, cpu: cpu, memory: &memory)
         }
 
-        if before <= cycles {
-            return cycles &- before
+        if before <= cpu.registers.cycles {
+            return cpu.registers.cycles &- before
         } else {
-            return UInt.max &- before &+ cycles
+            return UInt.max &- before &+ cpu.registers.cycles
         }
     }
 
-    @inline(__always)
-    func tick() {
-        cycles &+= 1
-    }
-
-    @inline(__always)
-    func tick(count: UInt) {
-        cycles &+= count
-    }
-}
-
-// MARK: - CPU.run implementation
-extension CPU {
-
-    func fetch() -> OpCode {
-        let opcode = read(at: registers.PC)
-        registers.PC &+= 1
+    static func fetch(cpu: CPU, memory: inout Memory) -> OpCode {
+        let opcode = cpu.registers.read(at: cpu.registers.PC, from: &memory)
+        cpu.registers.PC &+= 1
         return opcode
-    }
-}
-
-// MARK: - Memory
-extension CPU: Memory {
-
-    @inline(__always)
-    func read(at address: UInt16) -> UInt8 {
-        tick()
-        return memory.read(at: address)
-    }
-
-    @inline(__always)
-    func write(_ value: UInt8, at address: UInt16) {
-        if address == 0x4014 { // OAMDMA
-            writeOAM(value)
-        } else {
-            tick()
-            memory.write(value, at: address)
-        }
-    }
-
-    @inline(__always)
-    func clear() {
-        memory.clear()
-    }
-
-    // http://wiki.nesdev.com/w/index.php/PPU_registers#OAM_DMA_.28.244014.29_.3E_write
-    func writeOAM(_ value: UInt8) {
-        let start = value.u16 &* 0x100
-        for address in start...(start &+ 0xFF) {
-            let data = memory.read(at: address)
-            memory.write(data, at: 0x2004)
-            tick(count: 2)
-        }
-
-        // dummy cycles
-        tick()
-        if cycles % 2 == 1 {
-            tick()
-        }
-    }
-}
-
-// MARK: - Stack
-extension CPU {
-    func pushStack(_ value: UInt8) {
-        write(value, at: registers.S.u16 &+ 0x100)
-        registers.S &-= 1
-    }
-
-    func pushStack(word: UInt16) {
-        pushStack(UInt8(word >> 8))
-        pushStack(UInt8(word & 0xFF))
-    }
-
-    func pullStack() -> UInt8 {
-        registers.S &+= 1
-        return read(at: registers.S.u16 &+ 0x100)
-    }
-
-    func pullStack() -> UInt16 {
-        let lo: UInt8 = pullStack()
-        let ho: UInt8 = pullStack()
-        return ho.u16 &<< 8 | lo.u16
     }
 }
 
@@ -131,19 +48,19 @@ extension CPU {
         return !interruptLine.get().isEmpty
     }
 
-    func interrupt() -> Bool {
+    func interrupt(memory: inout Memory) -> Bool {
         switch interruptLine.get() {
         case .RESET:
-            reset()
+            reset(memory: &memory)
         case .NMI:
-            handleNMI()
+            handleNMI(memory: &memory)
         case .IRQ:
             if registers.P.contains(.I) {
-                handleIRQ()
+                handleIRQ(memory: &memory)
             }
         case .BRK:
             if registers.P.contains(.I) {
-                handleBRK()
+                handleBRK(memory: &memory)
             }
         default:
             return false
@@ -153,14 +70,14 @@ extension CPU {
     }
 
     /// Reset registers & memory state
-    func reset() {
-        tick(count: 5)
+    func reset(memory: inout Memory) {
+        registers.tick(count: 5)
 #if nestest
         registers.PC = 0xC000
         interruptLine.clear(.RESET)
-        tick(count: 2)
+        registers.tick(count: 2)
 #else
-        registers.PC = readWord(at: 0xFFFC)
+        registers.PC = registers.readWord(at: 0xFFFC, from: &memory)
         registers.P.formUnion(.I)
         registers.S -= 3
 
@@ -168,42 +85,42 @@ extension CPU {
 #endif
     }
 
-    func handleNMI() {
-        tick(count: 2)
+    func handleNMI(memory: inout Memory) {
+        registers.tick(count: 2)
 
-        pushStack(word: registers.PC)
+        pushStack(word: registers.PC, registers: &registers, memory: &memory)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(registers.P.rawValue | Status.interruptedB.rawValue)
+        pushStack(registers.P.rawValue | Status.interruptedB.rawValue, registers: &registers, memory: &memory)
         registers.P.formUnion(.I)
-        registers.PC = readWord(at: 0xFFFA)
+        registers.PC = registers.readWord(at: 0xFFFA, from: &memory)
 
         interruptLine.clear(.NMI)
     }
 
-    func handleIRQ() {
-        tick(count: 2)
+    func handleIRQ(memory: inout Memory) {
+        registers.tick(count: 2)
 
-        pushStack(word: registers.PC)
+        pushStack(word: registers.PC, registers: &registers, memory: &memory)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(registers.P.rawValue | Status.interruptedB.rawValue)
+        pushStack(registers.P.rawValue | Status.interruptedB.rawValue, registers: &registers, memory: &memory)
         registers.P.formUnion(.I)
-        registers.PC = readWord(at: 0xFFFE)
+        registers.PC = registers.readWord(at: 0xFFFE, from: &memory)
 
         interruptLine.clear(.IRQ)
     }
 
-    func handleBRK() {
-        tick(count: 2)
+    func handleBRK(memory: inout Memory) {
+        registers.tick(count: 2)
 
         registers.PC &+= 1
-        pushStack(word: registers.PC)
+        pushStack(word: registers.PC, registers: &registers, memory: &memory)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(registers.P.rawValue | Status.interruptedB.rawValue)
+        pushStack(registers.P.rawValue | Status.interruptedB.rawValue, registers: &registers, memory: &memory)
         registers.P.formUnion(.I)
-        registers.PC = readWord(at: 0xFFFE)
+        registers.PC = registers.readWord(at: 0xFFFE, from: &memory)
 
         interruptLine.clear(.BRK)
     }

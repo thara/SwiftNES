@@ -24,6 +24,8 @@ struct CPURegisters {
     /// Program Counter
     var PC: UInt16 = 0x00
 
+    private(set) var cycles: UInt = 0
+
     mutating func powerOn() {
         A = 0
         X = 0
@@ -35,6 +37,16 @@ struct CPURegisters {
 #else
         P = Status(rawValue: 0x34)
 #endif
+    }
+
+    @inline(__always)
+    mutating func tick() {
+        cycles &+= 1
+    }
+
+    @inline(__always)
+    mutating func tick(count: UInt) {
+        cycles &+= count
     }
 }
 

@@ -9,18 +9,19 @@ class CPUSpec: QuickSpec {
         describe("fetch") {
             it("read opcode at address indicated by PC") {
                 let cpu = CPU()
+                var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
-                cpu.memory.write(0x90, at: 0x9051)
-                cpu.memory.write(0x3F, at: 0x9052)
-                cpu.memory.write(0x81, at: 0x9053)
-                cpu.memory.write(0x90, at: 0x9054)
+                memory.write(0x90, at: 0x9051)
+                memory.write(0x3F, at: 0x9052)
+                memory.write(0x81, at: 0x9053)
+                memory.write(0x90, at: 0x9054)
 
                 cpu.registers.PC = 0x9052
 
-                var opcode = cpu.fetch()
+                var opcode = CPU.fetch(cpu: cpu, memory: &memory)
                 expect(opcode).to(equal(0x3F))
 
-                opcode = cpu.fetch()
+                opcode = CPU.fetch(cpu: cpu, memory: &memory)
                 expect(opcode).to(equal(0x81))
             }
         }
@@ -28,6 +29,7 @@ class CPUSpec: QuickSpec {
         describe("reset") {
             it("reset registers & memory state") {
                 let cpu = CPU()
+                var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
                 cpu.registers = CPURegisters(
                     A: 0xFA,
@@ -38,12 +40,12 @@ class CPUSpec: QuickSpec {
                     PC: 0b0101011010001101
                 )
 
-                cpu.memory.write(1, at: 0xFFFB)
-                cpu.memory.write(32, at: 0xFFFC)
-                cpu.memory.write(127, at: 0xFFFD)
-                cpu.memory.write(64, at: 0xFFFE)
+                memory.write(1, at: 0xFFFB)
+                memory.write(32, at: 0xFFFC)
+                memory.write(127, at: 0xFFFD)
+                memory.write(64, at: 0xFFFE)
 
-                _ = cpu.reset()
+                _ = cpu.reset(memory: &memory)
 
                 expect(cpu.registers.A).to(equal(0xFA))
                 expect(cpu.registers.X).to(equal(0x1F))
@@ -59,23 +61,25 @@ class CPUSpec: QuickSpec {
             it("push data, and pull the same") {
                 let cpu = CPU()
                 cpu.registers.S = 0xFF
+                var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
-                cpu.pushStack(0x83)
-                cpu.pushStack(0x14)
+                pushStack(0x83, registers: &cpu.registers, memory: &memory)
+                pushStack(0x14, registers: &cpu.registers, memory: &memory)
 
-                expect(cpu.pullStack() as UInt8).to(equal(0x14))
-                expect(cpu.pullStack() as UInt8).to(equal(0x83))
+                expect(pullStack(registers: &cpu.registers, memory: &memory) as UInt8).to(equal(0x14))
+                expect(pullStack(registers: &cpu.registers, memory: &memory) as UInt8).to(equal(0x83))
             }
 
             it("push word, and pull the same") {
                 let cpu = CPU()
                 cpu.registers.S = 0xFF
+                var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
-                cpu.pushStack(word: 0x98AF)
-                cpu.pushStack(word: 0x003A)
+                pushStack(word: 0x98AF, registers: &cpu.registers, memory: &memory)
+                pushStack(word: 0x003A, registers: &cpu.registers, memory: &memory)
 
-                expect(cpu.pullStack() as UInt16).to(equal(0x003A))
-                expect(cpu.pullStack() as UInt16).to(equal(0x98AF))
+                expect(pullStack(registers: &cpu.registers, memory: &memory) as UInt16).to(equal(0x003A))
+                expect(pullStack(registers: &cpu.registers, memory: &memory) as UInt16).to(equal(0x98AF))
             }
         }
     }

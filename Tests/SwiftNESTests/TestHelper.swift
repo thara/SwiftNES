@@ -10,7 +10,7 @@ class DummyRenderer: Renderer {
 
 extension CPU {
     convenience init() {
-        self.init(memory: [UInt8](repeating: 0x00, count: 65536), interruptLine: InterruptLine())
+        self.init(interruptLine: InterruptLine())
     }
 }
 

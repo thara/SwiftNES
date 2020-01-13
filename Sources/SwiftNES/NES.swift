@@ -2,6 +2,8 @@ public final class NES {
     private let cpu: CPU
     private let ppu: PPU
 
+    private var cpuMemory: Memory
+
     private let cartridgeDrive: CartridgeDrive
     private let controllerPort: ControllerPort
 
@@ -19,7 +21,8 @@ public final class NES {
         let interruptLine = InterruptLine()
 
         let cpuMemoryMap = CPUMemoryMap()
-        cpu = CPU(memory: cpuMemoryMap, interruptLine: interruptLine)
+        cpu = CPU(interruptLine: interruptLine)
+        cpuMemory = cpuMemoryMap
 
         let ppuMemoryMap = PPUMemoryMap()
         ppu = PPU(memory: ppuMemoryMap, interruptLine: interruptLine, lineBuffer: lineBuffer)
@@ -48,7 +51,7 @@ public final class NES {
         if !interrupted { nestest.before(cpu: cpu) }
 #endif
 
-        let cpuCycles = cpu.step()
+        let cpuCycles = CPU.step(cpu: cpu, memory: &cpuMemory)
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)
@@ -66,6 +69,7 @@ public final class NES {
     public func insert(cartridge: Cartridge) {
         cartridgeDrive.insert(cartridge)
         cpu.powerOn()
+        cpuMemory.clear()
         ppu.reset()
     }
 
