@@ -657,160 +657,139 @@ extension CPU {
     // Implements for Load/Store Operations
 
     /// LDA
-    func loadAccumulator(operand: Operand) -> NextPC {
+    func loadAccumulator(operand: Operand) {
         registers.A = read(at: operand)
-        return registers.PC
     }
 
     /// LDX
-    func loadXRegister(operand: Operand) -> NextPC {
+    func loadXRegister(operand: Operand) {
         registers.X = read(at: operand)
-        return registers.PC
     }
 
     /// LDY
-    func loadYRegister(operand: Operand) -> NextPC {
+    func loadYRegister(operand: Operand) {
         registers.Y = read(at: operand)
-        return registers.PC
     }
 
     /// STA
-    func storeAccumulator(operand: Operand) -> NextPC {
+    func storeAccumulator(operand: Operand) {
         write(registers.A, at: operand)
-        return registers.PC
     }
 
-    func storeAccumulatorWithTick(operand: Operand) -> NextPC {
+    func storeAccumulatorWithTick(operand: Operand) {
         write(registers.A, at: operand)
         tick()
-        return registers.PC
     }
 
     /// STX
-    func storeXRegister(operand: Operand) -> NextPC {
+    func storeXRegister(operand: Operand) {
         write(registers.X, at: operand)
-        return registers.PC
     }
 
     /// STY
-    func storeYRegister(operand: Operand) -> NextPC {
+    func storeYRegister(operand: Operand) {
         write(registers.Y, at: operand)
-        return registers.PC
     }
 
     // MARK: - Register Operations
 
     /// TAX
-    func transferAccumulatorToX(operand: Operand) -> NextPC {
+    func transferAccumulatorToX(operand: Operand) {
         registers.X = registers.A
         tick()
-        return registers.PC
     }
 
     /// TSX
-    func transferStackPointerToX(operand: Operand) -> NextPC {
+    func transferStackPointerToX(operand: Operand) {
         registers.X = registers.S
         tick()
-        return registers.PC
     }
 
     /// TAY
-    func transferAccumulatorToY(operand: Operand) -> NextPC {
+    func transferAccumulatorToY(operand: Operand) {
         registers.Y = registers.A
         tick()
-        return registers.PC
     }
 
     /// TXA
-    func transferXtoAccumulator(operand: Operand) -> NextPC {
+    func transferXtoAccumulator(operand: Operand) {
         registers.A = registers.X
         tick()
-        return registers.PC
     }
 
     /// TXS
-    func transferXtoStackPointer(operand: Operand) -> NextPC {
+    func transferXtoStackPointer(operand: Operand) {
         registers.S = registers.X
         tick()
-        return registers.PC
     }
 
     /// TYA
-    func transferYtoAccumulator(operand: Operand) -> NextPC {
+    func transferYtoAccumulator(operand: Operand) {
         registers.A = registers.Y
         tick()
-        return registers.PC
     }
 
     // MARK: - Stack instructions
 
     /// PHA
-    func pushAccumulator(operand: Operand) -> NextPC {
+    func pushAccumulator(operand: Operand) {
         pushStack(registers.A)
         tick()
-        return registers.PC
     }
 
     /// PHP
-    func pushProcessorStatus(operand: Operand) -> NextPC {
+    func pushProcessorStatus(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         pushStack(registers.P.rawValue | Status.operatedB.rawValue)
         tick()
-        return registers.PC
     }
 
     /// PLA
-    func pullAccumulator(operand: Operand) -> NextPC {
+    func pullAccumulator(operand: Operand) {
         registers.A = pullStack()
         tick(count: 2)
-        return registers.PC
     }
 
     /// PLP
-    func pullProcessorStatus(operand: Operand) -> NextPC {
+    func pullProcessorStatus(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
         tick(count: 2)
-        return registers.PC
     }
 
     // MARK: - Logical instructions
 
     /// AND
-    func bitwiseANDwithAccumulator(operand: Operand) -> NextPC {
+    func bitwiseANDwithAccumulator(operand: Operand) {
         registers.A &= read(at: operand)
-        return registers.PC
     }
 
     /// EOR
-    func bitwiseExclusiveOR(operand: Operand) -> NextPC {
+    func bitwiseExclusiveOR(operand: Operand) {
         registers.A ^= read(at: operand)
-        return registers.PC
     }
 
     /// ORA
-    func bitwiseORwithAccumulator(operand: Operand) -> NextPC {
+    func bitwiseORwithAccumulator(operand: Operand) {
         registers.A |= read(at: operand)
-        return registers.PC
     }
 
     /// BIT
-    func testBits(operand: Operand) -> NextPC {
+    func testBits(operand: Operand) {
         let value = read(at: operand)
         let data = registers.A & value
         registers.P.remove([.Z, .V, .N])
         if data == 0 { registers.P.formUnion(.Z) } else { registers.P.remove(.Z) }
         if value[6] == 1 { registers.P.formUnion(.V) } else { registers.P.remove(.V) }
         if value[7] == 1 { registers.P.formUnion(.N) } else { registers.P.remove(.N) }
-        return registers.PC
     }
 
     // MARK: - Arithmetic instructions
 
     /// ADC
-    func addWithCarry(operand: Operand) -> NextPC {
+    func addWithCarry(operand: Operand) {
         let a = registers.A
         let val = read(at: operand)
         var result = a &+ val
@@ -829,11 +808,10 @@ extension CPU {
         if c6 ^ c7 == 1 { registers.P.formUnion(.V) }
 
         registers.A = result
-        return registers.PC
     }
 
     /// SBC
-    func subtractWithCarry(operand: Operand) -> NextPC {
+    func subtractWithCarry(operand: Operand) {
         let a = registers.A
         let val = ~read(at: operand)
         var result = a &+ val
@@ -852,22 +830,20 @@ extension CPU {
         if c6 ^ c7 == 1 { registers.P.formUnion(.V) }
 
         registers.A = result
-        return registers.PC
     }
 
     /// CMP
-    func compareAccumulator(operand: Operand) -> NextPC {
+    func compareAccumulator(operand: Operand) {
         let cmp = Int16(registers.A) &- Int16(read(at: operand))
 
         registers.P.remove([.C, .Z, .N])
         registers.P.setZN(cmp)
         if 0 <= cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
-        return registers.PC
     }
 
     /// CPX
-    func compareXRegister(operand: Operand) -> NextPC {
+    func compareXRegister(operand: Operand) {
         let value = read(at: operand)
         let cmp = registers.X &- value
 
@@ -875,11 +851,10 @@ extension CPU {
         registers.P.setZN(cmp)
         if registers.X >= value { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
-        return registers.PC
     }
 
     /// CPY
-    func compareYRegister(operand: Operand) -> NextPC {
+    func compareYRegister(operand: Operand) {
         let value = read(at: operand)
         let cmp = registers.Y &- value
 
@@ -887,13 +862,12 @@ extension CPU {
         registers.P.setZN(cmp)
         if registers.Y >= value { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
 
-        return registers.PC
     }
 
     // MARK: - Increment/Decrement instructions
 
     /// INC
-    func incrementMemory(operand: Operand) -> NextPC {
+    func incrementMemory(operand: Operand) {
         let result = read(at: operand) &+ 1
 
         registers.P.setZN(result)
@@ -901,25 +875,22 @@ extension CPU {
 
         tick()
 
-        return registers.PC
     }
 
     /// INX
-    func incrementX(_: Operand) -> NextPC {
+    func incrementX(_: Operand) {
         registers.X = registers.X &+ 1
         tick()
-        return registers.PC
     }
 
     /// INY
-    func incrementY(operand: Operand) -> NextPC {
+    func incrementY(operand: Operand) {
         registers.Y = registers.Y &+ 1
         tick()
-        return registers.PC
     }
 
     /// DEC
-    func decrementMemory(operand: Operand) -> NextPC {
+    func decrementMemory(operand: Operand) {
         let result = read(at: operand) &- 1
 
         registers.P.setZN(result)
@@ -928,27 +899,24 @@ extension CPU {
 
         tick()
 
-        return registers.PC
     }
 
     /// DEX
-    func decrementX(operand: Operand) -> NextPC {
+    func decrementX(operand: Operand) {
         registers.X = registers.X &- 1
         tick()
-        return registers.PC
     }
 
     /// DEY
-    func decrementY(operand: Operand) -> NextPC {
+    func decrementY(operand: Operand) {
         registers.Y = registers.Y &- 1
         tick()
-        return registers.PC
     }
 
     // MARK: - Shift instructions
 
     /// ASL
-    func arithmeticShiftLeft(operand: Operand) -> NextPC {
+    func arithmeticShiftLeft(operand: Operand) {
         var data = read(at: operand)
 
         registers.P.remove([.C, .Z, .N])
@@ -961,21 +929,19 @@ extension CPU {
         write(data, at: operand)
 
         tick()
-        return registers.PC
     }
 
-    func arithmeticShiftLeftForAccumulator(operand: Operand) -> NextPC {
+    func arithmeticShiftLeftForAccumulator(operand: Operand) {
         registers.P.remove([.C, .Z, .N])
         if registers.A[7] == 1 { registers.P.formUnion(.C) }
 
         registers.A <<= 1
 
         tick()
-        return registers.PC
     }
 
     /// LSR
-    func logicalShiftRight(operand: Operand) -> NextPC {
+    func logicalShiftRight(operand: Operand) {
         var data = read(at: operand)
 
         registers.P.remove([.C, .Z, .N])
@@ -988,21 +954,19 @@ extension CPU {
         write(data, at: operand)
 
         tick()
-        return registers.PC
     }
 
-    func logicalShiftRightForAccumulator(operand: Operand) -> NextPC {
+    func logicalShiftRightForAccumulator(operand: Operand) {
         registers.P.remove([.C, .Z, .N])
         if registers.A[0] == 1 { registers.P.formUnion(.C) }
 
         registers.A >>= 1
 
         tick()
-        return registers.PC
     }
 
     /// ROL
-    func rotateLeft(operand: Operand) -> NextPC {
+    func rotateLeft(operand: Operand) {
         var data = read(at: operand)
         let c = data & 0x80
 
@@ -1017,10 +981,9 @@ extension CPU {
         write(data, at: operand)
 
         tick()
-        return registers.PC
     }
 
-    func rotateLeftForAccumulator(_: Operand) -> NextPC {
+    func rotateLeftForAccumulator(_: Operand) {
         let c = registers.A & 0x80
 
         var a = registers.A << 1
@@ -1032,11 +995,10 @@ extension CPU {
         registers.A = a
 
         tick()
-        return registers.PC
     }
 
     /// ROR
-    func rotateRight(operand: Operand) -> NextPC {
+    func rotateRight(operand: Operand) {
         var data = read(at: operand)
         let c = data & 0x01
 
@@ -1051,10 +1013,9 @@ extension CPU {
         write(data, at: operand)
 
         tick()
-        return registers.PC
     }
 
-    func rotateRightForAccumulator(operand: Operand) -> NextPC {
+    func rotateRightForAccumulator(operand: Operand) {
         let c = registers.A & 0x01
 
         var a = registers.A >> 1
@@ -1066,198 +1027,186 @@ extension CPU {
         registers.A = a
 
         tick()
-        return registers.PC
     }
 
     // MARK: - Jump instructions
 
     /// JMP
-    func jump(operand: Operand) -> NextPC {
-        return operand
+    func jump(operand: Operand) {
+        registers.PC = operand
     }
 
     /// JSR
-    func jumpToSubroutine(operand: Operand) -> NextPC {
+    func jumpToSubroutine(operand: Operand) {
         pushStack(word: registers.PC &- 1)
         tick()
-        return operand
+        registers.PC = operand
     }
 
     /// RTS
-    func returnFromSubroutine(operand: Operand) -> NextPC {
+    func returnFromSubroutine(operand: Operand) {
         tick(count: 3)
-        return pullStack() &+ 1
+        registers.PC = pullStack() &+ 1
     }
 
     /// RTI
-    func returnFromInterrupt(operand: Operand) -> NextPC {
+    func returnFromInterrupt(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         tick(count: 2)
         registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
-        return pullStack()
+        registers.PC = pullStack()
     }
 
     // MARK: - Branch instructions
 
-    fileprivate func branch(operand: Operand, test: Bool) -> NextPC {
+    fileprivate func branch(operand: Operand, test: Bool) {
         if test {
             tick()
             let pc = Int(registers.PC)
             let offset = Int(operand.i8)
             tickOnPageCrossed(value: pc, operand: offset)
-            return UInt16(pc &+ offset)
+            registers.PC = UInt16(pc &+ offset)
         }
-        return registers.PC
     }
 
     /// BCC
-    func branchIfCarryClear(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: !registers.P.contains(.C))
+    func branchIfCarryClear(operand: Operand) {
+        branch(operand: operand, test: !registers.P.contains(.C))
     }
 
     /// BCS
-    func branchIfCarrySet(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: registers.P.contains(.C))
+    func branchIfCarrySet(operand: Operand) {
+        branch(operand: operand, test: registers.P.contains(.C))
     }
 
     /// BEQ
-    func branchIfEqual(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: registers.P.contains(.Z))
+    func branchIfEqual(operand: Operand) {
+        branch(operand: operand, test: registers.P.contains(.Z))
     }
 
     /// BMI
-    func branchIfMinus(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: registers.P.contains(.N))
+    func branchIfMinus(operand: Operand) {
+        branch(operand: operand, test: registers.P.contains(.N))
     }
 
     /// BNE
-    func branchIfNotEqual(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: !registers.P.contains(.Z))
+    func branchIfNotEqual(operand: Operand) {
+        branch(operand: operand, test: !registers.P.contains(.Z))
     }
 
     /// BPL
-    func branchIfPlus(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: !registers.P.contains(.N))
+    func branchIfPlus(operand: Operand) {
+        branch(operand: operand, test: !registers.P.contains(.N))
     }
 
     /// BVC
-    func branchIfOverflowClear(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: !registers.P.contains(.V))
+    func branchIfOverflowClear(operand: Operand) {
+        branch(operand: operand, test: !registers.P.contains(.V))
     }
 
     /// BVS
-    func branchIfOverflowSet(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: registers.P.contains(.V))
+    func branchIfOverflowSet(operand: Operand) {
+        branch(operand: operand, test: registers.P.contains(.V))
     }
 
     // MARK: - Flag control instructions
 
     /// CLC
-    func clearCarry(operand: Operand) -> NextPC {
+    func clearCarry(operand: Operand) {
         registers.P.remove(.C)
         tick()
-        return registers.PC
     }
 
     /// CLD
-    func clearDecimal(operand: Operand) -> NextPC {
+    func clearDecimal(operand: Operand) {
         registers.P.remove(.D)
         tick()
-        return registers.PC
     }
 
     /// CLI
-    func clearInterrupt(operand: Operand) -> NextPC {
+    func clearInterrupt(operand: Operand) {
         registers.P.remove(.I)
         tick()
-        return registers.PC
     }
 
     /// CLV
-    func clearOverflow(operand: Operand) -> NextPC {
+    func clearOverflow(operand: Operand) {
         registers.P.remove(.V)
         tick()
-        return registers.PC
     }
 
     /// SEC
-    func setCarryFlag(operand: Operand) -> NextPC {
+    func setCarryFlag(operand: Operand) {
         registers.P.formUnion(.C)
         tick()
-        return registers.PC
     }
 
     /// SED
-    func setDecimalFlag(operand: Operand) -> NextPC {
+    func setDecimalFlag(operand: Operand) {
         registers.P.formUnion(.D)
         tick()
-        return registers.PC
     }
 
     /// SEI
-    func setInterruptDisable(operand: Operand) -> NextPC {
+    func setInterruptDisable(operand: Operand) {
         registers.P.formUnion(.I)
         tick()
-        return registers.PC
     }
 
     // MARK: - Misc
 
     /// BRK
-    func forceInterrupt(operand: Operand) -> NextPC {
+    func forceInterrupt(operand: Operand) {
         pushStack(word: registers.PC)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         pushStack(registers.P.rawValue | Status.interruptedB.rawValue)
         tick()
-        return readWord(at: 0xFFFE)
+        registers.PC = readWord(at: 0xFFFE)
     }
 
     /// NOP
-    func doNothing(_ operand: Operand) -> NextPC {
+    func doNothing(_ operand: Operand) {
         tick()
-        return registers.PC
     }
 
     // MARK: - Illegal
 
     /// LAX
-    func loadAccumulatorAndX(operand: Operand) -> NextPC {
+    func loadAccumulatorAndX(operand: Operand) {
         let data = read(at: operand)
         registers.A = data
         registers.X = data
-        return registers.PC
     }
 
     /// SAX
-    func storeAccumulatorAndX(operand: Operand) -> NextPC {
+    func storeAccumulatorAndX(operand: Operand) {
         write(registers.A & registers.X, at: operand)
-        return registers.PC
     }
 
     /// DCP
-    func decrementMemoryAndCompareAccumulator(operand: Operand) -> NextPC {
+    func decrementMemoryAndCompareAccumulator(operand: Operand) {
         // decrementMemory excluding tick
         let result = read(at: operand) &- 1
         registers.P.setZN(result)
         write(result, at: operand)
 
-        return compareAccumulator(operand: operand)
+        compareAccumulator(operand: operand)
     }
 
     /// ISB
-    func incrementMemoryAndSubtractWithCarry(operand: Operand) -> NextPC {
+    func incrementMemoryAndSubtractWithCarry(operand: Operand) {
         // incrementMemory excluding tick
         let result = read(at: operand) &+ 1
         registers.P.setZN(result)
         write(result, at: operand)
 
-        return subtractWithCarry(operand: operand)
+        subtractWithCarry(operand: operand)
     }
 
     /// SLO
-    func arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: Operand) -> NextPC {
+    func arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: Operand) {
         // arithmeticShiftLeft excluding tick
         var data = read(at: operand)
         registers.P.remove([.C, .Z, .N])
@@ -1267,11 +1216,11 @@ extension CPU {
         registers.P.setZN(data)
         write(data, at: operand)
 
-        return bitwiseORwithAccumulator(operand: operand)
+        bitwiseORwithAccumulator(operand: operand)
     }
 
     /// RLA
-    func rotateLeftAndBitwiseANDwithAccumulator(operand: Operand) -> NextPC {
+    func rotateLeftAndBitwiseANDwithAccumulator(operand: Operand) {
         // rotateLeft excluding tick
         var data = read(at: operand)
         let c = data & 0x80
@@ -1285,11 +1234,11 @@ extension CPU {
         registers.P.setZN(data)
         write(data, at: operand)
 
-        return bitwiseANDwithAccumulator(operand: operand)
+        bitwiseANDwithAccumulator(operand: operand)
     }
 
     /// SRE
-    func logicalShiftRightAndBitwiseExclusiveOR(operand: Operand) -> NextPC {
+    func logicalShiftRightAndBitwiseExclusiveOR(operand: Operand) {
         // logicalShiftRight excluding tick
         var data = read(at: operand)
         registers.P.remove([.C, .Z, .N])
@@ -1300,11 +1249,11 @@ extension CPU {
         registers.P.setZN(data)
         write(data, at: operand)
 
-        return bitwiseExclusiveOR(operand: operand)
+        bitwiseExclusiveOR(operand: operand)
     }
 
     /// RRA
-    func rotateRightAndAddWithCarry(operand: Operand) -> NextPC {
+    func rotateRightAndAddWithCarry(operand: Operand) {
         // rotateRight excluding tick
         var data = read(at: operand)
         let c = data & 0x01
@@ -1318,6 +1267,6 @@ extension CPU {
         registers.P.setZN(data)
         write(data, at: operand)
 
-        return addWithCarry(operand: operand)
+        addWithCarry(operand: operand)
     }
 }

@@ -1,9 +1,8 @@
 typealias OpCode = UInt8
 
 typealias Operand = UInt16
-typealias NextPC = UInt16
 
-typealias Operation = ((Operand) -> NextPC)
+typealias Operation = ((Operand) -> Void)
 
 // http://wiki.nesdev.com/w/index.php/CPU_addressing_modes
 enum AddressingMode {

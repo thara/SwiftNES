@@ -71,7 +71,7 @@ extension CPU {
 
     func execute(_ instruction: Instruction) {
         let operand = instruction.fetchOperand()
-        registers.PC = instruction.exec(operand)
+        instruction.exec(operand)
     }
 }
 
