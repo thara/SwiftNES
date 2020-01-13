@@ -6,448 +6,448 @@ extension CPU {
     func excuteInstruction(opcode: UInt8) {
         switch opcode {
         case 0xA9:
-            loadAccumulator(operand: .immediate(cpu: self))
+            LDA(operand: .immediate(cpu: self))
         case 0xA5:
-            loadAccumulator(operand: .zeroPage(cpu: self))
+            LDA(operand: .zeroPage(cpu: self))
         case 0xB5:
-            loadAccumulator(operand: .zeroPageX(cpu: self))
+            LDA(operand: .zeroPageX(cpu: self))
         case 0xAD:
-            loadAccumulator(operand: .absolute(cpu: self))
+            LDA(operand: .absolute(cpu: self))
         case 0xBD:
-            loadAccumulator(operand: .absoluteXWithPenalty(cpu: self))
+            LDA(operand: .absoluteXWithPenalty(cpu: self))
         case 0xB9:
-            loadAccumulator(operand: .absoluteYWithPenalty(cpu: self))
+            LDA(operand: .absoluteYWithPenalty(cpu: self))
         case 0xA1:
-            loadAccumulator(operand: .indexedIndirect(cpu: self))
+            LDA(operand: .indexedIndirect(cpu: self))
         case 0xB1:
-            loadAccumulator(operand: .indirectIndexed(cpu: self))
+            LDA(operand: .indirectIndexed(cpu: self))
         case 0xA2:
-            loadXRegister(operand: .immediate(cpu: self))
+            LDX(operand: .immediate(cpu: self))
         case 0xA6:
-            loadXRegister(operand: .zeroPage(cpu: self))
+            LDX(operand: .zeroPage(cpu: self))
         case 0xB6:
-            loadXRegister(operand: .zeroPageY(cpu: self))
+            LDX(operand: .zeroPageY(cpu: self))
         case 0xAE:
-            loadXRegister(operand: .absolute(cpu: self))
+            LDX(operand: .absolute(cpu: self))
         case 0xBE:
-            loadXRegister(operand: .absoluteYWithPenalty(cpu: self))
+            LDX(operand: .absoluteYWithPenalty(cpu: self))
         case 0xA0:
-            loadYRegister(operand: .immediate(cpu: self))
+            LDY(operand: .immediate(cpu: self))
         case 0xA4:
-            loadYRegister(operand: .zeroPage(cpu: self))
+            LDY(operand: .zeroPage(cpu: self))
         case 0xB4:
-            loadYRegister(operand: .zeroPageX(cpu: self))
+            LDY(operand: .zeroPageX(cpu: self))
         case 0xAC:
-            loadYRegister(operand: .absolute(cpu: self))
+            LDY(operand: .absolute(cpu: self))
         case 0xBC:
-            loadYRegister(operand: .absoluteXWithPenalty(cpu: self))
+            LDY(operand: .absoluteXWithPenalty(cpu: self))
         case 0x85:
-            storeAccumulator(operand: .zeroPage(cpu: self))
+            STA(operand: .zeroPage(cpu: self))
         case 0x95:
-            storeAccumulator(operand: .zeroPageX(cpu: self))
+            STA(operand: .zeroPageX(cpu: self))
         case 0x8D:
-            storeAccumulator(operand: .absolute(cpu: self))
+            STA(operand: .absolute(cpu: self))
         case 0x9D:
-            storeAccumulator(operand: .absoluteX(cpu: self))
+            STA(operand: .absoluteX(cpu: self))
         case 0x99:
-            storeAccumulator(operand: .absoluteY(cpu: self))
+            STA(operand: .absoluteY(cpu: self))
         case 0x81:
-            storeAccumulator(operand: .indexedIndirect(cpu: self))
+            STA(operand: .indexedIndirect(cpu: self))
         case 0x91:
-            storeAccumulatorWithTick(operand: .indirectIndexed(cpu: self))
+            STAWithTick(operand: .indirectIndexed(cpu: self))
         case 0x86:
-            storeXRegister(operand: .zeroPage(cpu: self))
+            STX(operand: .zeroPage(cpu: self))
         case 0x96:
-            storeXRegister(operand: .zeroPageY(cpu: self))
+            STX(operand: .zeroPageY(cpu: self))
         case 0x8E:
-            storeXRegister(operand: .absolute(cpu: self))
+            STX(operand: .absolute(cpu: self))
         case 0x84:
-            storeYRegister(operand: .zeroPage(cpu: self))
+            STY(operand: .zeroPage(cpu: self))
         case 0x94:
-            storeYRegister(operand: .zeroPageX(cpu: self))
+            STY(operand: .zeroPageX(cpu: self))
         case 0x8C:
-            storeYRegister(operand: .absolute(cpu: self))
+            STY(operand: .absolute(cpu: self))
         case 0xAA:
-            transferAccumulatorToX(operand: .implicit(cpu: self))
+            TAX(operand: .implicit(cpu: self))
         case 0xBA:
-            transferStackPointerToX(operand: .implicit(cpu: self))
+            TSX(operand: .implicit(cpu: self))
         case 0xA8:
-            transferAccumulatorToY(operand: .implicit(cpu: self))
+            TAY(operand: .implicit(cpu: self))
         case 0x8A:
-            transferXtoAccumulator(operand: .implicit(cpu: self))
+            TXA(operand: .implicit(cpu: self))
         case 0x9A:
-            transferXtoStackPointer(operand: .implicit(cpu: self))
+            TXS(operand: .implicit(cpu: self))
         case 0x98:
-            transferYtoAccumulator(operand: .implicit(cpu: self))
+            TYA(operand: .implicit(cpu: self))
 
         case 0x48:
-            pushAccumulator(operand: .implicit(cpu: self))
+            PHA(operand: .implicit(cpu: self))
         case 0x08:
-            pushProcessorStatus(operand: .implicit(cpu: self))
+            PHP(operand: .implicit(cpu: self))
         case 0x68:
-            pullAccumulator(operand: .implicit(cpu: self))
+            PLA(operand: .implicit(cpu: self))
         case 0x28:
-            pullProcessorStatus(operand: .implicit(cpu: self))
+            PLP(operand: .implicit(cpu: self))
 
         case 0x29:
-            bitwiseANDwithAccumulator(operand: .immediate(cpu: self))
+            AND(operand: .immediate(cpu: self))
         case 0x25:
-            bitwiseANDwithAccumulator(operand: .zeroPage(cpu: self))
+            AND(operand: .zeroPage(cpu: self))
         case 0x35:
-            bitwiseANDwithAccumulator(operand: .zeroPageX(cpu: self))
+            AND(operand: .zeroPageX(cpu: self))
         case 0x2D:
-            bitwiseANDwithAccumulator(operand: .absolute(cpu: self))
+            AND(operand: .absolute(cpu: self))
         case 0x3D:
-            bitwiseANDwithAccumulator(operand: .absoluteXWithPenalty(cpu: self))
+            AND(operand: .absoluteXWithPenalty(cpu: self))
         case 0x39:
-            bitwiseANDwithAccumulator(operand: .absoluteYWithPenalty(cpu: self))
+            AND(operand: .absoluteYWithPenalty(cpu: self))
         case 0x21:
-            bitwiseANDwithAccumulator(operand: .indexedIndirect(cpu: self))
+            AND(operand: .indexedIndirect(cpu: self))
         case 0x31:
-            bitwiseANDwithAccumulator(operand: .indirectIndexed(cpu: self))
+            AND(operand: .indirectIndexed(cpu: self))
         case 0x49:
-            bitwiseExclusiveOR(operand: .immediate(cpu: self))
+            EOR(operand: .immediate(cpu: self))
         case 0x45:
-            bitwiseExclusiveOR(operand: .zeroPage(cpu: self))
+            EOR(operand: .zeroPage(cpu: self))
         case 0x55:
-            bitwiseExclusiveOR(operand: .zeroPageX(cpu: self))
+            EOR(operand: .zeroPageX(cpu: self))
         case 0x4D:
-            bitwiseExclusiveOR(operand: .absolute(cpu: self))
+            EOR(operand: .absolute(cpu: self))
         case 0x5D:
-            bitwiseExclusiveOR(operand: .absoluteXWithPenalty(cpu: self))
+            EOR(operand: .absoluteXWithPenalty(cpu: self))
         case 0x59:
-            bitwiseExclusiveOR(operand: .absoluteYWithPenalty(cpu: self))
+            EOR(operand: .absoluteYWithPenalty(cpu: self))
         case 0x41:
-            bitwiseExclusiveOR(operand: .indexedIndirect(cpu: self))
+            EOR(operand: .indexedIndirect(cpu: self))
         case 0x51:
-            bitwiseExclusiveOR(operand: .indirectIndexed(cpu: self))
+            EOR(operand: .indirectIndexed(cpu: self))
         case 0x09:
-            bitwiseORwithAccumulator(operand: .immediate(cpu: self))
+            ORA(operand: .immediate(cpu: self))
         case 0x05:
-            bitwiseORwithAccumulator(operand: .zeroPage(cpu: self))
+            ORA(operand: .zeroPage(cpu: self))
         case 0x15:
-            bitwiseORwithAccumulator(operand: .zeroPageX(cpu: self))
+            ORA(operand: .zeroPageX(cpu: self))
         case 0x0D:
-            bitwiseORwithAccumulator(operand: .absolute(cpu: self))
+            ORA(operand: .absolute(cpu: self))
         case 0x1D:
-            bitwiseORwithAccumulator(operand: .absoluteXWithPenalty(cpu: self))
+            ORA(operand: .absoluteXWithPenalty(cpu: self))
         case 0x19:
-            bitwiseORwithAccumulator(operand: .absoluteYWithPenalty(cpu: self))
+            ORA(operand: .absoluteYWithPenalty(cpu: self))
         case 0x01:
-            bitwiseORwithAccumulator(operand: .indexedIndirect(cpu: self))
+            ORA(operand: .indexedIndirect(cpu: self))
         case 0x11:
-            bitwiseORwithAccumulator(operand: .indirectIndexed(cpu: self))
+            ORA(operand: .indirectIndexed(cpu: self))
         case 0x24:
-            testBits(operand: .zeroPage(cpu: self))
+            BIT(operand: .zeroPage(cpu: self))
         case 0x2C:
-            testBits(operand: .absolute(cpu: self))
+            BIT(operand: .absolute(cpu: self))
 
         case 0x69:
-            addWithCarry(operand: .immediate(cpu: self))
+            ADC(operand: .immediate(cpu: self))
         case 0x65:
-            addWithCarry(operand: .zeroPage(cpu: self))
+            ADC(operand: .zeroPage(cpu: self))
         case 0x75:
-            addWithCarry(operand: .zeroPageX(cpu: self))
+            ADC(operand: .zeroPageX(cpu: self))
         case 0x6D:
-            addWithCarry(operand: .absolute(cpu: self))
+            ADC(operand: .absolute(cpu: self))
         case 0x7D:
-            addWithCarry(operand: .absoluteXWithPenalty(cpu: self))
+            ADC(operand: .absoluteXWithPenalty(cpu: self))
         case 0x79:
-            addWithCarry(operand: .absoluteYWithPenalty(cpu: self))
+            ADC(operand: .absoluteYWithPenalty(cpu: self))
         case 0x61:
-            addWithCarry(operand: .indexedIndirect(cpu: self))
+            ADC(operand: .indexedIndirect(cpu: self))
         case 0x71:
-            addWithCarry(operand: .indirectIndexed(cpu: self))
+            ADC(operand: .indirectIndexed(cpu: self))
         case 0xE9:
-            subtractWithCarry(operand: .immediate(cpu: self))
+            SBC(operand: .immediate(cpu: self))
         case 0xE5:
-            subtractWithCarry(operand: .zeroPage(cpu: self))
+            SBC(operand: .zeroPage(cpu: self))
         case 0xF5:
-            subtractWithCarry(operand: .zeroPageX(cpu: self))
+            SBC(operand: .zeroPageX(cpu: self))
         case 0xED:
-            subtractWithCarry(operand: .absolute(cpu: self))
+            SBC(operand: .absolute(cpu: self))
         case 0xFD:
-            subtractWithCarry(operand: .absoluteXWithPenalty(cpu: self))
+            SBC(operand: .absoluteXWithPenalty(cpu: self))
         case 0xF9:
-            subtractWithCarry(operand: .absoluteYWithPenalty(cpu: self))
+            SBC(operand: .absoluteYWithPenalty(cpu: self))
         case 0xE1:
-            subtractWithCarry(operand: .indexedIndirect(cpu: self))
+            SBC(operand: .indexedIndirect(cpu: self))
         case 0xF1:
-            subtractWithCarry(operand: .indirectIndexed(cpu: self))
+            SBC(operand: .indirectIndexed(cpu: self))
         case 0xC9:
-            compareAccumulator(operand: .immediate(cpu: self))
+            CMP(operand: .immediate(cpu: self))
         case 0xC5:
-            compareAccumulator(operand: .zeroPage(cpu: self))
+            CMP(operand: .zeroPage(cpu: self))
         case 0xD5:
-            compareAccumulator(operand: .zeroPageX(cpu: self))
+            CMP(operand: .zeroPageX(cpu: self))
         case 0xCD:
-            compareAccumulator(operand: .absolute(cpu: self))
+            CMP(operand: .absolute(cpu: self))
         case 0xDD:
-            compareAccumulator(operand: .absoluteXWithPenalty(cpu: self))
+            CMP(operand: .absoluteXWithPenalty(cpu: self))
         case 0xD9:
-            compareAccumulator(operand: .absoluteYWithPenalty(cpu: self))
+            CMP(operand: .absoluteYWithPenalty(cpu: self))
         case 0xC1:
-            compareAccumulator(operand: .indexedIndirect(cpu: self))
+            CMP(operand: .indexedIndirect(cpu: self))
         case 0xD1:
-            compareAccumulator(operand: .indirectIndexed(cpu: self))
+            CMP(operand: .indirectIndexed(cpu: self))
         case 0xE0:
-            compareXRegister(operand: .immediate(cpu: self))
+            CPX(operand: .immediate(cpu: self))
         case 0xE4:
-            compareXRegister(operand: .zeroPage(cpu: self))
+            CPX(operand: .zeroPage(cpu: self))
         case 0xEC:
-            compareXRegister(operand: .absolute(cpu: self))
+            CPX(operand: .absolute(cpu: self))
         case 0xC0:
-            compareYRegister(operand: .immediate(cpu: self))
+            CPY(operand: .immediate(cpu: self))
         case 0xC4:
-            compareYRegister(operand: .zeroPage(cpu: self))
+            CPY(operand: .zeroPage(cpu: self))
         case 0xCC:
-            compareYRegister(operand: .absolute(cpu: self))
+            CPY(operand: .absolute(cpu: self))
 
         case 0xE6:
-            incrementMemory(operand: .zeroPage(cpu: self))
+            INC(operand: .zeroPage(cpu: self))
         case 0xF6:
-            incrementMemory(operand: .zeroPageX(cpu: self))
+            INC(operand: .zeroPageX(cpu: self))
         case 0xEE:
-            incrementMemory(operand: .absolute(cpu: self))
+            INC(operand: .absolute(cpu: self))
         case 0xFE:
-            incrementMemory(operand: .absoluteX(cpu: self))
+            INC(operand: .absoluteX(cpu: self))
         case 0xE8:
-            incrementX(operand: .implicit(cpu: self))
+            INX(operand: .implicit(cpu: self))
         case 0xC8:
-            incrementY(operand: .implicit(cpu: self))
+            INY(operand: .implicit(cpu: self))
         case 0xC6:
-            decrementMemory(operand: .zeroPage(cpu: self))
+            DEC(operand: .zeroPage(cpu: self))
         case 0xD6:
-            decrementMemory(operand: .zeroPageX(cpu: self))
+            DEC(operand: .zeroPageX(cpu: self))
         case 0xCE:
-            decrementMemory(operand: .absolute(cpu: self))
+            DEC(operand: .absolute(cpu: self))
         case 0xDE:
-            decrementMemory(operand: .absoluteX(cpu: self))
+            DEC(operand: .absoluteX(cpu: self))
         case 0xCA:
-            decrementX(operand: .implicit(cpu: self))
+            DEX(operand: .implicit(cpu: self))
         case 0x88:
-            decrementY(operand: .implicit(cpu: self))
+            DEY(operand: .implicit(cpu: self))
 
         case 0x0A:
-            arithmeticShiftLeftForAccumulator(operand: .accumulator(cpu: self))
+            ASLForAccumulator(operand: .accumulator(cpu: self))
         case 0x06:
-            arithmeticShiftLeft(operand: .zeroPage(cpu: self))
+            ASL(operand: .zeroPage(cpu: self))
         case 0x16:
-            arithmeticShiftLeft(operand: .zeroPageX(cpu: self))
+            ASL(operand: .zeroPageX(cpu: self))
         case 0x0E:
-            arithmeticShiftLeft(operand: .absolute(cpu: self))
+            ASL(operand: .absolute(cpu: self))
         case 0x1E:
-            arithmeticShiftLeft(operand: .absoluteX(cpu: self))
+            ASL(operand: .absoluteX(cpu: self))
         case 0x4A:
-            logicalShiftRightForAccumulator(operand: .accumulator(cpu: self))
+            LSRForAccumulator(operand: .accumulator(cpu: self))
         case 0x46:
-            logicalShiftRight(operand: .zeroPage(cpu: self))
+            LSR(operand: .zeroPage(cpu: self))
         case 0x56:
-            logicalShiftRight(operand: .zeroPageX(cpu: self))
+            LSR(operand: .zeroPageX(cpu: self))
         case 0x4E:
-            logicalShiftRight(operand: .absolute(cpu: self))
+            LSR(operand: .absolute(cpu: self))
         case 0x5E:
-            logicalShiftRight(operand: .absoluteX(cpu: self))
+            LSR(operand: .absoluteX(cpu: self))
         case 0x2A:
-            rotateLeftForAccumulator(operand: .accumulator(cpu: self))
+            ROLForAccumulator(operand: .accumulator(cpu: self))
         case 0x26:
-            rotateLeft(operand: .zeroPage(cpu: self))
+            ROL(operand: .zeroPage(cpu: self))
         case 0x36:
-            rotateLeft(operand: .zeroPageX(cpu: self))
+            ROL(operand: .zeroPageX(cpu: self))
         case 0x2E:
-            rotateLeft(operand: .absolute(cpu: self))
+            ROL(operand: .absolute(cpu: self))
         case 0x3E:
-            rotateLeft(operand: .absoluteX(cpu: self))
+            ROL(operand: .absoluteX(cpu: self))
         case 0x6A:
-            rotateRightForAccumulator(operand: .accumulator(cpu: self))
+            RORForAccumulator(operand: .accumulator(cpu: self))
         case 0x66:
-            rotateRight(operand: .zeroPage(cpu: self))
+            ROR(operand: .zeroPage(cpu: self))
         case 0x76:
-            rotateRight(operand: .zeroPageX(cpu: self))
+            ROR(operand: .zeroPageX(cpu: self))
         case 0x6E:
-            rotateRight(operand: .absolute(cpu: self))
+            ROR(operand: .absolute(cpu: self))
         case 0x7E:
-            rotateRight(operand: .absoluteX(cpu: self))
+            ROR(operand: .absoluteX(cpu: self))
 
         case 0x4C:
-            jump(operand: .absolute(cpu: self))
+            JMP(operand: .absolute(cpu: self))
         case 0x6C:
-            jump(operand: .indirect(cpu: self))
+            JMP(operand: .indirect(cpu: self))
         case 0x20:
-            jumpToSubroutine(operand: .absolute(cpu: self))
+            JSR(operand: .absolute(cpu: self))
         case 0x60:
-            returnFromSubroutine(operand: .implicit(cpu: self))
+            RTS(operand: .implicit(cpu: self))
         case 0x40:
-            returnFromInterrupt(operand: .implicit(cpu: self))
+            RTI(operand: .implicit(cpu: self))
 
         case 0x90:
-            branchIfCarryClear(operand: .relative(cpu: self))
+            BCC(operand: .relative(cpu: self))
         case 0xB0:
-            branchIfCarrySet(operand: .relative(cpu: self))
+            BCS(operand: .relative(cpu: self))
         case 0xF0:
-            branchIfEqual(operand: .relative(cpu: self))
+            BEQ(operand: .relative(cpu: self))
         case 0x30:
-            branchIfMinus(operand: .relative(cpu: self))
+            BMI(operand: .relative(cpu: self))
         case 0xD0:
-            branchIfNotEqual(operand: .relative(cpu: self))
+            BNE(operand: .relative(cpu: self))
         case 0x10:
-            branchIfPlus(operand: .relative(cpu: self))
+            BPL(operand: .relative(cpu: self))
         case 0x50:
-            branchIfOverflowClear(operand: .relative(cpu: self))
+            BVC(operand: .relative(cpu: self))
         case 0x70:
-            branchIfOverflowSet(operand: .relative(cpu: self))
+            BVS(operand: .relative(cpu: self))
 
         case 0x18:
-            clearCarry(operand: .implicit(cpu: self))
+            CLC(operand: .implicit(cpu: self))
         case 0xD8:
-            clearDecimal(operand: .implicit(cpu: self))
+            CLD(operand: .implicit(cpu: self))
         case 0x58:
-            clearInterrupt(operand: .implicit(cpu: self))
+            CLI(operand: .implicit(cpu: self))
         case 0xB8:
-            clearOverflow(operand: .implicit(cpu: self))
+            CLV(operand: .implicit(cpu: self))
 
         case 0x38:
-            setCarryFlag(operand: .implicit(cpu: self))
+            SEC(operand: .implicit(cpu: self))
         case 0xF8:
-            setDecimalFlag(operand: .implicit(cpu: self))
+            SED(operand: .implicit(cpu: self))
         case 0x78:
-            setInterruptDisable(operand: .implicit(cpu: self))
+            SEI(operand: .implicit(cpu: self))
 
         case 0x00:
-            forceInterrupt(operand: .implicit(cpu: self))
+            BRK(operand: .implicit(cpu: self))
 
         // Undocumented
 
         case 0xEB:
-            subtractWithCarry(operand: .immediate(cpu: self))
+            SBC(operand: .immediate(cpu: self))
 
         case 0x04, 0x44, 0x64:
-            doNothing(operand: .zeroPage(cpu: self))
+            NOP(operand: .zeroPage(cpu: self))
         case 0x0C:
-            doNothing(operand: .absolute(cpu: self))
+            NOP(operand: .absolute(cpu: self))
         case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
-            doNothing(operand: .zeroPageX(cpu: self))
+            NOP(operand: .zeroPageX(cpu: self))
         case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
-            doNothing(operand: .implicit(cpu: self))
+            NOP(operand: .implicit(cpu: self))
         case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
-            doNothing(operand: .absoluteXWithPenalty(cpu: self))
+            NOP(operand: .absoluteXWithPenalty(cpu: self))
         case 0x80, 0x82, 0x89, 0xC2, 0xE2:
-            doNothing(operand: .immediate(cpu: self))
+            NOP(operand: .immediate(cpu: self))
 
         case 0xA3:
-            loadAccumulatorAndX(operand: .indexedIndirect(cpu: self))
+            LAX(operand: .indexedIndirect(cpu: self))
         case 0xA7:
-            loadAccumulatorAndX(operand: .zeroPage(cpu: self))
+            LAX(operand: .zeroPage(cpu: self))
         case 0xAF:
-            loadAccumulatorAndX(operand: .absolute(cpu: self))
+            LAX(operand: .absolute(cpu: self))
         case 0xB3:
-            loadAccumulatorAndX(operand: .indirectIndexed(cpu: self))
+            LAX(operand: .indirectIndexed(cpu: self))
         case 0xB7:
-            loadAccumulatorAndX(operand: .zeroPageY(cpu: self))
+            LAX(operand: .zeroPageY(cpu: self))
         case 0xBF:
-            loadAccumulatorAndX(operand: .absoluteYWithPenalty(cpu: self))
+            LAX(operand: .absoluteYWithPenalty(cpu: self))
 
         case 0x83:
-            storeAccumulatorAndX(operand: .indexedIndirect(cpu: self))
+            SAX(operand: .indexedIndirect(cpu: self))
         case 0x87:
-            storeAccumulatorAndX(operand: .zeroPage(cpu: self))
+            SAX(operand: .zeroPage(cpu: self))
         case 0x8F:
-            storeAccumulatorAndX(operand: .absolute(cpu: self))
+            SAX(operand: .absolute(cpu: self))
         case 0x97:
-            storeAccumulatorAndX(operand: .zeroPageY(cpu: self))
+            SAX(operand: .zeroPageY(cpu: self))
 
         case 0xC3:
-            decrementMemoryAndCompareAccumulator(operand: .indexedIndirect(cpu: self))
+            DCP(operand: .indexedIndirect(cpu: self))
         case 0xC7:
-            decrementMemoryAndCompareAccumulator(operand: .zeroPage(cpu: self))
+            DCP(operand: .zeroPage(cpu: self))
         case 0xCF:
-            decrementMemoryAndCompareAccumulator(operand: .absolute(cpu: self))
+            DCP(operand: .absolute(cpu: self))
         case 0xD3:
-            decrementMemoryAndCompareAccumulator(operand: .indirectIndexed(cpu: self))
+            DCP(operand: .indirectIndexed(cpu: self))
         case 0xD7:
-            decrementMemoryAndCompareAccumulator(operand: .zeroPageX(cpu: self))
+            DCP(operand: .zeroPageX(cpu: self))
         case 0xDB:
-            decrementMemoryAndCompareAccumulator(operand: .absoluteY(cpu: self))
+            DCP(operand: .absoluteY(cpu: self))
         case 0xDF:
-            decrementMemoryAndCompareAccumulator(operand: .absoluteX(cpu: self))
+            DCP(operand: .absoluteX(cpu: self))
 
         case 0xE3:
-            incrementMemoryAndSubtractWithCarry(operand: .indexedIndirect(cpu: self))
+            ISB(operand: .indexedIndirect(cpu: self))
         case 0xE7:
-            incrementMemoryAndSubtractWithCarry(operand: .zeroPage(cpu: self))
+            ISB(operand: .zeroPage(cpu: self))
         case 0xEF:
-            incrementMemoryAndSubtractWithCarry(operand: .absolute(cpu: self))
+            ISB(operand: .absolute(cpu: self))
         case 0xF3:
-            incrementMemoryAndSubtractWithCarry(operand: .indirectIndexed(cpu: self))
+            ISB(operand: .indirectIndexed(cpu: self))
         case 0xF7:
-            incrementMemoryAndSubtractWithCarry(operand: .zeroPageX(cpu: self))
+            ISB(operand: .zeroPageX(cpu: self))
         case 0xFB:
-            incrementMemoryAndSubtractWithCarry(operand: .absoluteY(cpu: self))
+            ISB(operand: .absoluteY(cpu: self))
         case 0xFF:
-            incrementMemoryAndSubtractWithCarry(operand: .absoluteX(cpu: self))
+            ISB(operand: .absoluteX(cpu: self))
 
         case 0x03:
-            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .indexedIndirect(cpu: self))
+            SLO(operand: .indexedIndirect(cpu: self))
         case 0x07:
-            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .zeroPage(cpu: self))
+            SLO(operand: .zeroPage(cpu: self))
         case 0x0F:
-            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .absolute(cpu: self))
+            SLO(operand: .absolute(cpu: self))
         case 0x13:
-            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .indirectIndexed(cpu: self))
+            SLO(operand: .indirectIndexed(cpu: self))
         case 0x17:
-            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .zeroPageX(cpu: self))
+            SLO(operand: .zeroPageX(cpu: self))
         case 0x1B:
-            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .absoluteY(cpu: self))
+            SLO(operand: .absoluteY(cpu: self))
         case 0x1F:
-            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .absoluteX(cpu: self))
+            SLO(operand: .absoluteX(cpu: self))
 
         case 0x23:
-            rotateLeftAndBitwiseANDwithAccumulator(operand: .indexedIndirect(cpu: self))
+            RLA(operand: .indexedIndirect(cpu: self))
         case 0x27:
-            rotateLeftAndBitwiseANDwithAccumulator(operand: .zeroPage(cpu: self))
+            RLA(operand: .zeroPage(cpu: self))
         case 0x2F:
-            rotateLeftAndBitwiseANDwithAccumulator(operand: .absolute(cpu: self))
+            RLA(operand: .absolute(cpu: self))
         case 0x33:
-            rotateLeftAndBitwiseANDwithAccumulator(operand: .indirectIndexed(cpu: self))
+            RLA(operand: .indirectIndexed(cpu: self))
         case 0x37:
-            rotateLeftAndBitwiseANDwithAccumulator(operand: .zeroPageX(cpu: self))
+            RLA(operand: .zeroPageX(cpu: self))
         case 0x3B:
-            rotateLeftAndBitwiseANDwithAccumulator(operand: .absoluteY(cpu: self))
+            RLA(operand: .absoluteY(cpu: self))
         case 0x3F:
-            rotateLeftAndBitwiseANDwithAccumulator(operand: .absoluteX(cpu: self))
+            RLA(operand: .absoluteX(cpu: self))
 
         case 0x43:
-            logicalShiftRightAndBitwiseExclusiveOR(operand: .indexedIndirect(cpu: self))
+            SRE(operand: .indexedIndirect(cpu: self))
         case 0x47:
-            logicalShiftRightAndBitwiseExclusiveOR(operand: .zeroPage(cpu: self))
+            SRE(operand: .zeroPage(cpu: self))
         case 0x4F:
-            logicalShiftRightAndBitwiseExclusiveOR(operand: .absolute(cpu: self))
+            SRE(operand: .absolute(cpu: self))
         case 0x53:
-            logicalShiftRightAndBitwiseExclusiveOR(operand: .indirectIndexed(cpu: self))
+            SRE(operand: .indirectIndexed(cpu: self))
         case 0x57:
-            logicalShiftRightAndBitwiseExclusiveOR(operand: .zeroPageX(cpu: self))
+            SRE(operand: .zeroPageX(cpu: self))
         case 0x5B:
-            logicalShiftRightAndBitwiseExclusiveOR(operand: .absoluteY(cpu: self))
+            SRE(operand: .absoluteY(cpu: self))
         case 0x5F:
-            logicalShiftRightAndBitwiseExclusiveOR(operand: .absoluteX(cpu: self))
+            SRE(operand: .absoluteX(cpu: self))
 
         case 0x63:
-            rotateRightAndAddWithCarry(operand: .indexedIndirect(cpu: self))
+            RRA(operand: .indexedIndirect(cpu: self))
         case 0x67:
-            rotateRightAndAddWithCarry(operand: .zeroPage(cpu: self))
+            RRA(operand: .zeroPage(cpu: self))
         case 0x6F:
-            rotateRightAndAddWithCarry(operand: .absolute(cpu: self))
+            RRA(operand: .absolute(cpu: self))
         case 0x73:
-            rotateRightAndAddWithCarry(operand: .indirectIndexed(cpu: self))
+            RRA(operand: .indirectIndexed(cpu: self))
         case 0x77:
-            rotateRightAndAddWithCarry(operand: .zeroPageX(cpu: self))
+            RRA(operand: .zeroPageX(cpu: self))
         case 0x7B:
-            rotateRightAndAddWithCarry(operand: .absoluteY(cpu: self))
+            RRA(operand: .absoluteY(cpu: self))
         case 0x7F:
-            rotateRightAndAddWithCarry(operand: .absoluteX(cpu: self))
+            RRA(operand: .absoluteX(cpu: self))
 
         default:
-            doNothing(operand: .implicit(cpu: self))
+            NOP(operand: .implicit(cpu: self))
         }
     }
 }
@@ -597,103 +597,103 @@ extension Memory {
 extension CPU {
     // Implements for Load/Store Operations
 
-    /// LDA
-    func loadAccumulator(operand: Operand) {
+    /// loadAccumulator
+    func LDA(operand: Operand) {
         registers.A = read(at: operand)
     }
 
-    /// LDX
-    func loadXRegister(operand: Operand) {
+    /// loadXRegister
+    func LDX(operand: Operand) {
         registers.X = read(at: operand)
     }
 
-    /// LDY
-    func loadYRegister(operand: Operand) {
+    /// loadYRegister
+    func LDY(operand: Operand) {
         registers.Y = read(at: operand)
     }
 
-    /// STA
-    func storeAccumulator(operand: Operand) {
+    /// storeAccumulator
+    func STA(operand: Operand) {
         write(registers.A, at: operand)
     }
 
-    func storeAccumulatorWithTick(operand: Operand) {
+    func STAWithTick(operand: Operand) {
         write(registers.A, at: operand)
         tick()
     }
 
-    /// STX
-    func storeXRegister(operand: Operand) {
+    /// storeXRegister
+    func STX(operand: Operand) {
         write(registers.X, at: operand)
     }
 
-    /// STY
-    func storeYRegister(operand: Operand) {
+    /// storeYRegister
+    func STY(operand: Operand) {
         write(registers.Y, at: operand)
     }
 
     // MARK: - Register Operations
 
-    /// TAX
-    func transferAccumulatorToX(operand: Operand) {
+    /// transferAccumulatorToX
+    func TAX(operand: Operand) {
         registers.X = registers.A
         tick()
     }
 
-    /// TSX
-    func transferStackPointerToX(operand: Operand) {
+    /// transferStackPointerToX
+    func TSX(operand: Operand) {
         registers.X = registers.S
         tick()
     }
 
-    /// TAY
-    func transferAccumulatorToY(operand: Operand) {
+    /// transferAccumulatorToY
+    func TAY(operand: Operand) {
         registers.Y = registers.A
         tick()
     }
 
-    /// TXA
-    func transferXtoAccumulator(operand: Operand) {
+    /// transferXtoAccumulator
+    func TXA(operand: Operand) {
         registers.A = registers.X
         tick()
     }
 
-    /// TXS
-    func transferXtoStackPointer(operand: Operand) {
+    /// transferXtoStackPointer
+    func TXS(operand: Operand) {
         registers.S = registers.X
         tick()
     }
 
-    /// TYA
-    func transferYtoAccumulator(operand: Operand) {
+    /// transferYtoAccumulator
+    func TYA(operand: Operand) {
         registers.A = registers.Y
         tick()
     }
 
     // MARK: - Stack instructions
 
-    /// PHA
-    func pushAccumulator(operand: Operand) {
+    /// pushAccumulator
+    func PHA(operand: Operand) {
         pushStack(registers.A)
         tick()
     }
 
-    /// PHP
-    func pushProcessorStatus(operand: Operand) {
+    /// pushProcessorStatus
+    func PHP(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         pushStack(registers.P.rawValue | Status.operatedB.rawValue)
         tick()
     }
 
-    /// PLA
-    func pullAccumulator(operand: Operand) {
+    /// pullAccumulator
+    func PLA(operand: Operand) {
         registers.A = pullStack()
         tick(count: 2)
     }
 
-    /// PLP
-    func pullProcessorStatus(operand: Operand) {
+    /// pullProcessorStatus
+    func PLP(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
@@ -702,23 +702,23 @@ extension CPU {
 
     // MARK: - Logical instructions
 
-    /// AND
-    func bitwiseANDwithAccumulator(operand: Operand) {
+    /// bitwiseANDwithAccumulator
+    func AND(operand: Operand) {
         registers.A &= read(at: operand)
     }
 
-    /// EOR
-    func bitwiseExclusiveOR(operand: Operand) {
+    /// bitwiseExclusiveOR
+    func EOR(operand: Operand) {
         registers.A ^= read(at: operand)
     }
 
-    /// ORA
-    func bitwiseORwithAccumulator(operand: Operand) {
+    /// bitwiseORwithAccumulator
+    func ORA(operand: Operand) {
         registers.A |= read(at: operand)
     }
 
-    /// BIT
-    func testBits(operand: Operand) {
+    /// testBits
+    func BIT(operand: Operand) {
         let value = read(at: operand)
         let data = registers.A & value
         registers.P.remove([.Z, .V, .N])
@@ -729,8 +729,8 @@ extension CPU {
 
     // MARK: - Arithmetic instructions
 
-    /// ADC
-    func addWithCarry(operand: Operand) {
+    /// addWithCarry
+    func ADC(operand: Operand) {
         let a = registers.A
         let val = read(at: operand)
         var result = a &+ val
@@ -751,8 +751,8 @@ extension CPU {
         registers.A = result
     }
 
-    /// SBC
-    func subtractWithCarry(operand: Operand) {
+    /// subtractWithCarry
+    func SBC(operand: Operand) {
         let a = registers.A
         let val = ~read(at: operand)
         var result = a &+ val
@@ -773,8 +773,8 @@ extension CPU {
         registers.A = result
     }
 
-    /// CMP
-    func compareAccumulator(operand: Operand) {
+    /// compareAccumulator
+    func CMP(operand: Operand) {
         let cmp = Int16(registers.A) &- Int16(read(at: operand))
 
         registers.P.remove([.C, .Z, .N])
@@ -783,8 +783,8 @@ extension CPU {
 
     }
 
-    /// CPX
-    func compareXRegister(operand: Operand) {
+    /// compareXRegister
+    func CPX(operand: Operand) {
         let value = read(at: operand)
         let cmp = registers.X &- value
 
@@ -794,8 +794,8 @@ extension CPU {
 
     }
 
-    /// CPY
-    func compareYRegister(operand: Operand) {
+    /// compareYRegister
+    func CPY(operand: Operand) {
         let value = read(at: operand)
         let cmp = registers.Y &- value
 
@@ -807,8 +807,8 @@ extension CPU {
 
     // MARK: - Increment/Decrement instructions
 
-    /// INC
-    func incrementMemory(operand: Operand) {
+    /// incrementMemory
+    func INC(operand: Operand) {
         let result = read(at: operand) &+ 1
 
         registers.P.setZN(result)
@@ -818,20 +818,20 @@ extension CPU {
 
     }
 
-    /// INX
-    func incrementX(operand: Operand) {
+    /// incrementX
+    func INX(operand: Operand) {
         registers.X = registers.X &+ 1
         tick()
     }
 
-    /// INY
-    func incrementY(operand: Operand) {
+    /// incrementY
+    func INY(operand: Operand) {
         registers.Y = registers.Y &+ 1
         tick()
     }
 
-    /// DEC
-    func decrementMemory(operand: Operand) {
+    /// decrementMemory
+    func DEC(operand: Operand) {
         let result = read(at: operand) &- 1
 
         registers.P.setZN(result)
@@ -842,22 +842,22 @@ extension CPU {
 
     }
 
-    /// DEX
-    func decrementX(operand: Operand) {
+    /// decrementX
+    func DEX(operand: Operand) {
         registers.X = registers.X &- 1
         tick()
     }
 
-    /// DEY
-    func decrementY(operand: Operand) {
+    /// decrementY
+    func DEY(operand: Operand) {
         registers.Y = registers.Y &- 1
         tick()
     }
 
     // MARK: - Shift instructions
 
-    /// ASL
-    func arithmeticShiftLeft(operand: Operand) {
+    /// arithmeticShiftLeft
+    func ASL(operand: Operand) {
         var data = read(at: operand)
 
         registers.P.remove([.C, .Z, .N])
@@ -872,7 +872,7 @@ extension CPU {
         tick()
     }
 
-    func arithmeticShiftLeftForAccumulator(operand: Operand) {
+    func ASLForAccumulator(operand: Operand) {
         registers.P.remove([.C, .Z, .N])
         if registers.A[7] == 1 { registers.P.formUnion(.C) }
 
@@ -881,8 +881,8 @@ extension CPU {
         tick()
     }
 
-    /// LSR
-    func logicalShiftRight(operand: Operand) {
+    /// logicalShiftRight
+    func LSR(operand: Operand) {
         var data = read(at: operand)
 
         registers.P.remove([.C, .Z, .N])
@@ -897,7 +897,7 @@ extension CPU {
         tick()
     }
 
-    func logicalShiftRightForAccumulator(operand: Operand) {
+    func LSRForAccumulator(operand: Operand) {
         registers.P.remove([.C, .Z, .N])
         if registers.A[0] == 1 { registers.P.formUnion(.C) }
 
@@ -906,8 +906,8 @@ extension CPU {
         tick()
     }
 
-    /// ROL
-    func rotateLeft(operand: Operand) {
+    /// rotateLeft
+    func ROL(operand: Operand) {
         var data = read(at: operand)
         let c = data & 0x80
 
@@ -924,7 +924,7 @@ extension CPU {
         tick()
     }
 
-    func rotateLeftForAccumulator(operand: Operand) {
+    func ROLForAccumulator(operand: Operand) {
         let c = registers.A & 0x80
 
         var a = registers.A << 1
@@ -938,8 +938,8 @@ extension CPU {
         tick()
     }
 
-    /// ROR
-    func rotateRight(operand: Operand) {
+    /// rotateRight
+    func ROR(operand: Operand) {
         var data = read(at: operand)
         let c = data & 0x01
 
@@ -956,7 +956,7 @@ extension CPU {
         tick()
     }
 
-    func rotateRightForAccumulator(operand: Operand) {
+    func RORForAccumulator(operand: Operand) {
         let c = registers.A & 0x01
 
         var a = registers.A >> 1
@@ -972,26 +972,26 @@ extension CPU {
 
     // MARK: - Jump instructions
 
-    /// JMP
-    func jump(operand: Operand) {
+    /// jump
+    func JMP(operand: Operand) {
         registers.PC = operand
     }
 
-    /// JSR
-    func jumpToSubroutine(operand: Operand) {
+    /// jumpToSubroutine
+    func JSR(operand: Operand) {
         pushStack(word: registers.PC &- 1)
         tick()
         registers.PC = operand
     }
 
-    /// RTS
-    func returnFromSubroutine(operand: Operand) {
+    /// returnFromSubroutine
+    func RTS(operand: Operand) {
         tick(count: 3)
         registers.PC = pullStack() &+ 1
     }
 
-    /// RTI
-    func returnFromInterrupt(operand: Operand) {
+    /// returnFromInterrupt
+    func RTI(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         tick(count: 2)
@@ -1013,94 +1013,94 @@ extension CPU {
         }
     }
 
-    /// BCC
-    func branchIfCarryClear(operand: Operand) {
+    /// branchIfCarryClear
+    func BCC(operand: Operand) {
         branch(operand: operand, test: !registers.P.contains(.C))
     }
 
-    /// BCS
-    func branchIfCarrySet(operand: Operand) {
+    /// branchIfCarrySet
+    func BCS(operand: Operand) {
         branch(operand: operand, test: registers.P.contains(.C))
     }
 
-    /// BEQ
-    func branchIfEqual(operand: Operand) {
+    /// branchIfEqual
+    func BEQ(operand: Operand) {
         branch(operand: operand, test: registers.P.contains(.Z))
     }
 
-    /// BMI
-    func branchIfMinus(operand: Operand) {
+    /// branchIfMinus
+    func BMI(operand: Operand) {
         branch(operand: operand, test: registers.P.contains(.N))
     }
 
-    /// BNE
-    func branchIfNotEqual(operand: Operand) {
+    /// branchIfNotEqual
+    func BNE(operand: Operand) {
         branch(operand: operand, test: !registers.P.contains(.Z))
     }
 
-    /// BPL
-    func branchIfPlus(operand: Operand) {
+    /// branchIfPlus
+    func BPL(operand: Operand) {
         branch(operand: operand, test: !registers.P.contains(.N))
     }
 
-    /// BVC
-    func branchIfOverflowClear(operand: Operand) {
+    /// branchIfOverflowClear
+    func BVC(operand: Operand) {
         branch(operand: operand, test: !registers.P.contains(.V))
     }
 
-    /// BVS
-    func branchIfOverflowSet(operand: Operand) {
+    /// branchIfOverflowSet
+    func BVS(operand: Operand) {
         branch(operand: operand, test: registers.P.contains(.V))
     }
 
     // MARK: - Flag control instructions
 
-    /// CLC
-    func clearCarry(operand: Operand) {
+    /// clearCarry
+    func CLC(operand: Operand) {
         registers.P.remove(.C)
         tick()
     }
 
-    /// CLD
-    func clearDecimal(operand: Operand) {
+    /// clearDecimal
+    func CLD(operand: Operand) {
         registers.P.remove(.D)
         tick()
     }
 
-    /// CLI
-    func clearInterrupt(operand: Operand) {
+    /// clearInterrupt
+    func CLI(operand: Operand) {
         registers.P.remove(.I)
         tick()
     }
 
-    /// CLV
-    func clearOverflow(operand: Operand) {
+    /// clearOverflow
+    func CLV(operand: Operand) {
         registers.P.remove(.V)
         tick()
     }
 
-    /// SEC
-    func setCarryFlag(operand: Operand) {
+    /// setCarryFlag
+    func SEC(operand: Operand) {
         registers.P.formUnion(.C)
         tick()
     }
 
-    /// SED
-    func setDecimalFlag(operand: Operand) {
+    /// setDecimalFlag
+    func SED(operand: Operand) {
         registers.P.formUnion(.D)
         tick()
     }
 
-    /// SEI
-    func setInterruptDisable(operand: Operand) {
+    /// setInterruptDisable
+    func SEI(operand: Operand) {
         registers.P.formUnion(.I)
         tick()
     }
 
     // MARK: - Misc
 
-    /// BRK
-    func forceInterrupt(operand: Operand) {
+    /// forceInterrupt
+    func BRK(operand: Operand) {
         pushStack(word: registers.PC)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
@@ -1109,47 +1109,47 @@ extension CPU {
         registers.PC = readWord(at: 0xFFFE)
     }
 
-    /// NOP
-    func doNothing(operand: Operand) {
+    /// doNothing
+    func NOP(operand: Operand) {
         tick()
     }
 
-    // MARK: - Illegal
+    // MARK: - Unofficial
 
-    /// LAX
-    func loadAccumulatorAndX(operand: Operand) {
+    /// loadAccumulatorAndX
+    func LAX(operand: Operand) {
         let data = read(at: operand)
         registers.A = data
         registers.X = data
     }
 
-    /// SAX
-    func storeAccumulatorAndX(operand: Operand) {
+    /// storeAccumulatorAndX
+    func SAX(operand: Operand) {
         write(registers.A & registers.X, at: operand)
     }
 
-    /// DCP
-    func decrementMemoryAndCompareAccumulator(operand: Operand) {
+    /// decrementMemoryAndCompareAccumulator
+    func DCP(operand: Operand) {
         // decrementMemory excluding tick
         let result = read(at: operand) &- 1
         registers.P.setZN(result)
         write(result, at: operand)
 
-        compareAccumulator(operand: operand)
+        CMP(operand: operand)
     }
 
-    /// ISB
-    func incrementMemoryAndSubtractWithCarry(operand: Operand) {
+    /// incrementMemoryAndSubtractWithCarry
+    func ISB(operand: Operand) {
         // incrementMemory excluding tick
         let result = read(at: operand) &+ 1
         registers.P.setZN(result)
         write(result, at: operand)
 
-        subtractWithCarry(operand: operand)
+        SBC(operand: operand)
     }
 
-    /// SLO
-    func arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: Operand) {
+    /// arithmeticShiftLeftAndBitwiseORwithAccumulator
+    func SLO(operand: Operand) {
         // arithmeticShiftLeft excluding tick
         var data = read(at: operand)
         registers.P.remove([.C, .Z, .N])
@@ -1159,11 +1159,11 @@ extension CPU {
         registers.P.setZN(data)
         write(data, at: operand)
 
-        bitwiseORwithAccumulator(operand: operand)
+        ORA(operand: operand)
     }
 
-    /// RLA
-    func rotateLeftAndBitwiseANDwithAccumulator(operand: Operand) {
+    /// rotateLeftAndBitwiseANDwithAccumulator
+    func RLA(operand: Operand) {
         // rotateLeft excluding tick
         var data = read(at: operand)
         let c = data & 0x80
@@ -1177,11 +1177,11 @@ extension CPU {
         registers.P.setZN(data)
         write(data, at: operand)
 
-        bitwiseANDwithAccumulator(operand: operand)
+        AND(operand: operand)
     }
 
-    /// SRE
-    func logicalShiftRightAndBitwiseExclusiveOR(operand: Operand) {
+    /// logicalShiftRightAndBitwiseExclusiveOR
+    func SRE(operand: Operand) {
         // logicalShiftRight excluding tick
         var data = read(at: operand)
         registers.P.remove([.C, .Z, .N])
@@ -1192,11 +1192,11 @@ extension CPU {
         registers.P.setZN(data)
         write(data, at: operand)
 
-        bitwiseExclusiveOR(operand: operand)
+        EOR(operand: operand)
     }
 
-    /// RRA
-    func rotateRightAndAddWithCarry(operand: Operand) {
+    /// rotateRightAndAddWithCarry
+    func RRA(operand: Operand) {
         // rotateRight excluding tick
         var data = read(at: operand)
         let c = data & 0x01
@@ -1210,6 +1210,6 @@ extension CPU {
         registers.P.setZN(data)
         write(data, at: operand)
 
-        addWithCarry(operand: operand)
+        ADC(operand: operand)
     }
 }

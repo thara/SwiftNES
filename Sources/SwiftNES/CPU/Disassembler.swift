@@ -1,4 +1,3 @@
-
 struct Instruction {
     let opcode: OpCode
     let mnemonic: Mnemonic
