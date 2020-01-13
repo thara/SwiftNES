@@ -4,6 +4,7 @@ struct Instruction {
     let opcode: OpCode
     let mnemonic: Mnemonic
     let addressingMode: AddressingMode
+    let fetchOperand: AddressingMode.FetchOperand
     let exec: Operation
 }
 
@@ -17,6 +18,7 @@ extension CPU {
             let (mnemonic, addressingMode, operation) = decodeInstruction(for: opcode)
             table[i] = Instruction(
                 opcode: opcode, mnemonic: mnemonic, addressingMode: addressingMode,
+                fetchOperand: decodeToFetchOperand(addressingMode: addressingMode),
                 exec: operation)
         }
         return table.compactMap { $0 }
@@ -35,9 +37,9 @@ extension CPU {
         case 0xAD:
             return (.LDA, .absolute, loadAccumulator)
         case 0xBD:
-            return (.LDA, .absoluteXWithPenalty, loadAccumulator)
+            return (.LDA, .absoluteX(cycles: .onlyIfPageCrossed), loadAccumulator)
         case 0xB9:
-            return (.LDA, .absoluteYWithPenalty, loadAccumulator)
+            return (.LDA, .absoluteY(cycles: .onlyIfPageCrossed), loadAccumulator)
         case 0xA1:
             return (.LDA, .indexedIndirect, loadAccumulator)
         case 0xB1:
@@ -51,7 +53,7 @@ extension CPU {
         case 0xAE:
             return (.LDX, .absolute, loadXRegister)
         case 0xBE:
-            return (.LDX, .absoluteYWithPenalty, loadXRegister)
+            return (.LDX, .absoluteY(cycles: .onlyIfPageCrossed), loadXRegister)
         case 0xA0:
             return (.LDY, .immediate, loadYRegister)
         case 0xA4:
@@ -61,7 +63,7 @@ extension CPU {
         case 0xAC:
             return (.LDY, .absolute, loadYRegister)
         case 0xBC:
-            return (.LDY, .absoluteXWithPenalty, loadYRegister)
+            return (.LDY, .absoluteX(cycles: .onlyIfPageCrossed), loadYRegister)
         case 0x85:
             return (.STA, .zeroPage, storeAccumulator)
         case 0x95:
@@ -69,9 +71,9 @@ extension CPU {
         case 0x8D:
             return (.STA, .absolute, storeAccumulator)
         case 0x9D:
-            return (.STA, .absoluteX, storeAccumulator)
+            return (.STA, .absoluteX(cycles: .fixed), storeAccumulator)
         case 0x99:
-            return (.STA, .absoluteY, storeAccumulator)
+            return (.STA, .absoluteY(cycles: .fixed), storeAccumulator)
         case 0x81:
             return (.STA, .indexedIndirect, storeAccumulator)
         case 0x91:
@@ -119,9 +121,9 @@ extension CPU {
         case 0x2D:
             return (.AND, .absolute, bitwiseANDwithAccumulator)
         case 0x3D:
-            return (.AND, .absoluteXWithPenalty, bitwiseANDwithAccumulator)
+            return (.AND, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseANDwithAccumulator)
         case 0x39:
-            return (.AND, .absoluteYWithPenalty, bitwiseANDwithAccumulator)
+            return (.AND, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseANDwithAccumulator)
         case 0x21:
             return (.AND, .indexedIndirect, bitwiseANDwithAccumulator)
         case 0x31:
@@ -135,9 +137,9 @@ extension CPU {
         case 0x4D:
             return (.EOR, .absolute, bitwiseExclusiveOR)
         case 0x5D:
-            return (.EOR, .absoluteXWithPenalty, bitwiseExclusiveOR)
+            return (.EOR, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseExclusiveOR)
         case 0x59:
-            return (.EOR, .absoluteYWithPenalty, bitwiseExclusiveOR)
+            return (.EOR, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseExclusiveOR)
         case 0x41:
             return (.EOR, .indexedIndirect, bitwiseExclusiveOR)
         case 0x51:
@@ -151,9 +153,9 @@ extension CPU {
         case 0x0D:
             return (.ORA, .absolute, bitwiseORwithAccumulator)
         case 0x1D:
-            return (.ORA, .absoluteXWithPenalty, bitwiseORwithAccumulator)
+            return (.ORA, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseORwithAccumulator)
         case 0x19:
-            return (.ORA, .absoluteYWithPenalty, bitwiseORwithAccumulator)
+            return (.ORA, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseORwithAccumulator)
         case 0x01:
             return (.ORA, .indexedIndirect, bitwiseORwithAccumulator)
         case 0x11:
@@ -172,9 +174,9 @@ extension CPU {
         case 0x6D:
             return (.ADC, .absolute, addWithCarry)
         case 0x7D:
-            return (.ADC, .absoluteXWithPenalty, addWithCarry)
+            return (.ADC, .absoluteX(cycles: .onlyIfPageCrossed), addWithCarry)
         case 0x79:
-            return (.ADC, .absoluteYWithPenalty, addWithCarry)
+            return (.ADC, .absoluteY(cycles: .onlyIfPageCrossed), addWithCarry)
         case 0x61:
             return (.ADC, .indexedIndirect, addWithCarry)
         case 0x71:
@@ -188,9 +190,9 @@ extension CPU {
         case 0xED:
             return (.SBC, .absolute, subtractWithCarry)
         case 0xFD:
-            return (.SBC, .absoluteXWithPenalty, subtractWithCarry)
+            return (.SBC, .absoluteX(cycles: .onlyIfPageCrossed), subtractWithCarry)
         case 0xF9:
-            return (.SBC, .absoluteYWithPenalty, subtractWithCarry)
+            return (.SBC, .absoluteY(cycles: .onlyIfPageCrossed), subtractWithCarry)
         case 0xE1:
             return (.SBC, .indexedIndirect, subtractWithCarry)
         case 0xF1:
@@ -204,9 +206,9 @@ extension CPU {
         case 0xCD:
             return (.CMP, .absolute, compareAccumulator)
         case 0xDD:
-            return (.CMP, .absoluteXWithPenalty, compareAccumulator)
+            return (.CMP, .absoluteX(cycles: .onlyIfPageCrossed), compareAccumulator)
         case 0xD9:
-            return (.CMP, .absoluteYWithPenalty, compareAccumulator)
+            return (.CMP, .absoluteY(cycles: .onlyIfPageCrossed), compareAccumulator)
         case 0xC1:
             return (.CMP, .indexedIndirect, compareAccumulator)
         case 0xD1:
@@ -231,7 +233,7 @@ extension CPU {
         case 0xEE:
             return (.INC, .absolute, incrementMemory)
         case 0xFE:
-            return (.INC, .absoluteX, incrementMemory)
+            return (.INC, .absoluteX(cycles: .fixed), incrementMemory)
         case 0xE8:
             return (.INX, .implicit, incrementX)
         case 0xC8:
@@ -243,7 +245,7 @@ extension CPU {
         case 0xCE:
             return (.DEC, .absolute, decrementMemory)
         case 0xDE:
-            return (.DEC, .absoluteX, decrementMemory)
+            return (.DEC, .absoluteX(cycles: .fixed), decrementMemory)
         case 0xCA:
             return (.DEX, .implicit, decrementX)
         case 0x88:
@@ -258,7 +260,7 @@ extension CPU {
         case 0x0E:
             return (.ASL, .absolute, arithmeticShiftLeft)
         case 0x1E:
-            return (.ASL, .absoluteX, arithmeticShiftLeft)
+            return (.ASL, .absoluteX(cycles: .fixed), arithmeticShiftLeft)
         case 0x4A:
             return (.LSR, .accumulator, logicalShiftRightForAccumulator)
         case 0x46:
@@ -268,7 +270,7 @@ extension CPU {
         case 0x4E:
             return (.LSR, .absolute, logicalShiftRight)
         case 0x5E:
-            return (.LSR, .absoluteX, logicalShiftRight)
+            return (.LSR, .absoluteX(cycles: .fixed), logicalShiftRight)
         case 0x2A:
             return (.ROL, .accumulator, rotateLeftForAccumulator)
         case 0x26:
@@ -278,7 +280,7 @@ extension CPU {
         case 0x2E:
             return (.ROL, .absolute, rotateLeft)
         case 0x3E:
-            return (.ROL, .absoluteX, rotateLeft)
+            return (.ROL, .absoluteX(cycles: .fixed), rotateLeft)
         case 0x6A:
             return (.ROR, .accumulator, rotateRightForAccumulator)
         case 0x66:
@@ -288,7 +290,7 @@ extension CPU {
         case 0x6E:
             return (.ROR, .absolute, rotateRight)
         case 0x7E:
-            return (.ROR, .absoluteX, rotateRight)
+            return (.ROR, .absoluteX(cycles: .fixed), rotateRight)
 
         case 0x4C:
             return (.JMP, .absolute, jump)
@@ -351,7 +353,7 @@ extension CPU {
         case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
             return (.NOP, .implicit, doNothing)
         case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
-            return (.NOP, .absoluteXWithPenalty, doNothing)
+            return (.NOP, .absoluteX(cycles: .onlyIfPageCrossed), doNothing)
         case 0x80, 0x82, 0x89, 0xC2, 0xE2:
             return (.NOP, .immediate, doNothing)
 
@@ -366,7 +368,7 @@ extension CPU {
         case 0xB7:
             return (.LAX, .zeroPageY, loadAccumulatorAndX)
         case 0xBF:
-            return (.LAX, .absoluteYWithPenalty, loadAccumulatorAndX)
+            return (.LAX, .absoluteY(cycles: .onlyIfPageCrossed), loadAccumulatorAndX)
 
         case 0x83:
             return (.SAX, .indexedIndirect, storeAccumulatorAndX)
@@ -388,9 +390,9 @@ extension CPU {
         case 0xD7:
             return (.DCP, .zeroPageX, decrementMemoryAndCompareAccumulator)
         case 0xDB:
-            return (.DCP, .absoluteY, decrementMemoryAndCompareAccumulator)
+            return (.DCP, .absoluteY(cycles: .fixed), decrementMemoryAndCompareAccumulator)
         case 0xDF:
-            return (.DCP, .absoluteX, decrementMemoryAndCompareAccumulator)
+            return (.DCP, .absoluteX(cycles: .fixed), decrementMemoryAndCompareAccumulator)
 
         case 0xE3:
             return (.ISB, .indexedIndirect, incrementMemoryAndSubtractWithCarry)
@@ -403,9 +405,9 @@ extension CPU {
         case 0xF7:
             return (.ISB, .zeroPageX, incrementMemoryAndSubtractWithCarry)
         case 0xFB:
-            return (.ISB, .absoluteY, incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .absoluteY(cycles: .fixed), incrementMemoryAndSubtractWithCarry)
         case 0xFF:
-            return (.ISB, .absoluteX, incrementMemoryAndSubtractWithCarry)
+            return (.ISB, .absoluteX(cycles: .fixed), incrementMemoryAndSubtractWithCarry)
 
         case 0x03:
             return (.SLO, .indexedIndirect, arithmeticShiftLeftAndBitwiseORwithAccumulator)
@@ -418,9 +420,9 @@ extension CPU {
         case 0x17:
             return (.SLO, .zeroPageX, arithmeticShiftLeftAndBitwiseORwithAccumulator)
         case 0x1B:
-            return (.SLO, .absoluteY, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .absoluteY(cycles: .fixed), arithmeticShiftLeftAndBitwiseORwithAccumulator)
         case 0x1F:
-            return (.SLO, .absoluteX, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            return (.SLO, .absoluteX(cycles: .fixed), arithmeticShiftLeftAndBitwiseORwithAccumulator)
 
         case 0x23:
             return (.RLA, .indexedIndirect, rotateLeftAndBitwiseANDwithAccumulator)
@@ -433,9 +435,9 @@ extension CPU {
         case 0x37:
             return (.RLA, .zeroPageX, rotateLeftAndBitwiseANDwithAccumulator)
         case 0x3B:
-            return (.RLA, .absoluteY, rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .absoluteY(cycles: .fixed), rotateLeftAndBitwiseANDwithAccumulator)
         case 0x3F:
-            return (.RLA, .absoluteX, rotateLeftAndBitwiseANDwithAccumulator)
+            return (.RLA, .absoluteX(cycles: .fixed), rotateLeftAndBitwiseANDwithAccumulator)
 
         case 0x43:
             return (.SRE, .indexedIndirect, logicalShiftRightAndBitwiseExclusiveOR)
@@ -448,9 +450,9 @@ extension CPU {
         case 0x57:
             return (.SRE, .zeroPageX, logicalShiftRightAndBitwiseExclusiveOR)
         case 0x5B:
-            return (.SRE, .absoluteY, logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .absoluteY(cycles: .fixed), logicalShiftRightAndBitwiseExclusiveOR)
         case 0x5F:
-            return (.SRE, .absoluteX, logicalShiftRightAndBitwiseExclusiveOR)
+            return (.SRE, .absoluteX(cycles: .fixed), logicalShiftRightAndBitwiseExclusiveOR)
 
         case 0x63:
             return (.RRA, .indexedIndirect, rotateRightAndAddWithCarry)
@@ -463,12 +465,53 @@ extension CPU {
         case 0x77:
             return (.RRA, .zeroPageX, rotateRightAndAddWithCarry)
         case 0x7B:
-            return (.RRA, .absoluteY, rotateRightAndAddWithCarry)
+            return (.RRA, .absoluteY(cycles: .fixed), rotateRightAndAddWithCarry)
         case 0x7F:
-            return (.RRA, .absoluteX, rotateRightAndAddWithCarry)
+            return (.RRA, .absoluteX(cycles: .fixed), rotateRightAndAddWithCarry)
 
         default:
             return (.NOP, .implicit, doNothing)
+        }
+    }
+
+    fileprivate func decodeToFetchOperand(addressingMode: AddressingMode) -> AddressingMode.FetchOperand {
+        switch addressingMode {
+        case .implicit:
+            return CPU.implicit
+        case .accumulator:
+            return CPU.accumulator
+        case .immediate:
+            return CPU.immediate
+        case .zeroPage:
+            return CPU.zeroPage
+        case .zeroPageX:
+            return CPU.zeroPageX
+        case .zeroPageY:
+            return CPU.zeroPageY
+        case .absolute:
+            return CPU.absolute
+        case .absoluteX(let cycles):
+            switch cycles {
+            case .fixed:
+                return CPU.absoluteX
+            case .onlyIfPageCrossed:
+                return CPU.absoluteXWithPenalty
+            }
+        case .absoluteY(let cycles):
+            switch cycles {
+            case .fixed:
+                return CPU.absoluteY
+            case .onlyIfPageCrossed:
+                return CPU.absoluteYWithPenalty
+            }
+        case .relative:
+            return CPU.relative
+        case .indirect:
+            return CPU.indirect
+        case .indexedIndirect:
+            return CPU.indexedIndirect
+        case .indirectIndexed:
+            return CPU.indirectIndexed
         }
     }
 }
