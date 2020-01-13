@@ -1,31 +1,31 @@
 import Foundation
 
 struct NESTest {
-    let disassembler: Disassembler
+    let interruptLine: InterruptLine
 
-    var registers: CPURegisters! = nil
+    var cpu: CPU! = nil
     var enabled: Bool = false
 
     var machineCode: String = ""
     var assemblyCode: String = ""
 
-    init(disassembler: Disassembler) {
-        self.disassembler = disassembler
+    init(interruptLine: InterruptLine) {
+        self.interruptLine = interruptLine
     }
 
-    mutating func before(cpu: CPU) {
-        enabled = !cpu.interrupted
+    mutating func before(cpu: inout CPU) {
+        enabled = !interruptLine.interrupted
         if enabled {
-            (machineCode, assemblyCode) = disassembler.disassemble()
-            registers = cpu.registers
+            (machineCode, assemblyCode) = Disassembler.disassemble(cpu: &cpu)
+            self.cpu = cpu
         }
     }
 
     func print(ppu: PPU, cycles: UInt) {
         if enabled {
-            let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(registers!.description)"
+            let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(cpu!.description)"
             let ppuState = String(format: "%3d,%3d", ppu.scan.dot, ppu.scan.line)
-            let log = "\(registers.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
+            let log = "\(cpu.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
             Swift.print(log)
         }
     }
@@ -57,7 +57,7 @@ fileprivate extension String {
     }
 }
 
-extension CPURegisters: CustomStringConvertible {
+extension CPU: CustomStringConvertible {
     var description: String {
         return "A:\(A.hex2) X:\(X.hex2) Y:\(Y.hex2) P:\(P.rawValue.hex2) SP:\(S.hex2)"
     }

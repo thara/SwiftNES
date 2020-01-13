@@ -31,4 +31,8 @@ final class InterruptLine {
     func clear(_ interrupt: Interrupt) {
         current.remove(interrupt)
     }
+
+    var interrupted: Bool {
+        return !current.isEmpty
+    }
 }

@@ -1,9 +1,13 @@
 public final class NES {
-    private let cpu: CPU
+    private var cpu: CPU
     private let ppu: PPU
+
+    private var cpuMemory: Memory
 
     private let cartridgeDrive: CartridgeDrive
     private let controllerPort: ControllerPort
+
+    private let interruptLine: InterruptLine
 
     public static let maxDot = 340
     public static let maxLine = 261
@@ -16,10 +20,11 @@ public final class NES {
     private(set) var cycles: UInt = 0
 
     public init(lineBuffer: LineBuffer) {
-        let interruptLine = InterruptLine()
+        interruptLine = InterruptLine()
 
         let cpuMemoryMap = CPUMemoryMap()
-        cpu = CPU(memory: cpuMemoryMap, interruptLine: interruptLine)
+        cpu = CPU(memory: cpuMemoryMap)
+        cpuMemory = cpuMemoryMap
 
         let ppuMemoryMap = PPUMemoryMap()
         ppu = PPU(memory: ppuMemoryMap, interruptLine: interruptLine, lineBuffer: lineBuffer)
@@ -31,7 +36,7 @@ public final class NES {
 
         cartridgeDrive = BusConnectedCartridgeDrive(cpuMemoryMap: cpuMemoryMap, ppuMemoryMap: ppuMemoryMap)
 
-        nestest = NESTest(disassembler: Disassembler(cpu: cpu))
+        nestest = NESTest(interruptLine: interruptLine)
     }
 
     public func runFrame() {
@@ -44,16 +49,15 @@ public final class NES {
 
     public func step() {
 #if nestest
-        let interrupted = cpu.interrupted
-        if !interrupted { nestest.before(cpu: cpu) }
+        if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
 #endif
 
-        let cpuCycles = cpu.step()
+        let cpuCycles = cpu.step(interruptLine: interruptLine)
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)
         cycles &+= cpuCycles
-        if interrupted { return }
+        if interruptLine.interrupted { return }
 #endif
 
         var ppuCycles = cpuCycles &* 3
@@ -66,6 +70,11 @@ public final class NES {
     public func insert(cartridge: Cartridge) {
         cartridgeDrive.insert(cartridge)
         cpu.powerOn()
+
+        interruptLine.clear([.NMI, .IRQ])
+        interruptLine.send(.RESET)
+
+        cpuMemory.clear()
         ppu.reset()
     }
 

@@ -1,654 +1,460 @@
-// swiftlint:disable file_length
-
-struct Instruction {
-    let opcode: OpCode
-    let mnemonic: Mnemonic
-    let addressingMode: AddressingMode
-    let fetchOperand: AddressingMode.FetchOperand
-    let exec: Operation
-}
-
+// swiftlint:disable file_length cyclomatic_complexity function_body_length
 extension CPU {
 
-    func buildInstructionTable() -> [Instruction] {
-        var table: [Instruction?] = Array(repeating: nil, count: 0x100)
-        for i in 0x00...0xFF {
-            let opcode = OpCode(i)
-
-            let (mnemonic, addressingMode, operation) = decodeInstruction(for: opcode)
-            table[i] = Instruction(
-                opcode: opcode, mnemonic: mnemonic, addressingMode: addressingMode,
-                fetchOperand: decodeToFetchOperand(addressingMode: addressingMode),
-                exec: operation)
-        }
-        return table.compactMap { $0 }
+    @inline(__always)
+    mutating func fetchOperand() -> OpCode {
+        let opcode = read(at: PC)
+        PC &+= 1
+        return opcode
     }
 
-    // swiftlint:disable cyclomatic_complexity function_body_length line_length
-    private func decodeInstruction(for opcode: UInt8) -> (Mnemonic, AddressingMode, Operation) {
+    @inline(__always)
+    mutating func excuteInstruction(opcode: OpCode) {
         switch opcode {
-
         case 0xA9:
-            return (.LDA, .immediate, loadAccumulator)
+            LDA(operand: immediate())
         case 0xA5:
-            return (.LDA, .zeroPage, loadAccumulator)
+            LDA(operand: zeroPage())
         case 0xB5:
-            return (.LDA, .zeroPageX, loadAccumulator)
+            LDA(operand: zeroPageX())
         case 0xAD:
-            return (.LDA, .absolute, loadAccumulator)
+            LDA(operand: absolute())
         case 0xBD:
-            return (.LDA, .absoluteX(cycles: .onlyIfPageCrossed), loadAccumulator)
+            LDA(operand: absoluteXWithPenalty())
         case 0xB9:
-            return (.LDA, .absoluteY(cycles: .onlyIfPageCrossed), loadAccumulator)
+            LDA(operand: absoluteYWithPenalty())
         case 0xA1:
-            return (.LDA, .indexedIndirect, loadAccumulator)
+            LDA(operand: indexedIndirect())
         case 0xB1:
-            return (.LDA, .indirectIndexed, loadAccumulator)
+            LDA(operand: indirectIndexed())
         case 0xA2:
-            return (.LDX, .immediate, loadXRegister)
+            LDX(operand: immediate())
         case 0xA6:
-            return (.LDX, .zeroPage, loadXRegister)
+            LDX(operand: zeroPage())
         case 0xB6:
-            return (.LDX, .zeroPageY, loadXRegister)
+            LDX(operand: zeroPageY())
         case 0xAE:
-            return (.LDX, .absolute, loadXRegister)
+            LDX(operand: absolute())
         case 0xBE:
-            return (.LDX, .absoluteY(cycles: .onlyIfPageCrossed), loadXRegister)
+            LDX(operand: absoluteYWithPenalty())
         case 0xA0:
-            return (.LDY, .immediate, loadYRegister)
+            LDY(operand: immediate())
         case 0xA4:
-            return (.LDY, .zeroPage, loadYRegister)
+            LDY(operand: zeroPage())
         case 0xB4:
-            return (.LDY, .zeroPageX, loadYRegister)
+            LDY(operand: zeroPageX())
         case 0xAC:
-            return (.LDY, .absolute, loadYRegister)
+            LDY(operand: absolute())
         case 0xBC:
-            return (.LDY, .absoluteX(cycles: .onlyIfPageCrossed), loadYRegister)
+            LDY(operand: absoluteXWithPenalty())
         case 0x85:
-            return (.STA, .zeroPage, storeAccumulator)
+            STA(operand: zeroPage())
         case 0x95:
-            return (.STA, .zeroPageX, storeAccumulator)
+            STA(operand: zeroPageX())
         case 0x8D:
-            return (.STA, .absolute, storeAccumulator)
+            STA(operand: absolute())
         case 0x9D:
-            return (.STA, .absoluteX(cycles: .fixed), storeAccumulator)
+            STA(operand: absoluteX())
         case 0x99:
-            return (.STA, .absoluteY(cycles: .fixed), storeAccumulator)
+            STA(operand: absoluteY())
         case 0x81:
-            return (.STA, .indexedIndirect, storeAccumulator)
+            STA(operand: indexedIndirect())
         case 0x91:
-            return (.STA, .indirectIndexed, storeAccumulatorWithTick)
+            STAWithTick(operand: indirectIndexed())
         case 0x86:
-            return (.STX, .zeroPage, storeXRegister)
+            STX(operand: zeroPage())
         case 0x96:
-            return (.STX, .zeroPageY, storeXRegister)
+            STX(operand: zeroPageY())
         case 0x8E:
-            return (.STX, .absolute, storeXRegister)
+            STX(operand: absolute())
         case 0x84:
-            return (.STY, .zeroPage, storeYRegister)
+            STY(operand: zeroPage())
         case 0x94:
-            return (.STY, .zeroPageX, storeYRegister)
+            STY(operand: zeroPageX())
         case 0x8C:
-            return (.STY, .absolute, storeYRegister)
+            STY(operand: absolute())
         case 0xAA:
-            return (.TAX, .implicit, transferAccumulatorToX)
+            TAX(operand: implicit())
         case 0xBA:
-            return (.TSX, .implicit, transferStackPointerToX)
+            TSX(operand: implicit())
         case 0xA8:
-            return (.TAY, .implicit, transferAccumulatorToY)
+            TAY(operand: implicit())
         case 0x8A:
-            return (.TXA, .implicit, transferXtoAccumulator)
+            TXA(operand: implicit())
         case 0x9A:
-            return (.TXS, .implicit, transferXtoStackPointer)
+            TXS(operand: implicit())
         case 0x98:
-            return (.TYA, .implicit, transferYtoAccumulator)
+            TYA(operand: implicit())
 
         case 0x48:
-            return (.PHA, .implicit, pushAccumulator)
+            PHA(operand: implicit())
         case 0x08:
-            return (.PHP, .implicit, pushProcessorStatus)
+            PHP(operand: implicit())
         case 0x68:
-            return (.PLA, .implicit, pullAccumulator)
+            PLA(operand: implicit())
         case 0x28:
-            return (.PLP, .implicit, pullProcessorStatus)
+            PLP(operand: implicit())
 
         case 0x29:
-            return (.AND, .immediate, bitwiseANDwithAccumulator)
+            AND(operand: immediate())
         case 0x25:
-            return (.AND, .zeroPage, bitwiseANDwithAccumulator)
+            AND(operand: zeroPage())
         case 0x35:
-            return (.AND, .zeroPageX, bitwiseANDwithAccumulator)
+            AND(operand: zeroPageX())
         case 0x2D:
-            return (.AND, .absolute, bitwiseANDwithAccumulator)
+            AND(operand: absolute())
         case 0x3D:
-            return (.AND, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseANDwithAccumulator)
+            AND(operand: absoluteXWithPenalty())
         case 0x39:
-            return (.AND, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseANDwithAccumulator)
+            AND(operand: absoluteYWithPenalty())
         case 0x21:
-            return (.AND, .indexedIndirect, bitwiseANDwithAccumulator)
+            AND(operand: indexedIndirect())
         case 0x31:
-            return (.AND, .indirectIndexed, bitwiseANDwithAccumulator)
+            AND(operand: indirectIndexed())
         case 0x49:
-            return (.EOR, .immediate, bitwiseExclusiveOR)
+            EOR(operand: immediate())
         case 0x45:
-            return (.EOR, .zeroPage, bitwiseExclusiveOR)
+            EOR(operand: zeroPage())
         case 0x55:
-            return (.EOR, .zeroPageX, bitwiseExclusiveOR)
+            EOR(operand: zeroPageX())
         case 0x4D:
-            return (.EOR, .absolute, bitwiseExclusiveOR)
+            EOR(operand: absolute())
         case 0x5D:
-            return (.EOR, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseExclusiveOR)
+            EOR(operand: absoluteXWithPenalty())
         case 0x59:
-            return (.EOR, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseExclusiveOR)
+            EOR(operand: absoluteYWithPenalty())
         case 0x41:
-            return (.EOR, .indexedIndirect, bitwiseExclusiveOR)
+            EOR(operand: indexedIndirect())
         case 0x51:
-            return (.EOR, .indirectIndexed, bitwiseExclusiveOR)
+            EOR(operand: indirectIndexed())
         case 0x09:
-            return (.ORA, .immediate, bitwiseORwithAccumulator)
+            ORA(operand: immediate())
         case 0x05:
-            return (.ORA, .zeroPage, bitwiseORwithAccumulator)
+            ORA(operand: zeroPage())
         case 0x15:
-            return (.ORA, .zeroPageX, bitwiseORwithAccumulator)
+            ORA(operand: zeroPageX())
         case 0x0D:
-            return (.ORA, .absolute, bitwiseORwithAccumulator)
+            ORA(operand: absolute())
         case 0x1D:
-            return (.ORA, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseORwithAccumulator)
+            ORA(operand: absoluteXWithPenalty())
         case 0x19:
-            return (.ORA, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseORwithAccumulator)
+            ORA(operand: absoluteYWithPenalty())
         case 0x01:
-            return (.ORA, .indexedIndirect, bitwiseORwithAccumulator)
+            ORA(operand: indexedIndirect())
         case 0x11:
-            return (.ORA, .indirectIndexed, bitwiseORwithAccumulator)
+            ORA(operand: indirectIndexed())
         case 0x24:
-            return (.BIT, .zeroPage, testBits)
+            BIT(operand: zeroPage())
         case 0x2C:
-            return (.BIT, .absolute, testBits)
+            BIT(operand: absolute())
 
         case 0x69:
-            return (.ADC, .immediate, addWithCarry)
+            ADC(operand: immediate())
         case 0x65:
-            return (.ADC, .zeroPage, addWithCarry)
+            ADC(operand: zeroPage())
         case 0x75:
-            return (.ADC, .zeroPageX, addWithCarry)
+            ADC(operand: zeroPageX())
         case 0x6D:
-            return (.ADC, .absolute, addWithCarry)
+            ADC(operand: absolute())
         case 0x7D:
-            return (.ADC, .absoluteX(cycles: .onlyIfPageCrossed), addWithCarry)
+            ADC(operand: absoluteXWithPenalty())
         case 0x79:
-            return (.ADC, .absoluteY(cycles: .onlyIfPageCrossed), addWithCarry)
+            ADC(operand: absoluteYWithPenalty())
         case 0x61:
-            return (.ADC, .indexedIndirect, addWithCarry)
+            ADC(operand: indexedIndirect())
         case 0x71:
-            return (.ADC, .indirectIndexed, addWithCarry)
+            ADC(operand: indirectIndexed())
         case 0xE9:
-            return (.SBC, .immediate, subtractWithCarry)
+            SBC(operand: immediate())
         case 0xE5:
-            return (.SBC, .zeroPage, subtractWithCarry)
+            SBC(operand: zeroPage())
         case 0xF5:
-            return (.SBC, .zeroPageX, subtractWithCarry)
+            SBC(operand: zeroPageX())
         case 0xED:
-            return (.SBC, .absolute, subtractWithCarry)
+            SBC(operand: absolute())
         case 0xFD:
-            return (.SBC, .absoluteX(cycles: .onlyIfPageCrossed), subtractWithCarry)
+            SBC(operand: absoluteXWithPenalty())
         case 0xF9:
-            return (.SBC, .absoluteY(cycles: .onlyIfPageCrossed), subtractWithCarry)
+            SBC(operand: absoluteYWithPenalty())
         case 0xE1:
-            return (.SBC, .indexedIndirect, subtractWithCarry)
+            SBC(operand: indexedIndirect())
         case 0xF1:
-            return (.SBC, .indirectIndexed, subtractWithCarry)
+            SBC(operand: indirectIndexed())
         case 0xC9:
-            return (.CMP, .immediate, compareAccumulator)
+            CMP(operand: immediate())
         case 0xC5:
-            return (.CMP, .zeroPage, compareAccumulator)
+            CMP(operand: zeroPage())
         case 0xD5:
-            return (.CMP, .zeroPageX, compareAccumulator)
+            CMP(operand: zeroPageX())
         case 0xCD:
-            return (.CMP, .absolute, compareAccumulator)
+            CMP(operand: absolute())
         case 0xDD:
-            return (.CMP, .absoluteX(cycles: .onlyIfPageCrossed), compareAccumulator)
+            CMP(operand: absoluteXWithPenalty())
         case 0xD9:
-            return (.CMP, .absoluteY(cycles: .onlyIfPageCrossed), compareAccumulator)
+            CMP(operand: absoluteYWithPenalty())
         case 0xC1:
-            return (.CMP, .indexedIndirect, compareAccumulator)
+            CMP(operand: indexedIndirect())
         case 0xD1:
-            return (.CMP, .indirectIndexed, compareAccumulator)
+            CMP(operand: indirectIndexed())
         case 0xE0:
-            return (.CPX, .immediate, compareXRegister)
+            CPX(operand: immediate())
         case 0xE4:
-            return (.CPX, .zeroPage, compareXRegister)
+            CPX(operand: zeroPage())
         case 0xEC:
-            return (.CPX, .absolute, compareXRegister)
+            CPX(operand: absolute())
         case 0xC0:
-            return (.CPY, .immediate, compareYRegister)
+            CPY(operand: immediate())
         case 0xC4:
-            return (.CPY, .zeroPage, compareYRegister)
+            CPY(operand: zeroPage())
         case 0xCC:
-            return (.CPY, .absolute, compareYRegister)
+            CPY(operand: absolute())
 
         case 0xE6:
-            return (.INC, .zeroPage, incrementMemory)
+            INC(operand: zeroPage())
         case 0xF6:
-            return (.INC, .zeroPageX, incrementMemory)
+            INC(operand: zeroPageX())
         case 0xEE:
-            return (.INC, .absolute, incrementMemory)
+            INC(operand: absolute())
         case 0xFE:
-            return (.INC, .absoluteX(cycles: .fixed), incrementMemory)
+            INC(operand: absoluteX())
         case 0xE8:
-            return (.INX, .implicit, incrementX)
+            INX(operand: implicit())
         case 0xC8:
-            return (.INY, .implicit, incrementY)
+            INY(operand: implicit())
         case 0xC6:
-            return (.DEC, .zeroPage, decrementMemory)
+            DEC(operand: zeroPage())
         case 0xD6:
-            return (.DEC, .zeroPageX, decrementMemory)
+            DEC(operand: zeroPageX())
         case 0xCE:
-            return (.DEC, .absolute, decrementMemory)
+            DEC(operand: absolute())
         case 0xDE:
-            return (.DEC, .absoluteX(cycles: .fixed), decrementMemory)
+            DEC(operand: absoluteX())
         case 0xCA:
-            return (.DEX, .implicit, decrementX)
+            DEX(operand: implicit())
         case 0x88:
-            return (.DEY, .implicit, decrementY)
+            DEY(operand: implicit())
 
         case 0x0A:
-            return (.ASL, .accumulator, arithmeticShiftLeftForAccumulator)
+            ASLForAccumulator(operand: accumulator())
         case 0x06:
-            return (.ASL, .zeroPage, arithmeticShiftLeft)
+            ASL(operand: zeroPage())
         case 0x16:
-            return (.ASL, .zeroPageX, arithmeticShiftLeft)
+            ASL(operand: zeroPageX())
         case 0x0E:
-            return (.ASL, .absolute, arithmeticShiftLeft)
+            ASL(operand: absolute())
         case 0x1E:
-            return (.ASL, .absoluteX(cycles: .fixed), arithmeticShiftLeft)
+            ASL(operand: absoluteX())
         case 0x4A:
-            return (.LSR, .accumulator, logicalShiftRightForAccumulator)
+            LSRForAccumulator(operand: accumulator())
         case 0x46:
-            return (.LSR, .zeroPage, logicalShiftRight)
+            LSR(operand: zeroPage())
         case 0x56:
-            return (.LSR, .zeroPageX, logicalShiftRight)
+            LSR(operand: zeroPageX())
         case 0x4E:
-            return (.LSR, .absolute, logicalShiftRight)
+            LSR(operand: absolute())
         case 0x5E:
-            return (.LSR, .absoluteX(cycles: .fixed), logicalShiftRight)
+            LSR(operand: absoluteX())
         case 0x2A:
-            return (.ROL, .accumulator, rotateLeftForAccumulator)
+            ROLForAccumulator(operand: accumulator())
         case 0x26:
-            return (.ROL, .zeroPage, rotateLeft)
+            ROL(operand: zeroPage())
         case 0x36:
-            return (.ROL, .zeroPageX, rotateLeft)
+            ROL(operand: zeroPageX())
         case 0x2E:
-            return (.ROL, .absolute, rotateLeft)
+            ROL(operand: absolute())
         case 0x3E:
-            return (.ROL, .absoluteX(cycles: .fixed), rotateLeft)
+            ROL(operand: absoluteX())
         case 0x6A:
-            return (.ROR, .accumulator, rotateRightForAccumulator)
+            RORForAccumulator(operand: accumulator())
         case 0x66:
-            return (.ROR, .zeroPage, rotateRight)
+            ROR(operand: zeroPage())
         case 0x76:
-            return (.ROR, .zeroPageX, rotateRight)
+            ROR(operand: zeroPageX())
         case 0x6E:
-            return (.ROR, .absolute, rotateRight)
+            ROR(operand: absolute())
         case 0x7E:
-            return (.ROR, .absoluteX(cycles: .fixed), rotateRight)
+            ROR(operand: absoluteX())
 
         case 0x4C:
-            return (.JMP, .absolute, jump)
+            JMP(operand: absolute())
         case 0x6C:
-            return (.JMP, .indirect, jump)
+            JMP(operand: indirect())
         case 0x20:
-            return (.JSR, .absolute, jumpToSubroutine)
+            JSR(operand: absolute())
         case 0x60:
-            return (.RTS, .implicit, returnFromSubroutine)
+            RTS(operand: implicit())
         case 0x40:
-            return (.RTI, .implicit, returnFromInterrupt)
+            RTI(operand: implicit())
 
         case 0x90:
-            return (.BCC, .relative, branchIfCarryClear)
+            BCC(operand: relative())
         case 0xB0:
-            return (.BCS, .relative, branchIfCarrySet)
+            BCS(operand: relative())
         case 0xF0:
-            return (.BEQ, .relative, branchIfEqual)
+            BEQ(operand: relative())
         case 0x30:
-            return (.BMI, .relative, branchIfMinus)
+            BMI(operand: relative())
         case 0xD0:
-            return (.BNE, .relative, branchIfNotEqual)
+            BNE(operand: relative())
         case 0x10:
-            return (.BPL, .relative, branchIfPlus)
+            BPL(operand: relative())
         case 0x50:
-            return (.BVC, .relative, branchIfOverflowClear)
+            BVC(operand: relative())
         case 0x70:
-            return (.BVS, .relative, branchIfOverflowSet)
+            BVS(operand: relative())
 
         case 0x18:
-            return (.CLC, .implicit, clearCarry)
+            CLC(operand: implicit())
         case 0xD8:
-            return (.CLD, .implicit, clearDecimal)
+            CLD(operand: implicit())
         case 0x58:
-            return (.CLI, .implicit, clearInterrupt)
+            CLI(operand: implicit())
         case 0xB8:
-            return (.CLV, .implicit, clearOverflow)
+            CLV(operand: implicit())
 
         case 0x38:
-            return (.SEC, .implicit, setCarryFlag)
+            SEC(operand: implicit())
         case 0xF8:
-            return (.SED, .implicit, setDecimalFlag)
+            SED(operand: implicit())
         case 0x78:
-            return (.SEI, .implicit, setInterruptDisable)
+            SEI(operand: implicit())
 
         case 0x00:
-            return (.BRK, .implicit, forceInterrupt)
+            BRK(operand: implicit())
 
         // Undocumented
 
         case 0xEB:
-            return (.SBC, .immediate, subtractWithCarry)
+            SBC(operand: immediate())
 
         case 0x04, 0x44, 0x64:
-            return (.NOP, .zeroPage, doNothing)
+            NOP(operand: zeroPage())
         case 0x0C:
-            return (.NOP, .absolute, doNothing)
+            NOP(operand: absolute())
         case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
-            return (.NOP, .zeroPageX, doNothing)
+            NOP(operand: zeroPageX())
         case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
-            return (.NOP, .implicit, doNothing)
+            NOP(operand: implicit())
         case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
-            return (.NOP, .absoluteX(cycles: .onlyIfPageCrossed), doNothing)
+            NOP(operand: absoluteXWithPenalty())
         case 0x80, 0x82, 0x89, 0xC2, 0xE2:
-            return (.NOP, .immediate, doNothing)
+            NOP(operand: immediate())
 
         case 0xA3:
-            return (.LAX, .indexedIndirect, loadAccumulatorAndX)
+            LAX(operand: indexedIndirect())
         case 0xA7:
-            return (.LAX, .zeroPage, loadAccumulatorAndX)
+            LAX(operand: zeroPage())
         case 0xAF:
-            return (.LAX, .absolute, loadAccumulatorAndX)
+            LAX(operand: absolute())
         case 0xB3:
-            return (.LAX, .indirectIndexed, loadAccumulatorAndX)
+            LAX(operand: indirectIndexed())
         case 0xB7:
-            return (.LAX, .zeroPageY, loadAccumulatorAndX)
+            LAX(operand: zeroPageY())
         case 0xBF:
-            return (.LAX, .absoluteY(cycles: .onlyIfPageCrossed), loadAccumulatorAndX)
+            LAX(operand: absoluteYWithPenalty())
 
         case 0x83:
-            return (.SAX, .indexedIndirect, storeAccumulatorAndX)
+            SAX(operand: indexedIndirect())
         case 0x87:
-            return (.SAX, .zeroPage, storeAccumulatorAndX)
+            SAX(operand: zeroPage())
         case 0x8F:
-            return (.SAX, .absolute, storeAccumulatorAndX)
+            SAX(operand: absolute())
         case 0x97:
-            return (.SAX, .zeroPageY, storeAccumulatorAndX)
+            SAX(operand: zeroPageY())
 
         case 0xC3:
-            return (.DCP, .indexedIndirect, decrementMemoryAndCompareAccumulator)
+            DCP(operand: indexedIndirect())
         case 0xC7:
-            return (.DCP, .zeroPage, decrementMemoryAndCompareAccumulator)
+            DCP(operand: zeroPage())
         case 0xCF:
-            return (.DCP, .absolute, decrementMemoryAndCompareAccumulator)
+            DCP(operand: absolute())
         case 0xD3:
-            return (.DCP, .indirectIndexed, decrementMemoryAndCompareAccumulator)
+            DCP(operand: indirectIndexed())
         case 0xD7:
-            return (.DCP, .zeroPageX, decrementMemoryAndCompareAccumulator)
+            DCP(operand: zeroPageX())
         case 0xDB:
-            return (.DCP, .absoluteY(cycles: .fixed), decrementMemoryAndCompareAccumulator)
+            DCP(operand: absoluteY())
         case 0xDF:
-            return (.DCP, .absoluteX(cycles: .fixed), decrementMemoryAndCompareAccumulator)
+            DCP(operand: absoluteX())
 
         case 0xE3:
-            return (.ISB, .indexedIndirect, incrementMemoryAndSubtractWithCarry)
+            ISB(operand: indexedIndirect())
         case 0xE7:
-            return (.ISB, .zeroPage, incrementMemoryAndSubtractWithCarry)
+            ISB(operand: zeroPage())
         case 0xEF:
-            return (.ISB, .absolute, incrementMemoryAndSubtractWithCarry)
+            ISB(operand: absolute())
         case 0xF3:
-            return (.ISB, .indirectIndexed, incrementMemoryAndSubtractWithCarry)
+            ISB(operand: indirectIndexed())
         case 0xF7:
-            return (.ISB, .zeroPageX, incrementMemoryAndSubtractWithCarry)
+            ISB(operand: zeroPageX())
         case 0xFB:
-            return (.ISB, .absoluteY(cycles: .fixed), incrementMemoryAndSubtractWithCarry)
+            ISB(operand: absoluteY())
         case 0xFF:
-            return (.ISB, .absoluteX(cycles: .fixed), incrementMemoryAndSubtractWithCarry)
+            ISB(operand: absoluteX())
 
         case 0x03:
-            return (.SLO, .indexedIndirect, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            SLO(operand: indexedIndirect())
         case 0x07:
-            return (.SLO, .zeroPage, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            SLO(operand: zeroPage())
         case 0x0F:
-            return (.SLO, .absolute, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            SLO(operand: absolute())
         case 0x13:
-            return (.SLO, .indirectIndexed, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            SLO(operand: indirectIndexed())
         case 0x17:
-            return (.SLO, .zeroPageX, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            SLO(operand: zeroPageX())
         case 0x1B:
-            return (.SLO, .absoluteY(cycles: .fixed), arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            SLO(operand: absoluteY())
         case 0x1F:
-            return (.SLO, .absoluteX(cycles: .fixed), arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            SLO(operand: absoluteX())
 
         case 0x23:
-            return (.RLA, .indexedIndirect, rotateLeftAndBitwiseANDwithAccumulator)
+            RLA(operand: indexedIndirect())
         case 0x27:
-            return (.RLA, .zeroPage, rotateLeftAndBitwiseANDwithAccumulator)
+            RLA(operand: zeroPage())
         case 0x2F:
-            return (.RLA, .absolute, rotateLeftAndBitwiseANDwithAccumulator)
+            RLA(operand: absolute())
         case 0x33:
-            return (.RLA, .indirectIndexed, rotateLeftAndBitwiseANDwithAccumulator)
+            RLA(operand: indirectIndexed())
         case 0x37:
-            return (.RLA, .zeroPageX, rotateLeftAndBitwiseANDwithAccumulator)
+            RLA(operand: zeroPageX())
         case 0x3B:
-            return (.RLA, .absoluteY(cycles: .fixed), rotateLeftAndBitwiseANDwithAccumulator)
+            RLA(operand: absoluteY())
         case 0x3F:
-            return (.RLA, .absoluteX(cycles: .fixed), rotateLeftAndBitwiseANDwithAccumulator)
+            RLA(operand: absoluteX())
 
         case 0x43:
-            return (.SRE, .indexedIndirect, logicalShiftRightAndBitwiseExclusiveOR)
+            SRE(operand: indexedIndirect())
         case 0x47:
-            return (.SRE, .zeroPage, logicalShiftRightAndBitwiseExclusiveOR)
+            SRE(operand: zeroPage())
         case 0x4F:
-            return (.SRE, .absolute, logicalShiftRightAndBitwiseExclusiveOR)
+            SRE(operand: absolute())
         case 0x53:
-            return (.SRE, .indirectIndexed, logicalShiftRightAndBitwiseExclusiveOR)
+            SRE(operand: indirectIndexed())
         case 0x57:
-            return (.SRE, .zeroPageX, logicalShiftRightAndBitwiseExclusiveOR)
+            SRE(operand: zeroPageX())
         case 0x5B:
-            return (.SRE, .absoluteY(cycles: .fixed), logicalShiftRightAndBitwiseExclusiveOR)
+            SRE(operand: absoluteY())
         case 0x5F:
-            return (.SRE, .absoluteX(cycles: .fixed), logicalShiftRightAndBitwiseExclusiveOR)
+            SRE(operand: absoluteX())
 
         case 0x63:
-            return (.RRA, .indexedIndirect, rotateRightAndAddWithCarry)
+            RRA(operand: indexedIndirect())
         case 0x67:
-            return (.RRA, .zeroPage, rotateRightAndAddWithCarry)
+            RRA(operand: zeroPage())
         case 0x6F:
-            return (.RRA, .absolute, rotateRightAndAddWithCarry)
+            RRA(operand: absolute())
         case 0x73:
-            return (.RRA, .indirectIndexed, rotateRightAndAddWithCarry)
+            RRA(operand: indirectIndexed())
         case 0x77:
-            return (.RRA, .zeroPageX, rotateRightAndAddWithCarry)
+            RRA(operand: zeroPageX())
         case 0x7B:
-            return (.RRA, .absoluteY(cycles: .fixed), rotateRightAndAddWithCarry)
+            RRA(operand: absoluteY())
         case 0x7F:
-            return (.RRA, .absoluteX(cycles: .fixed), rotateRightAndAddWithCarry)
+            RRA(operand: absoluteX())
 
         default:
-            return (.NOP, .implicit, doNothing)
+            NOP(operand: implicit())
         }
-    }
-
-    fileprivate func decodeToFetchOperand(addressingMode: AddressingMode) -> AddressingMode.FetchOperand {
-        switch addressingMode {
-        case .implicit:
-            return implicit
-        case .accumulator:
-            return accumulator
-        case .immediate:
-            return immediate
-        case .zeroPage:
-            return zeroPage
-        case .zeroPageX:
-            return zeroPageX
-        case .zeroPageY:
-            return zeroPageY
-        case .absolute:
-            return absolute
-        case .absoluteX(let cycles):
-            switch cycles {
-            case .fixed:
-                return absoluteX
-            case .onlyIfPageCrossed:
-                return absoluteXWithPenalty
-            }
-        case .absoluteY(let cycles):
-            switch cycles {
-            case .fixed:
-                return absoluteY
-            case .onlyIfPageCrossed:
-                return absoluteYWithPenalty
-            }
-        case .relative:
-            return relative
-        case .indirect:
-            return indirect
-        case .indexedIndirect:
-            return indexedIndirect
-        case .indirectIndexed:
-            return indirectIndexed
-        }
-    }
-}
-
-// MARK: - Addressing Mode
-extension CPU {
-
-    func implicit() -> UInt16 {
-        return 0x00
-    }
-
-    func accumulator() -> UInt16 {
-        return registers.A.u16
-    }
-
-    func immediate() -> UInt16 {
-        let operand = registers.PC
-        registers.PC &+= 1
-        return operand
-    }
-
-    func zeroPage() -> UInt16 {
-        let operand = read(at: registers.PC).u16 & 0xFF
-        registers.PC &+= 1
-        return operand
-    }
-
-    func zeroPageX() -> UInt16 {
-        tick()
-
-        let operand = (read(at: registers.PC).u16 &+ registers.X.u16) & 0xFF
-        registers.PC &+= 1
-        return operand
-    }
-
-    func zeroPageY() -> UInt16 {
-        tick()
-
-        let operand = (read(at: registers.PC).u16 &+ registers.Y.u16) & 0xFF
-        registers.PC &+= 1
-        return operand
-    }
-
-    func absolute() -> UInt16 {
-        let operand = readWord(at: registers.PC)
-        registers.PC &+= 2
-        return operand
-    }
-
-    func absoluteX() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = data &+ registers.X.u16 & 0xFFFF
-        registers.PC &+= 2
-        tick()
-        return operand
-    }
-
-    func absoluteXWithPenalty() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = data &+ registers.X.u16 & 0xFFFF
-        registers.PC &+= 2
-
-        tickOnPageCrossed(value: data, operand: registers.X)
-        return operand
-    }
-
-    func absoluteY() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = data &+ registers.Y.u16 & 0xFFFF
-        registers.PC &+= 2
-        tick()
-        return operand
-    }
-
-    func absoluteYWithPenalty() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = data &+ registers.Y.u16 & 0xFFFF
-        registers.PC &+= 2
-
-        tickOnPageCrossed(value: data, operand: registers.Y)
-        return operand
-    }
-
-    func relative() -> UInt16 {
-        let operand = read(at: registers.PC).u16
-        registers.PC &+= 1
-        return operand
-    }
-
-    func indirect() -> UInt16 {
-        let data = readWord(at: registers.PC)
-        let operand = readOnIndirect(operand: data)
-        registers.PC &+= 2
-        return operand
-    }
-
-    func indexedIndirect() -> UInt16 {
-        let data = read(at: registers.PC)
-        let operand = readOnIndirect(operand: (data &+ registers.X).u16 & 0xFF)
-        registers.PC &+= 1
-
-        tick()
-
-        return operand
-    }
-
-    func indirectIndexed() -> UInt16 {
-        let data = read(at: registers.PC).u16
-        let operand = readOnIndirect(operand: data) &+ registers.Y.u16
-        registers.PC &+= 1
-
-        tickOnPageCrossed(value: operand &- registers.Y.u16, operand: registers.Y)
-        return operand
-    }
-
-    func tickOnPageCrossed(value: UInt16, operand: UInt8) {
-        tickOnPageCrossed(value: value, operand: operand.u16)
-    }
-
-    func tickOnPageCrossed(value: UInt16, operand: UInt16) {
-        if ((value &+ operand) & 0xFF00) != (value & 0xFF00) {
-            tick()
-        }
-    }
-
-    func tickOnPageCrossed(value: Int, operand: Int) {
-        if ((value &+ operand) & 0xFF00) != (value & 0xFF00) {
-            tick()
-        }
-    }
-}
-
-extension Memory {
-    func readOnIndirect(operand: UInt16) -> UInt16 {
-        let low = read(at: operand).u16
-        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8   // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-        return low | high
     }
 }
 
@@ -656,168 +462,147 @@ extension Memory {
 extension CPU {
     // Implements for Load/Store Operations
 
-    /// LDA
-    func loadAccumulator(operand: Operand) -> NextPC {
-        registers.A = read(at: operand)
-        return registers.PC
+    /// loadAccumulator
+    mutating func LDA(operand: Operand) {
+        A = read(at: operand)
     }
 
-    /// LDX
-    func loadXRegister(operand: Operand) -> NextPC {
-        registers.X = read(at: operand)
-        return registers.PC
+    /// loadXRegister
+    mutating func LDX(operand: Operand) {
+        X = read(at: operand)
     }
 
-    /// LDY
-    func loadYRegister(operand: Operand) -> NextPC {
-        registers.Y = read(at: operand)
-        return registers.PC
+    /// loadYRegister
+    mutating func LDY(operand: Operand) {
+        Y = read(at: operand)
     }
 
-    /// STA
-    func storeAccumulator(operand: Operand) -> NextPC {
-        write(registers.A, at: operand)
-        return registers.PC
+    /// storeAccumulator
+    mutating func STA(operand: Operand) {
+        write(A, at: operand)
     }
 
-    func storeAccumulatorWithTick(operand: Operand) -> NextPC {
-        write(registers.A, at: operand)
+    mutating func STAWithTick(operand: Operand) {
+        write(A, at: operand)
         tick()
-        return registers.PC
     }
 
-    /// STX
-    func storeXRegister(operand: Operand) -> NextPC {
-        write(registers.X, at: operand)
-        return registers.PC
+    /// storeXRegister
+    mutating func STX(operand: Operand) {
+        write(X, at: operand)
     }
 
-    /// STY
-    func storeYRegister(operand: Operand) -> NextPC {
-        write(registers.Y, at: operand)
-        return registers.PC
+    /// storeYRegister
+    mutating func STY(operand: Operand) {
+        write(Y, at: operand)
     }
 
     // MARK: - Register Operations
 
-    /// TAX
-    func transferAccumulatorToX(operand: Operand) -> NextPC {
-        registers.X = registers.A
+    /// transferAccumulatorToX
+    mutating func TAX(operand: Operand) {
+        X = A
         tick()
-        return registers.PC
     }
 
-    /// TSX
-    func transferStackPointerToX(operand: Operand) -> NextPC {
-        registers.X = registers.S
+    /// transferStackPointerToX
+    mutating func TSX(operand: Operand) {
+        X = S
         tick()
-        return registers.PC
     }
 
-    /// TAY
-    func transferAccumulatorToY(operand: Operand) -> NextPC {
-        registers.Y = registers.A
+    /// transferAccumulatorToY
+    mutating func TAY(operand: Operand) {
+        Y = A
         tick()
-        return registers.PC
     }
 
-    /// TXA
-    func transferXtoAccumulator(operand: Operand) -> NextPC {
-        registers.A = registers.X
+    /// transferXtoAccumulator
+    mutating func TXA(operand: Operand) {
+        A = X
         tick()
-        return registers.PC
     }
 
-    /// TXS
-    func transferXtoStackPointer(operand: Operand) -> NextPC {
-        registers.S = registers.X
+    /// transferXtoStackPointer
+    mutating func TXS(operand: Operand) {
+        S = X
         tick()
-        return registers.PC
     }
 
-    /// TYA
-    func transferYtoAccumulator(operand: Operand) -> NextPC {
-        registers.A = registers.Y
+    /// transferYtoAccumulator
+    mutating func TYA(operand: Operand) {
+        A = Y
         tick()
-        return registers.PC
     }
 
     // MARK: - Stack instructions
 
-    /// PHA
-    func pushAccumulator(operand: Operand) -> NextPC {
-        pushStack(registers.A)
+    /// pushAccumulator
+    mutating func PHA(operand: Operand) {
+        pushStack(A)
         tick()
-        return registers.PC
     }
 
-    /// PHP
-    func pushProcessorStatus(operand: Operand) -> NextPC {
+    /// pushProcessorStatus
+    mutating func PHP(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(registers.P.rawValue | Status.operatedB.rawValue)
+        pushStack(P.rawValue | Status.operatedB.rawValue)
         tick()
-        return registers.PC
     }
 
-    /// PLA
-    func pullAccumulator(operand: Operand) -> NextPC {
-        registers.A = pullStack()
+    /// pullAccumulator
+    mutating func PLA(operand: Operand) {
+        A = pullStack()
         tick(count: 2)
-        return registers.PC
     }
 
-    /// PLP
-    func pullProcessorStatus(operand: Operand) -> NextPC {
+    /// pullProcessorStatus
+    mutating func PLP(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
+        P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
         tick(count: 2)
-        return registers.PC
     }
 
     // MARK: - Logical instructions
 
-    /// AND
-    func bitwiseANDwithAccumulator(operand: Operand) -> NextPC {
-        registers.A &= read(at: operand)
-        return registers.PC
+    /// bitwiseANDwithAccumulator
+    mutating func AND(operand: Operand) {
+        A &= read(at: operand)
     }
 
-    /// EOR
-    func bitwiseExclusiveOR(operand: Operand) -> NextPC {
-        registers.A ^= read(at: operand)
-        return registers.PC
+    /// bitwiseExclusiveOR
+    mutating func EOR(operand: Operand) {
+        A ^= read(at: operand)
     }
 
-    /// ORA
-    func bitwiseORwithAccumulator(operand: Operand) -> NextPC {
-        registers.A |= read(at: operand)
-        return registers.PC
+    /// bitwiseORwithAccumulator
+    mutating func ORA(operand: Operand) {
+        A |= read(at: operand)
     }
 
-    /// BIT
-    func testBits(operand: Operand) -> NextPC {
+    /// testBits
+    mutating func BIT(operand: Operand) {
         let value = read(at: operand)
-        let data = registers.A & value
-        registers.P.remove([.Z, .V, .N])
-        if data == 0 { registers.P.formUnion(.Z) } else { registers.P.remove(.Z) }
-        if value[6] == 1 { registers.P.formUnion(.V) } else { registers.P.remove(.V) }
-        if value[7] == 1 { registers.P.formUnion(.N) } else { registers.P.remove(.N) }
-        return registers.PC
+        let data = A & value
+        P.remove([.Z, .V, .N])
+        if data == 0 { P.formUnion(.Z) } else { P.remove(.Z) }
+        if value[6] == 1 { P.formUnion(.V) } else { P.remove(.V) }
+        if value[7] == 1 { P.formUnion(.N) } else { P.remove(.N) }
     }
 
     // MARK: - Arithmetic instructions
 
-    /// ADC
-    func addWithCarry(operand: Operand) -> NextPC {
-        let a = registers.A
+    /// addWithCarry
+    mutating func ADC(operand: Operand) {
+        let a = A
         let val = read(at: operand)
         var result = a &+ val
 
-        if registers.P.contains(.C) { result &+= 1 }
+        if P.contains(.C) { result &+= 1 }
 
-        registers.P.remove([.C, .Z, .V, .N])
+        P.remove([.C, .Z, .V, .N])
 
         // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
         let a7 = a[7]
@@ -825,22 +610,21 @@ extension CPU {
         let c6 = a7 ^ v7 ^ result[7]
         let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
 
-        if c7 == 1 { registers.P.formUnion(.C) }
-        if c6 ^ c7 == 1 { registers.P.formUnion(.V) }
+        if c7 == 1 { P.formUnion(.C) }
+        if c6 ^ c7 == 1 { P.formUnion(.V) }
 
-        registers.A = result
-        return registers.PC
+        A = result
     }
 
-    /// SBC
-    func subtractWithCarry(operand: Operand) -> NextPC {
-        let a = registers.A
+    /// subtractWithCarry
+    mutating func SBC(operand: Operand) {
+        let a = A
         let val = ~read(at: operand)
         var result = a &+ val
 
-        if registers.P.contains(.C) { result &+= 1 }
+        if P.contains(.C) { result &+= 1 }
 
-        registers.P.remove([.C, .Z, .V, .N])
+        P.remove([.C, .Z, .V, .N])
 
         // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
         let a7 = a[7]
@@ -848,476 +632,474 @@ extension CPU {
         let c6 = a7 ^ v7 ^ result[7]
         let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
 
-        if c7 == 1 { registers.P.formUnion(.C) }
-        if c6 ^ c7 == 1 { registers.P.formUnion(.V) }
+        if c7 == 1 { P.formUnion(.C) }
+        if c6 ^ c7 == 1 { P.formUnion(.V) }
 
-        registers.A = result
-        return registers.PC
+        A = result
     }
 
-    /// CMP
-    func compareAccumulator(operand: Operand) -> NextPC {
-        let cmp = Int16(registers.A) &- Int16(read(at: operand))
+    /// compareAccumulator
+    mutating func CMP(operand: Operand) {
+        let cmp = Int16(A) &- Int16(read(at: operand))
 
-        registers.P.remove([.C, .Z, .N])
-        registers.P.setZN(cmp)
-        if 0 <= cmp { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
+        P.remove([.C, .Z, .N])
+        P.setZN(cmp)
+        if 0 <= cmp { P.formUnion(.C) } else { P.remove(.C) }
 
-        return registers.PC
     }
 
-    /// CPX
-    func compareXRegister(operand: Operand) -> NextPC {
+    /// compareXRegister
+    mutating func CPX(operand: Operand) {
         let value = read(at: operand)
-        let cmp = registers.X &- value
+        let cmp = X &- value
 
-        registers.P.remove([.C, .Z, .N])
-        registers.P.setZN(cmp)
-        if registers.X >= value { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
+        P.remove([.C, .Z, .N])
+        P.setZN(cmp)
+        if X >= value { P.formUnion(.C) } else { P.remove(.C) }
 
-        return registers.PC
     }
 
-    /// CPY
-    func compareYRegister(operand: Operand) -> NextPC {
+    /// compareYRegister
+    mutating func CPY(operand: Operand) {
         let value = read(at: operand)
-        let cmp = registers.Y &- value
+        let cmp = Y &- value
 
-        registers.P.remove([.C, .Z, .N])
-        registers.P.setZN(cmp)
-        if registers.Y >= value { registers.P.formUnion(.C) } else { registers.P.remove(.C) }
+        P.remove([.C, .Z, .N])
+        P.setZN(cmp)
+        if Y >= value { P.formUnion(.C) } else { P.remove(.C) }
 
-        return registers.PC
     }
 
     // MARK: - Increment/Decrement instructions
 
-    /// INC
-    func incrementMemory(operand: Operand) -> NextPC {
+    /// incrementMemory
+    mutating func INC(operand: Operand) {
         let result = read(at: operand) &+ 1
 
-        registers.P.setZN(result)
+        P.setZN(result)
         write(result, at: operand)
 
         tick()
 
-        return registers.PC
     }
 
-    /// INX
-    func incrementX(_: Operand) -> NextPC {
-        registers.X = registers.X &+ 1
+    /// incrementX
+    mutating func INX(operand: Operand) {
+        X = X &+ 1
         tick()
-        return registers.PC
     }
 
-    /// INY
-    func incrementY(operand: Operand) -> NextPC {
-        registers.Y = registers.Y &+ 1
+    /// incrementY
+    mutating func INY(operand: Operand) {
+        Y = Y &+ 1
         tick()
-        return registers.PC
     }
 
-    /// DEC
-    func decrementMemory(operand: Operand) -> NextPC {
+    /// decrementMemory
+    mutating func DEC(operand: Operand) {
         let result = read(at: operand) &- 1
-
-        registers.P.setZN(result)
+        P.setZN(result)
 
         write(result, at: operand)
-
         tick()
-
-        return registers.PC
     }
 
-    /// DEX
-    func decrementX(operand: Operand) -> NextPC {
-        registers.X = registers.X &- 1
+    /// decrementX
+    mutating func DEX(operand: Operand) {
+        X = X &- 1
         tick()
-        return registers.PC
     }
 
-    /// DEY
-    func decrementY(operand: Operand) -> NextPC {
-        registers.Y = registers.Y &- 1
+    /// decrementY
+    mutating func DEY(operand: Operand) {
+        Y = Y &- 1
         tick()
-        return registers.PC
     }
 
     // MARK: - Shift instructions
 
-    /// ASL
-    func arithmeticShiftLeft(operand: Operand) -> NextPC {
+    /// arithmeticShiftLeft
+    mutating func ASL(operand: Operand) {
         var data = read(at: operand)
 
-        registers.P.remove([.C, .Z, .N])
-        if data[7] == 1 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if data[7] == 1 { P.formUnion(.C) }
 
         data <<= 1
 
-        registers.P.setZN(data)
+        P.setZN(data)
 
         write(data, at: operand)
 
         tick()
-        return registers.PC
     }
 
-    func arithmeticShiftLeftForAccumulator(operand: Operand) -> NextPC {
-        registers.P.remove([.C, .Z, .N])
-        if registers.A[7] == 1 { registers.P.formUnion(.C) }
+    mutating func ASLForAccumulator(operand: Operand) {
+        P.remove([.C, .Z, .N])
+        if A[7] == 1 { P.formUnion(.C) }
 
-        registers.A <<= 1
+        A <<= 1
 
         tick()
-        return registers.PC
     }
 
-    /// LSR
-    func logicalShiftRight(operand: Operand) -> NextPC {
+    /// logicalShiftRight
+    mutating func LSR(operand: Operand) {
         var data = read(at: operand)
 
-        registers.P.remove([.C, .Z, .N])
-        if data[0] == 1 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if data[0] == 1 { P.formUnion(.C) }
 
         data >>= 1
 
-        registers.P.setZN(data)
+        P.setZN(data)
 
         write(data, at: operand)
 
         tick()
-        return registers.PC
     }
 
-    func logicalShiftRightForAccumulator(operand: Operand) -> NextPC {
-        registers.P.remove([.C, .Z, .N])
-        if registers.A[0] == 1 { registers.P.formUnion(.C) }
+    mutating func LSRForAccumulator(operand: Operand) {
+        P.remove([.C, .Z, .N])
+        if A[0] == 1 { P.formUnion(.C) }
 
-        registers.A >>= 1
+        A >>= 1
 
         tick()
-        return registers.PC
     }
 
-    /// ROL
-    func rotateLeft(operand: Operand) -> NextPC {
+    /// rotateLeft
+    mutating func ROL(operand: Operand) {
         var data = read(at: operand)
         let c = data & 0x80
 
         data <<= 1
-        if registers.P.contains(.C) { data |= 0x01 }
+        if P.contains(.C) { data |= 0x01 }
 
-        registers.P.remove([.C, .Z, .N])
-        if c == 0x80 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if c == 0x80 { P.formUnion(.C) }
 
-        registers.P.setZN(data)
+        P.setZN(data)
 
         write(data, at: operand)
 
         tick()
-        return registers.PC
     }
 
-    func rotateLeftForAccumulator(_: Operand) -> NextPC {
-        let c = registers.A & 0x80
+    mutating func ROLForAccumulator(operand: Operand) {
+        let c = A & 0x80
 
-        var a = registers.A << 1
-        if registers.P.contains(.C) { a |= 0x01 }
+        var a = A << 1
+        if P.contains(.C) { a |= 0x01 }
 
-        registers.P.remove([.C, .Z, .N])
-        if c == 0x80 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if c == 0x80 { P.formUnion(.C) }
 
-        registers.A = a
+        A = a
 
         tick()
-        return registers.PC
     }
 
-    /// ROR
-    func rotateRight(operand: Operand) -> NextPC {
+    /// rotateRight
+    mutating func ROR(operand: Operand) {
         var data = read(at: operand)
         let c = data & 0x01
 
         data >>= 1
-        if registers.P.contains(.C) { data |= 0x80 }
+        if P.contains(.C) { data |= 0x80 }
 
-        registers.P.remove([.C, .Z, .N])
-        if c == 1 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if c == 1 { P.formUnion(.C) }
 
-        registers.P.setZN(data)
+        P.setZN(data)
 
         write(data, at: operand)
 
         tick()
-        return registers.PC
     }
 
-    func rotateRightForAccumulator(operand: Operand) -> NextPC {
-        let c = registers.A & 0x01
+    mutating func RORForAccumulator(operand: Operand) {
+        let c = A & 0x01
 
-        var a = registers.A >> 1
-        if registers.P.contains(.C) { a |= 0x80 }
+        var a = A >> 1
+        if P.contains(.C) { a |= 0x80 }
 
-        registers.P.remove([.C, .Z, .N])
-        if c == 1 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if c == 1 { P.formUnion(.C) }
 
-        registers.A = a
+        A = a
 
         tick()
-        return registers.PC
     }
 
     // MARK: - Jump instructions
 
-    /// JMP
-    func jump(operand: Operand) -> NextPC {
-        return operand
+    /// jump
+    mutating func JMP(operand: Operand) {
+        PC = operand
     }
 
-    /// JSR
-    func jumpToSubroutine(operand: Operand) -> NextPC {
-        pushStack(word: registers.PC &- 1)
+    /// jumpToSubroutine
+    mutating func JSR(operand: Operand) {
+        pushStack(word: PC &- 1)
         tick()
-        return operand
+        PC = operand
     }
 
-    /// RTS
-    func returnFromSubroutine(operand: Operand) -> NextPC {
+    /// returnFromSubroutine
+    mutating func RTS(operand: Operand) {
         tick(count: 3)
-        return pullStack() &+ 1
+        PC = pullStack() &+ 1
     }
 
-    /// RTI
-    func returnFromInterrupt(operand: Operand) -> NextPC {
+    /// returnFromInterrupt
+    mutating func RTI(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         tick(count: 2)
-        registers.P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
-        return pullStack()
+        P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
+        PC = pullStack()
     }
 
     // MARK: - Branch instructions
 
-    fileprivate func branch(operand: Operand, test: Bool) -> NextPC {
+    private mutating func branch(operand: Operand, test: Bool) {
         if test {
             tick()
-            let pc = Int(registers.PC)
+            let pc = Int(PC)
             let offset = Int(operand.i8)
-            tickOnPageCrossed(value: pc, operand: offset)
-            return UInt16(pc &+ offset)
+            if pageCrossed(value: pc, operand: offset) {
+                tick()
+            }
+            PC = UInt16(pc &+ offset)
         }
-        return registers.PC
     }
 
-    /// BCC
-    func branchIfCarryClear(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: !registers.P.contains(.C))
+    /// branchIfCarryClear
+    mutating func BCC(operand: Operand) {
+        branch(operand: operand, test: !P.contains(.C))
     }
 
-    /// BCS
-    func branchIfCarrySet(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: registers.P.contains(.C))
+    /// branchIfCarrySet
+    mutating func BCS(operand: Operand) {
+        branch(operand: operand, test: P.contains(.C))
     }
 
-    /// BEQ
-    func branchIfEqual(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: registers.P.contains(.Z))
+    /// branchIfEqual
+    mutating func BEQ(operand: Operand) {
+        branch(operand: operand, test: P.contains(.Z))
     }
 
-    /// BMI
-    func branchIfMinus(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: registers.P.contains(.N))
+    /// branchIfMinus
+    mutating func BMI(operand: Operand) {
+        branch(operand: operand, test: P.contains(.N))
     }
 
-    /// BNE
-    func branchIfNotEqual(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: !registers.P.contains(.Z))
+    /// branchIfNotEqual
+    mutating func BNE(operand: Operand) {
+        branch(operand: operand, test: !P.contains(.Z))
     }
 
-    /// BPL
-    func branchIfPlus(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: !registers.P.contains(.N))
+    /// branchIfPlus
+    mutating func BPL(operand: Operand) {
+        branch(operand: operand, test: !P.contains(.N))
     }
 
-    /// BVC
-    func branchIfOverflowClear(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: !registers.P.contains(.V))
+    /// branchIfOverflowClear
+    mutating func BVC(operand: Operand) {
+        branch(operand: operand, test: !P.contains(.V))
     }
 
-    /// BVS
-    func branchIfOverflowSet(operand: Operand) -> NextPC {
-        return branch(operand: operand, test: registers.P.contains(.V))
+    /// branchIfOverflowSet
+    mutating func BVS(operand: Operand) {
+        branch(operand: operand, test: P.contains(.V))
     }
 
     // MARK: - Flag control instructions
 
-    /// CLC
-    func clearCarry(operand: Operand) -> NextPC {
-        registers.P.remove(.C)
+    /// clearCarry
+    mutating func CLC(operand: Operand) {
+        P.remove(.C)
         tick()
-        return registers.PC
     }
 
-    /// CLD
-    func clearDecimal(operand: Operand) -> NextPC {
-        registers.P.remove(.D)
+    /// clearDecimal
+    mutating func CLD(operand: Operand) {
+        P.remove(.D)
         tick()
-        return registers.PC
     }
 
-    /// CLI
-    func clearInterrupt(operand: Operand) -> NextPC {
-        registers.P.remove(.I)
+    /// clearInterrupt
+    mutating func CLI(operand: Operand) {
+        P.remove(.I)
         tick()
-        return registers.PC
     }
 
-    /// CLV
-    func clearOverflow(operand: Operand) -> NextPC {
-        registers.P.remove(.V)
+    /// clearOverflow
+    mutating func CLV(operand: Operand) {
+        P.remove(.V)
         tick()
-        return registers.PC
     }
 
-    /// SEC
-    func setCarryFlag(operand: Operand) -> NextPC {
-        registers.P.formUnion(.C)
+    /// setCarryFlag
+    mutating func SEC(operand: Operand) {
+        P.formUnion(.C)
         tick()
-        return registers.PC
     }
 
-    /// SED
-    func setDecimalFlag(operand: Operand) -> NextPC {
-        registers.P.formUnion(.D)
+    /// setDecimalFlag
+    mutating func SED(operand: Operand) {
+        P.formUnion(.D)
         tick()
-        return registers.PC
     }
 
-    /// SEI
-    func setInterruptDisable(operand: Operand) -> NextPC {
-        registers.P.formUnion(.I)
+    /// setInterruptDisable
+    mutating func SEI(operand: Operand) {
+        P.formUnion(.I)
         tick()
-        return registers.PC
     }
 
     // MARK: - Misc
 
-    /// BRK
-    func forceInterrupt(operand: Operand) -> NextPC {
-        pushStack(word: registers.PC)
+    /// forceInterrupt
+    mutating func BRK(operand: Operand) {
+        pushStack(word: PC)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(registers.P.rawValue | Status.interruptedB.rawValue)
+        pushStack(P.rawValue | Status.interruptedB.rawValue)
         tick()
-        return readWord(at: 0xFFFE)
+        PC = readWord(at: 0xFFFE)
     }
 
-    /// NOP
-    func doNothing(_ operand: Operand) -> NextPC {
+    /// doNothing
+    mutating func NOP(operand: Operand) {
         tick()
-        return registers.PC
     }
 
-    // MARK: - Illegal
+    // MARK: - Unofficial
 
-    /// LAX
-    func loadAccumulatorAndX(operand: Operand) -> NextPC {
+    /// loadAccumulatorAndX
+    mutating func LAX(operand: Operand) {
         let data = read(at: operand)
-        registers.A = data
-        registers.X = data
-        return registers.PC
+        A = data
+        X = data
     }
 
-    /// SAX
-    func storeAccumulatorAndX(operand: Operand) -> NextPC {
-        write(registers.A & registers.X, at: operand)
-        return registers.PC
+    /// storeAccumulatorAndX
+    mutating func SAX(operand: Operand) {
+        write(A & X, at: operand)
     }
 
-    /// DCP
-    func decrementMemoryAndCompareAccumulator(operand: Operand) -> NextPC {
+    /// decrementMemoryAndCompareAccumulator
+    mutating func DCP(operand: Operand) {
         // decrementMemory excluding tick
         let result = read(at: operand) &- 1
-        registers.P.setZN(result)
+        P.setZN(result)
         write(result, at: operand)
 
-        return compareAccumulator(operand: operand)
+        CMP(operand: operand)
     }
 
-    /// ISB
-    func incrementMemoryAndSubtractWithCarry(operand: Operand) -> NextPC {
+    /// incrementMemoryAndSubtractWithCarry
+    mutating func ISB(operand: Operand) {
         // incrementMemory excluding tick
         let result = read(at: operand) &+ 1
-        registers.P.setZN(result)
+        P.setZN(result)
         write(result, at: operand)
 
-        return subtractWithCarry(operand: operand)
+        SBC(operand: operand)
     }
 
-    /// SLO
-    func arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: Operand) -> NextPC {
+    /// arithmeticShiftLeftAndBitwiseORwithAccumulator
+    mutating func SLO(operand: Operand) {
         // arithmeticShiftLeft excluding tick
         var data = read(at: operand)
-        registers.P.remove([.C, .Z, .N])
-        if data[7] == 1 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if data[7] == 1 { P.formUnion(.C) }
 
         data <<= 1
-        registers.P.setZN(data)
+        P.setZN(data)
         write(data, at: operand)
 
-        return bitwiseORwithAccumulator(operand: operand)
+        ORA(operand: operand)
     }
 
-    /// RLA
-    func rotateLeftAndBitwiseANDwithAccumulator(operand: Operand) -> NextPC {
+    /// rotateLeftAndBitwiseANDwithAccumulator
+    mutating func RLA(operand: Operand) {
         // rotateLeft excluding tick
         var data = read(at: operand)
         let c = data & 0x80
 
         data <<= 1
-        if registers.P.contains(.C) { data |= 0x01 }
+        if P.contains(.C) { data |= 0x01 }
 
-        registers.P.remove([.C, .Z, .N])
-        if c == 0x80 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if c == 0x80 { P.formUnion(.C) }
 
-        registers.P.setZN(data)
+        P.setZN(data)
         write(data, at: operand)
 
-        return bitwiseANDwithAccumulator(operand: operand)
+        AND(operand: operand)
     }
 
-    /// SRE
-    func logicalShiftRightAndBitwiseExclusiveOR(operand: Operand) -> NextPC {
+    /// logicalShiftRightAndBitwiseExclusiveOR
+    mutating func SRE(operand: Operand) {
         // logicalShiftRight excluding tick
         var data = read(at: operand)
-        registers.P.remove([.C, .Z, .N])
-        if data[0] == 1 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if data[0] == 1 { P.formUnion(.C) }
 
         data >>= 1
 
-        registers.P.setZN(data)
+        P.setZN(data)
         write(data, at: operand)
 
-        return bitwiseExclusiveOR(operand: operand)
+        EOR(operand: operand)
     }
 
-    /// RRA
-    func rotateRightAndAddWithCarry(operand: Operand) -> NextPC {
+    /// rotateRightAndAddWithCarry
+    mutating func RRA(operand: Operand) {
         // rotateRight excluding tick
         var data = read(at: operand)
         let c = data & 0x01
 
         data >>= 1
-        if registers.P.contains(.C) { data |= 0x80 }
+        if P.contains(.C) { data |= 0x80 }
 
-        registers.P.remove([.C, .Z, .N])
-        if c == 1 { registers.P.formUnion(.C) }
+        P.remove([.C, .Z, .N])
+        if c == 1 { P.formUnion(.C) }
 
-        registers.P.setZN(data)
+        P.setZN(data)
         write(data, at: operand)
 
-        return addWithCarry(operand: operand)
+        ADC(operand: operand)
+    }
+}
+
+// MARK: - Stack
+extension CPU {
+    @inline(__always)
+    mutating func pushStack(_ value: UInt8) {
+        write(value, at: S.u16 &+ 0x100)
+        S &-= 1
+    }
+
+    @inline(__always)
+    mutating func pushStack(word: UInt16) {
+        pushStack(UInt8(word >> 8))
+        pushStack(UInt8(word & 0xFF))
+    }
+
+    @inline(__always)
+    mutating func pullStack() -> UInt8 {
+        S &+= 1
+        return read(at: S.u16 &+ 0x100)
+    }
+
+    @inline(__always)
+    mutating func pullStack() -> UInt16 {
+        let lo: UInt8 = pullStack()
+        let ho: UInt8 = pullStack()
+        return ho.u16 &<< 8 | lo.u16
     }
 }

@@ -88,6 +88,7 @@ final class Emulator {
             nes.runFrame()
 
             let endPerf = SDL_GetPerformanceCounter()
+
             let framePerf = Double(endPerf - startPerf) / Double(SDL_GetPerformanceFrequency()) * 1000
             if 0 < 16.666 - framePerf {
                 // Capping 60 FPS

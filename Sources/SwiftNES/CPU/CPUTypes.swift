@@ -1,4 +1,8 @@
-struct CPURegisters {
+typealias OpCode = UInt8
+
+typealias Operand = UInt16
+
+struct CPU {
     /// Accumulator
     var A: UInt8 = 0x00 {
         didSet {
@@ -23,6 +27,24 @@ struct CPURegisters {
     var P: Status = []
     /// Program Counter
     var PC: UInt16 = 0x00
+
+    var memory: Memory
+
+    init(memory: Memory) {
+        self.memory = memory
+    }
+
+    private(set) var cycles: UInt = 0
+
+    @inline(__always)
+    mutating func tick() {
+        cycles &+= 1
+    }
+
+    @inline(__always)
+    mutating func tick(count: UInt) {
+        cycles &+= count
+    }
 
     mutating func powerOn() {
         A = 0
