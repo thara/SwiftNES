@@ -4,29 +4,6 @@ typealias Operand = UInt16
 
 typealias Operation = ((Operand) -> Void)
 
-// http://wiki.nesdev.com/w/index.php/CPU_addressing_modes
-enum AddressingMode {
-    case implicit
-    case accumulator
-    case immediate
-    case zeroPage
-    case zeroPageX
-    case zeroPageY
-    case absolute
-    case absoluteX(cycles: CycleConsumption)
-    case absoluteY(cycles: CycleConsumption)
-    case relative
-    case indirect
-    case indexedIndirect
-    case indirectIndexed
-
-    typealias FetchOperand = (CPU) -> UInt16
-
-    enum CycleConsumption {
-        case fixed, onlyIfPageCrossed
-    }
-}
-
 // http://obelisk.me.uk/6502/reference.html
 enum Mnemonic {
     // MARK: - Load/Store Operations

@@ -109,6 +109,8 @@ class Disassembler {
         case .indirectIndexed:
             let data = cpu.memory.readOnIndirect(operand: operand1.u16)
             return String(format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ y.u16, cpu.memory.read(at: data &+ y.u16))
+        default:
+            return " "
         }
     }
 

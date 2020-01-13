@@ -70,7 +70,7 @@ extension CPU {
     }
 
     func execute(_ instruction: Instruction) {
-        let operand = instruction.fetchOperand(self)
+        let operand = instruction.addressingMode.fetchOperand(self)
         instruction.exec(operand)
     }
 }
