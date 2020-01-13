@@ -1,7 +1,5 @@
 // swiftlint:disable file_length, large_tuple
 
-typealias OperationFunc = (UInt16, inout CPUState, inout CPUMemory) -> Void
-
 struct CPUInstruction {
     var opcode: UInt8
     var addressingMode: AddressingModes
@@ -30,6 +28,7 @@ func buildInstructionTable() -> [CPUInstruction] {
 }
 
 struct CPUOperation {
+    typealias OperationFunc = (UInt16, inout CPUState, inout CPUMemory) -> Void
     private var operation: OperationFunc
 
     init(_ operation: @escaping OperationFunc) {

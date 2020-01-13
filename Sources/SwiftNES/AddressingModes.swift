@@ -1,6 +1,5 @@
-typealias AddressingModeFunc = (inout CPUState, inout CPUMemory) -> UInt16
-
 struct AddressingModes {
+    typealias AddressingModeFunc = (inout CPUState, inout CPUMemory) -> UInt16
     private let delegate: AddressingModeFunc
 
     init(f: @escaping AddressingModeFunc) {
