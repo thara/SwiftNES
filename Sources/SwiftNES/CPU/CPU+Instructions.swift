@@ -1,523 +1,459 @@
-// swiftlint:disable file_length
-
-struct Instruction {
-    let opcode: OpCode
-    let mnemonic: Mnemonic
-    let addressingMode: AddressingMode
-    let fetchOperand: AddressingMode.FetchOperand
-    let exec: Operation
-}
+// swiftlint:disable file_length cyclomatic_complexity function_body_length
 
 extension CPU {
 
-    func buildInstructionTable() -> [Instruction] {
-        var table: [Instruction?] = Array(repeating: nil, count: 0x100)
-        for i in 0x00...0xFF {
-            let opcode = OpCode(i)
-
-            let (mnemonic, addressingMode, operation) = decodeInstruction(for: opcode)
-            table[i] = Instruction(
-                opcode: opcode, mnemonic: mnemonic, addressingMode: addressingMode,
-                fetchOperand: decodeToFetchOperand(addressingMode: addressingMode),
-                exec: operation)
-        }
-        return table.compactMap { $0 }
-    }
-
-    // swiftlint:disable cyclomatic_complexity function_body_length line_length
-    private func decodeInstruction(for opcode: UInt8) -> (Mnemonic, AddressingMode, Operation) {
+    @inline(__always)
+    func excuteInstruction(opcode: UInt8) {
         switch opcode {
-
         case 0xA9:
-            return (.LDA, .immediate, loadAccumulator)
+            loadAccumulator(operand: .immediate(cpu: self))
         case 0xA5:
-            return (.LDA, .zeroPage, loadAccumulator)
+            loadAccumulator(operand: .zeroPage(cpu: self))
         case 0xB5:
-            return (.LDA, .zeroPageX, loadAccumulator)
+            loadAccumulator(operand: .zeroPageX(cpu: self))
         case 0xAD:
-            return (.LDA, .absolute, loadAccumulator)
+            loadAccumulator(operand: .absolute(cpu: self))
         case 0xBD:
-            return (.LDA, .absoluteX(cycles: .onlyIfPageCrossed), loadAccumulator)
+            loadAccumulator(operand: .absoluteXWithPenalty(cpu: self))
         case 0xB9:
-            return (.LDA, .absoluteY(cycles: .onlyIfPageCrossed), loadAccumulator)
+            loadAccumulator(operand: .absoluteYWithPenalty(cpu: self))
         case 0xA1:
-            return (.LDA, .indexedIndirect, loadAccumulator)
+            loadAccumulator(operand: .indexedIndirect(cpu: self))
         case 0xB1:
-            return (.LDA, .indirectIndexed, loadAccumulator)
+            loadAccumulator(operand: .indirectIndexed(cpu: self))
         case 0xA2:
-            return (.LDX, .immediate, loadXRegister)
+            loadXRegister(operand: .immediate(cpu: self))
         case 0xA6:
-            return (.LDX, .zeroPage, loadXRegister)
+            loadXRegister(operand: .zeroPage(cpu: self))
         case 0xB6:
-            return (.LDX, .zeroPageY, loadXRegister)
+            loadXRegister(operand: .zeroPageY(cpu: self))
         case 0xAE:
-            return (.LDX, .absolute, loadXRegister)
+            loadXRegister(operand: .absolute(cpu: self))
         case 0xBE:
-            return (.LDX, .absoluteY(cycles: .onlyIfPageCrossed), loadXRegister)
+            loadXRegister(operand: .absoluteYWithPenalty(cpu: self))
         case 0xA0:
-            return (.LDY, .immediate, loadYRegister)
+            loadYRegister(operand: .immediate(cpu: self))
         case 0xA4:
-            return (.LDY, .zeroPage, loadYRegister)
+            loadYRegister(operand: .zeroPage(cpu: self))
         case 0xB4:
-            return (.LDY, .zeroPageX, loadYRegister)
+            loadYRegister(operand: .zeroPageX(cpu: self))
         case 0xAC:
-            return (.LDY, .absolute, loadYRegister)
+            loadYRegister(operand: .absolute(cpu: self))
         case 0xBC:
-            return (.LDY, .absoluteX(cycles: .onlyIfPageCrossed), loadYRegister)
+            loadYRegister(operand: .absoluteXWithPenalty(cpu: self))
         case 0x85:
-            return (.STA, .zeroPage, storeAccumulator)
+            storeAccumulator(operand: .zeroPage(cpu: self))
         case 0x95:
-            return (.STA, .zeroPageX, storeAccumulator)
+            storeAccumulator(operand: .zeroPageX(cpu: self))
         case 0x8D:
-            return (.STA, .absolute, storeAccumulator)
+            storeAccumulator(operand: .absolute(cpu: self))
         case 0x9D:
-            return (.STA, .absoluteX(cycles: .fixed), storeAccumulator)
+            storeAccumulator(operand: .absoluteX(cpu: self))
         case 0x99:
-            return (.STA, .absoluteY(cycles: .fixed), storeAccumulator)
+            storeAccumulator(operand: .absoluteY(cpu: self))
         case 0x81:
-            return (.STA, .indexedIndirect, storeAccumulator)
+            storeAccumulator(operand: .indexedIndirect(cpu: self))
         case 0x91:
-            return (.STA, .indirectIndexed, storeAccumulatorWithTick)
+            storeAccumulatorWithTick(operand: .indirectIndexed(cpu: self))
         case 0x86:
-            return (.STX, .zeroPage, storeXRegister)
+            storeXRegister(operand: .zeroPage(cpu: self))
         case 0x96:
-            return (.STX, .zeroPageY, storeXRegister)
+            storeXRegister(operand: .zeroPageY(cpu: self))
         case 0x8E:
-            return (.STX, .absolute, storeXRegister)
+            storeXRegister(operand: .absolute(cpu: self))
         case 0x84:
-            return (.STY, .zeroPage, storeYRegister)
+            storeYRegister(operand: .zeroPage(cpu: self))
         case 0x94:
-            return (.STY, .zeroPageX, storeYRegister)
+            storeYRegister(operand: .zeroPageX(cpu: self))
         case 0x8C:
-            return (.STY, .absolute, storeYRegister)
+            storeYRegister(operand: .absolute(cpu: self))
         case 0xAA:
-            return (.TAX, .implicit, transferAccumulatorToX)
+            transferAccumulatorToX(operand: .implicit(cpu: self))
         case 0xBA:
-            return (.TSX, .implicit, transferStackPointerToX)
+            transferStackPointerToX(operand: .implicit(cpu: self))
         case 0xA8:
-            return (.TAY, .implicit, transferAccumulatorToY)
+            transferAccumulatorToY(operand: .implicit(cpu: self))
         case 0x8A:
-            return (.TXA, .implicit, transferXtoAccumulator)
+            transferXtoAccumulator(operand: .implicit(cpu: self))
         case 0x9A:
-            return (.TXS, .implicit, transferXtoStackPointer)
+            transferXtoStackPointer(operand: .implicit(cpu: self))
         case 0x98:
-            return (.TYA, .implicit, transferYtoAccumulator)
+            transferYtoAccumulator(operand: .implicit(cpu: self))
 
         case 0x48:
-            return (.PHA, .implicit, pushAccumulator)
+            pushAccumulator(operand: .implicit(cpu: self))
         case 0x08:
-            return (.PHP, .implicit, pushProcessorStatus)
+            pushProcessorStatus(operand: .implicit(cpu: self))
         case 0x68:
-            return (.PLA, .implicit, pullAccumulator)
+            pullAccumulator(operand: .implicit(cpu: self))
         case 0x28:
-            return (.PLP, .implicit, pullProcessorStatus)
+            pullProcessorStatus(operand: .implicit(cpu: self))
 
         case 0x29:
-            return (.AND, .immediate, bitwiseANDwithAccumulator)
+            bitwiseANDwithAccumulator(operand: .immediate(cpu: self))
         case 0x25:
-            return (.AND, .zeroPage, bitwiseANDwithAccumulator)
+            bitwiseANDwithAccumulator(operand: .zeroPage(cpu: self))
         case 0x35:
-            return (.AND, .zeroPageX, bitwiseANDwithAccumulator)
+            bitwiseANDwithAccumulator(operand: .zeroPageX(cpu: self))
         case 0x2D:
-            return (.AND, .absolute, bitwiseANDwithAccumulator)
+            bitwiseANDwithAccumulator(operand: .absolute(cpu: self))
         case 0x3D:
-            return (.AND, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseANDwithAccumulator)
+            bitwiseANDwithAccumulator(operand: .absoluteXWithPenalty(cpu: self))
         case 0x39:
-            return (.AND, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseANDwithAccumulator)
+            bitwiseANDwithAccumulator(operand: .absoluteYWithPenalty(cpu: self))
         case 0x21:
-            return (.AND, .indexedIndirect, bitwiseANDwithAccumulator)
+            bitwiseANDwithAccumulator(operand: .indexedIndirect(cpu: self))
         case 0x31:
-            return (.AND, .indirectIndexed, bitwiseANDwithAccumulator)
+            bitwiseANDwithAccumulator(operand: .indirectIndexed(cpu: self))
         case 0x49:
-            return (.EOR, .immediate, bitwiseExclusiveOR)
+            bitwiseExclusiveOR(operand: .immediate(cpu: self))
         case 0x45:
-            return (.EOR, .zeroPage, bitwiseExclusiveOR)
+            bitwiseExclusiveOR(operand: .zeroPage(cpu: self))
         case 0x55:
-            return (.EOR, .zeroPageX, bitwiseExclusiveOR)
+            bitwiseExclusiveOR(operand: .zeroPageX(cpu: self))
         case 0x4D:
-            return (.EOR, .absolute, bitwiseExclusiveOR)
+            bitwiseExclusiveOR(operand: .absolute(cpu: self))
         case 0x5D:
-            return (.EOR, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseExclusiveOR)
+            bitwiseExclusiveOR(operand: .absoluteXWithPenalty(cpu: self))
         case 0x59:
-            return (.EOR, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseExclusiveOR)
+            bitwiseExclusiveOR(operand: .absoluteYWithPenalty(cpu: self))
         case 0x41:
-            return (.EOR, .indexedIndirect, bitwiseExclusiveOR)
+            bitwiseExclusiveOR(operand: .indexedIndirect(cpu: self))
         case 0x51:
-            return (.EOR, .indirectIndexed, bitwiseExclusiveOR)
+            bitwiseExclusiveOR(operand: .indirectIndexed(cpu: self))
         case 0x09:
-            return (.ORA, .immediate, bitwiseORwithAccumulator)
+            bitwiseORwithAccumulator(operand: .immediate(cpu: self))
         case 0x05:
-            return (.ORA, .zeroPage, bitwiseORwithAccumulator)
+            bitwiseORwithAccumulator(operand: .zeroPage(cpu: self))
         case 0x15:
-            return (.ORA, .zeroPageX, bitwiseORwithAccumulator)
+            bitwiseORwithAccumulator(operand: .zeroPageX(cpu: self))
         case 0x0D:
-            return (.ORA, .absolute, bitwiseORwithAccumulator)
+            bitwiseORwithAccumulator(operand: .absolute(cpu: self))
         case 0x1D:
-            return (.ORA, .absoluteX(cycles: .onlyIfPageCrossed), bitwiseORwithAccumulator)
+            bitwiseORwithAccumulator(operand: .absoluteXWithPenalty(cpu: self))
         case 0x19:
-            return (.ORA, .absoluteY(cycles: .onlyIfPageCrossed), bitwiseORwithAccumulator)
+            bitwiseORwithAccumulator(operand: .absoluteYWithPenalty(cpu: self))
         case 0x01:
-            return (.ORA, .indexedIndirect, bitwiseORwithAccumulator)
+            bitwiseORwithAccumulator(operand: .indexedIndirect(cpu: self))
         case 0x11:
-            return (.ORA, .indirectIndexed, bitwiseORwithAccumulator)
+            bitwiseORwithAccumulator(operand: .indirectIndexed(cpu: self))
         case 0x24:
-            return (.BIT, .zeroPage, testBits)
+            testBits(operand: .zeroPage(cpu: self))
         case 0x2C:
-            return (.BIT, .absolute, testBits)
+            testBits(operand: .absolute(cpu: self))
 
         case 0x69:
-            return (.ADC, .immediate, addWithCarry)
+            addWithCarry(operand: .immediate(cpu: self))
         case 0x65:
-            return (.ADC, .zeroPage, addWithCarry)
+            addWithCarry(operand: .zeroPage(cpu: self))
         case 0x75:
-            return (.ADC, .zeroPageX, addWithCarry)
+            addWithCarry(operand: .zeroPageX(cpu: self))
         case 0x6D:
-            return (.ADC, .absolute, addWithCarry)
+            addWithCarry(operand: .absolute(cpu: self))
         case 0x7D:
-            return (.ADC, .absoluteX(cycles: .onlyIfPageCrossed), addWithCarry)
+            addWithCarry(operand: .absoluteXWithPenalty(cpu: self))
         case 0x79:
-            return (.ADC, .absoluteY(cycles: .onlyIfPageCrossed), addWithCarry)
+            addWithCarry(operand: .absoluteYWithPenalty(cpu: self))
         case 0x61:
-            return (.ADC, .indexedIndirect, addWithCarry)
+            addWithCarry(operand: .indexedIndirect(cpu: self))
         case 0x71:
-            return (.ADC, .indirectIndexed, addWithCarry)
+            addWithCarry(operand: .indirectIndexed(cpu: self))
         case 0xE9:
-            return (.SBC, .immediate, subtractWithCarry)
+            subtractWithCarry(operand: .immediate(cpu: self))
         case 0xE5:
-            return (.SBC, .zeroPage, subtractWithCarry)
+            subtractWithCarry(operand: .zeroPage(cpu: self))
         case 0xF5:
-            return (.SBC, .zeroPageX, subtractWithCarry)
+            subtractWithCarry(operand: .zeroPageX(cpu: self))
         case 0xED:
-            return (.SBC, .absolute, subtractWithCarry)
+            subtractWithCarry(operand: .absolute(cpu: self))
         case 0xFD:
-            return (.SBC, .absoluteX(cycles: .onlyIfPageCrossed), subtractWithCarry)
+            subtractWithCarry(operand: .absoluteXWithPenalty(cpu: self))
         case 0xF9:
-            return (.SBC, .absoluteY(cycles: .onlyIfPageCrossed), subtractWithCarry)
+            subtractWithCarry(operand: .absoluteYWithPenalty(cpu: self))
         case 0xE1:
-            return (.SBC, .indexedIndirect, subtractWithCarry)
+            subtractWithCarry(operand: .indexedIndirect(cpu: self))
         case 0xF1:
-            return (.SBC, .indirectIndexed, subtractWithCarry)
+            subtractWithCarry(operand: .indirectIndexed(cpu: self))
         case 0xC9:
-            return (.CMP, .immediate, compareAccumulator)
+            compareAccumulator(operand: .immediate(cpu: self))
         case 0xC5:
-            return (.CMP, .zeroPage, compareAccumulator)
+            compareAccumulator(operand: .zeroPage(cpu: self))
         case 0xD5:
-            return (.CMP, .zeroPageX, compareAccumulator)
+            compareAccumulator(operand: .zeroPageX(cpu: self))
         case 0xCD:
-            return (.CMP, .absolute, compareAccumulator)
+            compareAccumulator(operand: .absolute(cpu: self))
         case 0xDD:
-            return (.CMP, .absoluteX(cycles: .onlyIfPageCrossed), compareAccumulator)
+            compareAccumulator(operand: .absoluteXWithPenalty(cpu: self))
         case 0xD9:
-            return (.CMP, .absoluteY(cycles: .onlyIfPageCrossed), compareAccumulator)
+            compareAccumulator(operand: .absoluteYWithPenalty(cpu: self))
         case 0xC1:
-            return (.CMP, .indexedIndirect, compareAccumulator)
+            compareAccumulator(operand: .indexedIndirect(cpu: self))
         case 0xD1:
-            return (.CMP, .indirectIndexed, compareAccumulator)
+            compareAccumulator(operand: .indirectIndexed(cpu: self))
         case 0xE0:
-            return (.CPX, .immediate, compareXRegister)
+            compareXRegister(operand: .immediate(cpu: self))
         case 0xE4:
-            return (.CPX, .zeroPage, compareXRegister)
+            compareXRegister(operand: .zeroPage(cpu: self))
         case 0xEC:
-            return (.CPX, .absolute, compareXRegister)
+            compareXRegister(operand: .absolute(cpu: self))
         case 0xC0:
-            return (.CPY, .immediate, compareYRegister)
+            compareYRegister(operand: .immediate(cpu: self))
         case 0xC4:
-            return (.CPY, .zeroPage, compareYRegister)
+            compareYRegister(operand: .zeroPage(cpu: self))
         case 0xCC:
-            return (.CPY, .absolute, compareYRegister)
+            compareYRegister(operand: .absolute(cpu: self))
 
         case 0xE6:
-            return (.INC, .zeroPage, incrementMemory)
+            incrementMemory(operand: .zeroPage(cpu: self))
         case 0xF6:
-            return (.INC, .zeroPageX, incrementMemory)
+            incrementMemory(operand: .zeroPageX(cpu: self))
         case 0xEE:
-            return (.INC, .absolute, incrementMemory)
+            incrementMemory(operand: .absolute(cpu: self))
         case 0xFE:
-            return (.INC, .absoluteX(cycles: .fixed), incrementMemory)
+            incrementMemory(operand: .absoluteX(cpu: self))
         case 0xE8:
-            return (.INX, .implicit, incrementX)
+            incrementX(operand: .implicit(cpu: self))
         case 0xC8:
-            return (.INY, .implicit, incrementY)
+            incrementY(operand: .implicit(cpu: self))
         case 0xC6:
-            return (.DEC, .zeroPage, decrementMemory)
+            decrementMemory(operand: .zeroPage(cpu: self))
         case 0xD6:
-            return (.DEC, .zeroPageX, decrementMemory)
+            decrementMemory(operand: .zeroPageX(cpu: self))
         case 0xCE:
-            return (.DEC, .absolute, decrementMemory)
+            decrementMemory(operand: .absolute(cpu: self))
         case 0xDE:
-            return (.DEC, .absoluteX(cycles: .fixed), decrementMemory)
+            decrementMemory(operand: .absoluteX(cpu: self))
         case 0xCA:
-            return (.DEX, .implicit, decrementX)
+            decrementX(operand: .implicit(cpu: self))
         case 0x88:
-            return (.DEY, .implicit, decrementY)
+            decrementY(operand: .implicit(cpu: self))
 
         case 0x0A:
-            return (.ASL, .accumulator, arithmeticShiftLeftForAccumulator)
+            arithmeticShiftLeftForAccumulator(operand: .accumulator(cpu: self))
         case 0x06:
-            return (.ASL, .zeroPage, arithmeticShiftLeft)
+            arithmeticShiftLeft(operand: .zeroPage(cpu: self))
         case 0x16:
-            return (.ASL, .zeroPageX, arithmeticShiftLeft)
+            arithmeticShiftLeft(operand: .zeroPageX(cpu: self))
         case 0x0E:
-            return (.ASL, .absolute, arithmeticShiftLeft)
+            arithmeticShiftLeft(operand: .absolute(cpu: self))
         case 0x1E:
-            return (.ASL, .absoluteX(cycles: .fixed), arithmeticShiftLeft)
+            arithmeticShiftLeft(operand: .absoluteX(cpu: self))
         case 0x4A:
-            return (.LSR, .accumulator, logicalShiftRightForAccumulator)
+            logicalShiftRightForAccumulator(operand: .accumulator(cpu: self))
         case 0x46:
-            return (.LSR, .zeroPage, logicalShiftRight)
+            logicalShiftRight(operand: .zeroPage(cpu: self))
         case 0x56:
-            return (.LSR, .zeroPageX, logicalShiftRight)
+            logicalShiftRight(operand: .zeroPageX(cpu: self))
         case 0x4E:
-            return (.LSR, .absolute, logicalShiftRight)
+            logicalShiftRight(operand: .absolute(cpu: self))
         case 0x5E:
-            return (.LSR, .absoluteX(cycles: .fixed), logicalShiftRight)
+            logicalShiftRight(operand: .absoluteX(cpu: self))
         case 0x2A:
-            return (.ROL, .accumulator, rotateLeftForAccumulator)
+            rotateLeftForAccumulator(operand: .accumulator(cpu: self))
         case 0x26:
-            return (.ROL, .zeroPage, rotateLeft)
+            rotateLeft(operand: .zeroPage(cpu: self))
         case 0x36:
-            return (.ROL, .zeroPageX, rotateLeft)
+            rotateLeft(operand: .zeroPageX(cpu: self))
         case 0x2E:
-            return (.ROL, .absolute, rotateLeft)
+            rotateLeft(operand: .absolute(cpu: self))
         case 0x3E:
-            return (.ROL, .absoluteX(cycles: .fixed), rotateLeft)
+            rotateLeft(operand: .absoluteX(cpu: self))
         case 0x6A:
-            return (.ROR, .accumulator, rotateRightForAccumulator)
+            rotateRightForAccumulator(operand: .accumulator(cpu: self))
         case 0x66:
-            return (.ROR, .zeroPage, rotateRight)
+            rotateRight(operand: .zeroPage(cpu: self))
         case 0x76:
-            return (.ROR, .zeroPageX, rotateRight)
+            rotateRight(operand: .zeroPageX(cpu: self))
         case 0x6E:
-            return (.ROR, .absolute, rotateRight)
+            rotateRight(operand: .absolute(cpu: self))
         case 0x7E:
-            return (.ROR, .absoluteX(cycles: .fixed), rotateRight)
+            rotateRight(operand: .absoluteX(cpu: self))
 
         case 0x4C:
-            return (.JMP, .absolute, jump)
+            jump(operand: .absolute(cpu: self))
         case 0x6C:
-            return (.JMP, .indirect, jump)
+            jump(operand: .indirect(cpu: self))
         case 0x20:
-            return (.JSR, .absolute, jumpToSubroutine)
+            jumpToSubroutine(operand: .absolute(cpu: self))
         case 0x60:
-            return (.RTS, .implicit, returnFromSubroutine)
+            returnFromSubroutine(operand: .implicit(cpu: self))
         case 0x40:
-            return (.RTI, .implicit, returnFromInterrupt)
+            returnFromInterrupt(operand: .implicit(cpu: self))
 
         case 0x90:
-            return (.BCC, .relative, branchIfCarryClear)
+            branchIfCarryClear(operand: .relative(cpu: self))
         case 0xB0:
-            return (.BCS, .relative, branchIfCarrySet)
+            branchIfCarrySet(operand: .relative(cpu: self))
         case 0xF0:
-            return (.BEQ, .relative, branchIfEqual)
+            branchIfEqual(operand: .relative(cpu: self))
         case 0x30:
-            return (.BMI, .relative, branchIfMinus)
+            branchIfMinus(operand: .relative(cpu: self))
         case 0xD0:
-            return (.BNE, .relative, branchIfNotEqual)
+            branchIfNotEqual(operand: .relative(cpu: self))
         case 0x10:
-            return (.BPL, .relative, branchIfPlus)
+            branchIfPlus(operand: .relative(cpu: self))
         case 0x50:
-            return (.BVC, .relative, branchIfOverflowClear)
+            branchIfOverflowClear(operand: .relative(cpu: self))
         case 0x70:
-            return (.BVS, .relative, branchIfOverflowSet)
+            branchIfOverflowSet(operand: .relative(cpu: self))
 
         case 0x18:
-            return (.CLC, .implicit, clearCarry)
+            clearCarry(operand: .implicit(cpu: self))
         case 0xD8:
-            return (.CLD, .implicit, clearDecimal)
+            clearDecimal(operand: .implicit(cpu: self))
         case 0x58:
-            return (.CLI, .implicit, clearInterrupt)
+            clearInterrupt(operand: .implicit(cpu: self))
         case 0xB8:
-            return (.CLV, .implicit, clearOverflow)
+            clearOverflow(operand: .implicit(cpu: self))
 
         case 0x38:
-            return (.SEC, .implicit, setCarryFlag)
+            setCarryFlag(operand: .implicit(cpu: self))
         case 0xF8:
-            return (.SED, .implicit, setDecimalFlag)
+            setDecimalFlag(operand: .implicit(cpu: self))
         case 0x78:
-            return (.SEI, .implicit, setInterruptDisable)
+            setInterruptDisable(operand: .implicit(cpu: self))
 
         case 0x00:
-            return (.BRK, .implicit, forceInterrupt)
+            forceInterrupt(operand: .implicit(cpu: self))
 
         // Undocumented
 
         case 0xEB:
-            return (.SBC, .immediate, subtractWithCarry)
+            subtractWithCarry(operand: .immediate(cpu: self))
 
         case 0x04, 0x44, 0x64:
-            return (.NOP, .zeroPage, doNothing)
+            doNothing(operand: .zeroPage(cpu: self))
         case 0x0C:
-            return (.NOP, .absolute, doNothing)
+            doNothing(operand: .absolute(cpu: self))
         case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
-            return (.NOP, .zeroPageX, doNothing)
+            doNothing(operand: .zeroPageX(cpu: self))
         case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
-            return (.NOP, .implicit, doNothing)
+            doNothing(operand: .implicit(cpu: self))
         case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
-            return (.NOP, .absoluteX(cycles: .onlyIfPageCrossed), doNothing)
+            doNothing(operand: .absoluteXWithPenalty(cpu: self))
         case 0x80, 0x82, 0x89, 0xC2, 0xE2:
-            return (.NOP, .immediate, doNothing)
+            doNothing(operand: .immediate(cpu: self))
 
         case 0xA3:
-            return (.LAX, .indexedIndirect, loadAccumulatorAndX)
+            loadAccumulatorAndX(operand: .indexedIndirect(cpu: self))
         case 0xA7:
-            return (.LAX, .zeroPage, loadAccumulatorAndX)
+            loadAccumulatorAndX(operand: .zeroPage(cpu: self))
         case 0xAF:
-            return (.LAX, .absolute, loadAccumulatorAndX)
+            loadAccumulatorAndX(operand: .absolute(cpu: self))
         case 0xB3:
-            return (.LAX, .indirectIndexed, loadAccumulatorAndX)
+            loadAccumulatorAndX(operand: .indirectIndexed(cpu: self))
         case 0xB7:
-            return (.LAX, .zeroPageY, loadAccumulatorAndX)
+            loadAccumulatorAndX(operand: .zeroPageY(cpu: self))
         case 0xBF:
-            return (.LAX, .absoluteY(cycles: .onlyIfPageCrossed), loadAccumulatorAndX)
+            loadAccumulatorAndX(operand: .absoluteYWithPenalty(cpu: self))
 
         case 0x83:
-            return (.SAX, .indexedIndirect, storeAccumulatorAndX)
+            storeAccumulatorAndX(operand: .indexedIndirect(cpu: self))
         case 0x87:
-            return (.SAX, .zeroPage, storeAccumulatorAndX)
+            storeAccumulatorAndX(operand: .zeroPage(cpu: self))
         case 0x8F:
-            return (.SAX, .absolute, storeAccumulatorAndX)
+            storeAccumulatorAndX(operand: .absolute(cpu: self))
         case 0x97:
-            return (.SAX, .zeroPageY, storeAccumulatorAndX)
+            storeAccumulatorAndX(operand: .zeroPageY(cpu: self))
 
         case 0xC3:
-            return (.DCP, .indexedIndirect, decrementMemoryAndCompareAccumulator)
+            decrementMemoryAndCompareAccumulator(operand: .indexedIndirect(cpu: self))
         case 0xC7:
-            return (.DCP, .zeroPage, decrementMemoryAndCompareAccumulator)
+            decrementMemoryAndCompareAccumulator(operand: .zeroPage(cpu: self))
         case 0xCF:
-            return (.DCP, .absolute, decrementMemoryAndCompareAccumulator)
+            decrementMemoryAndCompareAccumulator(operand: .absolute(cpu: self))
         case 0xD3:
-            return (.DCP, .indirectIndexed, decrementMemoryAndCompareAccumulator)
+            decrementMemoryAndCompareAccumulator(operand: .indirectIndexed(cpu: self))
         case 0xD7:
-            return (.DCP, .zeroPageX, decrementMemoryAndCompareAccumulator)
+            decrementMemoryAndCompareAccumulator(operand: .zeroPageX(cpu: self))
         case 0xDB:
-            return (.DCP, .absoluteY(cycles: .fixed), decrementMemoryAndCompareAccumulator)
+            decrementMemoryAndCompareAccumulator(operand: .absoluteY(cpu: self))
         case 0xDF:
-            return (.DCP, .absoluteX(cycles: .fixed), decrementMemoryAndCompareAccumulator)
+            decrementMemoryAndCompareAccumulator(operand: .absoluteX(cpu: self))
 
         case 0xE3:
-            return (.ISB, .indexedIndirect, incrementMemoryAndSubtractWithCarry)
+            incrementMemoryAndSubtractWithCarry(operand: .indexedIndirect(cpu: self))
         case 0xE7:
-            return (.ISB, .zeroPage, incrementMemoryAndSubtractWithCarry)
+            incrementMemoryAndSubtractWithCarry(operand: .zeroPage(cpu: self))
         case 0xEF:
-            return (.ISB, .absolute, incrementMemoryAndSubtractWithCarry)
+            incrementMemoryAndSubtractWithCarry(operand: .absolute(cpu: self))
         case 0xF3:
-            return (.ISB, .indirectIndexed, incrementMemoryAndSubtractWithCarry)
+            incrementMemoryAndSubtractWithCarry(operand: .indirectIndexed(cpu: self))
         case 0xF7:
-            return (.ISB, .zeroPageX, incrementMemoryAndSubtractWithCarry)
+            incrementMemoryAndSubtractWithCarry(operand: .zeroPageX(cpu: self))
         case 0xFB:
-            return (.ISB, .absoluteY(cycles: .fixed), incrementMemoryAndSubtractWithCarry)
+            incrementMemoryAndSubtractWithCarry(operand: .absoluteY(cpu: self))
         case 0xFF:
-            return (.ISB, .absoluteX(cycles: .fixed), incrementMemoryAndSubtractWithCarry)
+            incrementMemoryAndSubtractWithCarry(operand: .absoluteX(cpu: self))
 
         case 0x03:
-            return (.SLO, .indexedIndirect, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .indexedIndirect(cpu: self))
         case 0x07:
-            return (.SLO, .zeroPage, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .zeroPage(cpu: self))
         case 0x0F:
-            return (.SLO, .absolute, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .absolute(cpu: self))
         case 0x13:
-            return (.SLO, .indirectIndexed, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .indirectIndexed(cpu: self))
         case 0x17:
-            return (.SLO, .zeroPageX, arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .zeroPageX(cpu: self))
         case 0x1B:
-            return (.SLO, .absoluteY(cycles: .fixed), arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .absoluteY(cpu: self))
         case 0x1F:
-            return (.SLO, .absoluteX(cycles: .fixed), arithmeticShiftLeftAndBitwiseORwithAccumulator)
+            arithmeticShiftLeftAndBitwiseORwithAccumulator(operand: .absoluteX(cpu: self))
 
         case 0x23:
-            return (.RLA, .indexedIndirect, rotateLeftAndBitwiseANDwithAccumulator)
+            rotateLeftAndBitwiseANDwithAccumulator(operand: .indexedIndirect(cpu: self))
         case 0x27:
-            return (.RLA, .zeroPage, rotateLeftAndBitwiseANDwithAccumulator)
+            rotateLeftAndBitwiseANDwithAccumulator(operand: .zeroPage(cpu: self))
         case 0x2F:
-            return (.RLA, .absolute, rotateLeftAndBitwiseANDwithAccumulator)
+            rotateLeftAndBitwiseANDwithAccumulator(operand: .absolute(cpu: self))
         case 0x33:
-            return (.RLA, .indirectIndexed, rotateLeftAndBitwiseANDwithAccumulator)
+            rotateLeftAndBitwiseANDwithAccumulator(operand: .indirectIndexed(cpu: self))
         case 0x37:
-            return (.RLA, .zeroPageX, rotateLeftAndBitwiseANDwithAccumulator)
+            rotateLeftAndBitwiseANDwithAccumulator(operand: .zeroPageX(cpu: self))
         case 0x3B:
-            return (.RLA, .absoluteY(cycles: .fixed), rotateLeftAndBitwiseANDwithAccumulator)
+            rotateLeftAndBitwiseANDwithAccumulator(operand: .absoluteY(cpu: self))
         case 0x3F:
-            return (.RLA, .absoluteX(cycles: .fixed), rotateLeftAndBitwiseANDwithAccumulator)
+            rotateLeftAndBitwiseANDwithAccumulator(operand: .absoluteX(cpu: self))
 
         case 0x43:
-            return (.SRE, .indexedIndirect, logicalShiftRightAndBitwiseExclusiveOR)
+            logicalShiftRightAndBitwiseExclusiveOR(operand: .indexedIndirect(cpu: self))
         case 0x47:
-            return (.SRE, .zeroPage, logicalShiftRightAndBitwiseExclusiveOR)
+            logicalShiftRightAndBitwiseExclusiveOR(operand: .zeroPage(cpu: self))
         case 0x4F:
-            return (.SRE, .absolute, logicalShiftRightAndBitwiseExclusiveOR)
+            logicalShiftRightAndBitwiseExclusiveOR(operand: .absolute(cpu: self))
         case 0x53:
-            return (.SRE, .indirectIndexed, logicalShiftRightAndBitwiseExclusiveOR)
+            logicalShiftRightAndBitwiseExclusiveOR(operand: .indirectIndexed(cpu: self))
         case 0x57:
-            return (.SRE, .zeroPageX, logicalShiftRightAndBitwiseExclusiveOR)
+            logicalShiftRightAndBitwiseExclusiveOR(operand: .zeroPageX(cpu: self))
         case 0x5B:
-            return (.SRE, .absoluteY(cycles: .fixed), logicalShiftRightAndBitwiseExclusiveOR)
+            logicalShiftRightAndBitwiseExclusiveOR(operand: .absoluteY(cpu: self))
         case 0x5F:
-            return (.SRE, .absoluteX(cycles: .fixed), logicalShiftRightAndBitwiseExclusiveOR)
+            logicalShiftRightAndBitwiseExclusiveOR(operand: .absoluteX(cpu: self))
 
         case 0x63:
-            return (.RRA, .indexedIndirect, rotateRightAndAddWithCarry)
+            rotateRightAndAddWithCarry(operand: .indexedIndirect(cpu: self))
         case 0x67:
-            return (.RRA, .zeroPage, rotateRightAndAddWithCarry)
+            rotateRightAndAddWithCarry(operand: .zeroPage(cpu: self))
         case 0x6F:
-            return (.RRA, .absolute, rotateRightAndAddWithCarry)
+            rotateRightAndAddWithCarry(operand: .absolute(cpu: self))
         case 0x73:
-            return (.RRA, .indirectIndexed, rotateRightAndAddWithCarry)
+            rotateRightAndAddWithCarry(operand: .indirectIndexed(cpu: self))
         case 0x77:
-            return (.RRA, .zeroPageX, rotateRightAndAddWithCarry)
+            rotateRightAndAddWithCarry(operand: .zeroPageX(cpu: self))
         case 0x7B:
-            return (.RRA, .absoluteY(cycles: .fixed), rotateRightAndAddWithCarry)
+            rotateRightAndAddWithCarry(operand: .absoluteY(cpu: self))
         case 0x7F:
-            return (.RRA, .absoluteX(cycles: .fixed), rotateRightAndAddWithCarry)
+            rotateRightAndAddWithCarry(operand: .absoluteX(cpu: self))
 
         default:
-            return (.NOP, .implicit, doNothing)
-        }
-    }
-
-    fileprivate func decodeToFetchOperand(addressingMode: AddressingMode) -> AddressingMode.FetchOperand {
-        switch addressingMode {
-        case .implicit:
-            return CPU.implicit
-        case .accumulator:
-            return CPU.accumulator
-        case .immediate:
-            return CPU.immediate
-        case .zeroPage:
-            return CPU.zeroPage
-        case .zeroPageX:
-            return CPU.zeroPageX
-        case .zeroPageY:
-            return CPU.zeroPageY
-        case .absolute:
-            return CPU.absolute
-        case .absoluteX(let cycles):
-            switch cycles {
-            case .fixed:
-                return CPU.absoluteX
-            case .onlyIfPageCrossed:
-                return CPU.absoluteXWithPenalty
-            }
-        case .absoluteY(let cycles):
-            switch cycles {
-            case .fixed:
-                return CPU.absoluteY
-            case .onlyIfPageCrossed:
-                return CPU.absoluteYWithPenalty
-            }
-        case .relative:
-            return CPU.relative
-        case .indirect:
-            return CPU.indirect
-        case .indexedIndirect:
-            return CPU.indexedIndirect
-        case .indirectIndexed:
-            return CPU.indirectIndexed
+            doNothing(operand: .implicit(cpu: self))
         }
     }
 }
 
 // MARK: - Addressing Mode
-extension CPU {
+extension Operand {
 
     static func implicit(cpu: CPU) -> UInt16 {
         return 0x00
@@ -633,6 +569,9 @@ extension CPU {
         return operand
     }
 
+}
+
+extension CPU {
     static func pageCrossed(value: UInt16, operand: UInt8) -> Bool {
         return CPU.pageCrossed(value: value, operand: operand.u16)
     }
@@ -880,7 +819,7 @@ extension CPU {
     }
 
     /// INX
-    func incrementX(_: Operand) {
+    func incrementX(operand: Operand) {
         registers.X = registers.X &+ 1
         tick()
     }
@@ -985,7 +924,7 @@ extension CPU {
         tick()
     }
 
-    func rotateLeftForAccumulator(_: Operand) {
+    func rotateLeftForAccumulator(operand: Operand) {
         let c = registers.A & 0x80
 
         var a = registers.A << 1
@@ -1171,7 +1110,7 @@ extension CPU {
     }
 
     /// NOP
-    func doNothing(_ operand: Operand) {
+    func doNothing(operand: Operand) {
         tick()
     }
 

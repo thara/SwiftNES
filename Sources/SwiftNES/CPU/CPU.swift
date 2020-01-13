@@ -7,8 +7,6 @@ final class CPU {
 
     let interruptLine: InterruptLine
 
-    private var instructions: [Instruction?]
-
     // TODO Cycle-accurate
     private var cycles: UInt = 0
 
@@ -16,9 +14,6 @@ final class CPU {
         self.registers = CPURegisters()
         self.memory = memory
         self.interruptLine = interruptLine
-
-        self.instructions = []  // Need all properties are initialized because 'self' is used in 'buildInstructionTable'
-        self.instructions = buildInstructionTable()
     }
 
     func powerOn() {
@@ -33,9 +28,7 @@ final class CPU {
         let before = cycles
 
         if !interrupt() {
-            let opcode = fetch()
-            let instruction = decode(opcode)
-            execute(instruction)
+            excuteInstruction(opcode: fetch())
         }
 
         if before <= cycles {
@@ -63,15 +56,6 @@ extension CPU {
         let opcode = read(at: registers.PC)
         registers.PC &+= 1
         return opcode
-    }
-
-    func decode(_ opcode: OpCode) -> Instruction {
-        return instructions[Int(opcode)]!
-    }
-
-    func execute(_ instruction: Instruction) {
-        let operand = instruction.fetchOperand(self)
-        instruction.exec(operand)
     }
 }
 

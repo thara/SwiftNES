@@ -25,24 +25,6 @@ class CPUSpec: QuickSpec {
             }
         }
 
-        describe("decode") {
-            let cpu = CPU()
-
-            context("If passed opcode is supported") {
-                it("select an instruction by opcode") {
-                    let instruction = cpu.decode(0x24)
-                    expect(instruction.mnemonic).to(equal(.BIT))
-                }
-            }
-
-            context("If passed opcode is not supported") {
-                it("return NOP instruction") {
-                    let instruction = cpu.decode(0x02)
-                    expect(instruction.mnemonic).to(equal(.NOP))
-                }
-            }
-        }
-
         describe("reset") {
             it("reset registers & memory state") {
                 let cpu = CPU()

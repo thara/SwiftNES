@@ -15,19 +15,19 @@ struct NESTest {
 
     mutating func before(cpu: CPU) {
         enabled = !cpu.interrupted
-        if enabled {
-            (machineCode, assemblyCode) = disassembler.disassemble()
-            registers = cpu.registers
-        }
+        // if enabled {
+        //     (machineCode, assemblyCode) = disassembler.disassemble()
+        //     registers = cpu.registers
+        // }
     }
 
     func print(ppu: PPU, cycles: UInt) {
-        if enabled {
-            let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(registers!.description)"
-            let ppuState = String(format: "%3d,%3d", ppu.scan.dot, ppu.scan.line)
-            let log = "\(registers.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
-            Swift.print(log)
-        }
+        // if enabled {
+        //     let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(registers!.description)"
+        //     let ppuState = String(format: "%3d,%3d", ppu.scan.dot, ppu.scan.line)
+        //     let log = "\(registers.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
+        //     Swift.print(log)
+        // }
     }
 }
 
