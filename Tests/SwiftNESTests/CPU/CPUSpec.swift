@@ -29,10 +29,10 @@ class CPUSpec: QuickSpec {
 
                 cpu.PC = 0x9052
 
-                var opcode = fetch(cpu: &cpu, memory: &memory)
+                var opcode = cpu.fetch(from: &memory)
                 expect(opcode).to(equal(0x3F))
 
-                opcode = fetch(cpu: &cpu, memory: &memory)
+                opcode = cpu.fetch(from: &memory)
                 expect(opcode).to(equal(0x81))
             }
         }
@@ -56,7 +56,7 @@ class CPUSpec: QuickSpec {
                 memory.write(127, at: 0xFFFD)
                 memory.write(64, at: 0xFFFE)
 
-                _ = reset(cpu: &cpu, memory: &memory)
+                _ = cpu.reset(memory: &memory)
 
                 expect(cpu.A).to(equal(0xFA))
                 expect(cpu.X).to(equal(0x1F))
@@ -74,11 +74,11 @@ class CPUSpec: QuickSpec {
                 cpu.S = 0xFF
                 var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
-                pushStack(0x83, cpu: &cpu, memory: &memory)
-                pushStack(0x14, cpu: &cpu, memory: &memory)
+                cpu.pushStack(0x83, to: &memory)
+                cpu.pushStack(0x14, to: &memory)
 
-                expect(pullStack(cpu: &cpu, memory: &memory) as UInt8).to(equal(0x14))
-                expect(pullStack(cpu: &cpu, memory: &memory) as UInt8).to(equal(0x83))
+                expect(cpu.pullStack(from: &memory) as UInt8).to(equal(0x14))
+                expect(cpu.pullStack(from: &memory) as UInt8).to(equal(0x83))
             }
 
             it("push word, and pull the same") {
@@ -86,11 +86,11 @@ class CPUSpec: QuickSpec {
                 cpu.S = 0xFF
                 var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
 
-                pushStack(word: 0x98AF, cpu: &cpu, memory: &memory)
-                pushStack(word: 0x003A, cpu: &cpu, memory: &memory)
+                cpu.pushStack(word: 0x98AF, to: &memory)
+                cpu.pushStack(word: 0x003A, to: &memory)
 
-                expect(pullStack(cpu: &cpu, memory: &memory) as UInt16).to(equal(0x003A))
-                expect(pullStack(cpu: &cpu, memory: &memory) as UInt16).to(equal(0x98AF))
+                expect(cpu.pullStack(from: &memory) as UInt16).to(equal(0x003A))
+                expect(cpu.pullStack(from: &memory) as UInt16).to(equal(0x98AF))
             }
         }
     }

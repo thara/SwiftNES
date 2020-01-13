@@ -56,8 +56,8 @@ func step(cpu: inout CPU, memory: inout Memory, interruptLine: InterruptLine) ->
     let before = cpu.cycles
 
     if !interrupt(cpu: &cpu, memory: &memory, from: interruptLine) {
-        let opcode = fetch(cpu: &cpu, memory: &memory)
-        excuteInstruction(opcode: opcode, cpu: &cpu, memory: &memory)
+        let opcode = cpu.fetch(from: &memory)
+        cpu.excuteInstruction(opcode: opcode, memory: &memory)
     }
 
     if before <= cpu.cycles {
@@ -67,8 +67,10 @@ func step(cpu: inout CPU, memory: inout Memory, interruptLine: InterruptLine) ->
     }
 }
 
-func fetch(cpu: inout CPU, memory: inout Memory) -> OpCode {
-    let opcode = cpu.read(at: cpu.PC, from: &memory)
-    cpu.PC &+= 1
-    return opcode
+extension CPU {
+    mutating func fetch(from memory: inout Memory) -> OpCode {
+        let opcode = read(at: PC, from: &memory)
+        PC &+= 1
+        return opcode
+    }
 }

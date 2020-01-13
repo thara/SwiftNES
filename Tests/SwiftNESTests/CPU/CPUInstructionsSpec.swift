@@ -466,7 +466,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
 
-                    expect(pullStack(cpu: &cpu, memory: &memory) as UInt8).to(equal(0xF2))
+                    expect(cpu.pullStack(from: &memory) as UInt8).to(equal(0xF2))
                     expect(cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(3))
                 }
@@ -485,7 +485,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
 
-                    expect(Status(rawValue: pullStack(cpu: &cpu, memory: &memory))).to(equal([cpu.P, Status.operatedB] as Status))
+                    expect(Status(rawValue: cpu.pullStack(from: &memory))).to(equal([cpu.P, Status.operatedB] as Status))
                     expect(cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(3))
                 }
@@ -501,7 +501,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.S = 0xFF
                     cpu.A = 0xF2
-                    pushStack(0xA2, cpu: &cpu, memory: &memory)
+                    cpu.pushStack(0xA2, to: &memory)
 
                     let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
 
@@ -522,7 +522,7 @@ class InstructionSpec: QuickSpec {
                     cpu.S = 0xFF
 
                     let status: Status = [.N, .R, .Z, .C]
-                    pushStack(status.rawValue, cpu: &cpu, memory: &memory)
+                    cpu.pushStack(status.rawValue, to: &memory)
 
                     let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
 
@@ -1051,7 +1051,7 @@ class InstructionSpec: QuickSpec {
                     let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
 
                     expect(cpu.PC).to(equal(0x0130))
-                    expect(pullStack(cpu: &cpu, memory: &memory) as UInt16).to(equal(0x0304))
+                    expect(cpu.pullStack(from: &memory) as UInt16).to(equal(0x0304))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -1065,7 +1065,7 @@ class InstructionSpec: QuickSpec {
                     memory.write(opcode, at: 0x0130)
                     cpu.PC = 0x0130
                     cpu.S = 0xFF
-                    pushStack(word: 0x0304, cpu: &cpu, memory: &memory)
+                    cpu.pushStack(word: 0x0304, to: &memory)
 
                     let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
 
@@ -1084,9 +1084,9 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0130
                     cpu.S = 0xFF
 
-                    pushStack(word: 0x0401, cpu: &cpu, memory: &memory)
+                    cpu.pushStack(word: 0x0401, to: &memory)
                     let status: Status = [.N, .Z, .C]
-                    pushStack(status.rawValue, cpu: &cpu, memory: &memory)
+                    cpu.pushStack(status.rawValue, to: &memory)
 
                     let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
 
@@ -1513,8 +1513,8 @@ class InstructionSpec: QuickSpec {
                     let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
 
                     expect(cpu.PC).to(equal(0x8170))
-                    expect(pullStack(cpu: &cpu, memory: &memory) as UInt8).to(equal(status.rawValue | Status.interruptedB.rawValue))
-                    expect(pullStack(cpu: &cpu, memory: &memory) as UInt16).to(equal(0x0303))
+                    expect(cpu.pullStack(from: &memory) as UInt8).to(equal(status.rawValue | Status.interruptedB.rawValue))
+                    expect(cpu.pullStack(from: &memory) as UInt16).to(equal(0x0303))
                     expect(cycle).to(equal(7))
                 }
             }
