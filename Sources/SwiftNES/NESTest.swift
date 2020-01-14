@@ -4,7 +4,7 @@ struct NESTest {
     let disassembler: Disassembler
     let interruptLine: InterruptLine
 
-    // var registers: CPURegisters! = nil
+    var state: CPU! = nil
     var enabled: Bool = false
 
     var machineCode: String = ""
@@ -15,21 +15,21 @@ struct NESTest {
         self.interruptLine = interruptLine
     }
 
-    mutating func before(cpu: inout CPU) {
+    mutating func before(cpu: inout CPU, memory: inout Memory) {
         enabled = !interruptLine.interrupted
-        // if enabled {
-        //     (machineCode, assemblyCode) = disassembler.disassemble()
-        //     registers = cpu.registers
-        // }
+        if enabled {
+            (machineCode, assemblyCode) = disassembler.disassemble(cpu: &cpu, memory: &memory)
+            state = cpu
+        }
     }
 
     func print(ppu: PPU, cycles: UInt) {
-        // if enabled {
-        //     let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(registers!.description)"
-        //     let ppuState = String(format: "%3d,%3d", ppu.scan.dot, ppu.scan.line)
-        //     let log = "\(registers.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
-        //     Swift.print(log)
-        // }
+        if enabled {
+            let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(state!.description)"
+            let ppuState = String(format: "%3d,%3d", ppu.scan.dot, ppu.scan.line)
+            let log = "\(state.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
+            Swift.print(log)
+        }
     }
 }
 
@@ -37,7 +37,7 @@ struct NESTest {
 public func nestest(romPath: String) throws {
     let cartridge = try Cartridge(file: try NESFile(path: romPath))
 
-    let nes = makeNES(renderer: DummyRenderer())
+    let nes = NES(lineBuffer: LineBuffer(renderer: DummyRenderer(), renderingMode: .prioring))
     nes.insert(cartridge: cartridge)
 
     while true {

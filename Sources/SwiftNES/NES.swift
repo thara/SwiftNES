@@ -49,7 +49,7 @@ public final class NES {
 
     public func step() {
 #if nestest
-        if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
+        if !interruptLine.interrupted { nestest.before(cpu: &cpu, memory: &cpuMemory) }
 #endif
 
         let cpuCycles = SwiftNES.step(cpu: &cpu, memory: &cpuMemory, interruptLine: interruptLine)
