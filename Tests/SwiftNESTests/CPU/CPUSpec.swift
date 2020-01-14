@@ -17,7 +17,7 @@ class CPUSpec: QuickSpec {
             }
         }
 
-        describe("fetch") {
+        describe("fetchOpCode") {
             it("read opcode at address indicated by PC") {
                 var cpu = CPU()
                 var memory: Memory = [UInt8](repeating: 0x00, count: 65536)
@@ -29,10 +29,10 @@ class CPUSpec: QuickSpec {
 
                 cpu.PC = 0x9052
 
-                var opcode = cpu.fetch(from: &memory)
+                var opcode = cpu.fetchOpCode(from: &memory)
                 expect(opcode).to(equal(0x3F))
 
-                opcode = cpu.fetch(from: &memory)
+                opcode = cpu.fetchOpCode(from: &memory)
                 expect(opcode).to(equal(0x81))
             }
         }

@@ -1,28 +1,3 @@
-func interrupt(cpu: inout CPU, memory: inout Memory, from interruptLine: InterruptLine) -> Bool {
-    switch interruptLine.get() {
-    case .RESET:
-        cpu.reset(memory: &memory)
-        interruptLine.clear(.RESET)
-    case .NMI:
-        cpu.handleNMI(memory: &memory)
-        interruptLine.clear(.NMI)
-    case .IRQ:
-        if cpu.P.contains(.I) {
-            cpu.handleIRQ(memory: &memory)
-            interruptLine.clear(.IRQ)
-        }
-    case .BRK:
-        if cpu.P.contains(.I) {
-            cpu.handleBRK(memory: &memory)
-            interruptLine.clear(.BRK)
-        }
-    default:
-        return false
-    }
-
-    return true
-}
-
 extension CPU {
     /// Reset registers & memory state
     mutating func reset(memory: inout Memory) {

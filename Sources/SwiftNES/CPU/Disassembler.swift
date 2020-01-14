@@ -1,21 +1,21 @@
-struct Instruction {
-    let opcode: OpCode
-    let mnemonic: Mnemonic
-    let addressingMode: AddressingMode
-    let fetchOperand: AddressingMode.FetchOperand
-    let exec: Operation
-}
+// struct Instruction {
+//     let opcode: OpCode
+//     let mnemonic: Mnemonic
+//     let addressingMode: AddressingMode
+//     let fetchOperand: AddressingMode.FetchOperand
+//     let exec: Operation
+// }
 
-struct CPUStep {
-    var pc: UInt16 = 0x00
+// struct CPUStep {
+//     var pc: UInt16 = 0x00
 
-    var operand1: UInt8 = 0x00
-    var operand2: UInt8 = 0x00
+//     var operand1: UInt8 = 0x00
+//     var operand2: UInt8 = 0x00
 
-    var operand16: UInt16 {
-        return operand1.u16 | (operand2.u16 << 8)
-    }
-}
+//     var operand16: UInt16 {
+//         return operand1.u16 | (operand2.u16 << 8)
+//     }
+// }
 
 // swiftlint:disable cyclomatic_complexity
 class Disassembler {
