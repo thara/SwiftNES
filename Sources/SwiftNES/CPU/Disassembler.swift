@@ -133,13 +133,13 @@ class Disassembler {
         case .relative:
             return String(format: "$%04X", Int(step.pc) &+ 2 &+ Int(operand1.i8))
         case .indirect:
-            return String(format: "($%04X) = %04X", operand16, memory.readOnIndirect(operand: operand16))
+            return String(format: "($%04X) = %04X", operand16, readOnIndirect(operand: operand16, read: memory.read))
         case .indexedIndirect:
             let operandX = x &+ operand1
-            let address = memory.readOnIndirect(operand: operandX.u16)
+            let address = readOnIndirect(operand: operandX.u16, read: memory.read)
             return String(format: "($%02X,X) @ %02X = %04X = %02X", operand1, operandX, address, memory.read(at: address))
         case .indirectIndexed:
-            let data = memory.readOnIndirect(operand: operand1.u16)
+            let data = readOnIndirect(operand: operand1.u16, read: memory.read)
             return String(format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ y.u16, memory.read(at: data &+ y.u16))
         }
     }
@@ -166,11 +166,11 @@ class Disassembler {
         case .relative:
             return step.pc
         case .indirect:
-            return memory.readOnIndirect(operand: step.operand16)
+            return readOnIndirect(operand: step.operand16, read: memory.read)
         case .indirectIndexed:
-            return memory.readOnIndirect(operand: (step.operand16 &+ step.state.X.u16) & 0xFF)
+            return readOnIndirect(operand: (step.operand16 &+ step.state.X.u16) & 0xFF, read: memory.read)
         case .indexedIndirect:
-            return memory.readOnIndirect(operand: step.operand16) &+ step.state.Y.u16
+            return readOnIndirect(operand: step.operand16, read: memory.read) &+ step.state.Y.u16
         default:
             return 0x00
         }
@@ -423,14 +423,6 @@ class Disassembler {
 
             default: return (.NOP, .implicit)
         }
-    }
-}
-
-extension Memory {
-    func readOnIndirect(operand: UInt16) -> UInt16 {
-        let low = read(at: operand).u16
-        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8
-        return low | high
     }
 }
 

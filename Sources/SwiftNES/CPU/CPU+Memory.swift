@@ -31,12 +31,16 @@ extension CPU {
     }
 
     mutating func readWord(at address: UInt16, from memory: inout Memory) -> UInt16 {
-        return read(at: address, from: &memory).u16 | (read(at: address + 1, from: &memory).u16 << 8)
+        return SwiftNES.readWord(at: address) { op in read(at: op, from: &memory) }
     }
 
     mutating func readOnIndirect(operand: UInt16, from memory: inout Memory) -> UInt16 {
-        let low = read(at: operand, from: &memory).u16
-        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF), from: &memory).u16 &<< 8   // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-        return low | high
+        return SwiftNES.readOnIndirect(operand: operand) { op in read(at: op, from: &memory) }
     }
+}
+
+func readOnIndirect(operand: UInt16, read: (UInt16) -> UInt8) -> UInt16 {
+    let low = read(operand).u16
+    let high = read(operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8
+    return low | high
 }

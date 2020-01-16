@@ -10,9 +10,14 @@ protocol Memory {
     mutating func clear()
 }
 
+@inline(__always)
+func readWord(at address: UInt16, read: (UInt16) -> UInt8) -> UInt16 {
+    return read(address).u16 | (read(address + 1).u16 << 8)
+}
+
 extension Memory {
     func readWord(at address: UInt16) -> UInt16 {
-        return read(at: address).u16 | (read(at: address + 1).u16 << 8)
+        return SwiftNES.readWord(at: address, read: read)
     }
 }
 

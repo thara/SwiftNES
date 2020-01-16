@@ -1,5 +1,3 @@
-import Logging
-
 func step(cpu: inout CPU, memory: inout Memory, interruptLine: InterruptLine) -> UInt {
     let before = cpu.cycles
 
