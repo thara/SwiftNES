@@ -20,9 +20,7 @@ final class PPU {
 
     var spriteZeroOnLine = false
 
-    private(set) var frames: UInt = 0
-
-    private let interruptLine: InterruptLine
+    var frames: UInt = 0
 
     var scan = Scan()
     public var lineBuffer = LineBuffer()
@@ -30,17 +28,16 @@ final class PPU {
     // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
     var internalDataBus: UInt8 = 0x00
 
-    init(memory: Memory, interruptLine: InterruptLine) {
+    init(memory: Memory) {
         self.memory = memory
-        self.interruptLine = interruptLine
     }
 
     var renderingEnabled: Bool {
         return registers.mask.contains(.sprite) || registers.mask.contains(.background)
     }
 
-    func step() {
-        process()
+    func step(interruptLine: InterruptLine) {
+        process(interruptLine: interruptLine)
 
         switch scan.nextDot() {
         case .frame:
@@ -62,7 +59,7 @@ final class PPU {
 // MARK: - process implementation
 extension PPU {
 
-    func process() {
+    func process(interruptLine: InterruptLine) {
         var preRendering = false
 
         switch scan.line {
@@ -211,7 +208,7 @@ extension PPU {
             tile.shift()
         }
 
-        guard registers.isEnabledBackground(at: x) else {
+        guard isEnabledBackground(registers.mask, at: x) else {
             return .zero
         }
         return BackgroundPixel(
@@ -272,7 +269,7 @@ extension PPU {
     }
 
     func getSpritePixel(x: Int, background bg: BackgroundPixel) -> SpritePixel {
-        guard registers.isEnabledSprite(at: x) else {
+        guard isEnabledSprite(registers.mask, at: x) else {
             return .zero
         }
 
@@ -346,4 +343,12 @@ struct SpritePixel {
     var priority: Bool
 
     static let zero = SpritePixel(enabled: false, color: 0x00, priority: true)
+}
+
+func isEnabledSprite(_ mask: PPUMask, at x: Int) -> Bool {
+    return mask.contains(.sprite) && !(x < 8 && !mask.contains(.spriteLeft))
+}
+
+func isEnabledBackground(_ mask: PPUMask, at x: Int) -> Bool {
+    return mask.contains(.background) && !(x < 8 && !mask.contains(.backgroundLeft))
 }

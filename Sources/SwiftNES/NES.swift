@@ -3,6 +3,7 @@ public final class NES {
     private let ppu: PPU
 
     private var cpuMemory: Memory
+    private var ppuMemory = PPUMemoryMap()
 
     private let cartridgeDrive: CartridgeDrive
     private let controllerPort = ControllerPort()
@@ -21,7 +22,7 @@ public final class NES {
 
     public init() {
         let ppuMemoryMap = PPUMemoryMap()
-        ppu = PPU(memory: ppuMemoryMap, interruptLine: interruptLine)
+        ppu = PPU(memory: ppuMemoryMap)
 
         let cpuMemoryMap = CPUMemoryMap()
         cpuMemoryMap.ppuPort = ppu.port
@@ -58,7 +59,7 @@ public final class NES {
         while 0 < ppuCycles {
             let currentLine = ppu.scan.line
 
-            ppu.step()
+            ppu.step(interruptLine: interruptLine)
 
             if currentLine != ppu.scan.line {
                 render(currentLine, &ppu.lineBuffer)

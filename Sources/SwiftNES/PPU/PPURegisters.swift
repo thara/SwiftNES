@@ -36,12 +36,8 @@ struct PPURegisters: CustomStringConvertible {
         return controller.contains(.spriteSize) ? 16 : 8
     }
 
-    func isEnabledBackground(at x: Int) -> Bool {
-        return mask.contains(.background) && !(x < 8 && !mask.contains(.backgroundLeft))
-    }
-
-    func isEnabledSprite(at x: Int) -> Bool {
-        return mask.contains(.sprite) && !(x < 8 && !mask.contains(.spriteLeft))
+    var backgroundPatternTableAddrBase: UInt16 {
+        return controller.contains(.bgTableAddr) ? 0x1000 : 0x0000
     }
 
     mutating func clear() {
@@ -148,10 +144,6 @@ struct PPURegisters: CustomStringConvertible {
     mutating func copyY() {
         // v: IHGF.ED CBA..... = t: IHGF.ED CBA.....
         v = (v & ~0b111101111100000) | (t & 0b111101111100000)
-    }
-
-    var backgroundPatternTableAddrBase: UInt16 {
-        return controller.contains(.bgTableAddr) ? 0x1000 : 0x0000
     }
 }
 
