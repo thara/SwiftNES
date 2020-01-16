@@ -1,13 +1,13 @@
 public final class NES {
-    private var cpu: CPU
+    private var cpu = CPU()
     private let ppu: PPU
 
     private var cpuMemory: Memory
 
     private let cartridgeDrive: CartridgeDrive
-    private let controllerPort: ControllerPort
+    private let controllerPort = ControllerPort()
 
-    private let interruptLine: InterruptLine
+    private let interruptLine = InterruptLine()
 
     public static let maxDot = 340
     public static let maxLine = 261
@@ -20,19 +20,13 @@ public final class NES {
     private(set) var cycles: UInt = 0
 
     public init() {
-        interruptLine = InterruptLine()
-
-        let cpuMemoryMap = CPUMemoryMap()
-        cpu = CPU()
-        cpuMemory = cpuMemoryMap
-
         let ppuMemoryMap = PPUMemoryMap()
         ppu = PPU(memory: ppuMemoryMap, interruptLine: interruptLine)
 
+        let cpuMemoryMap = CPUMemoryMap()
         cpuMemoryMap.ppuPort = ppu.port
-
-        controllerPort = ControllerPort()
         cpuMemoryMap.controllerPort = controllerPort
+        self.cpuMemory = cpuMemoryMap
 
         cartridgeDrive = BusConnectedCartridgeDrive(cpuMemoryMap: cpuMemoryMap, ppuMemoryMap: ppuMemoryMap)
 
