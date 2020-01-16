@@ -20,15 +20,33 @@ final class SDLFrameRenderer: Renderer {
 
     private var line = 0
 
-    init(renderer: SDLRenderer, screenRect: SDL_Rect) throws {
+    public enum RenderingMode {
+        case prioring, backgroundOnly, spriteOnly
+    }
+
+    private let renderingMode: RenderingMode
+
+    init(renderer: SDLRenderer, screenRect: SDL_Rect, renderingMode: RenderingMode = .prioring) throws {
         self.renderer = renderer
         self.screenRect = screenRect
+        self.renderingMode = renderingMode
 
         frameTexture = try SDLTexture(
             renderer: renderer, format: .argb8888, access: .streaming, width: screenWidth, height: screenHeight
         )
 
         frameBuffer = [UInt32](repeating: 0x00, count: rowPixels * screenHeight)
+    }
+
+    func newLine(number: Int, lineBuffer: inout LineBuffer) {
+        switch renderingMode {
+        case .prioring:
+            newLine(number: number, pixels: lineBuffer.buffer)
+        case .backgroundOnly:
+            newLine(number: number, pixels: lineBuffer.backgroundBuffer)
+        case .spriteOnly:
+            newLine(number: number, pixels: lineBuffer.spriteBuffer)
+        }
     }
 
     func newLine(number: Int, pixels: [UInt32]) {

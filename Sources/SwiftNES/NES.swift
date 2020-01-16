@@ -19,7 +19,7 @@ public final class NES {
 
     private(set) var cycles: UInt = 0
 
-    public init(lineBuffer: LineBuffer) {
+    public init() {
         interruptLine = InterruptLine()
 
         let cpuMemoryMap = CPUMemoryMap()
@@ -27,7 +27,7 @@ public final class NES {
         cpuMemory = cpuMemoryMap
 
         let ppuMemoryMap = PPUMemoryMap()
-        ppu = PPU(memory: ppuMemoryMap, interruptLine: interruptLine, lineBuffer: lineBuffer)
+        ppu = PPU(memory: ppuMemoryMap, interruptLine: interruptLine)
 
         cpuMemoryMap.ppuPort = ppu.port
 
@@ -39,15 +39,15 @@ public final class NES {
         nestest = NESTest(disassembler: Disassembler(), interruptLine: interruptLine)
     }
 
-    public func runFrame() {
+    public func runFrame(render: (Int, inout LineBuffer) -> Void) {
         let currentFrame = ppu.frames
 
         repeat {
-            step()
+            step(render)
         } while currentFrame == ppu.frames
     }
 
-    public func step() {
+    public func step(_ render: (Int, inout LineBuffer) -> Void) {
 #if nestest
         if !interruptLine.interrupted { nestest.before(cpu: &cpu, memory: &cpuMemory) }
 #endif
@@ -62,7 +62,14 @@ public final class NES {
 
         var ppuCycles = cpuCycles &* 3
         while 0 < ppuCycles {
+            let currentLine = ppu.scan.line
+
             ppu.step()
+
+            if currentLine != ppu.scan.line {
+                render(currentLine, &ppu.lineBuffer)
+            }
+
             ppuCycles &-= 1
         }
     }

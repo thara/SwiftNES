@@ -25,15 +25,14 @@ final class PPU {
     private let interruptLine: InterruptLine
 
     var scan = Scan()
-    public var lineBuffer: LineBuffer
+    public var lineBuffer = LineBuffer()
 
     // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
     var internalDataBus: UInt8 = 0x00
 
-    init(memory: Memory, interruptLine: InterruptLine, lineBuffer: LineBuffer = LineBuffer()) {
+    init(memory: Memory, interruptLine: InterruptLine) {
         self.memory = memory
         self.interruptLine = interruptLine
-        self.lineBuffer = lineBuffer
     }
 
     var renderingEnabled: Bool {
@@ -44,10 +43,7 @@ final class PPU {
         process()
 
         switch scan.nextDot() {
-        case .line(let lastLine):
-            lineBuffer.flush(to: lastLine)
-        case .frame(let lastLine):
-            lineBuffer.flush(to: lastLine)
+        case .frame:
             frames += 1
         default:
             break
