@@ -10,7 +10,7 @@ private let pitch = {
 
 private let safeAreaHeight = (NES.height &- screenHeight) / 2
 
-final class SDLFrameRenderer: Renderer {
+final class SDLFrameRenderer {
 
     private let renderer: SDLRenderer
     private let screenRect: SDL_Rect

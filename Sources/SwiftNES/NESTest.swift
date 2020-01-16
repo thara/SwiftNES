@@ -37,7 +37,7 @@ struct NESTest {
 public func nestest(romPath: String) throws {
     let cartridge = try Cartridge(file: try NESFile(path: romPath))
 
-    let nes = NES(lineBuffer: LineBuffer(renderer: DummyRenderer(), renderingMode: .prioring))
+    let nes = NES()
     nes.insert(cartridge: cartridge)
 
     while true {
@@ -46,10 +46,6 @@ public func nestest(romPath: String) throws {
             break
         }
     }
-}
-
-private class DummyRenderer: Renderer {
-    func newLine(number: Int, pixels: [UInt32]) {}
 }
 #endif
 
