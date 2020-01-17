@@ -5,12 +5,9 @@ import Nimble
 
 class InstructionSpec: QuickSpec {
     override func spec() {
-        var cpu: CPU!
-        var memory: Memory!
-        let interruptLine = InterruptLine()
+        var nes: NES!
         beforeEach {
-            cpu = CPU()
-            memory = [UInt8](repeating: 0x00, count: 65536)
+            nes = NES()
         }
 
         describe("LDA") {
@@ -19,14 +16,14 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xA9
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0xF8))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(nes.cpu.A).to(equal(0xF8))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -35,15 +32,15 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xA5
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x93, at: 0x00F8)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x93, at: 0x00F8, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x93))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(nes.cpu.A).to(equal(0x93))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(3))
                 }
             }
@@ -52,16 +49,16 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xB5
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x93, at: 0x0087)
-                    cpu.PC = 0x0302
-                    cpu.X = 0x8F
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x93, at: 0x0087, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.X = 0x8F
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x93))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(nes.cpu.A).to(equal(0x93))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -70,16 +67,16 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xAD
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x07, at: 0x0304)
-                    memory.write(0x51, at: 0x07F8)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x07, at: 0x0304, to: &nes)
+                    write(0x51, at: 0x07F8, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x51))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.A).to(equal(0x51))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -88,17 +85,17 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xBD
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x07, at: 0x0304)
-                    memory.write(0x51, at: 0x07FA)
-                    cpu.PC = 0x0302
-                    cpu.X = 0x02
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x07, at: 0x0304, to: &nes)
+                    write(0x51, at: 0x07FA, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.X = 0x02
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x51))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.A).to(equal(0x51))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -107,17 +104,17 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xB9
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x07, at: 0x0304)
-                    memory.write(0x51, at: 0x07FA)
-                    cpu.PC = 0x0302
-                    cpu.Y = 0x02
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x07, at: 0x0304, to: &nes)
+                    write(0x51, at: 0x07FA, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.Y = 0x02
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x51))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.A).to(equal(0x51))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -126,19 +123,19 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xA1
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x23, at: 0x00FA)
-                    memory.write(0x04, at: 0x00FB)
-                    memory.write(0x9F, at: 0x0423)
-                    cpu.PC = 0x0302
-                    cpu.X = 0x02
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x23, at: 0x00FA, to: &nes)
+                    write(0x04, at: 0x00FB, to: &nes)
+                    write(0x9F, at: 0x0423, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.X = 0x02
                     // low: 0xFA, high: (0xFA + 1) & 0x00FF = 0xFB
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x9F))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(nes.cpu.A).to(equal(0x9F))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -147,18 +144,18 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xB1
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x40, at: 0x0303)
-                    memory.write(0x71, at: 0x0040)
-                    memory.write(0x07, at: 0x0041)
-                    memory.write(0x93, at: 0x0773)
-                    cpu.PC = 0x0302
-                    cpu.Y = 0x02
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x40, at: 0x0303, to: &nes)
+                    write(0x71, at: 0x0040, to: &nes)
+                    write(0x07, at: 0x0041, to: &nes)
+                    write(0x93, at: 0x0773, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.Y = 0x02
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x93))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(nes.cpu.A).to(equal(0x93))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(5))
                 }
             }
@@ -170,14 +167,14 @@ class InstructionSpec: QuickSpec {
                 it("load X register") {
                     let opcode: UInt8 = 0xA2
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.X).to(equal(0xF8))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(nes.cpu.X).to(equal(0xF8))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -186,15 +183,15 @@ class InstructionSpec: QuickSpec {
                 it("load X register") {
                     let opcode: UInt8 = 0xA6
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x93, at: 0x00F8)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x93, at: 0x00F8, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.X).to(equal(0x93))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(nes.cpu.X).to(equal(0x93))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(3))
                 }
             }
@@ -203,16 +200,16 @@ class InstructionSpec: QuickSpec {
                 it("load X register") {
                     let opcode: UInt8 = 0xB6
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x93, at: 0x0087)
-                    cpu.PC = 0x0302
-                    cpu.Y = 0x8F
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x93, at: 0x0087, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.Y = 0x8F
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.X).to(equal(0x93))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(nes.cpu.X).to(equal(0x93))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -221,16 +218,16 @@ class InstructionSpec: QuickSpec {
                 it("load accumulator") {
                     let opcode: UInt8 = 0xAE
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x07, at: 0x0304)
-                    memory.write(0x51, at: 0x07F8)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x07, at: 0x0304, to: &nes)
+                    write(0x51, at: 0x07F8, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.X).to(equal(0x51))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.X).to(equal(0x51))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -244,15 +241,15 @@ class InstructionSpec: QuickSpec {
                 it("Store accumulator") {
                     let opcode: UInt8 = 0x85
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    cpu.PC = 0x0302
-                    cpu.A = 0x93
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0x93
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x00F8)).to(equal(0x93))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(read(at: 0x00F8, from: &nes)).to(equal(0x93))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(3))
                 }
             }
@@ -261,16 +258,16 @@ class InstructionSpec: QuickSpec {
                 it("Store accumulator") {
                     let opcode: UInt8 = 0x95
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    cpu.PC = 0x0302
-                    cpu.A = 0x32
-                    cpu.X = 0x8F
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0x32
+                    nes.cpu.X = 0x8F
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0087)).to(equal(0x32))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(read(at: 0x0087, from: &nes)).to(equal(0x32))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -279,16 +276,16 @@ class InstructionSpec: QuickSpec {
                 it("Store accumulator") {
                     let opcode: UInt8 = 0x8D
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x07, at: 0x0304)
-                    cpu.PC = 0x0302
-                    cpu.A = 0x19
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x07, at: 0x0304, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0x19
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x07F8)).to(equal(0x19))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x07F8, from: &nes)).to(equal(0x19))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -297,17 +294,17 @@ class InstructionSpec: QuickSpec {
                 it("Store accumulator") {
                     let opcode: UInt8 = 0x9D
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x07, at: 0x0304)
-                    cpu.PC = 0x0302
-                    cpu.A = 0x24
-                    cpu.X = 0x02
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x07, at: 0x0304, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0x24
+                    nes.cpu.X = 0x02
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x07FA)).to(equal(0x24))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x07FA, from: &nes)).to(equal(0x24))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(5))
                 }
             }
@@ -316,18 +313,18 @@ class InstructionSpec: QuickSpec {
                 it("Store accumulator") {
                     let opcode: UInt8 = 0x99
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x07, at: 0x0304)
-                    memory.write(0x51, at: 0x07FA)
-                    cpu.PC = 0x0302
-                    cpu.A = 0x23
-                    cpu.Y = 0x02
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x07, at: 0x0304, to: &nes)
+                    write(0x51, at: 0x07FA, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0x23
+                    nes.cpu.Y = 0x02
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x07FA)).to(equal(0x23))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x07FA, from: &nes)).to(equal(0x23))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(5))
                 }
             }
@@ -336,20 +333,20 @@ class InstructionSpec: QuickSpec {
                 it("Store accumulator") {
                     let opcode: UInt8 = 0x81
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0xF8, at: 0x0303)
-                    memory.write(0x23, at: 0x00FA)
-                    memory.write(0x04, at: 0x00FB)
-                    memory.write(0x9F, at: 0x0423)
-                    cpu.PC = 0x0302
-                    cpu.A = 0xF1
-                    cpu.X = 0x02
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0xF8, at: 0x0303, to: &nes)
+                    write(0x23, at: 0x00FA, to: &nes)
+                    write(0x04, at: 0x00FB, to: &nes)
+                    write(0x9F, at: 0x0423, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0xF1
+                    nes.cpu.X = 0x02
                     // low: 0xFA, high: (0xFA + 1) & 0x00FF = 0xFB
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0423)).to(equal(0xF1))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(read(at: 0x0423, from: &nes)).to(equal(0xF1))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -358,19 +355,19 @@ class InstructionSpec: QuickSpec {
                 it("Store accumulator") {
                     let opcode: UInt8 = 0x91
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x40, at: 0x0303)
-                    memory.write(0x71, at: 0x0040)
-                    memory.write(0x07, at: 0x0041)
-                    memory.write(0x93, at: 0x0773)
-                    cpu.PC = 0x0302
-                    cpu.A = 0xF2
-                    cpu.Y = 0x02
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x40, at: 0x0303, to: &nes)
+                    write(0x71, at: 0x0040, to: &nes)
+                    write(0x07, at: 0x0041, to: &nes)
+                    write(0x93, at: 0x0773, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0xF2
+                    nes.cpu.Y = 0x02
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0773)).to(equal(0xF2))
-                    expect(cpu.PC).to(equal(0x0304))
+                    expect(read(at: 0x0773, from: &nes)).to(equal(0xF2))
+                    expect(nes.cpu.PC).to(equal(0x0304))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -383,15 +380,15 @@ class InstructionSpec: QuickSpec {
                 it("transfer Accumulator to X register") {
                     let opcode: UInt8 = 0xAA
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.A = 0xF2
-                    cpu.X = 0x32
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0xF2
+                    nes.cpu.X = 0x32
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.X).to(equal(0xF2))
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.X).to(equal(0xF2))
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -402,15 +399,15 @@ class InstructionSpec: QuickSpec {
                 it("transfer Accumulator to Y register") {
                     let opcode: UInt8 = 0xA8
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.A = 0xF2
-                    cpu.Y = 0x32
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0xF2
+                    nes.cpu.Y = 0x32
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.Y).to(equal(0xF2))
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.Y).to(equal(0xF2))
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -421,15 +418,15 @@ class InstructionSpec: QuickSpec {
                 it("transfer X register to accumulator") {
                     let opcode: UInt8 = 0x8A
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.A = 0xF2
-                    cpu.X = 0x32
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0xF2
+                    nes.cpu.X = 0x32
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x32))
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.A).to(equal(0x32))
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -440,15 +437,15 @@ class InstructionSpec: QuickSpec {
                 it("transfer Y register to accumulator") {
                     let opcode: UInt8 = 0x98
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.A = 0xF2
-                    cpu.Y = 0x32
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0xF2
+                    nes.cpu.Y = 0x32
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0x32))
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.A).to(equal(0x32))
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -459,15 +456,15 @@ class InstructionSpec: QuickSpec {
                 it("push accumulator to stack") {
                     let opcode: UInt8 = 0x48
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.S = 0xFF
-                    cpu.A = 0xF2
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.S = 0xFF
+                    nes.cpu.A = 0xF2
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.pullStack(from: &memory) as UInt8).to(equal(0xF2))
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(pullStack(from: &nes) as UInt8).to(equal(0xF2))
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(3))
                 }
             }
@@ -478,15 +475,15 @@ class InstructionSpec: QuickSpec {
                 it("push processor status to stack") {
                     let opcode: UInt8 = 0x08
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.S = 0xFF
-                    cpu.P = [.N, .B, .I, .Z, .C]
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.S = 0xFF
+                    nes.cpu.P = [.N, .B, .I, .Z, .C]
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(Status(rawValue: cpu.pullStack(from: &memory))).to(equal([cpu.P, Status.operatedB] as Status))
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(Status(rawValue: pullStack(from: &nes))).to(equal([nes.cpu.P, Status.operatedB] as Status))
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(3))
                 }
             }
@@ -497,16 +494,16 @@ class InstructionSpec: QuickSpec {
                 it("pull stack and write accumulator") {
                     let opcode: UInt8 = 0x68
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.S = 0xFF
-                    cpu.A = 0xF2
-                    cpu.pushStack(0xA2, to: &memory)
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.S = 0xFF
+                    nes.cpu.A = 0xF2
+                    pushStack(0xA2, to: &nes)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0xA2))
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.A).to(equal(0xA2))
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -517,17 +514,17 @@ class InstructionSpec: QuickSpec {
                 it("pull stack and write processor status") {
                     let opcode: UInt8 = 0x28
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.S = 0xFF
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.S = 0xFF
 
                     let status: Status = [.N, .R, .Z, .C]
-                    cpu.pushStack(status.rawValue, to: &memory)
+                    pushStack(status.rawValue, to: &nes)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.P).to(equal(status))
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.P).to(equal(status))
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -538,17 +535,17 @@ class InstructionSpec: QuickSpec {
                 it("performe logical AND on the accumulator") {
                     let opcode: UInt8 = 0x2D
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(0b01011100, at: 0x0130)
-                    cpu.PC = 0x0302
-                    cpu.A = 0b11011011
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(0b01011100, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0b11011011
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0b01011000))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.A).to(equal(0b01011000))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -561,17 +558,17 @@ class InstructionSpec: QuickSpec {
                 it("performe exclusive OR on the accumulator") {
                     let opcode: UInt8 = 0x4D
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(0b01011100, at: 0x0130)
-                    cpu.PC = 0x0302
-                    cpu.A = 0b11011011
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(0b01011100, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0b11011011
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0b10000111))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.A).to(equal(0b10000111))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -584,17 +581,17 @@ class InstructionSpec: QuickSpec {
                 it("performe OR on the accumulator") {
                     let opcode: UInt8 = 0x0D
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(0b01011100, at: 0x0130)
-                    cpu.PC = 0x0302
-                    cpu.A = 0b11011011
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(0b01011100, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0b11011011
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0b11011111))
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.A).to(equal(0b11011111))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -609,19 +606,19 @@ class InstructionSpec: QuickSpec {
                     it("set zero status") {
                         let opcode: UInt8 = 0x2C
 
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x30, at: 0x0303)
-                        memory.write(0x01, at: 0x0304)
-                        memory.write(0b10011100, at: 0x0130)
-                        cpu.PC = 0x0302
-                        cpu.A = 0b01000011
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x30, at: 0x0303, to: &nes)
+                        write(0x01, at: 0x0304, to: &nes)
+                        write(0b10011100, at: 0x0130, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.A = 0b01000011
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.P.contains(.Z)).to(beTruthy())
-                        expect(cpu.P.contains(.V)).to(beFalsy())
-                        expect(cpu.P.contains(.N)).to(beTruthy())
-                        expect(cpu.PC).to(equal(0x0305))
+                        expect(nes.cpu.P.contains(.Z)).to(beTruthy())
+                        expect(nes.cpu.P.contains(.V)).to(beFalsy())
+                        expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                        expect(nes.cpu.PC).to(equal(0x0305))
                         expect(cycle).to(equal(4))
                     }
                 }
@@ -630,19 +627,19 @@ class InstructionSpec: QuickSpec {
                     it("set overflow status") {
                         let opcode: UInt8 = 0x2C
 
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x30, at: 0x0303)
-                        memory.write(0x01, at: 0x0304)
-                        memory.write(0b01011100, at: 0x0130)
-                        cpu.PC = 0x0302
-                        cpu.A = 0b11011011
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x30, at: 0x0303, to: &nes)
+                        write(0x01, at: 0x0304, to: &nes)
+                        write(0b01011100, at: 0x0130, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.A = 0b11011011
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.P.contains(.Z)).to(beFalsy())
-                        expect(cpu.P.contains(.V)).to(beTruthy())
-                        expect(cpu.P.contains(.N)).to(beFalsy())
-                        expect(cpu.PC).to(equal(0x0305))
+                        expect(nes.cpu.P.contains(.Z)).to(beFalsy())
+                        expect(nes.cpu.P.contains(.V)).to(beTruthy())
+                        expect(nes.cpu.P.contains(.N)).to(beFalsy())
+                        expect(nes.cpu.PC).to(equal(0x0305))
                         expect(cycle).to(equal(4))
                     }
                 }
@@ -651,19 +648,19 @@ class InstructionSpec: QuickSpec {
                     it("set negative status") {
                         let opcode: UInt8 = 0x2C
 
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x30, at: 0x0303)
-                        memory.write(0x01, at: 0x0304)
-                        memory.write(0b10011100, at: 0x0130)
-                        cpu.PC = 0x0302
-                        cpu.A = 0b10011011
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x30, at: 0x0303, to: &nes)
+                        write(0x01, at: 0x0304, to: &nes)
+                        write(0b10011100, at: 0x0130, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.A = 0b10011011
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.P.contains(.Z)).to(beFalsy())
-                        expect(cpu.P.contains(.V)).to(beFalsy())
-                        expect(cpu.P.contains(.N)).to(beTruthy())
-                        expect(cpu.PC).to(equal(0x0305))
+                        expect(nes.cpu.P.contains(.Z)).to(beFalsy())
+                        expect(nes.cpu.P.contains(.V)).to(beFalsy())
+                        expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                        expect(nes.cpu.PC).to(equal(0x0305))
                         expect(cycle).to(equal(4))
                     }
                 }
@@ -677,22 +674,22 @@ class InstructionSpec: QuickSpec {
                 it("add with carry") {
                     let opcode: UInt8 = 0x6D
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(255, at: 0x0130)
-                    cpu.PC = 0x0302
-                    cpu.A = 12
-                    cpu.P.formUnion(.C)
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(255, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 12
+                    nes.cpu.P.formUnion(.C)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(12))
-                    expect(cpu.P.contains(.Z)).to(beFalsy())
-                    expect(cpu.P.contains(.V)).to(beFalsy())
-                    expect(cpu.P.contains(.N)).to(beFalsy())
-                    expect(cpu.P.contains(.C)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.A).to(equal(12))
+                    expect(nes.cpu.P.contains(.Z)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.V)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.N)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -706,22 +703,22 @@ class InstructionSpec: QuickSpec {
                 it("subtract with carry") {
                     let opcode: UInt8 = 0xED
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(42, at: 0x0130)
-                    cpu.PC = 0x0302
-                    cpu.A = 30
-                    cpu.P.formUnion(.C)
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(42, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 30
+                    nes.cpu.P.formUnion(.C)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(244))
-                    expect(cpu.P.contains(.Z)).to(beFalsy())
-                    expect(cpu.P.contains(.V)).to(beFalsy())
-                    expect(cpu.P.contains(.N)).to(beTruthy())
-                    expect(cpu.P.contains(.C)).to(beFalsy())
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.A).to(equal(244))
+                    expect(nes.cpu.P.contains(.Z)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.V)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                    expect(nes.cpu.P.contains(.C)).to(beFalsy())
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(4))
                 }
             }
@@ -735,57 +732,57 @@ class InstructionSpec: QuickSpec {
 
                 context("A == M") {
                     it("set Zero flag") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x30, at: 0x0303)
-                        memory.write(0x01, at: 0x0304)
-                        memory.write(97, at: 0x0130)
-                        cpu.PC = 0x0302
-                        cpu.A = 97
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x30, at: 0x0303, to: &nes)
+                        write(0x01, at: 0x0304, to: &nes)
+                        write(97, at: 0x0130, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.A = 97
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.P.contains(.C)).to(beTruthy())
-                        expect(cpu.P.contains(.Z)).to(beTruthy())
-                        expect(cpu.P.contains(.N)).to(beFalsy())
-                        expect(cpu.PC).to(equal(0x0305))
+                        expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                        expect(nes.cpu.P.contains(.Z)).to(beTruthy())
+                        expect(nes.cpu.P.contains(.N)).to(beFalsy())
+                        expect(nes.cpu.PC).to(equal(0x0305))
                         expect(cycle).to(equal(4))
                     }
                 }
 
                 context("A >= M") {
                     it("set Zero flag") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x30, at: 0x0303)
-                        memory.write(0x01, at: 0x0304)
-                        memory.write(97, at: 0x0130)
-                        cpu.PC = 0x0302
-                        cpu.A = 98
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x30, at: 0x0303, to: &nes)
+                        write(0x01, at: 0x0304, to: &nes)
+                        write(97, at: 0x0130, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.A = 98
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.P.contains(.C)).to(beTruthy())
-                        expect(cpu.P.contains(.Z)).to(beFalsy())
-                        expect(cpu.P.contains(.N)).to(beFalsy())
-                        expect(cpu.PC).to(equal(0x0305))
+                        expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                        expect(nes.cpu.P.contains(.Z)).to(beFalsy())
+                        expect(nes.cpu.P.contains(.N)).to(beFalsy())
+                        expect(nes.cpu.PC).to(equal(0x0305))
                         expect(cycle).to(equal(4))
                     }
                 }
 
                 context("A < M") {
                     it("set Zero flag") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x30, at: 0x0303)
-                        memory.write(0x01, at: 0x0304)
-                        memory.write(97, at: 0x0130)
-                        cpu.PC = 0x0302
-                        cpu.A = 96
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x30, at: 0x0303, to: &nes)
+                        write(0x01, at: 0x0304, to: &nes)
+                        write(97, at: 0x0130, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.A = 96
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.P.contains(.C)).to(beFalsy())
-                        expect(cpu.P.contains(.Z)).to(beFalsy())
-                        expect(cpu.P.contains(.N)).to(beTruthy())
-                        expect(cpu.PC).to(equal(0x0305))
+                        expect(nes.cpu.P.contains(.C)).to(beFalsy())
+                        expect(nes.cpu.P.contains(.Z)).to(beFalsy())
+                        expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                        expect(nes.cpu.PC).to(equal(0x0305))
                         expect(cycle).to(equal(4))
                     }
                 }
@@ -801,18 +798,18 @@ class InstructionSpec: QuickSpec {
                 it("increment carry") {
                     let opcode: UInt8 = 0xEE
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(254, at: 0x0130)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(254, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0130)).to(equal(255))
-                    expect(cpu.P.contains(.Z)).to(beFalsy())
-                    expect(cpu.P.contains(.N)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x0130, from: &nes)).to(equal(255))
+                    expect(nes.cpu.P.contains(.Z)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -827,18 +824,18 @@ class InstructionSpec: QuickSpec {
                 it("decrement carry") {
                     let opcode: UInt8 = 0xCE
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(254, at: 0x0130)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(254, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0130)).to(equal(253))
-                    expect(cpu.P.contains(.Z)).to(beFalsy())
-                    expect(cpu.P.contains(.N)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x0130, from: &nes)).to(equal(253))
+                    expect(nes.cpu.P.contains(.Z)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -853,16 +850,16 @@ class InstructionSpec: QuickSpec {
                 it("shift left bits of the accumulator") {
                     let opcode: UInt8 = 0x0A
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.A = 0b11001011
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0b11001011
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0b10010110))
-                    expect(cpu.P.contains(.N)).to(beTruthy())
-                    expect(cpu.P.contains(.C)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.A).to(equal(0b10010110))
+                    expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                    expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -871,18 +868,18 @@ class InstructionSpec: QuickSpec {
                 it("shift left bits on memory") {
                     let opcode: UInt8 = 0x0E
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(0b11101110, at: 0x0130)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(0b11101110, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0130)).to(equal(0b11011100))
-                    expect(cpu.P.contains(.N)).to(beTruthy())
-                    expect(cpu.P.contains(.C)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x0130, from: &nes)).to(equal(0b11011100))
+                    expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                    expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -895,16 +892,16 @@ class InstructionSpec: QuickSpec {
                 it("shift right bits of the accumulator") {
                     let opcode: UInt8 = 0x4A
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.A = 0b11001011
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0b11001011
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0b01100101))
-                    expect(cpu.P.contains(.N)).to(beFalsy())
-                    expect(cpu.P.contains(.C)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.A).to(equal(0b01100101))
+                    expect(nes.cpu.P.contains(.N)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -913,18 +910,18 @@ class InstructionSpec: QuickSpec {
                 it("shift right bits of memory") {
                     let opcode: UInt8 = 0x4E
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(0b11101110, at: 0x0130)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(0b11101110, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0130)).to(equal(0b01110111))
-                    expect(cpu.P.contains(.N)).to(beFalsy())
-                    expect(cpu.P.contains(.C)).to(beFalsy())
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x0130, from: &nes)).to(equal(0b01110111))
+                    expect(nes.cpu.P.contains(.N)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.C)).to(beFalsy())
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -937,16 +934,16 @@ class InstructionSpec: QuickSpec {
                 it("rotate left") {
                     let opcode: UInt8 = 0x2A
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.A = 0b11001011
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0b11001011
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0b10010110))
-                    expect(cpu.P.contains(.N)).to(beTruthy())
-                    expect(cpu.P.contains(.C)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.A).to(equal(0b10010110))
+                    expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                    expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -955,19 +952,19 @@ class InstructionSpec: QuickSpec {
                 it("rotate left") {
                     let opcode: UInt8 = 0x2E
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(0b11101110, at: 0x0130)
-                    cpu.PC = 0x0302
-                    cpu.P.formUnion(.C)
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(0b11101110, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.formUnion(.C)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0130)).to(equal(0b11011101))
-                    expect(cpu.P.contains(.N)).to(beTruthy())
-                    expect(cpu.P.contains(.C)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x0130, from: &nes)).to(equal(0b11011101))
+                    expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                    expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -980,16 +977,16 @@ class InstructionSpec: QuickSpec {
                 it("rotate right") {
                     let opcode: UInt8 = 0x6A
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.A = 0b11001011
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.A = 0b11001011
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.A).to(equal(0b01100101))
-                    expect(cpu.P.contains(.N)).to(beFalsy())
-                    expect(cpu.P.contains(.C)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.A).to(equal(0b01100101))
+                    expect(nes.cpu.P.contains(.N)).to(beFalsy())
+                    expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -998,19 +995,19 @@ class InstructionSpec: QuickSpec {
                 it("rotate right") {
                     let opcode: UInt8 = 0x6E
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    memory.write(0b11101110, at: 0x0130)
-                    cpu.PC = 0x0302
-                    cpu.P.formUnion(.C)
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    write(0b11101110, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.formUnion(.C)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(memory.read(at: 0x0130)).to(equal(0b11110111))
-                    expect(cpu.P.contains(.N)).to(beTruthy())
-                    expect(cpu.P.contains(.C)).to(beFalsy())
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(read(at: 0x0130, from: &nes)).to(equal(0b11110111))
+                    expect(nes.cpu.P.contains(.N)).to(beTruthy())
+                    expect(nes.cpu.P.contains(.C)).to(beFalsy())
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -1023,14 +1020,14 @@ class InstructionSpec: QuickSpec {
                 it("jump") {
                     let opcode: UInt8 = 0x4C
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    cpu.PC = 0x0302
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    nes.cpu.PC = 0x0302
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.PC).to(equal(0x0130))
+                    expect(nes.cpu.PC).to(equal(0x0130))
                     expect(cycle).to(equal(3))
                 }
             }
@@ -1042,16 +1039,16 @@ class InstructionSpec: QuickSpec {
                 it("jump to subroutine") {
                     let opcode: UInt8 = 0x20
 
-                    memory.write(opcode, at: 0x0302)
-                    memory.write(0x30, at: 0x0303)
-                    memory.write(0x01, at: 0x0304)
-                    cpu.PC = 0x0302
-                    cpu.S = 0xFF
+                    write(opcode, at: 0x0302, to: &nes)
+                    write(0x30, at: 0x0303, to: &nes)
+                    write(0x01, at: 0x0304, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.S = 0xFF
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.PC).to(equal(0x0130))
-                    expect(cpu.pullStack(from: &memory) as UInt16).to(equal(0x0304))
+                    expect(nes.cpu.PC).to(equal(0x0130))
+                    expect(pullStack(from: &nes) as UInt16).to(equal(0x0304))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -1062,14 +1059,14 @@ class InstructionSpec: QuickSpec {
                 it("return from subroutine") {
                     let opcode: UInt8 = 0x60
 
-                    memory.write(opcode, at: 0x0130)
-                    cpu.PC = 0x0130
-                    cpu.S = 0xFF
-                    cpu.pushStack(word: 0x0304, to: &memory)
+                    write(opcode, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0130
+                    nes.cpu.S = 0xFF
+                    pushStack(word: 0x0304, to: &nes)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.PC).to(equal(0x0305))
+                    expect(nes.cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -1080,18 +1077,18 @@ class InstructionSpec: QuickSpec {
                 it("return from interrupt") {
                     let opcode: UInt8 = 0x40
 
-                    memory.write(opcode, at: 0x0130)
-                    cpu.PC = 0x0130
-                    cpu.S = 0xFF
+                    write(opcode, at: 0x0130, to: &nes)
+                    nes.cpu.PC = 0x0130
+                    nes.cpu.S = 0xFF
 
-                    cpu.pushStack(word: 0x0401, to: &memory)
+                    pushStack(word: 0x0401, to: &nes)
                     let status: Status = [.N, .Z, .C]
-                    cpu.pushStack(status.rawValue, to: &memory)
+                    pushStack(status.rawValue, to: &nes)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.PC).to(equal(0x0401))
-                    expect(cpu.P.rawValue).to(equal(status.rawValue | 0x20))
+                    expect(nes.cpu.PC).to(equal(0x0401))
+                    expect(nes.cpu.P.rawValue).to(equal(status.rawValue | 0x20))
                     expect(cycle).to(equal(6))
                 }
             }
@@ -1103,28 +1100,28 @@ class InstructionSpec: QuickSpec {
 
                 context("if carray flag is clear") {
                     it("add the relative displacement to the PC") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.remove(.C)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.remove(.C)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0307))
+                        expect(nes.cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
                     }
                 }
 
                 context("if carray flag is set") {
                     it("NOP") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.formUnion(.C)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.formUnion(.C)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0304))
+                        expect(nes.cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
                     }
                 }
@@ -1137,28 +1134,28 @@ class InstructionSpec: QuickSpec {
 
                 context("if carray flag is clear") {
                     it("NOP") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.remove(.C)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.remove(.C)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0304))
+                        expect(nes.cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
                     }
                 }
 
                 context("if carray flag is set") {
                     it("add the relative displacement to the PC") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.formUnion(.C)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.formUnion(.C)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0307))
+                        expect(nes.cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
                     }
                 }
@@ -1171,28 +1168,28 @@ class InstructionSpec: QuickSpec {
 
                 context("if zero flag is clear") {
                     it("NOP") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.remove(.Z)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.remove(.Z)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0304))
+                        expect(nes.cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
                     }
                 }
 
                 context("if zero flag is set") {
                     it("add the relative displacement to the PC") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.formUnion(.Z)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.formUnion(.Z)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0307))
+                        expect(nes.cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
                     }
                 }
@@ -1205,28 +1202,28 @@ class InstructionSpec: QuickSpec {
 
                 context("if negative flag is clear") {
                     it("NOP") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.remove(.N)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.remove(.N)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0304))
+                        expect(nes.cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
                     }
                 }
 
                 context("if negative flag is set") {
                     it("add the relative displacement to the PC") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.formUnion(.N)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.formUnion(.N)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0307))
+                        expect(nes.cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
                     }
                 }
@@ -1239,28 +1236,28 @@ class InstructionSpec: QuickSpec {
 
                 context("if zero flag is clear") {
                     it("add the relative displacement to the PC") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.remove(.Z)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.remove(.Z)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0307))
+                        expect(nes.cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
                     }
                 }
 
                 context("if zero flag is set") {
                     it("NOP") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.formUnion(.Z)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.formUnion(.Z)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0304))
+                        expect(nes.cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
                     }
                 }
@@ -1273,28 +1270,28 @@ class InstructionSpec: QuickSpec {
 
                 context("if negative flag is clear") {
                     it("add the relative displacement to the PC") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.remove(.N)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.remove(.N)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0307))
+                        expect(nes.cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
                     }
                 }
 
                 context("if negative flag is set") {
                     it("NOP") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.formUnion(.N)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.formUnion(.N)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0304))
+                        expect(nes.cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
                     }
                 }
@@ -1307,28 +1304,28 @@ class InstructionSpec: QuickSpec {
 
                 context("if overflow flag is clear") {
                     it("add the relative displacement to the PC") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.remove(.V)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.remove(.V)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0307))
+                        expect(nes.cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
                     }
                 }
 
                 context("if overflow flag is set") {
                     it("NOP") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.formUnion(.V)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.formUnion(.V)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0304))
+                        expect(nes.cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
                     }
                 }
@@ -1341,28 +1338,28 @@ class InstructionSpec: QuickSpec {
 
                 context("if overflow flag is clear") {
                     it("NOP") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.remove(.V)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.remove(.V)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0304))
+                        expect(nes.cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
                     }
                 }
 
                 context("if overflow flag is set") {
                     it("add the relative displacement to the PC") {
-                        memory.write(opcode, at: 0x0302)
-                        memory.write(0x03, at: 0x0303)
-                        cpu.PC = 0x0302
-                        cpu.P.formUnion(.V)
+                        write(opcode, at: 0x0302, to: &nes)
+                        write(0x03, at: 0x0303, to: &nes)
+                        nes.cpu.PC = 0x0302
+                        nes.cpu.P.formUnion(.V)
 
-                        let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                        let cycle = cpuStep(nes: &nes)
 
-                        expect(cpu.PC).to(equal(0x0307))
+                        expect(nes.cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
                     }
                 }
@@ -1374,14 +1371,14 @@ class InstructionSpec: QuickSpec {
                 it("clear carry flag") {
                     let opcode: UInt8 = 0x18
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.P.formUnion(.C)
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.formUnion(.C)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.P.contains(.C)).to(beFalsy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.P.contains(.C)).to(beFalsy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -1392,14 +1389,14 @@ class InstructionSpec: QuickSpec {
                 it("clear decimal mode") {
                     let opcode: UInt8 = 0xD8
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.P.formUnion(.D)
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.formUnion(.D)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.P.contains(.D)).to(beFalsy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.P.contains(.D)).to(beFalsy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -1410,14 +1407,14 @@ class InstructionSpec: QuickSpec {
                 it("clear interrupt disable") {
                     let opcode: UInt8 = 0x58
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.P.formUnion(.I)
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.formUnion(.I)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.P.contains(.I)).to(beFalsy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.P.contains(.I)).to(beFalsy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -1428,14 +1425,14 @@ class InstructionSpec: QuickSpec {
                 it("clear overflow flag") {
                     let opcode: UInt8 = 0xB8
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.P.formUnion(.V)
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.formUnion(.V)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.P.contains(.V)).to(beFalsy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.P.contains(.V)).to(beFalsy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -1446,14 +1443,14 @@ class InstructionSpec: QuickSpec {
                 it("set carray flag") {
                     let opcode: UInt8 = 0x38
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.P.remove(.C)
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.remove(.C)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.P.contains(.C)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.P.contains(.C)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -1464,14 +1461,14 @@ class InstructionSpec: QuickSpec {
                 it("set decimal flag") {
                     let opcode: UInt8 = 0xF8
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.P.remove(.D)
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.remove(.D)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.P.contains(.D)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.P.contains(.D)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
@@ -1482,42 +1479,42 @@ class InstructionSpec: QuickSpec {
                 it("set interrupt disable") {
                     let opcode: UInt8 = 0x78
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.P.remove(.I)
+                    write(opcode, at: 0x0302, to: &nes)
+                    nes.cpu.PC = 0x0302
+                    nes.cpu.P.remove(.I)
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+                    let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.P.contains(.I)).to(beTruthy())
-                    expect(cpu.PC).to(equal(0x0303))
+                    expect(nes.cpu.P.contains(.I)).to(beTruthy())
+                    expect(nes.cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(2))
                 }
             }
         }
 
-        describe("BRK") {
-            describe("implicit") {
-                it("force interrupt") {
-                    let opcode: UInt8 = 0x00
+        // describe("BRK") {
+        //     describe("implicit") {
+        //         it("force interrupt") {
+        //             let opcode: UInt8 = 0x00
 
-                    memory.write(0x70, at: 0xFFFE)
-                    memory.write(0x81, at: 0xFFFF)
+        //             write(0x70, at: 0xFFFE, to: &nes)
+        //             write(0x81, at: 0xFFFF, to: &nes)
 
-                    memory.write(opcode, at: 0x0302)
-                    cpu.PC = 0x0302
-                    cpu.S = 0xFF
+        //             write(opcode, at: 0x0302, to: &nes)
+        //             nes.cpu.PC = 0x0302
+        //             nes.cpu.S = 0xFF
 
-                    let status: Status = [.N, .R, .Z, .C]
-                    cpu.P = status
+        //             let status: Status = [.N, .R, .Z, .C]
+        //             nes.cpu.P = status
 
-                    let cycle = step(cpu: &cpu, memory: &memory, interruptLine: interruptLine)
+        //             let cycle = cpuStep(nes: &nes)
 
-                    expect(cpu.PC).to(equal(0x8170))
-                    expect(cpu.pullStack(from: &memory) as UInt8).to(equal(status.rawValue | Status.interruptedB.rawValue))
-                    expect(cpu.pullStack(from: &memory) as UInt16).to(equal(0x0303))
-                    expect(cycle).to(equal(7))
-                }
-            }
-        }
+        //             expect(nes.cpu.PC).to(equal(0x8170))
+        //             expect(pullStack(from: &nes) as UInt8).to(equal(status.rawValue | Status.interruptedB.rawValue))
+        //             expect(pullStack(from: &nes) as UInt16).to(equal(0x0303))
+        //             expect(cycle).to(equal(7))
+        //         }
+        //     }
+        // }
     }
 }

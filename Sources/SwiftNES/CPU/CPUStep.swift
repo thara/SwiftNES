@@ -1,35 +1,35 @@
-func step(cpu: inout CPU, memory: inout Memory, interruptLine: InterruptLine) -> UInt {
-    let before = cpu.cycles
+func cpuStep(nes: inout NES) -> UInt {
+    let before = nes.cpu.cycles
 
-    if !interrupt(cpu: &cpu, memory: &memory, from: interruptLine) {
-        let opcode = cpu.fetchOpCode(from: &memory)
-        cpu.excuteInstruction(opcode: opcode, memory: &memory)
+    if !interrupt(on: &nes) {
+        let opcode = fetchOpCode(from: &nes)
+        excuteInstruction(opcode: opcode, on: &nes)
     }
 
-    if before <= cpu.cycles {
-        return cpu.cycles &- before
+    if before <= nes.cpu.cycles {
+        return nes.cpu.cycles &- before
     } else {
-        return UInt.max &- before &+ cpu.cycles
+        return UInt.max &- before &+ nes.cpu.cycles
     }
 }
 
-func interrupt(cpu: inout CPU, memory: inout Memory, from interruptLine: InterruptLine) -> Bool {
-    switch interruptLine.get() {
+func interrupt(on nes: inout NES) -> Bool {
+    switch nes.interruptLine.get() {
     case .RESET:
-        cpu.reset(memory: &memory)
-        interruptLine.clear(.RESET)
+        reset(on: &nes)
+        nes.interruptLine.clear(.RESET)
     case .NMI:
-        cpu.handleNMI(memory: &memory)
-        interruptLine.clear(.NMI)
+        handleNMI(on: &nes)
+        nes.interruptLine.clear(.NMI)
     case .IRQ:
-        if cpu.P.contains(.I) {
-            cpu.handleIRQ(memory: &memory)
-            interruptLine.clear(.IRQ)
+        if nes.cpu.P.contains(.I) {
+            handleIRQ(on: &nes)
+            nes.interruptLine.clear(.IRQ)
         }
     case .BRK:
-        if cpu.P.contains(.I) {
-            cpu.handleBRK(memory: &memory)
-            interruptLine.clear(.BRK)
+        if nes.cpu.P.contains(.I) {
+            handleBRK(on: &nes)
+            nes.interruptLine.clear(.BRK)
         }
     default:
         return false

@@ -1,14 +1,16 @@
 public struct NES {
-    private var cpu = CPU()
-    private let ppu: PPU
+    var cpu = CPU()
+    let ppu: PPU
 
-    private var cpuMemory: Memory
-    private var ppuMemory = PPUMemoryMap()
+    var ppuMemory = PPUMemoryMap()
 
-    private let cartridgeDrive: CartridgeDrive
-    private let controllerPort = ControllerPort()
+    var wram = [UInt8](repeating: 0x00, count: 32767)
 
-    private let interruptLine = InterruptLine()
+    var cartridge: Cartridge?
+    let cartridgeDrive: CartridgeDrive
+    let controllerPort = ControllerPort()
+
+    let interruptLine = InterruptLine()
 
     public static let maxDot = 340
     public static let maxLine = 261
@@ -25,10 +27,6 @@ public struct NES {
         ppu = PPU(memory: ppuMemoryMap)
 
         let cpuMemoryMap = CPUMemoryMap()
-        cpuMemoryMap.ppuPort = ppu.port
-        cpuMemoryMap.controllerPort = controllerPort
-        self.cpuMemory = cpuMemoryMap
-
         cartridgeDrive = BusConnectedCartridgeDrive(cpuMemoryMap: cpuMemoryMap, ppuMemoryMap: ppuMemoryMap)
 
         nestest = NESTest(disassembler: Disassembler(), interruptLine: interruptLine)
@@ -47,7 +45,7 @@ public struct NES {
         if !interruptLine.interrupted { nestest.before(cpu: &cpu, memory: &cpuMemory) }
 #endif
 
-        let cpuCycles = SwiftNES.step(cpu: &cpu, memory: &cpuMemory, interruptLine: interruptLine)
+        let cpuCycles = cpuStep(nes: &self)
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)
@@ -70,13 +68,14 @@ public struct NES {
     }
 
     public mutating func insert(cartridge: Cartridge) {
+        self.cartridge = cartridge
         cartridgeDrive.insert(cartridge)
         cpu.powerOn()
 
         interruptLine.clear([.NMI, .IRQ])
         interruptLine.send(.RESET)
 
-        cpuMemory.clear()
+        wram.fill(0x00)
         ppu.reset()
     }
 
