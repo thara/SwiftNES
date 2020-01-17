@@ -8,7 +8,7 @@ let screenHeight = 224
 
 final class Emulator {
 
-    private let nes: NES
+    private var nes: NES
 
     private let window: SDLWindow
     private let windowTitle: String

@@ -1,4 +1,4 @@
-public final class NES {
+public struct NES {
     private var cpu = CPU()
     private let ppu: PPU
 
@@ -34,7 +34,7 @@ public final class NES {
         nestest = NESTest(disassembler: Disassembler(), interruptLine: interruptLine)
     }
 
-    public func runFrame(render: (Int, inout LineBuffer) -> Void) {
+    public mutating func runFrame(render: (Int, inout LineBuffer) -> Void) {
         let currentFrame = ppu.frames
 
         repeat {
@@ -42,7 +42,7 @@ public final class NES {
         } while currentFrame == ppu.frames
     }
 
-    public func step(_ render: (Int, inout LineBuffer) -> Void) {
+    public mutating func step(_ render: (Int, inout LineBuffer) -> Void) {
 #if nestest
         if !interruptLine.interrupted { nestest.before(cpu: &cpu, memory: &cpuMemory) }
 #endif
@@ -69,7 +69,7 @@ public final class NES {
         }
     }
 
-    public func insert(cartridge: Cartridge) {
+    public mutating func insert(cartridge: Cartridge) {
         cartridgeDrive.insert(cartridge)
         cpu.powerOn()
 
