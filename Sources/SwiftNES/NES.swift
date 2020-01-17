@@ -26,8 +26,7 @@ public struct NES {
         let ppuMemoryMap = PPUMemoryMap()
         ppu = PPU(memory: ppuMemoryMap)
 
-        let cpuMemoryMap = CPUMemoryMap()
-        cartridgeDrive = BusConnectedCartridgeDrive(cpuMemoryMap: cpuMemoryMap, ppuMemoryMap: ppuMemoryMap)
+        cartridgeDrive = BusConnectedCartridgeDrive(ppuMemoryMap: ppuMemoryMap)
 
         nestest = NESTest(disassembler: Disassembler(), interruptLine: interruptLine)
     }
