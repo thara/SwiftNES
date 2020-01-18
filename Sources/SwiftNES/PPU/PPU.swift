@@ -32,7 +32,7 @@ final class PPU {
 
     /// Background tiles
     var tile = Tile()
-    var nextPattern = BackgroundTileShiftRegisters()
+    var nextPattern = Tile.Pattern()
 
     // Sprite OAM
     var primaryOAM = [UInt8](repeating: 0x00, count: oamSize)
@@ -398,7 +398,7 @@ extension PPU {
             sprites[i] = Sprite(
                 y: secondaryOAM[n],
                 tileIndex: secondaryOAM[n &+ 1],
-                attr: SpriteAttribute(rawValue: secondaryOAM[n &+ 2]),
+                attr: Sprite.Attribute(rawValue: secondaryOAM[n &+ 2]),
                 x: secondaryOAM[n &+ 3]
             )
         default:
