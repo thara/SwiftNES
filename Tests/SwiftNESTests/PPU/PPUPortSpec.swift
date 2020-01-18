@@ -5,9 +5,9 @@ import Nimble
 
 class PPUPortSpec: QuickSpec {
     override func spec() {
-        var ppu: PPU!
+        var nes: NES!
         beforeEach {
-            ppu = PPU()
+            nes = NES()
         }
 
         describe("PPUCTRL") {
@@ -15,11 +15,11 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("set controller register") {
-                    ppu.write(0b01010000, to: address)
-                    expect(ppu.controller).to(equal([.slave, .bgTableAddr]))
+                    writePPURegister(0b01010000, to: address, on: &nes)
+                    expect(nes.ppu.controller).to(equal([.slave, .bgTableAddr]))
 
-                    ppu.write(0b00000111, to: address)
-                    expect(ppu.controller).to(equal([.vramAddrIncr, .nameTableAddrHigh, .nameTableAddrLow]))
+                    writePPURegister(0b00000111, to: address, on: &nes)
+                    expect(nes.ppu.controller).to(equal([.vramAddrIncr, .nameTableAddrHigh, .nameTableAddrLow]))
                 }
             }
         }
@@ -28,11 +28,11 @@ class PPUPortSpec: QuickSpec {
             let address: UInt16 = 0x2001
             context("write") {
                 it("set mask register") {
-                    ppu.write(0b01010000, to: address)
-                    expect(ppu.mask).to(equal([.green, .sprite]))
+                    writePPURegister(0b01010000, to: address, on: &nes)
+                    expect(nes.ppu.mask).to(equal([.green, .sprite]))
 
-                    ppu.write(0b00000111, to: address)
-                    expect(ppu.mask).to(equal([.spriteLeft, .backgroundLeft, .greyscale]))
+                    writePPURegister(0b00000111, to: address, on: &nes)
+                    expect(nes.ppu.mask).to(equal([.spriteLeft, .backgroundLeft, .greyscale]))
                 }
             }
         }
@@ -42,12 +42,12 @@ class PPUPortSpec: QuickSpec {
 
             context("read") {
                 it("read status and clear vblank and write toggle") {
-                    ppu.status = [.vblank, .spriteZeroHit]
-                    ppu.writeToggle = true
-                    expect(ppu.read(from: address)).to(equal(0b11000000))
-                    expect(ppu.writeToggle).to(beFalsy())
+                    nes.ppu.status = [.vblank, .spriteZeroHit]
+                    nes.ppu.writeToggle = true
+                    expect(readPPURegister(from: address, on: &nes)).to(equal(0b11000000))
+                    expect(nes.ppu.writeToggle).to(beFalsy())
 
-                    expect(ppu.read(from: address)).to(equal(0b01000000))
+                    expect(readPPURegister(from: address, on: &nes)).to(equal(0b01000000))
                 }
             }
         }
@@ -57,8 +57,8 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("write oam address") {
-                    ppu.write(255, to: address)
-                    expect(ppu.objectAttributeMemoryAddress).to(equal(255))
+                    writePPURegister(255, to: address, on: &nes)
+                    expect(nes.ppu.objectAttributeMemoryAddress).to(equal(255))
                 }
             }
         }
@@ -68,19 +68,19 @@ class PPUPortSpec: QuickSpec {
 
             context("read") {
                 it("read oam data") {
-                    ppu.primaryOAM[0x09] = 0xA3
-                    ppu.write(0x09, to: 0x2003)
+                    nes.ppu.primaryOAM[0x09] = 0xA3
+                    writePPURegister(0x09, to: 0x2003, on: &nes)
 
-                    expect(ppu.read(from: address)).to(equal(0xA3))
+                    expect(readPPURegister(from: address, on: &nes)).to(equal(0xA3))
                 }
             }
 
             context("write") {
                 it("write oam data") {
-                    ppu.write(0xAB, to: 0x2003)
-                    ppu.write(0x32, to: address)
+                    writePPURegister(0xAB, to: 0x2003, on: &nes)
+                    writePPURegister(0x32, to: address, on: &nes)
 
-                    expect(ppu.primaryOAM[0xAB]).to(equal(0x32))
+                    expect(nes.ppu.primaryOAM[0xAB]).to(equal(0x32))
                 }
             }
         }
@@ -90,14 +90,14 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("set scroll position by two write") {
-                    ppu.write(0x1F, to: address)
-                    expect(ppu.writeToggle).to(beTruthy())
-                    expect(ppu.t.coarseXScroll).to(equal(3))
-                    expect(ppu.fineX).to(equal(0x1F & 0b111))
+                    writePPURegister(0x1F, to: address, on: &nes)
+                    expect(nes.ppu.writeToggle).to(beTruthy())
+                    expect(nes.ppu.t.coarseXScroll).to(equal(3))
+                    expect(nes.ppu.fineX).to(equal(0x1F & 0b111))
 
-                    ppu.write(0x0E, to: address)
-                    expect(ppu.writeToggle).to(beFalsy())
-                    expect(ppu.t.coarseYScroll).to(equal(1))
+                    writePPURegister(0x0E, to: address, on: &nes)
+                    expect(nes.ppu.writeToggle).to(beFalsy())
+                    expect(nes.ppu.t.coarseYScroll).to(equal(1))
                 }
             }
         }
@@ -107,14 +107,14 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("set current address by two write") {
-                    ppu.write(0x3F, to: address)
-                    expect(ppu.writeToggle).to(beTruthy())
+                    writePPURegister(0x3F, to: address, on: &nes)
+                    expect(nes.ppu.writeToggle).to(beTruthy())
 
-                    ppu.write(0x91, to: address)
-                    expect(ppu.writeToggle).to(beFalsy())
+                    writePPURegister(0x91, to: address, on: &nes)
+                    expect(nes.ppu.writeToggle).to(beFalsy())
 
-                    expect(ppu.v).to(equal(0x3F91))
-                    expect(ppu.t).to(equal(0x3F91))
+                    expect(nes.ppu.v).to(equal(0x3F91))
+                    expect(nes.ppu.t).to(equal(0x3F91))
                 }
             }
         }
@@ -124,12 +124,12 @@ class PPUPortSpec: QuickSpec {
 
             context("write") {
                 it("write data at currentAddress in memory") {
-                    ppu.write(0x2F, to: 0x2006)
-                    ppu.write(0x11, to: 0x2006)
+                    writePPURegister(0x2F, to: 0x2006, on: &nes)
+                    writePPURegister(0x11, to: 0x2006, on: &nes)
 
-                    ppu.write(0x83, to: address)
+                    writePPURegister(0x83, to: address, on: &nes)
 
-                    expect(ppu.memory.read(at: 0x2F11)).to(equal(0x83))
+                    expect(readPPU(at: 0x2F11, from: &nes)).to(equal(0x83))
                 }
             }
         }

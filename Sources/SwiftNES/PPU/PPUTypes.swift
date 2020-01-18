@@ -1,3 +1,68 @@
+struct PPU {
+    /// PPUCTRL
+    var controller: PPUController = []
+    /// PPUMASK
+    var mask: PPUMask = []
+    /// PPUSTATUS
+    var status: PPUStatus = []
+    /// PPUDATA
+    var data: UInt8 = 0x00
+    /// OAMADDR
+    var objectAttributeMemoryAddress: UInt8 = 0x00
+
+    /// current VRAM address
+    var v: UInt16 = 0x00
+    /// temporary VRAM address
+    var t: UInt16 = 0x00
+    /// Fine X scroll
+    var fineX: UInt8 = 0x00
+    var writeToggle: Bool = false
+
+    var nameTable = [UInt8](repeating: 0x00, count: 0x1000)
+    var paletteRAMIndexes = [UInt8](repeating: 0x00, count: 0x0020)
+
+    // Background registers
+    var nameTableEntry: UInt8 = 0x00
+    var attrTableEntry: UInt8 = 0x00
+    var bgTempAddr: UInt16 = 0x00
+
+    /// Background tiles
+    var tile = Tile()
+    var nextPattern = Tile.Pattern()
+
+    // Sprite OAM
+    var primaryOAM = [UInt8](repeating: 0x00, count: oamSize)
+    var secondaryOAM = [UInt8](repeating: 0x00, count: 32)
+    var sprites = [Sprite](repeating: .defaultValue, count: spriteLimit)
+
+    var spriteZeroOnLine = false
+
+    var frames: UInt = 0
+
+    var scan = Scan()
+    public var lineBuffer = LineBuffer()
+
+    // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
+    var internalDataBus: UInt8 = 0x00
+
+    var renderingEnabled: Bool {
+        return mask.contains(.sprite) || mask.contains(.background)
+    }
+
+    mutating func reset() {
+        controller = []
+        mask = []
+        status = []
+        data = 0x00
+
+        nameTable.fill(0x00)
+        paletteRAMIndexes.fill(0x00)
+        scan.clear()
+        lineBuffer.clear()
+        frames = 0
+    }
+}
+
 struct PPUController: OptionSet {
     let rawValue: UInt8
 

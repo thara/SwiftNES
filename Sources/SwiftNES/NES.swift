@@ -1,16 +1,17 @@
 public struct NES {
     var cpu = CPU()
-    let ppu: PPU
-
-    var ppuMemory = PPUMemoryMap()
+    var ppu: PPU
 
     var wram = [UInt8](repeating: 0x00, count: 32767)
 
-    var cartridge: Cartridge?
-    let cartridgeDrive: CartridgeDrive
+    var cartridge: Cartridge? {
+        didSet { mirroring = cartridge?.mapper.mirroring }
+    }
     let controllerPort = ControllerPort()
 
     let interruptLine = InterruptLine()
+
+    var mirroring: Mirroring?
 
     public static let maxDot = 340
     public static let maxLine = 261
@@ -23,10 +24,7 @@ public struct NES {
     private(set) var cycles: UInt = 0
 
     public init() {
-        let ppuMemoryMap = PPUMemoryMap()
-        ppu = PPU(memory: ppuMemoryMap)
-
-        cartridgeDrive = BusConnectedCartridgeDrive(ppuMemoryMap: ppuMemoryMap)
+        ppu = PPU()
 
         nestest = NESTest(disassembler: Disassembler(), interruptLine: interruptLine)
     }
@@ -56,7 +54,7 @@ public struct NES {
         while 0 < ppuCycles {
             let currentLine = ppu.scan.line
 
-            ppu.step(interruptLine: interruptLine)
+            ppuStep(on: &self)
 
             if currentLine != ppu.scan.line {
                 render(currentLine, &ppu.lineBuffer)
@@ -68,7 +66,6 @@ public struct NES {
 
     public mutating func insert(cartridge: Cartridge) {
         self.cartridge = cartridge
-        cartridgeDrive.insert(cartridge)
         cpu.powerOn()
 
         interruptLine.clear([.NMI, .IRQ])
@@ -86,4 +83,8 @@ public struct NES {
 
 public protocol CartridgeDrive {
     func insert(_ cartridge: Cartridge)
+}
+
+enum Mirroring {
+    case vertical, horizontal
 }

@@ -18,7 +18,7 @@ func read(at address: UInt16, from nes: inout NES) -> UInt8 {
     case 0x0000...0x1FFF:
         return nes.wram.read(at: address)
     case 0x2000...0x3FFF:
-        return nes.ppu.read(from: ppuAddress(address))
+        return readPPURegister(from: ppuAddress(address), on: &nes)
     case 0x4004, 0x4005, 0x4006, 0x4007, 0x4015:
         return 0xFF
     case 0x4016, 0x4017:
@@ -35,7 +35,7 @@ func write(_ value: UInt8, at address: UInt16, to nes: inout NES) {
     case 0x0000...0x07FF:
         nes.wram.write(value, at: address)
     case 0x2000...0x3FFF:
-        nes.ppu.write(value, to: ppuAddress(address))
+        writePPURegister(value, to: ppuAddress(address), on: &nes)
     case 0x4016, 0x4017:
         nes.controllerPort.write(value)
     case 0x4020...0xFFFF:
