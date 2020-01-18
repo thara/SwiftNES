@@ -1,7 +1,28 @@
 let startVerticalBlank = 241
 
 final class PPU {
-    var registers = PPURegisters()
+    /// PPUCTRL
+    var controller: PPUController = []
+    /// PPUMASK
+    var mask: PPUMask = []
+    /// PPUSTATUS
+    var status: PPUStatus = []
+    /// PPUDATA
+    var data: UInt8 = 0x00
+    /// OAMADDR
+    var objectAttributeMemoryAddress: UInt8 = 0x00
+
+    /// current VRAM address
+    var v: UInt16 = 0x00
+
+    /// temporary VRAM address
+    var t: UInt16 = 0x00
+
+    /// Fine X scroll
+    var fineX: UInt8 = 0x00
+
+    var writeToggle: Bool = false
+
     var memory: Memory
 
     // Background registers
@@ -33,7 +54,7 @@ final class PPU {
     }
 
     var renderingEnabled: Bool {
-        return registers.mask.contains(.sprite) || registers.mask.contains(.background)
+        return mask.contains(.sprite) || mask.contains(.background)
     }
 
     func step(interruptLine: InterruptLine) {
@@ -48,11 +69,128 @@ final class PPU {
     }
 
     func reset() {
-        registers.clear()
+        clear()
         memory.clear()
         scan.clear()
         lineBuffer.clear()
         frames = 0
+    }
+}
+
+extension PPU {
+
+    var spriteSize: Int {
+        return controller.contains(.spriteSize) ? 16 : 8
+    }
+
+    var backgroundPatternTableAddrBase: UInt16 {
+        return controller.contains(.bgTableAddr) ? 0x1000 : 0x0000
+    }
+
+    func clear() {
+        controller = []
+        mask = []
+        status = []
+        data = 0x00
+    }
+
+    func incrV() {
+        v &+= controller.vramIncrement
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#.242000_write
+    func writeController(_ d: UInt8) {
+        controller = PPUController(rawValue: d)
+        // t: ...BA.. ........ = d: ......BA
+        t = (t & ~0b000110000000000) | (controller.nameTableSelect << 10)
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#.242002_read
+    func readStatus() -> UInt8 {
+        let s = status
+        status.remove(.vblank)
+        writeToggle = false
+        return s.rawValue
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#.242005_first_write_.28w_is_0.29
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#.242005_second_write_.28w_is_1.29
+    func writeScroll(position d: UInt8) {
+        if !writeToggle {
+            // first write
+            // t: ....... ...HGFED = d: HGFED...
+            // x:              CBA = d: .....CBA
+            t = (t & ~0b000000000011111) | ((d & 0b11111000).u16 >> 3)
+            fineX = d & 0b111
+            writeToggle = true
+        } else {
+            // second write
+            // t: CBA..HG FED..... = d: HGFEDCBA
+            t = (t & ~0b111001111100000) | ((d & 0b111).u16 << 12) | ((d & 0b11111000).u16 << 2)
+            writeToggle = false
+        }
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#.242006_first_write_.28w_is_0.29
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#.242006_second_write_.28w_is_1.29
+    func writeVRAMAddress(addr d: UInt8) {
+        if !writeToggle {
+            // first write
+            // t: .FEDCBA ........ = d: ..FEDCBA
+            // t: X...... ........ = 0
+            t = (t & ~0b011111100000000) | ((d & 0b111111).u16 << 8)
+            writeToggle = true
+        } else {
+            // second write
+            // t: ....... HGFEDCBA = d: HGFEDCBA
+            // v                   = t
+            t = (t & ~0b000000011111111) | d.u16
+            v = t
+            writeToggle = false
+        }
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#Coarse_X_increment
+    func incrCoarseX() {
+        if v.coarseXScroll == 31 {
+            v &= ~0b11111 // coarse X = 0
+            v ^= 0x0400  // switch horizontal nametable
+        } else {
+            v &+= 1
+        }
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#Y_increment
+    func incrY() {
+        if v.fineYScroll < 7 {
+            v &+= 0x1000
+        } else {
+            v &= ~0x7000 // fine Y = 0
+
+            var y = v.coarseYScroll
+            if y == 29 {
+                y = 0
+                v ^= 0x0800  // switch vertical nametable
+            } else if y == 31 {
+                y = 0
+            } else {
+                y &+= 1
+            }
+
+            v = (v & ~0x03E0) | (y &<< 5)
+        }
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#At_dot_257_of_each_scanline
+    func copyX() {
+        // v: ....F.. ...EDCBA = t: ....F.. ...EDCBA
+        v = (v & ~0b10000011111) | (t & 0b10000011111)
+    }
+
+    // http://wiki.nesdev.com/w/index.php/PPU_scrolling#During_dots_280_to_304_of_the_pre-render_scanline_.28end_of_vblank.29
+    func copyY() {
+        // v: IHGF.ED CBA..... = t: IHGF.ED CBA.....
+        v = (v & ~0b111101111100000) | (t & 0b111101111100000)
     }
 }
 
@@ -67,7 +205,7 @@ extension PPU {
             // Pre Render
             defer {
                 if scan.dot == 1 {
-                    registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
+                    status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
                 }
                 if scan.dot == 341 && renderingEnabled && frames.isOdd {
                     // Skip 0 cycle on visible frame
@@ -85,8 +223,8 @@ extension PPU {
         case startVerticalBlank:
             // begin VBLANK
             if scan.dot == 1 {
-                registers.status.formUnion(.vblank)
-                if registers.controller.contains(.nmi) {
+                status.formUnion(.vblank)
+                if controller.contains(.nmi) {
                     interruptLine.send(.NMI)
                 }
             }
@@ -136,30 +274,30 @@ extension PPU {
         switch scan.dot {
         case 321:
             // No reload shift
-            bgTempAddr = nameTableFirst | registers.v.nameTableAddressIndex
+            bgTempAddr = nameTableFirst | v.nameTableAddressIndex
         case 1...255, 322...336:
             switch scan.dot % 8 {
             case 1:
                 // Fetch nametable byte : step 1
-                bgTempAddr = nameTableFirst | registers.v.nameTableAddressIndex
+                bgTempAddr = nameTableFirst | v.nameTableAddressIndex
                 tile.reload(for: nextPattern, with: attrTableEntry)
             case 2:
                 // Fetch nametable byte : step 2
                 nameTableEntry = memory.read(at: bgTempAddr)
             case 3:
                 // Fetch attribute table byte : step 1
-                bgTempAddr = attributeTableFirst | registers.v.attributeAddressIndex
+                bgTempAddr = attributeTableFirst | v.attributeAddressIndex
             case 4:
                 // Fetch attribute table byte : step 2
                 attrTableEntry = memory.read(at: bgTempAddr)
                 // select area
-                if registers.v.coarseXScroll[1] == 1 { attrTableEntry &>>= 2 }
-                if registers.v.coarseYScroll[1] == 1 { attrTableEntry &>>= 4 }
+                if v.coarseXScroll[1] == 1 { attrTableEntry &>>= 2 }
+                if v.coarseYScroll[1] == 1 { attrTableEntry &>>= 4 }
             case 5:
                 // Fetch tile bitmap low byte : step 1
-                let base: UInt16 = registers.controller.contains(.bgTableAddr) ? 0x1000 : 0x0000
+                let base: UInt16 = controller.contains(.bgTableAddr) ? 0x1000 : 0x0000
                 let index = nameTableEntry.u16 &* tileHeight &* 2
-                bgTempAddr = base &+ index &+ registers.v.fineYScroll.u16
+                bgTempAddr = base &+ index &+ v.fineYScroll.u16
             case 6:
                 // Fetch tile bitmap low byte : step 2
                 nextPattern.low = memory.read(at: bgTempAddr).u16
@@ -170,7 +308,7 @@ extension PPU {
                 // Fetch tile bitmap high byte : step 2
                 nextPattern.high = memory.read(at: bgTempAddr).u16
                 if renderingEnabled {
-                    registers.incrCoarseX()
+                    incrCoarseX()
                 }
             default:
                 break
@@ -178,20 +316,20 @@ extension PPU {
         case 256:
             nextPattern.high = memory.read(at: bgTempAddr).u16
             if renderingEnabled {
-                registers.incrY()
+                incrY()
             }
         case 257:
             tile.reload(for: nextPattern, with: attrTableEntry)
             if renderingEnabled {
-                registers.copyX()
+                copyX()
             }
         case 280...304:
             if scan.line == 261 && renderingEnabled {
-                registers.copyY()
+                copyY()
             }
         // Unused name table fetches
         case 337, 339:
-            bgTempAddr = nameTableFirst | registers.v.nameTableAddressIndex
+            bgTempAddr = nameTableFirst | v.nameTableAddressIndex
         case 338, 340:
             nameTableEntry = memory.read(at: bgTempAddr)
         default:
@@ -202,13 +340,13 @@ extension PPU {
 
     /// Returns pallete index for fine X
     func getBackgroundPixel(x: Int) -> BackgroundPixel {
-        let (pixel, pallete) = tile[registers.fineX]
+        let (pixel, pallete) = tile[fineX]
 
         if (1 <= scan.dot && scan.dot <= 256) || (321 <= scan.dot && scan.dot <= 336) {
             tile.shift()
         }
 
-        guard isEnabledBackground(registers.mask, at: x) else {
+        guard isEnabledBackground(mask, at: x) else {
             return .zero
         }
         return BackgroundPixel(
@@ -227,7 +365,7 @@ extension PPU {
             spriteZeroOnLine = false
 
             // the sprite evaluation phase
-            let spriteSize = registers.spriteSize
+            let spriteSize = self.spriteSize
             var n = 0
 
             let oamIterator = Iterator(limit: secondaryOAM.count)
@@ -251,7 +389,7 @@ extension PPU {
                 }
             }
             if spriteLimit <= n && renderingEnabled {
-                registers.status.formUnion(.spriteOverflow)
+                status.formUnion(.spriteOverflow)
             }
         case 257...320:
             // the sprite fetch phase
@@ -269,7 +407,7 @@ extension PPU {
     }
 
     func getSpritePixel(x: Int, background bg: BackgroundPixel) -> SpritePixel {
-        guard isEnabledSprite(registers.mask, at: x) else {
+        guard isEnabledSprite(mask, at: x) else {
             return .zero
         }
 
@@ -282,12 +420,12 @@ extension PPU {
                 continue
             }
 
-            var row = sprite.row(lineNumber: y, spriteHeight: registers.spriteSize)
+            var row = sprite.row(lineNumber: y, spriteHeight: spriteSize)
             let col = sprite.col(x: UInt16(x))
             var tileIndex = sprite.tileIndex.u16
 
             let base: UInt16
-            if registers.controller.sprite8x16pixels {
+            if controller.sprite8x16pixels {
                 tileIndex &= 0xFE
                 if 7 < row {
                     tileIndex += 1
@@ -295,7 +433,7 @@ extension PPU {
                 }
                 base = tileIndex & 1
             } else {
-                base = registers.controller.baseSpriteTableAddr
+                base = controller.baseSpriteTableAddr
             }
 
             let tileAddr = base &+ tileIndex &* 16 &+ row
@@ -310,10 +448,10 @@ extension PPU {
             if i == 0
                 && spriteZeroOnLine
                 && renderingEnabled
-                && !registers.status.contains(.spriteZeroHit)
+                && !status.contains(.spriteZeroHit)
                 && sprite.x != 0xFF && x < 0xFF
                 && bg.enabled {
-                registers.status.formUnion(.spriteZeroHit)
+                status.formUnion(.spriteZeroHit)
             }
 
             return SpritePixel(

@@ -9,7 +9,7 @@ extension PPU: IOPort {
 
         switch address {
         case 0x2002:
-            result = registers.readStatus() | (internalDataBus & 0b11111)
+            result = readStatus() | (internalDataBus & 0b11111)
             // Race Condition
             if scan.line == startVerticalBlank && scan.dot < 2 {
                 result &= ~0x80
@@ -20,16 +20,16 @@ extension PPU: IOPort {
                 // during sprite evaluation
                 result = 0xFF
             } else {
-                result = primaryOAM[Int(registers.objectAttributeMemoryAddress)]
+                result = primaryOAM[Int(objectAttributeMemoryAddress)]
             }
         case 0x2007:
-            if registers.v <= 0x3EFF {
-                result = registers.data
-                registers.data = memory.read(at: registers.v)
+            if v <= 0x3EFF {
+                result = data
+                data = memory.read(at: v)
             } else {
-                result = memory.read(at: registers.v)
+                result = memory.read(at: v)
             }
-            registers.incrV()
+            incrV()
         default:
             result = 0x00
         }
@@ -41,21 +41,21 @@ extension PPU: IOPort {
     func write(_ value: UInt8, to address: UInt16) {
         switch address {
         case 0x2000:
-            registers.writeController(value)
+            writeController(value)
         case 0x2001:
-            registers.mask = PPUMask(rawValue: value)
+            mask = PPUMask(rawValue: value)
         case 0x2003:
-            registers.objectAttributeMemoryAddress = value
+            objectAttributeMemoryAddress = value
         case 0x2004:
-            primaryOAM[Int(registers.objectAttributeMemoryAddress)] = value
-            registers.objectAttributeMemoryAddress &+= 1
+            primaryOAM[Int(objectAttributeMemoryAddress)] = value
+            objectAttributeMemoryAddress &+= 1
         case 0x2005:
-            registers.writeScroll(position: value)
+            writeScroll(position: value)
         case 0x2006:
-            registers.writeVRAMAddress(addr: value)
+            writeVRAMAddress(addr: value)
         case 0x2007:
-            memory.write(value, at: registers.v)
-            registers.incrV()
+            memory.write(value, at: v)
+            incrV()
         default:
             break
             // NOP

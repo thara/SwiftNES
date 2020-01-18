@@ -13,7 +13,7 @@ class PPUSpec: QuickSpec {
 
             describe("fetchBackgroundPixel") {
                 beforeEach {
-                    ppu.registers.v = vramAddress(fineYScroll: 5, nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
+                    ppu.v = vramAddress(fineYScroll: 5, nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
 
                     ppu.memory.write(0x11, at: 0x0035)
                     ppu.memory.write(0x81, at: 0x003D)

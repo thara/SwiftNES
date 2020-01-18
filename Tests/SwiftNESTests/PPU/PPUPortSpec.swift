@@ -16,10 +16,10 @@ class PPUPortSpec: QuickSpec {
             context("write") {
                 it("set controller register") {
                     ppu.write(0b01010000, to: address)
-                    expect(ppu.registers.controller).to(equal([.slave, .bgTableAddr]))
+                    expect(ppu.controller).to(equal([.slave, .bgTableAddr]))
 
                     ppu.write(0b00000111, to: address)
-                    expect(ppu.registers.controller).to(equal([.vramAddrIncr, .nameTableAddrHigh, .nameTableAddrLow]))
+                    expect(ppu.controller).to(equal([.vramAddrIncr, .nameTableAddrHigh, .nameTableAddrLow]))
                 }
             }
         }
@@ -29,10 +29,10 @@ class PPUPortSpec: QuickSpec {
             context("write") {
                 it("set mask register") {
                     ppu.write(0b01010000, to: address)
-                    expect(ppu.registers.mask).to(equal([.green, .sprite]))
+                    expect(ppu.mask).to(equal([.green, .sprite]))
 
                     ppu.write(0b00000111, to: address)
-                    expect(ppu.registers.mask).to(equal([.spriteLeft, .backgroundLeft, .greyscale]))
+                    expect(ppu.mask).to(equal([.spriteLeft, .backgroundLeft, .greyscale]))
                 }
             }
         }
@@ -42,10 +42,10 @@ class PPUPortSpec: QuickSpec {
 
             context("read") {
                 it("read status and clear vblank and write toggle") {
-                    ppu.registers.status = [.vblank, .spriteZeroHit]
-                    ppu.registers.writeToggle = true
+                    ppu.status = [.vblank, .spriteZeroHit]
+                    ppu.writeToggle = true
                     expect(ppu.read(from: address)).to(equal(0b11000000))
-                    expect(ppu.registers.writeToggle).to(beFalsy())
+                    expect(ppu.writeToggle).to(beFalsy())
 
                     expect(ppu.read(from: address)).to(equal(0b01000000))
                 }
@@ -58,7 +58,7 @@ class PPUPortSpec: QuickSpec {
             context("write") {
                 it("write oam address") {
                     ppu.write(255, to: address)
-                    expect(ppu.registers.objectAttributeMemoryAddress).to(equal(255))
+                    expect(ppu.objectAttributeMemoryAddress).to(equal(255))
                 }
             }
         }
@@ -91,13 +91,13 @@ class PPUPortSpec: QuickSpec {
             context("write") {
                 it("set scroll position by two write") {
                     ppu.write(0x1F, to: address)
-                    expect(ppu.registers.writeToggle).to(beTruthy())
-                    expect(ppu.registers.t.coarseXScroll).to(equal(3))
-                    expect(ppu.registers.fineX).to(equal(0x1F & 0b111))
+                    expect(ppu.writeToggle).to(beTruthy())
+                    expect(ppu.t.coarseXScroll).to(equal(3))
+                    expect(ppu.fineX).to(equal(0x1F & 0b111))
 
                     ppu.write(0x0E, to: address)
-                    expect(ppu.registers.writeToggle).to(beFalsy())
-                    expect(ppu.registers.t.coarseYScroll).to(equal(1))
+                    expect(ppu.writeToggle).to(beFalsy())
+                    expect(ppu.t.coarseYScroll).to(equal(1))
                 }
             }
         }
@@ -108,13 +108,13 @@ class PPUPortSpec: QuickSpec {
             context("write") {
                 it("set current address by two write") {
                     ppu.write(0x3F, to: address)
-                    expect(ppu.registers.writeToggle).to(beTruthy())
+                    expect(ppu.writeToggle).to(beTruthy())
 
                     ppu.write(0x91, to: address)
-                    expect(ppu.registers.writeToggle).to(beFalsy())
+                    expect(ppu.writeToggle).to(beFalsy())
 
-                    expect(ppu.registers.v).to(equal(0x3F91))
-                    expect(ppu.registers.t).to(equal(0x3F91))
+                    expect(ppu.v).to(equal(0x3F91))
+                    expect(ppu.t).to(equal(0x3F91))
                 }
             }
         }
