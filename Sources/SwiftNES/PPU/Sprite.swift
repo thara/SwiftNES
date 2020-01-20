@@ -3,12 +3,29 @@ let spriteLimit: Int = 8
 let oamSize = 4 * spriteCount
 
 struct Sprite {
+    struct Attribute: OptionSet {
+        let rawValue: UInt8
+
+        static let flipVertically = Attribute(rawValue: 1 << 7)
+        static let flipHorizontally = Attribute(rawValue: 1 << 6)
+        /// Priority
+        static let behindBackground = Attribute(rawValue: 1 << 5)
+
+        /// Palette
+        static let pallete2 = Attribute(rawValue: 1 << 1)
+        static let pallete1 = Attribute(rawValue: 1)
+
+        var pallete: UInt8 {
+            return rawValue & 0b11
+        }
+    }
+
     /// Y position of top
     let y: UInt8
     /// Tile index number
     let tileIndex: UInt8
     /// Attributes
-    let attr: SpriteAttribute
+    let attr: Attribute
     /// X position of left
     let x: UInt8
 
@@ -32,22 +49,5 @@ struct Sprite {
             col = 8 &- 1 &- col
         }
         return UInt8(col)
-    }
-}
-
-struct SpriteAttribute: OptionSet {
-    let rawValue: UInt8
-
-    static let flipVertically = SpriteAttribute(rawValue: 1 << 7)
-    static let flipHorizontally = SpriteAttribute(rawValue: 1 << 6)
-    /// Priority
-    static let behindBackground = SpriteAttribute(rawValue: 1 << 5)
-
-    /// Palette
-    static let pallete2 = SpriteAttribute(rawValue: 1 << 1)
-    static let pallete1 = SpriteAttribute(rawValue: 1)
-
-    var pallete: UInt8 {
-        return rawValue & 0b11
     }
 }

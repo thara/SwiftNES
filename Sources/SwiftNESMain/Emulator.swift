@@ -19,6 +19,8 @@ final class Emulator {
 
     private let controller: VirtualStandardController
 
+    private let frameRenderer: SDLFrameRenderer
+
     init(windowTitle: String, windowScale: Int) throws {
         try SDL.initialize(subSystems: [.video])
 
@@ -43,11 +45,11 @@ final class Emulator {
 
         let screenRect = SDL_Rect(x: 0, y: 0, w: Int32(windowSize.width), h: Int32(windowSize.height))
 
-        let frameRenderer = try SDLFrameRenderer(renderer: renderer, screenRect: screenRect)
+        frameRenderer = try SDLFrameRenderer(renderer: renderer, screenRect: screenRect)
 
         controller = VirtualStandardController()
 
-        nes = NES(lineBuffer: LineBuffer(renderer: frameRenderer, renderingMode: .prioring))
+        nes = NES()
         nes.connect(controller1: controller.nesController, controller2: nil)
 
         event = SDL_Event()
@@ -85,7 +87,7 @@ final class Emulator {
 
             controller.update(keys: currentKeys)
 
-            nes.runFrame()
+            nes.runFrame(onLineEnd: frameRenderer.newLine)
 
             let endPerf = SDL_GetPerformanceCounter()
 
