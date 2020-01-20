@@ -9,7 +9,7 @@ extension CPU {
     }
 
     @inline(__always)
-    mutating func excuteInstruction(opcode: UInt8) {
+    mutating func excuteInstruction(opcode: OpCode) {
         switch opcode {
         case 0xA9:
             LDA(operand: immediate())
@@ -457,26 +457,6 @@ extension CPU {
         }
     }
 }
-
-func pageCrossed(value: UInt16, operand: UInt8) -> Bool {
-    return pageCrossed(value: value, operand: operand.u16)
-}
-
-func pageCrossed(value: UInt16, operand: UInt16) -> Bool {
-    return ((value &+ operand) & 0xFF00) != (value & 0xFF00)
-}
-
-func pageCrossed(value: Int, operand: Int) -> Bool {
-    return ((value &+ operand) & 0xFF00) != (value & 0xFF00)
-}
-
-// extension Memory {
-//     func readOnIndirect(operand: UInt16) -> UInt16 {
-//         let low = read(at: operand).u16
-//         let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8   // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
-//         return low | high
-//     }
-// }
 
 // MARK: - Operations
 extension CPU {
