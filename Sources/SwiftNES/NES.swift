@@ -36,7 +36,7 @@ public final class NES {
 
         cartridgeDrive = BusConnectedCartridgeDrive(cpuMemoryMap: cpuMemoryMap, ppuMemoryMap: ppuMemoryMap)
 
-        nestest = NESTest(disassembler: Disassembler(), interruptLine: interruptLine)
+        nestest = NESTest(interruptLine: interruptLine)
     }
 
     public func runFrame() {

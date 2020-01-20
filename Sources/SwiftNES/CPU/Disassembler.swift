@@ -53,7 +53,7 @@ class Disassembler {
         let addressingMode: AddressingMode
     }
 
-    func disassemble(cpu: inout CPU) -> (machineCode: String, assemblyCode: String) {
+    static func disassemble(cpu: inout CPU) -> (machineCode: String, assemblyCode: String) {
         let currentStep = makeCurrentStep(cpu: &cpu)
         let opcode = cpu.memory.read(at: currentStep.pc)
         let instruction = instructionTable[Int(opcode)]
@@ -62,7 +62,7 @@ class Disassembler {
             makeAssemblyCode(step: currentStep, instruction: instruction, cpu: &cpu))
     }
 
-    private func makeCurrentStep(cpu: inout CPU) -> CPUStep {
+    private static func makeCurrentStep(cpu: inout CPU) -> CPUStep {
         let pc = cpu.PC
         return CPUStep(
             pc: cpu.PC,
@@ -72,7 +72,7 @@ class Disassembler {
         )
     }
 
-    private func makeMachineCode(step: CPUStep, instruction: Instruction) -> String {
+    private static func makeMachineCode(step: CPUStep, instruction: Instruction) -> String {
         switch instruction.addressingMode {
         case .immediate, .zeroPage, .zeroPageX, .zeroPageY, .relative, .indirectIndexed, .indexedIndirect:
             return "\(instruction.opcode.hex2) \(step.operand1.hex2)"
@@ -83,13 +83,13 @@ class Disassembler {
         }
     }
 
-    private func makeAssemblyCode(step: CPUStep, instruction: Instruction, cpu: inout CPU) -> String {
+    private static func makeAssemblyCode(step: CPUStep, instruction: Instruction, cpu: inout CPU) -> String {
         let operandString = makeAssemblyOperand(step: step, instruction: instruction, cpu: &cpu)
         let prefix = undocumentedOpcodes.contains(Int(instruction.opcode)) ? "*" : " "
         return "\(prefix)\(instruction.mnemonic) \(operandString)"
     }
 
-    private func makeAssemblyOperand(step: CPUStep, instruction: Instruction, cpu: inout CPU) -> String {
+    private static func makeAssemblyOperand(step: CPUStep, instruction: Instruction, cpu: inout CPU) -> String {
         switch instruction.mnemonic {
         case .JMP, .JSR:
             if case .absolute = instruction.addressingMode {
@@ -107,7 +107,7 @@ class Disassembler {
     }
 
     // swiftlint:disable cyclomatic_complexity line_length
-    private func makeAssemblyOperand(step: CPUStep, addressingMode: AddressingMode, cpu: inout CPU) -> String {
+    private static func makeAssemblyOperand(step: CPUStep, addressingMode: AddressingMode, cpu: inout CPU) -> String {
         let operand1 = step.operand1
         let operand16 = step.operand16
         let x = step.state.X
@@ -145,7 +145,7 @@ class Disassembler {
     }
 
     // swiftlint:disable cyclomatic_complexity
-    private func decodeAddress(step: CPUStep, addressingMode: AddressingMode, cpu: inout CPU) -> UInt16 {
+    private static func decodeAddress(step: CPUStep, addressingMode: AddressingMode, cpu: inout CPU) -> UInt16 {
         switch addressingMode {
         case .implicit:
             return 0x00
@@ -176,7 +176,7 @@ class Disassembler {
         }
     }
 
-    private let instructionTable: [Disassembler.Instruction] = {
+    private static let instructionTable: [Disassembler.Instruction] = {
         var table: [Disassembler.Instruction?] = Array(repeating: nil, count: 0x100)
         for i in 0x00...0xFF {
             let opcode = OpCode(i)
