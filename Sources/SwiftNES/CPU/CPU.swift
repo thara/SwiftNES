@@ -1,76 +1,31 @@
-import Logging
-
-struct CPU {
-    /// Accumulator
-    var A: UInt8 = 0x00 {
-        didSet {
-            P.setZN(A)
-        }
-    }
-    /// Index register
-    var X: UInt8 = 0x00 {
-        didSet {
-            P.setZN(X)
-        }
-    }
-    /// Index register
-    var Y: UInt8 = 0x00 {
-        didSet {
-            P.setZN(Y)
-        }
-    }
-    /// Stack pointer
-    var S: UInt8 = 0xFF
-    /// Status register
-    var P: Status = []
-    /// Program Counter
-    var PC: UInt16 = 0x00
-
-    private(set) var cycles: UInt = 0
-
-    @inline(__always)
-    mutating func tick() {
-        cycles &+= 1
-    }
-
-    @inline(__always)
-    mutating func tick(count: UInt) {
-        cycles &+= count
-    }
-
-    mutating func powerOn() {
-        A = 0
-        X = 0
-        Y = 0
-        S = 0xFD
-#if nestest
-        // https://wiki.nesdev.com/w/index.php/CPU_power_up_state#cite_ref-1
-        P = Status(rawValue: 0x24)
-#else
-        P = Status(rawValue: 0x34)
-#endif
-    }
-}
-
-func step(cpu: inout CPU, memory: inout Memory, interruptLine: InterruptLine) -> UInt {
+func step(cpu: inout CPU, interruptLine: InterruptLine) -> UInt {
     let before = cpu.cycles
 
-    if !interrupt(cpu: &cpu, memory: &memory, from: interruptLine) {
-        let opcode = cpu.fetch(from: &memory)
-        cpu.excuteInstruction(opcode: opcode, memory: &memory)
+    switch interruptLine.get() {
+    case .RESET:
+        cpu.reset()
+        interruptLine.clear(.RESET)
+    case .NMI:
+        cpu.handleNMI()
+        interruptLine.clear(.NMI)
+    case .IRQ:
+        if cpu.P.contains(.I) {
+            cpu.handleIRQ()
+            interruptLine.clear(.IRQ)
+        }
+    case .BRK:
+        if cpu.P.contains(.I) {
+            cpu.handleBRK()
+            interruptLine.clear(.BRK)
+        }
+    default:
+        let opcode = cpu.fetchOperand()
+        cpu.excuteInstruction(opcode: opcode)
     }
 
     if before <= cpu.cycles {
         return cpu.cycles &- before
     } else {
         return UInt.max &- before &+ cpu.cycles
-    }
-}
-
-extension CPU {
-    mutating func fetch(from memory: inout Memory) -> OpCode {
-        let opcode = read(at: PC, from: &memory)
-        PC &+= 1
-        return opcode
     }
 }

@@ -8,6 +8,12 @@ class DummyRenderer: Renderer {
     func newLine(number: Int, pixels: [UInt32]) {}
 }
 
+extension CPU {
+    init() {
+        self.init(memory: [UInt8](repeating: 0x00, count: 65536))
+    }
+}
+
 extension PPU {
     convenience init() {
         self.init(memory: [UInt8](repeating: 0x00, count: 65534), interruptLine: InterruptLine())
