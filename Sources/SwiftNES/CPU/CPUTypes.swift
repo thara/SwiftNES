@@ -1,3 +1,9 @@
+typealias OpCode = UInt8
+
+typealias Operand = UInt16
+
+typealias Operation = ((Operand) -> Void)
+
 struct CPU {
     /// Accumulator
     var A: UInt8 = 0x00 {

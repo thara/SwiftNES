@@ -4,7 +4,7 @@ struct NESTest {
     let disassembler: Disassembler
     let interruptLine: InterruptLine
 
-    // var registers: CPURegisters! = nil
+    var cpu: CPU! = nil
     var enabled: Bool = false
 
     var machineCode: String = ""
@@ -17,19 +17,19 @@ struct NESTest {
 
     mutating func before(cpu: inout CPU) {
         enabled = !interruptLine.interrupted
-        // if enabled {
-        //     (machineCode, assemblyCode) = disassembler.disassemble()
-        //     registers = cpu.registers
-        // }
+        if enabled {
+            (machineCode, assemblyCode) = disassembler.disassemble(cpu: &cpu)
+            self.cpu = cpu
+        }
     }
 
     func print(ppu: PPU, cycles: UInt) {
-        // if enabled {
-        //     let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(registers!.description)"
-        //     let ppuState = String(format: "%3d,%3d", ppu.scan.dot, ppu.scan.line)
-        //     let log = "\(registers.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
-        //     Swift.print(log)
-        // }
+        if enabled {
+            let cpuState = "\(machineCode.padding(9))\(assemblyCode.padding(33))\(cpu!.description)"
+            let ppuState = String(format: "%3d,%3d", ppu.scan.dot, ppu.scan.line)
+            let log = "\(cpu.PC.hex4)  \(cpuState) PPU:\(ppuState) CYC:\(cycles)"
+            Swift.print(log)
+        }
     }
 }
 
