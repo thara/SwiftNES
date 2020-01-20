@@ -22,53 +22,21 @@ final class PPU {
 
     private(set) var frames: UInt = 0
 
-    private let interruptLine: InterruptLine
-
     var scan = Scan()
-    public var lineBuffer: LineBuffer
+    var lineBuffer = LineBuffer()
 
     // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
     var internalDataBus: UInt8 = 0x00
 
-    init(memory: Memory, interruptLine: InterruptLine, lineBuffer: LineBuffer = LineBuffer()) {
+    init(memory: Memory) {
         self.memory = memory
-        self.interruptLine = interruptLine
-        self.lineBuffer = lineBuffer
     }
 
     var renderingEnabled: Bool {
         return registers.mask.contains(.sprite) || registers.mask.contains(.background)
     }
 
-    func step() {
-        process()
-
-        switch scan.nextDot() {
-        case .line(let lastLine):
-            lineBuffer.flush(to: lastLine)
-        case .frame(let lastLine):
-            lineBuffer.flush(to: lastLine)
-            frames += 1
-        default:
-            break
-        }
-    }
-
-    func reset() {
-        registers.clear()
-        memory.clear()
-        scan.clear()
-        lineBuffer.clear()
-        frames = 0
-    }
-}
-
-// MARK: - process implementation
-extension PPU {
-
-    func process() {
-        var preRendering = false
-
+    func step(interruptLine: InterruptLine) {
         switch scan.line {
         case 261:
             // Pre Render
@@ -100,7 +68,26 @@ extension PPU {
         default:
             break
         }
+
+        switch scan.nextDot() {
+        case .frame:
+            frames += 1
+        default:
+            break
+        }
     }
+
+    func reset() {
+        registers.clear()
+        memory.clear()
+        scan.clear()
+        lineBuffer.clear()
+        frames = 0
+    }
+}
+
+// MARK: - process implementation
+extension PPU {
 
     func renderPixel() {
         let x = scan.dot &- 2
