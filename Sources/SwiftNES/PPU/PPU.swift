@@ -89,6 +89,21 @@ final class PPU {
 // MARK: - process implementation
 extension PPU {
 
+    struct BackgroundPixel {
+        var enabled: Bool
+        var color: Int
+
+        static let zero = BackgroundPixel(enabled: false, color: 0x00)
+    }
+
+    struct SpritePixel {
+        var enabled: Bool
+        var color: Int
+        var priority: Bool
+
+        static let zero = SpritePixel(enabled: false, color: 0x00, priority: true)
+    }
+
     func renderPixel() {
         let x = scan.dot &- 2
 
@@ -322,19 +337,4 @@ extension PPU {
 private extension BinaryInteger {
     @inline(__always)
     var isOdd: Bool { return self.magnitude % 2 != 0 }
-}
-
-struct BackgroundPixel {
-    var enabled: Bool
-    var color: Int
-
-    static let zero = BackgroundPixel(enabled: false, color: 0x00)
-}
-
-struct SpritePixel {
-    var enabled: Bool
-    var color: Int
-    var priority: Bool
-
-    static let zero = SpritePixel(enabled: false, color: 0x00, priority: true)
 }
