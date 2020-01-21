@@ -3,7 +3,7 @@ import Nimble
 
 @testable import SwiftNES
 
-class CPUMemoryMapSpec: QuickSpec {
+class CPUMemorySpec: QuickSpec {
     override func spec() {
         describe("WRAM") {
             var data: [UInt8] = Array(repeating: 0, count: 2049)  // 2048 + 1
@@ -11,7 +11,7 @@ class CPUMemoryMapSpec: QuickSpec {
             data[1024] = 52
             data[2048] = 127
 
-            let map = CPUMemoryMap(initial: data)
+            let map = CPUMemory(initial: data)
 
             it("Read") {
                 expect(map.read(at: 0)).to(equal(1))
@@ -33,7 +33,7 @@ class CPUMemoryMapSpec: QuickSpec {
         // describe("ROM") {
 
         //     it("load Program") {
-        //         let map = CPUMemoryMap()
+        //         let map = CPUMemory()
 
         //         var p: [UInt8]  = Array(repeating: 0, count: 0x4000)
         //         p[0x0000] = 1
@@ -50,7 +50,7 @@ class CPUMemoryMapSpec: QuickSpec {
 
         describe("readWord") {
 
-            let map = CPUMemoryMap()
+            let map = CPUMemory()
 
             it("read 1 word") {
                 map.write(1, at: 128)

@@ -3,10 +3,10 @@ import Nimble
 
 @testable import SwiftNES
 
-class PPUMemoryMapSpec: QuickSpec {
+class PPUMemorySpec: QuickSpec {
     override func spec() {
         describe("toNameTableAddress") {
-            let map = PPUMemoryMap()
+            let map = PPUMemory()
 
             context("Vertical mirroring mode") {
                 beforeEach {

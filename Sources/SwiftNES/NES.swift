@@ -2,10 +2,10 @@ public final class NES {
     private var cpu: CPU
     private let ppu: PPU
 
-    private var cpuMemory: Memory
+    private let cpuMemory = CPUMemory()
+    private let ppuMemory = PPUMemory()
 
-    private let cartridgeDrive: CartridgeDrive
-    private let controllerPort: ControllerPort
+    private let controllerPort = ControllerPort()
 
     private let interruptLine: InterruptLine
 
@@ -24,18 +24,10 @@ public final class NES {
     public init() {
         interruptLine = InterruptLine()
 
-        let cpuMemoryMap = CPUMemoryMap()
-        cpu = CPU(memory: cpuMemoryMap)
-        cpuMemory = cpuMemoryMap
-
-        let ppuMemoryMap = PPUMemoryMap()
-        ppu = PPU(memory: ppuMemoryMap)
-        cpuMemoryMap.ppuPort = ppu
-
-        controllerPort = ControllerPort()
-        cpuMemoryMap.controllerPort = controllerPort
-
-        cartridgeDrive = BusConnectedCartridgeDrive(cpuMemoryMap: cpuMemoryMap, ppuMemoryMap: ppuMemoryMap)
+        cpu = CPU(memory: cpuMemory)
+        ppu = PPU(memory: ppuMemory)
+        cpuMemory.ppuPort = ppu
+        cpuMemory.controllerPort = controllerPort
 
         nestest = NESTest(interruptLine: interruptLine)
     }
@@ -76,13 +68,15 @@ public final class NES {
     }
 
     public func insert(cartridge: Cartridge) {
-        cartridgeDrive.insert(cartridge)
+        cpuMemory.cartridge = cartridge
+        ppuMemory.cartridge = cartridge
+
         cpu.powerOn()
 
         interruptLine.clear([.NMI, .IRQ])
         interruptLine.send(.RESET)
 
-        cpuMemory.clear()
+        cpu.memory.clear()
         ppu.reset()
         lineBuffer.clear()
     }
@@ -91,8 +85,4 @@ public final class NES {
         controllerPort.port1 = controller1
         controllerPort.port2 = controller2
     }
-}
-
-public protocol CartridgeDrive {
-    func insert(_ cartridge: Cartridge)
 }

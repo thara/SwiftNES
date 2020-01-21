@@ -1,4 +1,4 @@
-final class PPUMemoryMap: Memory {
+final class PPUMemory: Memory {
     var cartridge: Cartridge? {
         didSet {
             mirroring = cartridge?.mapper.mirroring
