@@ -51,4 +51,3 @@ struct Sprite {
         return UInt8(col)
     }
 }
-

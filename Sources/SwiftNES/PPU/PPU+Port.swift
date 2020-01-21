@@ -1,9 +1,5 @@
 extension PPU: IOPort {
 
-    var port: IOPort {
-        return self
-    }
-
     func read(from address: UInt16) -> UInt8 {
         var result: UInt8
 

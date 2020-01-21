@@ -19,6 +19,8 @@ public final class NES {
 
     private(set) var cycles: UInt = 0
 
+    private var lineBuffer = LineBuffer()
+
     public init() {
         interruptLine = InterruptLine()
 
@@ -28,8 +30,7 @@ public final class NES {
 
         let ppuMemoryMap = PPUMemoryMap()
         ppu = PPU(memory: ppuMemoryMap)
-
-        cpuMemoryMap.ppuPort = ppu.port
+        cpuMemoryMap.ppuPort = ppu
 
         controllerPort = ControllerPort()
         cpuMemoryMap.controllerPort = controllerPort
@@ -62,12 +63,12 @@ public final class NES {
 
         var ppuCycles = cpuCycles &* 3
         while 0 < ppuCycles {
-            let currentLine = ppu.scan.line
+            let currentLine = ppu.line
 
-            ppu.step(interruptLine: interruptLine)
+            ppu.step(writeTo: &lineBuffer, interruptLine: interruptLine)
 
-            if currentLine != ppu.scan.line {
-                render(currentLine, &ppu.lineBuffer)
+            if currentLine != ppu.line {
+                render(currentLine, &lineBuffer)
             }
 
             ppuCycles &-= 1
@@ -83,6 +84,7 @@ public final class NES {
 
         cpuMemory.clear()
         ppu.reset()
+        lineBuffer.clear()
     }
 
     public func connect(controller1: Controller?, controller2: Controller?) {
