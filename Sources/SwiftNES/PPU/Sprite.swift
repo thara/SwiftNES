@@ -1,7 +1,3 @@
-let spriteCount: Int = 64
-let spriteLimit: Int = 8
-let oamSize = 4 * spriteCount
-
 struct Sprite {
     struct Attribute: OptionSet {
         let rawValue: UInt8

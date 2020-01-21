@@ -1,5 +1,13 @@
 let startVerticalBlank = 241
 
+let nameTableFirst: UInt16 = 0x2000
+let attributeTableFirst: UInt16 = 0x23C0
+let tileHeight: UInt16 = 8
+
+let spriteCount: Int = 64
+let spriteLimit: Int = 8
+let oamSize = 4 * spriteCount
+
 final class PPU {
     var registers = PPURegisters()
     var memory: Memory

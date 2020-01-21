@@ -1,8 +1,3 @@
-let nameTableFirst: UInt16 = 0x2000
-let attributeTableFirst: UInt16 = 0x23C0
-
-let tileHeight: UInt16 = 8
-
 struct Tile {
     struct Pattern {
         var low: UInt16 = 0x00
