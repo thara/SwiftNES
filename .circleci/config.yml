@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  test:
+  build:
     docker:
       - image: swift:5.0.1
     working_directory: ~/src
@@ -32,15 +32,34 @@ jobs:
           name: Restore build artifacts
           key: swiftpm-{{ checksum "Package.resolved" }}
       - run:
-          name: Run test
-          command: swift test -v -Xswiftc "-j1"
+          name: Build
+          command: swift build -v -Xswiftc "-j1"
+      - run:
+          name: Build nestest
+          command: swift build -v -Xswiftc "-j1" -Xswiftc -Dnestest
       - save_cache:
           name: Cache build artifacts
           key: swiftpm-{{ checksum "Package.resolved" }}
           paths:
             - ~/src/.build
+  test:
+    docker:
+      - image: swift:5.0.1
+    working_directory: ~/src
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: apt-get update && apt-get install -y libsdl2-dev libgd-dev
+      - run:
+          name: Run test
+          command: swift test -v -Xswiftc "-j1"
 
 workflows:
+  version: 2
   test:
     jobs:
-      - test
+      - build
+      - test:
+          requires:
+            - build
