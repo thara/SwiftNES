@@ -4,8 +4,32 @@ let attributeTableFirst: UInt16 = 0x23C0
 let tileHeight: UInt16 = 8
 
 struct Tile {
-    var currentPattern = BackgroundTileShiftRegisters()
-    var currentAttribute = BackgroundAttributeShiftRegisters()
+    struct Pattern {
+        var low: UInt16 = 0x00
+        var high: UInt16 = 000
+
+        @inline(__always)
+        subscript(n: UInt8) -> UInt16 {
+            return (high[n] &<< 1) | low[n]
+        }
+    }
+
+    struct Attribute {
+        var low: UInt8 = 0x00
+        var high: UInt8 = 0x00
+
+        /// 1 quadrant of attrTableEntry
+        var lowLatch: Bool = false
+        var highLatch: Bool = false
+
+        @inline(__always)
+        subscript(n: UInt8) -> UInt8 {
+            return (high[n] &<< 1) | low[n]
+        }
+    }
+
+    var currentPattern = Pattern()
+    var currentAttribute = Attribute()
 
     @inline(__always)
     subscript(x: UInt8) -> (pattern: UInt16, pallete: UInt16) {
@@ -29,34 +53,10 @@ struct Tile {
     }
 
     @inline(__always)
-    mutating func reload(for next: BackgroundTileShiftRegisters, with nextAttribute: UInt8) {
+    mutating func reload(for next: Pattern, with nextAttribute: UInt8) {
         currentPattern.low = (currentPattern.low & 0xFF00) | next.low
         currentPattern.high = (currentPattern.high & 0xFF00) | next.high
         currentAttribute.lowLatch = nextAttribute[0] == 1
         currentAttribute.highLatch = nextAttribute[1] == 1
-    }
-}
-
-struct BackgroundTileShiftRegisters {
-    var low: UInt16 = 0x00
-    var high: UInt16 = 000
-
-    @inline(__always)
-    subscript(n: UInt8) -> UInt16 {
-        return (high[n] &<< 1) | low[n]
-    }
-}
-
-struct BackgroundAttributeShiftRegisters {
-    var low: UInt8 = 0x00
-    var high: UInt8 = 0x00
-
-    /// 1 quadrant of attrTableEntry
-    var lowLatch: Bool = false
-    var highLatch: Bool = false
-
-    @inline(__always)
-    subscript(n: UInt8) -> UInt8 {
-        return (high[n] &<< 1) | low[n]
     }
 }

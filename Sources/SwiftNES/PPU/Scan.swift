@@ -1,4 +1,8 @@
 struct Scan: CustomDebugStringConvertible {
+    enum Update: Equatable {
+        case dot, line(lastLine: Int), frame(lastLine: Int)
+    }
+
     var dot: Int = 0
     var line: Int = 0
 
@@ -11,7 +15,7 @@ struct Scan: CustomDebugStringConvertible {
         dot &+= 1
     }
 
-    mutating func nextDot() -> ScanUpdate {
+    mutating func nextDot() -> Update {
         dot &+= 1
         if NES.maxDot <= dot {
             dot %= NES.maxDot
@@ -33,10 +37,4 @@ struct Scan: CustomDebugStringConvertible {
     var debugDescription: String {
         return "dot:\(dot), line:\(line)"
     }
-}
-
-enum ScanUpdate: Equatable {
-    case dot
-    case line(lastLine: Int)
-    case frame(lastLine: Int)
 }

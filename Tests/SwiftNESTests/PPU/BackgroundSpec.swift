@@ -37,7 +37,7 @@ class BackgroundSpec: QuickSpec {
                     tile.currentAttribute.lowLatch = false
                     tile.currentAttribute.highLatch = false
 
-                    var nextPattern = BackgroundTileShiftRegisters()
+                    var nextPattern = Tile.Pattern()
                     nextPattern.low = 0b11111111
                     nextPattern.high = 0b00000000
 
