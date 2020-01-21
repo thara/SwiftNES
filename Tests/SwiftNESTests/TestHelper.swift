@@ -4,10 +4,6 @@ func vramAddress(fineYScroll: UInt16 = 0, nameTableNo: UInt16, coarseYScroll: UI
     return (fineYScroll << 12) | (nameTableNo << 10) | (coarseYScroll << 5) | coarseXScroll
 }
 
-class DummyRenderer: Renderer {
-    func newLine(number: Int, pixels: [UInt32]) {}
-}
-
 extension CPU {
     init() {
         self.init(memory: [UInt8](repeating: 0x00, count: 65536))
@@ -28,7 +24,7 @@ extension Cartridge {
 
 class DummyMapper: Mapper {
 
-    var ram: [UInt8]
+    var ram: Memory
     var program: [UInt8] = []
     var characterData: [UInt8] = []
 
