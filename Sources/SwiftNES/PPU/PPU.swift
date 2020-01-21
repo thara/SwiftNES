@@ -33,10 +33,6 @@ final class PPU {
         return scan.line
     }
 
-    var renderingEnabled: Bool {
-        return registers.mask.contains(.sprite) || registers.mask.contains(.background)
-    }
-
     func step(writeTo lineBuffer: inout LineBuffer, interruptLine: InterruptLine) {
         switch scan.line {
         case 261:
@@ -45,7 +41,7 @@ final class PPU {
                 if scan.dot == 1 {
                     registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
                 }
-                if scan.dot == 341 && renderingEnabled && frames.isOdd {
+                if scan.dot == 341 && registers.renderingEnabled && frames.isOdd {
                     // Skip 0 cycle on visible frame
                     scan.skip()
                 }
@@ -97,6 +93,10 @@ extension PPURegisters {
 
     var spriteSize: Int {
         return controller.contains(.spriteSize) ? 16 : 8
+    }
+
+    var renderingEnabled: Bool {
+        return mask.contains(.sprite) || mask.contains(.background)
     }
 
     func isEnabledBackground(at x: Int) -> Bool {
@@ -211,7 +211,7 @@ extension PPURegisters {
     }
 }
 
-// MARK: - process implementation
+// MARK: - Pixel Rendering
 extension PPU {
 
     struct BackgroundPixel {
@@ -235,7 +235,7 @@ extension PPU {
         let bg = getBackgroundPixel(x: x)
         let sprite = getSpritePixel(x: x, background: bg)
 
-        if renderingEnabled {
+        if registers.renderingEnabled {
             fetchBackgroundPixel()
             fetchSpritePixel()
         }
@@ -244,7 +244,7 @@ extension PPU {
             return
         }
 
-        let pixel = renderingEnabled ? selectPixel(bg: bg, sprite: sprite) : 0
+        let pixel = registers.renderingEnabled ? selectPixel(bg: bg, sprite: sprite) : 0
         lineBuffer.write(pixel, bg.color, sprite.color, at: x)
     }
 
@@ -303,7 +303,7 @@ extension PPU {
             case 0:
                 // Fetch tile bitmap high byte : step 2
                 nextPattern.high = memory.read(at: bgTempAddr).u16
-                if renderingEnabled {
+                if registers.renderingEnabled {
                     registers.incrCoarseX()
                 }
             default:
@@ -311,16 +311,16 @@ extension PPU {
             }
         case 256:
             nextPattern.high = memory.read(at: bgTempAddr).u16
-            if renderingEnabled {
+            if registers.renderingEnabled {
                 registers.incrY()
             }
         case 257:
             tile.reload(for: nextPattern, with: attrTableEntry)
-            if renderingEnabled {
+            if registers.renderingEnabled {
                 registers.copyX()
             }
         case 280...304:
-            if scan.line == 261 && renderingEnabled {
+            if scan.line == 261 && registers.renderingEnabled {
                 registers.copyY()
             }
         // Unused name table fetches
@@ -384,7 +384,7 @@ extension PPU {
                     n &+= 1
                 }
             }
-            if spriteLimit <= n && renderingEnabled {
+            if spriteLimit <= n && registers.renderingEnabled {
                 registers.status.formUnion(.spriteOverflow)
             }
         case 257...320:
@@ -443,7 +443,7 @@ extension PPU {
 
             if i == 0
                 && spriteZeroOnLine
-                && renderingEnabled
+                && registers.renderingEnabled
                 && !registers.status.contains(.spriteZeroHit)
                 && sprite.x != 0xFF && x < 0xFF
                 && bg.enabled {
