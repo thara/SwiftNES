@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
-      run: brew install sdl2 gd swiftlint
+      run: brew install sdl2 gd swiftlint libsoundio
     - name: Lint
       run: make lint
     - name: Build
