@@ -1,6 +1,7 @@
 public final class NES {
     private var cpu: CPU
     private let ppu: PPU
+    private let apu: APU
 
     private let cpuMemory = CPUMemory()
     private let ppuMemory = PPUMemory()
@@ -29,6 +30,8 @@ public final class NES {
         cpuMemory.ppuPort = ppu
         cpuMemory.controllerPort = controllerPort
 
+        apu = APU()
+
         nestest = NESTest(interruptLine: interruptLine)
     }
 
@@ -46,10 +49,12 @@ public final class NES {
 #endif
 
         let cpuCycles = cpu.step(interruptLine: interruptLine)
+        cycles &+= cpuCycles
+
+        apu.step()
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)
-        cycles &+= cpuCycles
         if interruptLine.interrupted { return }
 #endif
 

@@ -2,6 +2,7 @@ final class CPUMemory: Memory {
     private var wram: [UInt8]
 
     var ppuPort: IOPort?
+    var apuPort: IOPort?
     var cartridge: Cartridge?
     var controllerPort: ControllerPort?
 
@@ -19,8 +20,8 @@ final class CPUMemory: Memory {
             return wram.read(at: address)
         case 0x2000...0x3FFF:
             return ppuPort?.read(from: ppuAddress(address)) ?? 0x00
-        case 0x4004, 0x4005, 0x4006, 0x4007, 0x4015:
-            return 0xFF
+        case 0x4000...0x4013, 0x4015:
+            return apuPort?.read(from: address) ?? 0x00
         case 0x4016, 0x4017:
             return controllerPort?.read(at: address) ?? 0x00
         case 0x4020...0xFFFF:
@@ -36,8 +37,13 @@ final class CPUMemory: Memory {
             wram.write(value, at: address)
         case 0x2000...0x3FFF:
             ppuPort?.write(value, to: ppuAddress(address))
-        case 0x4016, 0x4017:
+        case 0x4000...0x4013, 0x4015:
+            apuPort?.write(value, to: address)
+        case 0x4016:
             controllerPort?.write(value)
+        case 0x4017:
+            controllerPort?.write(value)
+            apuPort?.write(value, to: address)
         case 0x4020...0xFFFF:
             cartridge?.write(value, at: address)
         default:

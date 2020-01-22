@@ -1,5 +1,4 @@
 class APU {
-
     let pulse1: PluseWaveChannel = .pulse1()
     let pulse2: PluseWaveChannel = .pulse2()
     let frameCounter = FrameCounter()
@@ -40,11 +39,11 @@ class APU {
     }
 }
 
-// MARK: - Memory Map
-extension APU: Memory {
+// MARK: - IO Port
+extension APU: IOPort {
 
     @inline(__always)
-    func read(at address: UInt16) -> UInt8 {
+    func read(from address: UInt16) -> UInt8 {
         switch address {
         case 0x4015:
             let dmcInt: UInt8 = 0
@@ -62,7 +61,7 @@ extension APU: Memory {
     }
 
     @inline(__always)
-    func write(_ value: UInt8, at address: UInt16) {
+    func write(_ value: UInt8, to address: UInt16) {
         switch address {
         // Pluse 1
         case 0x4000:

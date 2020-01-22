@@ -1,6 +1,6 @@
 class Sequencer {
 
-    var currentForm: [UInt8] = []
+    var currentForm: [UInt8] = waveforms[0]
     var position: Int = 0
 
     func update(duty: Int) {
