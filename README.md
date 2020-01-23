@@ -9,6 +9,7 @@
 - Swift 5.0.1 later
 - SDL2
 - GD Graphics Library
+- libsoundio
 
 ## Roadmap
 
