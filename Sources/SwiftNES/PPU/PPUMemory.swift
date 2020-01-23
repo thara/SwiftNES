@@ -76,7 +76,3 @@ final class PPUMemory: Memory {
         paletteRAMIndexes.fill(0x00)
     }
 }
-
-enum Mirroring {
-    case vertical, horizontal
-}

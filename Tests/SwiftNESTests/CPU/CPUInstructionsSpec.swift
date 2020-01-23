@@ -483,7 +483,7 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.step(interruptLine: interruptLine)
 
-                    expect(Status(rawValue: cpu.pullStack())).to(equal([cpu.P, Status.operatedB] as Status))
+                    expect(CPU.Status(rawValue: cpu.pullStack())).to(equal([cpu.P, CPU.Status.operatedB] as CPU.Status))
                     expect(cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(3))
                 }
@@ -519,7 +519,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.S = 0xFF
 
-                    let status: Status = [.N, .R, .Z, .C]
+                    let status: CPU.Status = [.N, .R, .Z, .C]
                     cpu.pushStack(status.rawValue)
 
                     let cycle = cpu.step(interruptLine: interruptLine)
@@ -1083,7 +1083,7 @@ class InstructionSpec: QuickSpec {
                     cpu.S = 0xFF
 
                     cpu.pushStack(word: 0x0401)
-                    let status: Status = [.N, .Z, .C]
+                    let status: CPU.Status = [.N, .Z, .C]
                     cpu.pushStack(status.rawValue)
 
                     let cycle = cpu.step(interruptLine: interruptLine)
@@ -1505,13 +1505,13 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.S = 0xFF
 
-                    let status: Status = [.N, .R, .Z, .C]
+                    let status: CPU.Status = [.N, .R, .Z, .C]
                     cpu.P = status
 
                     let cycle = cpu.step(interruptLine: interruptLine)
 
                     expect(cpu.PC).to(equal(0x8170))
-                    expect(cpu.pullStack() as UInt8).to(equal(status.rawValue | Status.interruptedB.rawValue))
+                    expect(cpu.pullStack() as UInt8).to(equal(status.rawValue | CPU.Status.interruptedB.rawValue))
                     expect(cpu.pullStack() as UInt16).to(equal(0x0303))
                     expect(cycle).to(equal(7))
                 }

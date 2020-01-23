@@ -1,3 +1,7 @@
+typealias OpCode = UInt8
+
+typealias Operand = UInt16
+
 // swiftlint:disable file_length cyclomatic_complexity function_body_length
 extension CPU {
 

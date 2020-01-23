@@ -10,3 +10,7 @@ protocol Mapper: class {
 
     var mirroring: Mirroring { get }
 }
+
+enum Mirroring {
+    case vertical, horizontal
+}
