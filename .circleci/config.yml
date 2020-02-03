@@ -3,13 +3,13 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: swift:5.0.1
+      - image: swift:5.1.3
     working_directory: ~/src
     steps:
       - checkout
       - restore_cache:
           name: Restore swiftlint
-          key: swiftlint-0.33.0-bin-{{ .Environment.CACHE_VERSION }}
+          key: swiftlint-0.38.2-bin-{{ .Environment.CACHE_VERSION }}
       - run:
           name: Install dependencies
           command: apt-get update && apt-get install -y libsdl2-dev libgd-dev libsoundio-dev
@@ -22,7 +22,7 @@ jobs:
             fi
       - save_cache:
           name: Cache swiftlint
-          key: swiftlint-0.33.0-bin-{{ .Environment.CACHE_VERSION }}
+          key: swiftlint-0.38.2-bin-{{ .Environment.CACHE_VERSION }}
           paths:
             - ~/swiftlint
       - run:
@@ -44,13 +44,13 @@ jobs:
             - ~/src/.build
   test:
     docker:
-      - image: swift:5.0.1
+      - image: swift:5.1.3
     working_directory: ~/src
     steps:
       - checkout
       - run:
           name: Install dependencies
-          command: apt-get update && apt-get install -y libsdl2-dev libgd-dev
+          command: apt-get update && apt-get install -y libsdl2-dev libgd-dev libsoundio-dev
       - run:
           name: Run test
           command: swift test -v -Xswiftc "-j1"
