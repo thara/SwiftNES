@@ -12,7 +12,7 @@ jobs:
           key: swiftlint-0.33.0-bin-{{ .Environment.CACHE_VERSION }}
       - run:
           name: Install dependencies
-          command: apt-get update && apt-get install -y libsdl2-dev libgd-dev
+          command: apt-get update && apt-get install -y libsdl2-dev libgd-dev libsoundio-dev
       - run:
           name: Build swiftlint
           command: |
