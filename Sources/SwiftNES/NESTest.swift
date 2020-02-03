@@ -35,19 +35,15 @@ struct NESTest {
 public func nestest(romPath: String) throws {
     let cartridge = try Cartridge(file: try NESFile(path: romPath))
 
-    let nes = makeNES(renderer: DummyRenderer())
+    let nes = NES()
     nes.insert(cartridge: cartridge)
 
     while true {
-        nes.step()
+        nes.step(onLineEnd: {_, _ in })
         if 26554 < nes.cycles {
             break
         }
     }
-}
-
-private class DummyRenderer: Renderer {
-    func newLine(number: Int, pixels: [UInt32]) {}
 }
 #endif
 
