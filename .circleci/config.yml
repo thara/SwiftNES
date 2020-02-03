@@ -11,8 +11,24 @@ jobs:
           name: Restore swiftlint
           key: swiftlint-0.38.2-bin-{{ .Environment.CACHE_VERSION }}
       - run:
+          name: Workaround of failure to install mercurial
+          command: mv /usr/lib/python2.7/site-packages /usr/lib/python2.7/dist-packages; ln -s dist-packages /usr/lib/python2.7/site-packages
+      - run:
           name: Install dependencies
-          command: apt-get update && apt-get install -y libsdl2-dev libgd-dev libsoundio-dev
+          command: apt-get update && apt-get install -y libgd-dev libsoundio-dev
+      - run:
+          name: Install SDL2 2.0.10
+          command: |
+            apt-get install -y mercurial libtool libxext-dev
+            mkdir -p ~/tmp/sdl2
+            cd ~/tmp/sdl2
+            hg clone https://hg.libsdl.org/SDL SDL
+            cd SDL
+            mkdir build
+            cd build
+            ../configure
+            make
+            make install
       - run:
           name: Build swiftlint
           command: |
@@ -49,8 +65,24 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Workaround of failure to install mercurial
+          command: mv /usr/lib/python2.7/site-packages /usr/lib/python2.7/dist-packages; ln -s dist-packages /usr/lib/python2.7/site-packages
+      - run:
           name: Install dependencies
-          command: apt-get update && apt-get install -y libsdl2-dev libgd-dev libsoundio-dev
+          command: apt-get update && apt-get install -y libgd-dev libsoundio-dev
+      - run:
+          name: Install SDL2 2.0.10
+          command: |
+            apt-get install -y mercurial libtool libxext-dev
+            mkdir -p ~/tmp/sdl2
+            cd ~/tmp/sdl2
+            hg clone https://hg.libsdl.org/SDL SDL
+            cd SDL
+            mkdir build
+            cd build
+            ../configure
+            make
+            make install
       - run:
           name: Run test
           command: swift test -v -Xswiftc "-j1"
