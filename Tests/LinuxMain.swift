@@ -4,16 +4,10 @@ import Quick
 @testable import SwiftNESTests
 
 QCKMain([
-    AddressingModeSpec.self,
-    CPUSpec.self,
-    InstructionSpec.self,
-    CPURegisterSpec.self,
+    NESFileSpec.self,
+    SoundQueueSpec.self,
 
-    PPUSpec.self,
-    PPUPortSpec.self,
-    PPURegistersSpec.self,
-    BackgroundSpec.self,
-
+    // APU
     DividerSpec.self,
     EnvelopeGeneratorSpec.self,
     LengthCounterSpec.self,
@@ -21,8 +15,24 @@ QCKMain([
     SweepUnitSpec.self,
     TimerSpec.self,
 
-    CPUMemoryMapSpec.self,
-    PPUMemoryMapSpec.self,
+    // CPU
+    AddressingModeSpec.self,
+    CPUMemorySpec.self,
+    InstructionSpec.self,
+    CPUSpec.self,
 
-    NESFileSpec.self,
+    // Controller
+    StandardControllerSpec.self,
+
+    // Mappers
+    Mapper0Spec.self,
+
+    // PPU
+    BackgroundSpec.self,
+    PPUMemorySpec.self,
+    PPUPortSpec.self,
+    PPUSpec.self,
+    PPURegistersSpec.self,
+    ScanSpec.self,
+    VRAMAddressSpec.self,
 ])

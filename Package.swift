@@ -12,7 +12,7 @@ let package = Package(
         .package(url: "https://github.com/twostraws/SwiftGD.git", from: "2.0.0"),
         .package(url: "https://github.com/thara/SoundIO.git", from: "0.1.0"),
 
-        .package(url: "https://github.com/Quick/Quick.git", from: "2.1.0"),
+        .package(url: "https://github.com/Quick/Quick.git", from: "2.2.0"),
         .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.0"),
 
         .package(url: "https://github.com/kylef/Commander.git", from: "0.9.0"),
