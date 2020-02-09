@@ -543,7 +543,7 @@ extension CPU {
 
     /// pushAccumulator
     mutating func PHA(operand: Operand) {
-        pushStack(A)
+        pushStack(A, to: &self)
         tick()
     }
 
@@ -551,13 +551,13 @@ extension CPU {
     mutating func PHP(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.operatedB.rawValue)
+        pushStack(P.rawValue | Status.operatedB.rawValue, to: &self)
         tick()
     }
 
     /// pullAccumulator
     mutating func PLA(operand: Operand) {
-        A = pullStack()
+        A = pullStack(from: &self)
         tick(count: 2)
     }
 
@@ -565,7 +565,7 @@ extension CPU {
     mutating func PLP(operand: Operand) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
+        P = Status(rawValue: pullStack(from: &self) & ~Status.B.rawValue | Status.R.rawValue)
         tick(count: 2)
     }
 
@@ -845,7 +845,7 @@ extension CPU {
 
     /// jumpToSubroutine
     mutating func JSR(operand: Operand) {
-        pushStack(word: PC &- 1)
+        pushStack(word: PC &- 1, to: &self)
         tick()
         PC = operand
     }
@@ -853,7 +853,7 @@ extension CPU {
     /// returnFromSubroutine
     mutating func RTS(operand: Operand) {
         tick(count: 3)
-        PC = pullStack() &+ 1
+        PC = pullStack(from: &self) &+ 1
     }
 
     /// returnFromInterrupt
@@ -861,8 +861,8 @@ extension CPU {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
         tick(count: 2)
-        P = Status(rawValue: pullStack() & ~Status.B.rawValue | Status.R.rawValue)
-        PC = pullStack()
+        P = Status(rawValue: pullStack(from: &self) & ~Status.B.rawValue | Status.R.rawValue)
+        PC = pullStack(from: &self)
     }
 
     // MARK: - Branch instructions
@@ -967,10 +967,10 @@ extension CPU {
 
     /// forceInterrupt
     mutating func BRK(operand: Operand) {
-        pushStack(word: PC)
+        pushStack(word: PC, to: &self)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.interruptedB.rawValue)
+        pushStack(P.rawValue | Status.interruptedB.rawValue, to: &self)
         tick()
         PC = readWord(at: 0xFFFE)
     }
@@ -1081,29 +1081,27 @@ extension CPU {
 }
 
 // MARK: - Stack
-extension CPU {
-    @inline(__always)
-    mutating func pushStack(_ value: UInt8) {
-        write(value, at: S.u16 &+ 0x100)
-        S &-= 1
-    }
+@inline(__always)
+func pushStack(_ value: UInt8, to cpu: inout CPU) {
+    cpu.write(value, at: cpu.S.u16 &+ 0x100)
+    cpu.S &-= 1
+}
 
-    @inline(__always)
-    mutating func pushStack(word: UInt16) {
-        pushStack(UInt8(word >> 8))
-        pushStack(UInt8(word & 0xFF))
-    }
+@inline(__always)
+func pushStack(word: UInt16, to cpu: inout CPU) {
+    pushStack(UInt8(word >> 8), to: &cpu)
+    pushStack(UInt8(word & 0xFF), to: &cpu)
+}
 
-    @inline(__always)
-    mutating func pullStack() -> UInt8 {
-        S &+= 1
-        return read(at: S.u16 &+ 0x100)
-    }
+@inline(__always)
+func pullStack(from cpu: inout CPU) -> UInt8 {
+    cpu.S &+= 1
+    return cpu.read(at: cpu.S.u16 &+ 0x100)
+}
 
-    @inline(__always)
-    mutating func pullStack() -> UInt16 {
-        let lo: UInt8 = pullStack()
-        let ho: UInt8 = pullStack()
-        return ho.u16 &<< 8 | lo.u16
-    }
+@inline(__always)
+func pullStack(from cpu: inout CPU) -> UInt16 {
+    let lo: UInt8 = pullStack(from: &cpu)
+    let ho: UInt8 = pullStack(from: &cpu)
+    return ho.u16 &<< 8 | lo.u16
 }

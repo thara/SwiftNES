@@ -69,22 +69,22 @@ class CPUSpec: QuickSpec {
                 var cpu = CPU()
                 cpu.S = 0xFF
 
-                cpu.pushStack(0x83)
-                cpu.pushStack(0x14)
+                pushStack(0x83, to: &cpu)
+                pushStack(0x14, to: &cpu)
 
-                expect(cpu.pullStack() as UInt8).to(equal(0x14))
-                expect(cpu.pullStack() as UInt8).to(equal(0x83))
+                expect(pullStack(from: &cpu) as UInt8).to(equal(0x14))
+                expect(pullStack(from: &cpu) as UInt8).to(equal(0x83))
             }
 
             it("push word, and pull the same") {
                 var cpu = CPU()
                 cpu.S = 0xFF
 
-                cpu.pushStack(word: 0x98AF)
-                cpu.pushStack(word: 0x003A)
+                pushStack(word: 0x98AF, to: &cpu)
+                pushStack(word: 0x003A, to: &cpu)
 
-                expect(cpu.pullStack() as UInt16).to(equal(0x003A))
-                expect(cpu.pullStack() as UInt16).to(equal(0x98AF))
+                expect(pullStack(from: &cpu) as UInt16).to(equal(0x003A))
+                expect(pullStack(from: &cpu) as UInt16).to(equal(0x98AF))
             }
         }
     }
