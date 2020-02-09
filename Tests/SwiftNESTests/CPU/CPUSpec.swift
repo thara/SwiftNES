@@ -52,7 +52,7 @@ class CPUSpec: QuickSpec {
                 cpu.write(127, at: 0xFFFD)
                 cpu.write(64, at: 0xFFFE)
 
-                _ = cpu.reset()
+                _ = CPU.reset(on: &cpu)
 
                 expect(cpu.A).to(equal(0xFA))
                 expect(cpu.X).to(equal(0x1F))

@@ -48,7 +48,7 @@ public final class NES {
         if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
 #endif
 
-        let cpuCycles = cpu.step(interruptLine: interruptLine)
+        let cpuCycles = SwiftNES.step(cpu: &cpu, interruptLine: interruptLine)
         cycles &+= cpuCycles
 
         apu.step()

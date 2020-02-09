@@ -41,40 +41,6 @@ struct CPU {
         cycles &+= count
     }
 
-    mutating func step(interruptLine: InterruptLine) -> UInt {
-        let before = cycles
-
-        switch interruptLine.get() {
-        case .RESET:
-            CPU.reset(on: &self)
-            interruptLine.clear(.RESET)
-        case .NMI:
-            CPU.handleNMI(on: &self)
-            interruptLine.clear(.NMI)
-        case .IRQ:
-            if P.contains(.I) {
-                CPU.handleIRQ(on: &self)
-                interruptLine.clear(.IRQ)
-            }
-        case .BRK:
-            if P.contains(.I) {
-                CPU.handleBRK(on: &self)
-                interruptLine.clear(.BRK)
-            }
-        default:
-            let opcode = CPU.fetchOperand(from: &self)
-            let (operation, fetchOperand) = CPU.decode(opcode: opcode, on: &self)
-            let operand = fetchOperand(&self)
-            operation(operand, &self)
-        }
-
-        if before <= cycles {
-            return cycles &- before
-        } else {
-            return UInt.max &- before &+ cycles
-        }
-    }
-
     mutating func powerOn() {
         A = 0
         X = 0
@@ -88,6 +54,41 @@ struct CPU {
 #endif
     }
 }
+
+func step(cpu: inout CPU, interruptLine: InterruptLine) -> UInt {
+    let before = cpu.cycles
+
+    switch interruptLine.get() {
+    case .RESET:
+        CPU.reset(on: &cpu)
+        interruptLine.clear(.RESET)
+    case .NMI:
+        CPU.handleNMI(on: &cpu)
+        interruptLine.clear(.NMI)
+    case .IRQ:
+        if cpu.P.contains(.I) {
+            CPU.handleIRQ(on: &cpu)
+            interruptLine.clear(.IRQ)
+        }
+    case .BRK:
+        if cpu.P.contains(.I) {
+            CPU.handleBRK(on: &cpu)
+            interruptLine.clear(.BRK)
+        }
+    default:
+        let opcode = CPU.fetchOperand(from: &cpu)
+        let (operation, fetchOperand) = CPU.decode(opcode: opcode, on: &cpu)
+        let operand = fetchOperand(&cpu)
+        operation(operand, &cpu)
+    }
+
+    if before <= cpu.cycles {
+        return cpu.cycles &- before
+    } else {
+        return UInt.max &- before &+ cpu.cycles
+    }
+}
+
 
 // MARK: - Memory
 extension CPU {

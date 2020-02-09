@@ -21,7 +21,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0xF8, at: 0x0303)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0xF8))
                     expect(cpu.PC).to(equal(0x0304))
@@ -38,7 +38,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0x93, at: 0x00F8)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x93))
                     expect(cpu.PC).to(equal(0x0304))
@@ -56,7 +56,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.X = 0x8F
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x93))
                     expect(cpu.PC).to(equal(0x0304))
@@ -74,7 +74,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0x51, at: 0x07F8)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x51))
                     expect(cpu.PC).to(equal(0x0305))
@@ -93,7 +93,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.X = 0x02
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x51))
                     expect(cpu.PC).to(equal(0x0305))
@@ -112,7 +112,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.Y = 0x02
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x51))
                     expect(cpu.PC).to(equal(0x0305))
@@ -133,7 +133,7 @@ class InstructionSpec: QuickSpec {
                     cpu.X = 0x02
                     // low: 0xFA, high: (0xFA + 1) & 0x00FF = 0xFB
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x9F))
                     expect(cpu.PC).to(equal(0x0304))
@@ -153,7 +153,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.Y = 0x02
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x93))
                     expect(cpu.PC).to(equal(0x0304))
@@ -172,7 +172,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0xF8, at: 0x0303)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.X).to(equal(0xF8))
                     expect(cpu.PC).to(equal(0x0304))
@@ -189,7 +189,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0x93, at: 0x00F8)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.X).to(equal(0x93))
                     expect(cpu.PC).to(equal(0x0304))
@@ -207,7 +207,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.Y = 0x8F
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.X).to(equal(0x93))
                     expect(cpu.PC).to(equal(0x0304))
@@ -225,7 +225,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0x51, at: 0x07F8)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.X).to(equal(0x51))
                     expect(cpu.PC).to(equal(0x0305))
@@ -247,7 +247,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0x93
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x00F8)).to(equal(0x93))
                     expect(cpu.PC).to(equal(0x0304))
@@ -265,7 +265,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0x32
                     cpu.X = 0x8F
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0087)).to(equal(0x32))
                     expect(cpu.PC).to(equal(0x0304))
@@ -283,7 +283,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0x19
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x07F8)).to(equal(0x19))
                     expect(cpu.PC).to(equal(0x0305))
@@ -302,7 +302,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0x24
                     cpu.X = 0x02
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x07FA)).to(equal(0x24))
                     expect(cpu.PC).to(equal(0x0305))
@@ -322,7 +322,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0x23
                     cpu.Y = 0x02
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x07FA)).to(equal(0x23))
                     expect(cpu.PC).to(equal(0x0305))
@@ -344,7 +344,7 @@ class InstructionSpec: QuickSpec {
                     cpu.X = 0x02
                     // low: 0xFA, high: (0xFA + 1) & 0x00FF = 0xFB
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0423)).to(equal(0xF1))
                     expect(cpu.PC).to(equal(0x0304))
@@ -365,7 +365,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0xF2
                     cpu.Y = 0x02
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0773)).to(equal(0xF2))
                     expect(cpu.PC).to(equal(0x0304))
@@ -386,7 +386,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0xF2
                     cpu.X = 0x32
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.X).to(equal(0xF2))
                     expect(cpu.PC).to(equal(0x0303))
@@ -405,7 +405,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0xF2
                     cpu.Y = 0x32
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.Y).to(equal(0xF2))
                     expect(cpu.PC).to(equal(0x0303))
@@ -424,7 +424,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0xF2
                     cpu.X = 0x32
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x32))
                     expect(cpu.PC).to(equal(0x0303))
@@ -443,7 +443,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0xF2
                     cpu.Y = 0x32
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0x32))
                     expect(cpu.PC).to(equal(0x0303))
@@ -462,7 +462,7 @@ class InstructionSpec: QuickSpec {
                     cpu.S = 0xFF
                     cpu.A = 0xF2
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(pullStack(from: &cpu) as UInt8).to(equal(0xF2))
                     expect(cpu.PC).to(equal(0x0303))
@@ -481,7 +481,7 @@ class InstructionSpec: QuickSpec {
                     cpu.S = 0xFF
                     cpu.P = [.N, .B, .I, .Z, .C]
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(CPU.Status(rawValue: pullStack(from: &cpu))).to(equal([cpu.P, CPU.Status.operatedB] as CPU.Status))
                     expect(cpu.PC).to(equal(0x0303))
@@ -501,7 +501,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 0xF2
                     pushStack(0xA2, to: &cpu)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0xA2))
                     expect(cpu.PC).to(equal(0x0303))
@@ -522,7 +522,7 @@ class InstructionSpec: QuickSpec {
                     let status: CPU.Status = [.N, .R, .Z, .C]
                     pushStack(status.rawValue, to: &cpu)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.P).to(equal(status))
                     expect(cpu.PC).to(equal(0x0303))
@@ -543,7 +543,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0b11011011
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0b01011000))
                     expect(cpu.PC).to(equal(0x0305))
@@ -566,7 +566,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0b11011011
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0b10000111))
                     expect(cpu.PC).to(equal(0x0305))
@@ -589,7 +589,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0b11011011
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0b11011111))
                     expect(cpu.PC).to(equal(0x0305))
@@ -614,7 +614,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.A = 0b01000011
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.P.contains(.Z)).to(beTruthy())
                         expect(cpu.P.contains(.V)).to(beFalsy())
@@ -635,7 +635,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.A = 0b11011011
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.P.contains(.Z)).to(beFalsy())
                         expect(cpu.P.contains(.V)).to(beTruthy())
@@ -656,7 +656,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.A = 0b10011011
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.P.contains(.Z)).to(beFalsy())
                         expect(cpu.P.contains(.V)).to(beFalsy())
@@ -683,7 +683,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 12
                     cpu.P.formUnion(.C)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(12))
                     expect(cpu.P.contains(.Z)).to(beFalsy())
@@ -712,7 +712,7 @@ class InstructionSpec: QuickSpec {
                     cpu.A = 30
                     cpu.P.formUnion(.C)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(244))
                     expect(cpu.P.contains(.Z)).to(beFalsy())
@@ -740,7 +740,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.A = 97
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.P.contains(.C)).to(beTruthy())
                         expect(cpu.P.contains(.Z)).to(beTruthy())
@@ -759,7 +759,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.A = 98
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.P.contains(.C)).to(beTruthy())
                         expect(cpu.P.contains(.Z)).to(beFalsy())
@@ -778,7 +778,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.A = 96
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.P.contains(.C)).to(beFalsy())
                         expect(cpu.P.contains(.Z)).to(beFalsy())
@@ -805,7 +805,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(254, at: 0x0130)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0130)).to(equal(255))
                     expect(cpu.P.contains(.Z)).to(beFalsy())
@@ -831,7 +831,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(254, at: 0x0130)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0130)).to(equal(253))
                     expect(cpu.P.contains(.Z)).to(beFalsy())
@@ -855,7 +855,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0b11001011
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0b10010110))
                     expect(cpu.P.contains(.N)).to(beTruthy())
@@ -875,7 +875,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0b11101110, at: 0x0130)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0130)).to(equal(0b11011100))
                     expect(cpu.P.contains(.N)).to(beTruthy())
@@ -897,7 +897,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0b11001011
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0b01100101))
                     expect(cpu.P.contains(.N)).to(beFalsy())
@@ -917,7 +917,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0b11101110, at: 0x0130)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0130)).to(equal(0b01110111))
                     expect(cpu.P.contains(.N)).to(beFalsy())
@@ -939,7 +939,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0b11001011
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0b10010110))
                     expect(cpu.P.contains(.N)).to(beTruthy())
@@ -960,7 +960,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.formUnion(.C)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0130)).to(equal(0b11011101))
                     expect(cpu.P.contains(.N)).to(beTruthy())
@@ -982,7 +982,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.A = 0b11001011
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.A).to(equal(0b01100101))
                     expect(cpu.P.contains(.N)).to(beFalsy())
@@ -1003,7 +1003,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.formUnion(.C)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.read(at: 0x0130)).to(equal(0b11110111))
                     expect(cpu.P.contains(.N)).to(beTruthy())
@@ -1026,7 +1026,7 @@ class InstructionSpec: QuickSpec {
                     cpu.write(0x01, at: 0x0304)
                     cpu.PC = 0x0302
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.PC).to(equal(0x0130))
                     expect(cycle).to(equal(3))
@@ -1046,7 +1046,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.S = 0xFF
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.PC).to(equal(0x0130))
                     expect(pullStack(from: &cpu) as UInt16).to(equal(0x0304))
@@ -1065,7 +1065,7 @@ class InstructionSpec: QuickSpec {
                     cpu.S = 0xFF
                     pushStack(word: 0x0304, to: &cpu)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.PC).to(equal(0x0305))
                     expect(cycle).to(equal(6))
@@ -1086,7 +1086,7 @@ class InstructionSpec: QuickSpec {
                     let status: CPU.Status = [.N, .Z, .C]
                     pushStack(status.rawValue, to: &cpu)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.PC).to(equal(0x0401))
                     expect(cpu.P.rawValue).to(equal(status.rawValue | 0x20))
@@ -1106,7 +1106,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.remove(.C)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
@@ -1120,7 +1120,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.formUnion(.C)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
@@ -1140,7 +1140,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.remove(.C)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
@@ -1154,7 +1154,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.formUnion(.C)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
@@ -1174,7 +1174,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.remove(.Z)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
@@ -1188,7 +1188,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.formUnion(.Z)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
@@ -1208,7 +1208,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.remove(.N)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
@@ -1222,7 +1222,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.formUnion(.N)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
@@ -1242,7 +1242,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.remove(.Z)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
@@ -1256,7 +1256,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.formUnion(.Z)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
@@ -1276,7 +1276,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.remove(.N)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
@@ -1290,7 +1290,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.formUnion(.N)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
@@ -1310,7 +1310,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.remove(.V)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
@@ -1324,7 +1324,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.formUnion(.V)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
@@ -1344,7 +1344,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.remove(.V)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0304))
                         expect(cycle).to(equal(2))
@@ -1358,7 +1358,7 @@ class InstructionSpec: QuickSpec {
                         cpu.PC = 0x0302
                         cpu.P.formUnion(.V)
 
-                        let cycle = cpu.step(interruptLine: interruptLine)
+                        let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                         expect(cpu.PC).to(equal(0x0307))
                         expect(cycle).to(equal(3))
@@ -1376,7 +1376,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.formUnion(.C)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.P.contains(.C)).to(beFalsy())
                     expect(cpu.PC).to(equal(0x0303))
@@ -1394,7 +1394,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.formUnion(.D)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.P.contains(.D)).to(beFalsy())
                     expect(cpu.PC).to(equal(0x0303))
@@ -1412,7 +1412,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.formUnion(.I)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.P.contains(.I)).to(beFalsy())
                     expect(cpu.PC).to(equal(0x0303))
@@ -1430,7 +1430,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.formUnion(.V)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.P.contains(.V)).to(beFalsy())
                     expect(cpu.PC).to(equal(0x0303))
@@ -1448,7 +1448,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.remove(.C)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.P.contains(.C)).to(beTruthy())
                     expect(cpu.PC).to(equal(0x0303))
@@ -1466,7 +1466,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.remove(.D)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.P.contains(.D)).to(beTruthy())
                     expect(cpu.PC).to(equal(0x0303))
@@ -1484,7 +1484,7 @@ class InstructionSpec: QuickSpec {
                     cpu.PC = 0x0302
                     cpu.P.remove(.I)
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.P.contains(.I)).to(beTruthy())
                     expect(cpu.PC).to(equal(0x0303))
@@ -1508,7 +1508,7 @@ class InstructionSpec: QuickSpec {
                     let status: CPU.Status = [.N, .R, .Z, .C]
                     cpu.P = status
 
-                    let cycle = cpu.step(interruptLine: interruptLine)
+                    let cycle = step(cpu: &cpu, interruptLine: interruptLine)
 
                     expect(cpu.PC).to(equal(0x8170))
                     expect(pullStack(from: &cpu) as UInt8).to(equal(status.rawValue | CPU.Status.interruptedB.rawValue))
