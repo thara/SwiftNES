@@ -60,24 +60,24 @@ func step(cpu: inout CPU, interruptLine: InterruptLine) -> UInt {
 
     switch interruptLine.get() {
     case .RESET:
-        CPU.reset(on: &cpu)
+        reset(on: &cpu)
         interruptLine.clear(.RESET)
     case .NMI:
-        CPU.handleNMI(on: &cpu)
+        handleNMI(on: &cpu)
         interruptLine.clear(.NMI)
     case .IRQ:
         if cpu.P.contains(.I) {
-            CPU.handleIRQ(on: &cpu)
+            handleIRQ(on: &cpu)
             interruptLine.clear(.IRQ)
         }
     case .BRK:
         if cpu.P.contains(.I) {
-            CPU.handleBRK(on: &cpu)
+            handleBRK(on: &cpu)
             interruptLine.clear(.BRK)
         }
     default:
-        let opcode = CPU.fetchOperand(from: &cpu)
-        let (operation, fetchOperand) = CPU.decode(opcode: opcode, on: &cpu)
+        let opcode = fetchOperand(from: &cpu)
+        let (operation, fetchOperand) = decode(opcode)
         let operand = fetchOperand(&cpu)
         operation(operand, &cpu)
     }
@@ -88,7 +88,6 @@ func step(cpu: inout CPU, interruptLine: InterruptLine) -> UInt {
         return UInt.max &- before &+ cpu.cycles
     }
 }
-
 
 // MARK: - Memory
 extension CPU {

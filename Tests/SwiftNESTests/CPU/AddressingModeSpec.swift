@@ -28,7 +28,7 @@ class AddressingModeSpec: QuickSpec {
 
             context("implicit") {
                 it("return 0") {
-                    let (operand, pc) = cpu.measurePC { CPU.implicit(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { implicit(on: &$0) }
                     expect(operand == 0x00).to(beTruthy())
                     expect(pc).to(equal(0))
                 }
@@ -38,7 +38,7 @@ class AddressingModeSpec: QuickSpec {
                 it("return data on accumulator") {
                     cpu.A = 0xFA
 
-                    let (operand, pc) = cpu.measurePC { CPU.accumulator(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { accumulator(on: &$0) }
                     expect(operand).to(equal(0xFA))
                     expect(pc).to(equal(0))
                 }
@@ -46,7 +46,7 @@ class AddressingModeSpec: QuickSpec {
 
             context("immediate") {
                 it("return PC's data directly") {
-                    let (operand, pc) = cpu.measurePC { CPU.immediate(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { immediate(on: &$0) }
                     expect(operand).to(equal(0x8234))
                     expect(pc).to(equal(1))
                 }
@@ -54,7 +54,7 @@ class AddressingModeSpec: QuickSpec {
 
             context("zeroPage") {
                 it("return 8 bit operand at addressing by PC on memory") {
-                    let (operand, pc) = cpu.measurePC { CPU.zeroPage(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { zeroPage(on: &$0) }
                     expect(operand).to(equal(0x0090))
                     expect(pc).to(equal(1))
                 }
@@ -62,7 +62,7 @@ class AddressingModeSpec: QuickSpec {
 
             context("zeroPageX") {
                 it("return 8 bit operand at addressing by PC added X on memory") {
-                    let (operand, pc) = cpu.measurePC { CPU.zeroPageX(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { zeroPageX(on: &$0) }
                     expect(operand).to(equal(0x95)) // (0x90 + 0x05) & 0xFF
                     expect(pc).to(equal(1))
                 }
@@ -70,7 +70,7 @@ class AddressingModeSpec: QuickSpec {
 
             context("zeroPageY") {
                 it("return 8 bit operand at addressing by PC added Y on memory") {
-                    let (operand, pc) = cpu.measurePC { CPU.zeroPageY(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { zeroPageY(on: &$0) }
                     expect(operand).to(equal(0x10)) // (0x90 + 0x80) & 0xFF
                     expect(pc).to(equal(1))
                 }
@@ -78,21 +78,21 @@ class AddressingModeSpec: QuickSpec {
 
             context("absolute") {
                 it("return full 16 bit address") {
-                    let (operand, pc) = cpu.measurePC { CPU.absolute(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { absolute(on: &$0) }
                     expect(operand).to(equal(0x9490))
                     expect(pc).to(equal(2))
                 }
             }
             context("absoluteX") {
                 it("return full 16 bit address added X") {
-                    let (operand, pc) = cpu.measurePC { CPU.absoluteX(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { absoluteX(on: &$0) }
                     expect(operand).to(equal(0x9495))  // 0x9490 + 0x05
                     expect(pc).to(equal(2))
                 }
             }
             context("absoluteY") {
                 it("return full 16 bit address added Y") {
-                    let (operand, pc) = cpu.measurePC { CPU.absoluteY(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { absoluteY(on: &$0) }
                     expect(operand).to(equal(0x9510))  // 0x9490 + 0x80
                     expect(pc).to(equal(2))
                 }
@@ -103,7 +103,7 @@ class AddressingModeSpec: QuickSpec {
                     cpu.PC = 0x50
                     cpu.write(120, at: 0x50)
 
-                    let (operand, pc) = cpu.measurePC { CPU.relative(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { relative(on: &$0) }
                     expect(operand).to(equal(120))
                     expect(pc).to(equal(1))
                 }
@@ -111,7 +111,7 @@ class AddressingModeSpec: QuickSpec {
 
             context("indirect") {
                 it("return (Indirect) address") {
-                    let (operand, pc) = cpu.measurePC { CPU.indirect(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { indirect(on: &$0) }
                     expect(operand).to(equal(0x8133))  // 0x33 + (0x81 << 8)
                     expect(pc).to(equal(2))
                 }
@@ -122,7 +122,7 @@ class AddressingModeSpec: QuickSpec {
                     cpu.write(0xFF, at: 0x95)
                     cpu.write(0xF0, at: 0x96)
 
-                    let (operand, pc) = cpu.measurePC { CPU.indexedIndirect(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { indexedIndirect(on: &$0) }
                     expect(operand).to(equal(0xF0FF))  // 0xFF + (0xF0 << 8)
                     expect(pc).to(equal(1))
                 }
@@ -133,7 +133,7 @@ class AddressingModeSpec: QuickSpec {
                     cpu.write(0x43, at: 0x90)
                     cpu.write(0xC0, at: 0x91)
 
-                    let (operand, pc) = cpu.measurePC { CPU.indirectIndexed(on: &$0) }
+                    let (operand, pc) = cpu.measurePC { indirectIndexed(on: &$0) }
                     expect(operand).to(equal(0xC0C3))  // 0xC043 + Y
                     expect(pc).to(equal(1))
                 }
