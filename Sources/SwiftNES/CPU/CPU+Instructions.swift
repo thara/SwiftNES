@@ -16,448 +16,448 @@ extension CPU {
     mutating func excuteInstruction(opcode: OpCode) {
         switch opcode {
         case 0xA9:
-            LDA(operand: immediate())
+            CPU.LDA(operand: immediate(), on: &self)
         case 0xA5:
-            LDA(operand: zeroPage())
+            CPU.LDA(operand: zeroPage(), on: &self)
         case 0xB5:
-            LDA(operand: zeroPageX())
+            CPU.LDA(operand: zeroPageX(), on: &self)
         case 0xAD:
-            LDA(operand: absolute())
+            CPU.LDA(operand: absolute(), on: &self)
         case 0xBD:
-            LDA(operand: absoluteXWithPenalty())
+            CPU.LDA(operand: absoluteXWithPenalty(), on: &self)
         case 0xB9:
-            LDA(operand: absoluteYWithPenalty())
+            CPU.LDA(operand: absoluteYWithPenalty(), on: &self)
         case 0xA1:
-            LDA(operand: indexedIndirect())
+            CPU.LDA(operand: indexedIndirect(), on: &self)
         case 0xB1:
-            LDA(operand: indirectIndexed())
+            CPU.LDA(operand: indirectIndexed(), on: &self)
         case 0xA2:
-            LDX(operand: immediate())
+            CPU.LDX(operand: immediate(), on: &self)
         case 0xA6:
-            LDX(operand: zeroPage())
+            CPU.LDX(operand: zeroPage(), on: &self)
         case 0xB6:
-            LDX(operand: zeroPageY())
+            CPU.LDX(operand: zeroPageY(), on: &self)
         case 0xAE:
-            LDX(operand: absolute())
+            CPU.LDX(operand: absolute(), on: &self)
         case 0xBE:
-            LDX(operand: absoluteYWithPenalty())
+            CPU.LDX(operand: absoluteYWithPenalty(), on: &self)
         case 0xA0:
-            LDY(operand: immediate())
+            CPU.LDY(operand: immediate(), on: &self)
         case 0xA4:
-            LDY(operand: zeroPage())
+            CPU.LDY(operand: zeroPage(), on: &self)
         case 0xB4:
-            LDY(operand: zeroPageX())
+            CPU.LDY(operand: zeroPageX(), on: &self)
         case 0xAC:
-            LDY(operand: absolute())
+            CPU.LDY(operand: absolute(), on: &self)
         case 0xBC:
-            LDY(operand: absoluteXWithPenalty())
+            CPU.LDY(operand: absoluteXWithPenalty(), on: &self)
         case 0x85:
-            STA(operand: zeroPage())
+            CPU.STA(operand: zeroPage(), on: &self)
         case 0x95:
-            STA(operand: zeroPageX())
+            CPU.STA(operand: zeroPageX(), on: &self)
         case 0x8D:
-            STA(operand: absolute())
+            CPU.STA(operand: absolute(), on: &self)
         case 0x9D:
-            STA(operand: absoluteX())
+            CPU.STA(operand: absoluteX(), on: &self)
         case 0x99:
-            STA(operand: absoluteY())
+            CPU.STA(operand: absoluteY(), on: &self)
         case 0x81:
-            STA(operand: indexedIndirect())
+            CPU.STA(operand: indexedIndirect(), on: &self)
         case 0x91:
-            STAWithTick(operand: indirectIndexed())
+            CPU.STAWithTick(operand: indirectIndexed(), on: &self)
         case 0x86:
-            STX(operand: zeroPage())
+            CPU.STX(operand: zeroPage(), on: &self)
         case 0x96:
-            STX(operand: zeroPageY())
+            CPU.STX(operand: zeroPageY(), on: &self)
         case 0x8E:
-            STX(operand: absolute())
+            CPU.STX(operand: absolute(), on: &self)
         case 0x84:
-            STY(operand: zeroPage())
+            CPU.STY(operand: zeroPage(), on: &self)
         case 0x94:
-            STY(operand: zeroPageX())
+            CPU.STY(operand: zeroPageX(), on: &self)
         case 0x8C:
-            STY(operand: absolute())
+            CPU.STY(operand: absolute(), on: &self)
         case 0xAA:
-            TAX(operand: implicit())
+            CPU.TAX(operand: implicit(), on: &self)
         case 0xBA:
-            TSX(operand: implicit())
+            CPU.TSX(operand: implicit(), on: &self)
         case 0xA8:
-            TAY(operand: implicit())
+            CPU.TAY(operand: implicit(), on: &self)
         case 0x8A:
-            TXA(operand: implicit())
+            CPU.TXA(operand: implicit(), on: &self)
         case 0x9A:
-            TXS(operand: implicit())
+            CPU.TXS(operand: implicit(), on: &self)
         case 0x98:
-            TYA(operand: implicit())
+            CPU.TYA(operand: implicit(), on: &self)
 
         case 0x48:
-            PHA(operand: implicit())
+            CPU.PHA(operand: implicit(), on: &self)
         case 0x08:
-            PHP(operand: implicit())
+            CPU.PHP(operand: implicit(), on: &self)
         case 0x68:
-            PLA(operand: implicit())
+            CPU.PLA(operand: implicit(), on: &self)
         case 0x28:
-            PLP(operand: implicit())
+            CPU.PLP(operand: implicit(), on: &self)
 
         case 0x29:
-            AND(operand: immediate())
+            CPU.AND(operand: immediate(), on: &self)
         case 0x25:
-            AND(operand: zeroPage())
+            CPU.AND(operand: zeroPage(), on: &self)
         case 0x35:
-            AND(operand: zeroPageX())
+            CPU.AND(operand: zeroPageX(), on: &self)
         case 0x2D:
-            AND(operand: absolute())
+            CPU.AND(operand: absolute(), on: &self)
         case 0x3D:
-            AND(operand: absoluteXWithPenalty())
+            CPU.AND(operand: absoluteXWithPenalty(), on: &self)
         case 0x39:
-            AND(operand: absoluteYWithPenalty())
+            CPU.AND(operand: absoluteYWithPenalty(), on: &self)
         case 0x21:
-            AND(operand: indexedIndirect())
+            CPU.AND(operand: indexedIndirect(), on: &self)
         case 0x31:
-            AND(operand: indirectIndexed())
+            CPU.AND(operand: indirectIndexed(), on: &self)
         case 0x49:
-            EOR(operand: immediate())
+            CPU.EOR(operand: immediate(), on: &self)
         case 0x45:
-            EOR(operand: zeroPage())
+            CPU.EOR(operand: zeroPage(), on: &self)
         case 0x55:
-            EOR(operand: zeroPageX())
+            CPU.EOR(operand: zeroPageX(), on: &self)
         case 0x4D:
-            EOR(operand: absolute())
+            CPU.EOR(operand: absolute(), on: &self)
         case 0x5D:
-            EOR(operand: absoluteXWithPenalty())
+            CPU.EOR(operand: absoluteXWithPenalty(), on: &self)
         case 0x59:
-            EOR(operand: absoluteYWithPenalty())
+            CPU.EOR(operand: absoluteYWithPenalty(), on: &self)
         case 0x41:
-            EOR(operand: indexedIndirect())
+            CPU.EOR(operand: indexedIndirect(), on: &self)
         case 0x51:
-            EOR(operand: indirectIndexed())
+            CPU.EOR(operand: indirectIndexed(), on: &self)
         case 0x09:
-            ORA(operand: immediate())
+            CPU.ORA(operand: immediate(), on: &self)
         case 0x05:
-            ORA(operand: zeroPage())
+            CPU.ORA(operand: zeroPage(), on: &self)
         case 0x15:
-            ORA(operand: zeroPageX())
+            CPU.ORA(operand: zeroPageX(), on: &self)
         case 0x0D:
-            ORA(operand: absolute())
+            CPU.ORA(operand: absolute(), on: &self)
         case 0x1D:
-            ORA(operand: absoluteXWithPenalty())
+            CPU.ORA(operand: absoluteXWithPenalty(), on: &self)
         case 0x19:
-            ORA(operand: absoluteYWithPenalty())
+            CPU.ORA(operand: absoluteYWithPenalty(), on: &self)
         case 0x01:
-            ORA(operand: indexedIndirect())
+            CPU.ORA(operand: indexedIndirect(), on: &self)
         case 0x11:
-            ORA(operand: indirectIndexed())
+            CPU.ORA(operand: indirectIndexed(), on: &self)
         case 0x24:
-            BIT(operand: zeroPage())
+            CPU.BIT(operand: zeroPage(), on: &self)
         case 0x2C:
-            BIT(operand: absolute())
+            CPU.BIT(operand: absolute(), on: &self)
 
         case 0x69:
-            ADC(operand: immediate())
+            CPU.ADC(operand: immediate(), on: &self)
         case 0x65:
-            ADC(operand: zeroPage())
+            CPU.ADC(operand: zeroPage(), on: &self)
         case 0x75:
-            ADC(operand: zeroPageX())
+            CPU.ADC(operand: zeroPageX(), on: &self)
         case 0x6D:
-            ADC(operand: absolute())
+            CPU.ADC(operand: absolute(), on: &self)
         case 0x7D:
-            ADC(operand: absoluteXWithPenalty())
+            CPU.ADC(operand: absoluteXWithPenalty(), on: &self)
         case 0x79:
-            ADC(operand: absoluteYWithPenalty())
+            CPU.ADC(operand: absoluteYWithPenalty(), on: &self)
         case 0x61:
-            ADC(operand: indexedIndirect())
+            CPU.ADC(operand: indexedIndirect(), on: &self)
         case 0x71:
-            ADC(operand: indirectIndexed())
+            CPU.ADC(operand: indirectIndexed(), on: &self)
         case 0xE9:
-            SBC(operand: immediate())
+            CPU.SBC(operand: immediate(), on: &self)
         case 0xE5:
-            SBC(operand: zeroPage())
+            CPU.SBC(operand: zeroPage(), on: &self)
         case 0xF5:
-            SBC(operand: zeroPageX())
+            CPU.SBC(operand: zeroPageX(), on: &self)
         case 0xED:
-            SBC(operand: absolute())
+            CPU.SBC(operand: absolute(), on: &self)
         case 0xFD:
-            SBC(operand: absoluteXWithPenalty())
+            CPU.SBC(operand: absoluteXWithPenalty(), on: &self)
         case 0xF9:
-            SBC(operand: absoluteYWithPenalty())
+            CPU.SBC(operand: absoluteYWithPenalty(), on: &self)
         case 0xE1:
-            SBC(operand: indexedIndirect())
+            CPU.SBC(operand: indexedIndirect(), on: &self)
         case 0xF1:
-            SBC(operand: indirectIndexed())
+            CPU.SBC(operand: indirectIndexed(), on: &self)
         case 0xC9:
-            CMP(operand: immediate())
+            CPU.CMP(operand: immediate(), on: &self)
         case 0xC5:
-            CMP(operand: zeroPage())
+            CPU.CMP(operand: zeroPage(), on: &self)
         case 0xD5:
-            CMP(operand: zeroPageX())
+            CPU.CMP(operand: zeroPageX(), on: &self)
         case 0xCD:
-            CMP(operand: absolute())
+            CPU.CMP(operand: absolute(), on: &self)
         case 0xDD:
-            CMP(operand: absoluteXWithPenalty())
+            CPU.CMP(operand: absoluteXWithPenalty(), on: &self)
         case 0xD9:
-            CMP(operand: absoluteYWithPenalty())
+            CPU.CMP(operand: absoluteYWithPenalty(), on: &self)
         case 0xC1:
-            CMP(operand: indexedIndirect())
+            CPU.CMP(operand: indexedIndirect(), on: &self)
         case 0xD1:
-            CMP(operand: indirectIndexed())
+            CPU.CMP(operand: indirectIndexed(), on: &self)
         case 0xE0:
-            CPX(operand: immediate())
+            CPU.CPX(operand: immediate(), on: &self)
         case 0xE4:
-            CPX(operand: zeroPage())
+            CPU.CPX(operand: zeroPage(), on: &self)
         case 0xEC:
-            CPX(operand: absolute())
+            CPU.CPX(operand: absolute(), on: &self)
         case 0xC0:
-            CPY(operand: immediate())
+            CPU.CPY(operand: immediate(), on: &self)
         case 0xC4:
-            CPY(operand: zeroPage())
+            CPU.CPY(operand: zeroPage(), on: &self)
         case 0xCC:
-            CPY(operand: absolute())
+            CPU.CPY(operand: absolute(), on: &self)
 
         case 0xE6:
-            INC(operand: zeroPage())
+            CPU.INC(operand: zeroPage(), on: &self)
         case 0xF6:
-            INC(operand: zeroPageX())
+            CPU.INC(operand: zeroPageX(), on: &self)
         case 0xEE:
-            INC(operand: absolute())
+            CPU.INC(operand: absolute(), on: &self)
         case 0xFE:
-            INC(operand: absoluteX())
+            CPU.INC(operand: absoluteX(), on: &self)
         case 0xE8:
-            INX(operand: implicit())
+            CPU.INX(operand: implicit(), on: &self)
         case 0xC8:
-            INY(operand: implicit())
+            CPU.INY(operand: implicit(), on: &self)
         case 0xC6:
-            DEC(operand: zeroPage())
+            CPU.DEC(operand: zeroPage(), on: &self)
         case 0xD6:
-            DEC(operand: zeroPageX())
+            CPU.DEC(operand: zeroPageX(), on: &self)
         case 0xCE:
-            DEC(operand: absolute())
+            CPU.DEC(operand: absolute(), on: &self)
         case 0xDE:
-            DEC(operand: absoluteX())
+            CPU.DEC(operand: absoluteX(), on: &self)
         case 0xCA:
-            DEX(operand: implicit())
+            CPU.DEX(operand: implicit(), on: &self)
         case 0x88:
-            DEY(operand: implicit())
+            CPU.DEY(operand: implicit(), on: &self)
 
         case 0x0A:
-            ASLForAccumulator(operand: accumulator())
+            CPU.ASLForAccumulator(operand: accumulator(), on: &self)
         case 0x06:
-            ASL(operand: zeroPage())
+            CPU.ASL(operand: zeroPage(), on: &self)
         case 0x16:
-            ASL(operand: zeroPageX())
+            CPU.ASL(operand: zeroPageX(), on: &self)
         case 0x0E:
-            ASL(operand: absolute())
+            CPU.ASL(operand: absolute(), on: &self)
         case 0x1E:
-            ASL(operand: absoluteX())
+            CPU.ASL(operand: absoluteX(), on: &self)
         case 0x4A:
-            LSRForAccumulator(operand: accumulator())
+            CPU.LSRForAccumulator(operand: accumulator(), on: &self)
         case 0x46:
-            LSR(operand: zeroPage())
+            CPU.LSR(operand: zeroPage(), on: &self)
         case 0x56:
-            LSR(operand: zeroPageX())
+            CPU.LSR(operand: zeroPageX(), on: &self)
         case 0x4E:
-            LSR(operand: absolute())
+            CPU.LSR(operand: absolute(), on: &self)
         case 0x5E:
-            LSR(operand: absoluteX())
+            CPU.LSR(operand: absoluteX(), on: &self)
         case 0x2A:
-            ROLForAccumulator(operand: accumulator())
+            CPU.ROLForAccumulator(operand: accumulator(), on: &self)
         case 0x26:
-            ROL(operand: zeroPage())
+            CPU.ROL(operand: zeroPage(), on: &self)
         case 0x36:
-            ROL(operand: zeroPageX())
+            CPU.ROL(operand: zeroPageX(), on: &self)
         case 0x2E:
-            ROL(operand: absolute())
+            CPU.ROL(operand: absolute(), on: &self)
         case 0x3E:
-            ROL(operand: absoluteX())
+            CPU.ROL(operand: absoluteX(), on: &self)
         case 0x6A:
-            RORForAccumulator(operand: accumulator())
+            CPU.RORForAccumulator(operand: accumulator(), on: &self)
         case 0x66:
-            ROR(operand: zeroPage())
+            CPU.ROR(operand: zeroPage(), on: &self)
         case 0x76:
-            ROR(operand: zeroPageX())
+            CPU.ROR(operand: zeroPageX(), on: &self)
         case 0x6E:
-            ROR(operand: absolute())
+            CPU.ROR(operand: absolute(), on: &self)
         case 0x7E:
-            ROR(operand: absoluteX())
+            CPU.ROR(operand: absoluteX(), on: &self)
 
         case 0x4C:
-            JMP(operand: absolute())
+            CPU.JMP(operand: absolute(), on: &self)
         case 0x6C:
-            JMP(operand: indirect())
+            CPU.JMP(operand: indirect(), on: &self)
         case 0x20:
-            JSR(operand: absolute())
+            CPU.JSR(operand: absolute(), on: &self)
         case 0x60:
-            RTS(operand: implicit())
+            CPU.RTS(operand: implicit(), on: &self)
         case 0x40:
-            RTI(operand: implicit())
+            CPU.RTI(operand: implicit(), on: &self)
 
         case 0x90:
-            BCC(operand: relative())
+            CPU.BCC(operand: relative(), on: &self)
         case 0xB0:
-            BCS(operand: relative())
+            CPU.BCS(operand: relative(), on: &self)
         case 0xF0:
-            BEQ(operand: relative())
+            CPU.BEQ(operand: relative(), on: &self)
         case 0x30:
-            BMI(operand: relative())
+            CPU.BMI(operand: relative(), on: &self)
         case 0xD0:
-            BNE(operand: relative())
+            CPU.BNE(operand: relative(), on: &self)
         case 0x10:
-            BPL(operand: relative())
+            CPU.BPL(operand: relative(), on: &self)
         case 0x50:
-            BVC(operand: relative())
+            CPU.BVC(operand: relative(), on: &self)
         case 0x70:
-            BVS(operand: relative())
+            CPU.BVS(operand: relative(), on: &self)
 
         case 0x18:
-            CLC(operand: implicit())
+            CPU.CLC(operand: implicit(), on: &self)
         case 0xD8:
-            CLD(operand: implicit())
+            CPU.CLD(operand: implicit(), on: &self)
         case 0x58:
-            CLI(operand: implicit())
+            CPU.CLI(operand: implicit(), on: &self)
         case 0xB8:
-            CLV(operand: implicit())
+            CPU.CLV(operand: implicit(), on: &self)
 
         case 0x38:
-            SEC(operand: implicit())
+            CPU.SEC(operand: implicit(), on: &self)
         case 0xF8:
-            SED(operand: implicit())
+            CPU.SED(operand: implicit(), on: &self)
         case 0x78:
-            SEI(operand: implicit())
+            CPU.SEI(operand: implicit(), on: &self)
 
         case 0x00:
-            BRK(operand: implicit())
+            CPU.BRK(operand: implicit(), on: &self)
 
         // Undocumented
 
         case 0xEB:
-            SBC(operand: immediate())
+            CPU.SBC(operand: immediate(), on: &self)
 
         case 0x04, 0x44, 0x64:
-            NOP(operand: zeroPage())
+            CPU.NOP(operand: zeroPage(), on: &self)
         case 0x0C:
-            NOP(operand: absolute())
+            CPU.NOP(operand: absolute(), on: &self)
         case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
-            NOP(operand: zeroPageX())
+            CPU.NOP(operand: zeroPageX(), on: &self)
         case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
-            NOP(operand: implicit())
+            CPU.NOP(operand: implicit(), on: &self)
         case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
-            NOP(operand: absoluteXWithPenalty())
+            CPU.NOP(operand: absoluteXWithPenalty(), on: &self)
         case 0x80, 0x82, 0x89, 0xC2, 0xE2:
-            NOP(operand: immediate())
+            CPU.NOP(operand: immediate(), on: &self)
 
         case 0xA3:
-            LAX(operand: indexedIndirect())
+            CPU.LAX(operand: indexedIndirect(), on: &self)
         case 0xA7:
-            LAX(operand: zeroPage())
+            CPU.LAX(operand: zeroPage(), on: &self)
         case 0xAF:
-            LAX(operand: absolute())
+            CPU.LAX(operand: absolute(), on: &self)
         case 0xB3:
-            LAX(operand: indirectIndexed())
+            CPU.LAX(operand: indirectIndexed(), on: &self)
         case 0xB7:
-            LAX(operand: zeroPageY())
+            CPU.LAX(operand: zeroPageY(), on: &self)
         case 0xBF:
-            LAX(operand: absoluteYWithPenalty())
+            CPU.LAX(operand: absoluteYWithPenalty(), on: &self)
 
         case 0x83:
-            SAX(operand: indexedIndirect())
+            CPU.SAX(operand: indexedIndirect(), on: &self)
         case 0x87:
-            SAX(operand: zeroPage())
+            CPU.SAX(operand: zeroPage(), on: &self)
         case 0x8F:
-            SAX(operand: absolute())
+            CPU.SAX(operand: absolute(), on: &self)
         case 0x97:
-            SAX(operand: zeroPageY())
+            CPU.SAX(operand: zeroPageY(), on: &self)
 
         case 0xC3:
-            DCP(operand: indexedIndirect())
+            CPU.DCP(operand: indexedIndirect(), on: &self)
         case 0xC7:
-            DCP(operand: zeroPage())
+            CPU.DCP(operand: zeroPage(), on: &self)
         case 0xCF:
-            DCP(operand: absolute())
+            CPU.DCP(operand: absolute(), on: &self)
         case 0xD3:
-            DCP(operand: indirectIndexed())
+            CPU.DCP(operand: indirectIndexed(), on: &self)
         case 0xD7:
-            DCP(operand: zeroPageX())
+            CPU.DCP(operand: zeroPageX(), on: &self)
         case 0xDB:
-            DCP(operand: absoluteY())
+            CPU.DCP(operand: absoluteY(), on: &self)
         case 0xDF:
-            DCP(operand: absoluteX())
+            CPU.DCP(operand: absoluteX(), on: &self)
 
         case 0xE3:
-            ISB(operand: indexedIndirect())
+            CPU.ISB(operand: indexedIndirect(), on: &self)
         case 0xE7:
-            ISB(operand: zeroPage())
+            CPU.ISB(operand: zeroPage(), on: &self)
         case 0xEF:
-            ISB(operand: absolute())
+            CPU.ISB(operand: absolute(), on: &self)
         case 0xF3:
-            ISB(operand: indirectIndexed())
+            CPU.ISB(operand: indirectIndexed(), on: &self)
         case 0xF7:
-            ISB(operand: zeroPageX())
+            CPU.ISB(operand: zeroPageX(), on: &self)
         case 0xFB:
-            ISB(operand: absoluteY())
+            CPU.ISB(operand: absoluteY(), on: &self)
         case 0xFF:
-            ISB(operand: absoluteX())
+            CPU.ISB(operand: absoluteX(), on: &self)
 
         case 0x03:
-            SLO(operand: indexedIndirect())
+            CPU.SLO(operand: indexedIndirect(), on: &self)
         case 0x07:
-            SLO(operand: zeroPage())
+            CPU.SLO(operand: zeroPage(), on: &self)
         case 0x0F:
-            SLO(operand: absolute())
+            CPU.SLO(operand: absolute(), on: &self)
         case 0x13:
-            SLO(operand: indirectIndexed())
+            CPU.SLO(operand: indirectIndexed(), on: &self)
         case 0x17:
-            SLO(operand: zeroPageX())
+            CPU.SLO(operand: zeroPageX(), on: &self)
         case 0x1B:
-            SLO(operand: absoluteY())
+            CPU.SLO(operand: absoluteY(), on: &self)
         case 0x1F:
-            SLO(operand: absoluteX())
+            CPU.SLO(operand: absoluteX(), on: &self)
 
         case 0x23:
-            RLA(operand: indexedIndirect())
+            CPU.RLA(operand: indexedIndirect(), on: &self)
         case 0x27:
-            RLA(operand: zeroPage())
+            CPU.RLA(operand: zeroPage(), on: &self)
         case 0x2F:
-            RLA(operand: absolute())
+            CPU.RLA(operand: absolute(), on: &self)
         case 0x33:
-            RLA(operand: indirectIndexed())
+            CPU.RLA(operand: indirectIndexed(), on: &self)
         case 0x37:
-            RLA(operand: zeroPageX())
+            CPU.RLA(operand: zeroPageX(), on: &self)
         case 0x3B:
-            RLA(operand: absoluteY())
+            CPU.RLA(operand: absoluteY(), on: &self)
         case 0x3F:
-            RLA(operand: absoluteX())
+            CPU.RLA(operand: absoluteX(), on: &self)
 
         case 0x43:
-            SRE(operand: indexedIndirect())
+            CPU.SRE(operand: indexedIndirect(), on: &self)
         case 0x47:
-            SRE(operand: zeroPage())
+            CPU.SRE(operand: zeroPage(), on: &self)
         case 0x4F:
-            SRE(operand: absolute())
+            CPU.SRE(operand: absolute(), on: &self)
         case 0x53:
-            SRE(operand: indirectIndexed())
+            CPU.SRE(operand: indirectIndexed(), on: &self)
         case 0x57:
-            SRE(operand: zeroPageX())
+            CPU.SRE(operand: zeroPageX(), on: &self)
         case 0x5B:
-            SRE(operand: absoluteY())
+            CPU.SRE(operand: absoluteY(), on: &self)
         case 0x5F:
-            SRE(operand: absoluteX())
+            CPU.SRE(operand: absoluteX(), on: &self)
 
         case 0x63:
-            RRA(operand: indexedIndirect())
+            CPU.RRA(operand: indexedIndirect(), on: &self)
         case 0x67:
-            RRA(operand: zeroPage())
+            CPU.RRA(operand: zeroPage(), on: &self)
         case 0x6F:
-            RRA(operand: absolute())
+            CPU.RRA(operand: absolute(), on: &self)
         case 0x73:
-            RRA(operand: indirectIndexed())
+            CPU.RRA(operand: indirectIndexed(), on: &self)
         case 0x77:
-            RRA(operand: zeroPageX())
+            CPU.RRA(operand: zeroPageX(), on: &self)
         case 0x7B:
-            RRA(operand: absoluteY())
+            CPU.RRA(operand: absoluteY(), on: &self)
         case 0x7F:
-            RRA(operand: absoluteX())
+            CPU.RRA(operand: absoluteX(), on: &self)
 
         default:
-            NOP(operand: implicit())
+            CPU.NOP(operand: implicit(), on: &self)
         }
     }
 }
@@ -467,146 +467,146 @@ extension CPU {
     // Implements for Load/Store Operations
 
     /// loadAccumulator
-    mutating func LDA(operand: Operand) {
-        A = read(at: operand)
+    static func LDA(operand: Operand, on cpu: inout CPU) {
+        cpu.A = cpu.read(at: operand)
     }
 
     /// loadXRegister
-    mutating func LDX(operand: Operand) {
-        X = read(at: operand)
+    static func LDX(operand: Operand, on cpu: inout CPU) {
+        cpu.X = cpu.read(at: operand)
     }
 
     /// loadYRegister
-    mutating func LDY(operand: Operand) {
-        Y = read(at: operand)
+    static func LDY(operand: Operand, on cpu: inout CPU) {
+        cpu.Y = cpu.read(at: operand)
     }
 
     /// storeAccumulator
-    mutating func STA(operand: Operand) {
-        write(A, at: operand)
+    static func STA(operand: Operand, on cpu: inout CPU) {
+        cpu.write(cpu.A, at: operand)
     }
 
-    mutating func STAWithTick(operand: Operand) {
-        write(A, at: operand)
-        tick()
+    static func STAWithTick(operand: Operand, on cpu: inout CPU) {
+        cpu.write(cpu.A, at: operand)
+        cpu.tick()
     }
 
     /// storeXRegister
-    mutating func STX(operand: Operand) {
-        write(X, at: operand)
+    static func STX(operand: Operand, on cpu: inout CPU) {
+        cpu.write(cpu.X, at: operand)
     }
 
     /// storeYRegister
-    mutating func STY(operand: Operand) {
-        write(Y, at: operand)
+    static func STY(operand: Operand, on cpu: inout CPU) {
+        cpu.write(cpu.Y, at: operand)
     }
 
     // MARK: - Register Operations
 
     /// transferAccumulatorToX
-    mutating func TAX(operand: Operand) {
-        X = A
-        tick()
+    static func TAX(operand: Operand, on cpu: inout CPU) {
+        cpu.X = cpu.A
+        cpu.tick()
     }
 
     /// transferStackPointerToX
-    mutating func TSX(operand: Operand) {
-        X = S
-        tick()
+    static func TSX(operand: Operand, on cpu: inout CPU) {
+        cpu.X = cpu.S
+        cpu.tick()
     }
 
     /// transferAccumulatorToY
-    mutating func TAY(operand: Operand) {
-        Y = A
-        tick()
+    static func TAY(operand: Operand, on cpu: inout CPU) {
+        cpu.Y = cpu.A
+        cpu.tick()
     }
 
     /// transferXtoAccumulator
-    mutating func TXA(operand: Operand) {
-        A = X
-        tick()
+    static func TXA(operand: Operand, on cpu: inout CPU) {
+        cpu.A = cpu.X
+        cpu.tick()
     }
 
     /// transferXtoStackPointer
-    mutating func TXS(operand: Operand) {
-        S = X
-        tick()
+    static func TXS(operand: Operand, on cpu: inout CPU) {
+        cpu.S = cpu.X
+        cpu.tick()
     }
 
     /// transferYtoAccumulator
-    mutating func TYA(operand: Operand) {
-        A = Y
-        tick()
+    static func TYA(operand: Operand, on cpu: inout CPU) {
+        cpu.A = cpu.Y
+        cpu.tick()
     }
 
     // MARK: - Stack instructions
 
     /// pushAccumulator
-    mutating func PHA(operand: Operand) {
-        pushStack(A, to: &self)
-        tick()
+    static func PHA(operand: Operand, on cpu: inout CPU) {
+        pushStack(cpu.A, to: &cpu)
+        cpu.tick()
     }
 
     /// pushProcessorStatus
-    mutating func PHP(operand: Operand) {
+    static func PHP(operand: Operand, on cpu: inout CPU) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.operatedB.rawValue, to: &self)
-        tick()
+        pushStack(cpu.P.rawValue | Status.operatedB.rawValue, to: &cpu)
+        cpu.tick()
     }
 
     /// pullAccumulator
-    mutating func PLA(operand: Operand) {
-        A = pullStack(from: &self)
-        tick(count: 2)
+    static func PLA(operand: Operand, on cpu: inout CPU) {
+        cpu.A = pullStack(from: &cpu)
+        cpu.tick(count: 2)
     }
 
     /// pullProcessorStatus
-    mutating func PLP(operand: Operand) {
+    static func PLP(operand: Operand, on cpu: inout CPU) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        P = Status(rawValue: pullStack(from: &self) & ~Status.B.rawValue | Status.R.rawValue)
-        tick(count: 2)
+        cpu.P = Status(rawValue: pullStack(from: &cpu) & ~Status.B.rawValue | Status.R.rawValue)
+        cpu.tick(count: 2)
     }
 
     // MARK: - Logical instructions
 
     /// bitwiseANDwithAccumulator
-    mutating func AND(operand: Operand) {
-        A &= read(at: operand)
+    static func AND(operand: Operand, on cpu: inout CPU) {
+        cpu.A &= cpu.read(at: operand)
     }
 
     /// bitwiseExclusiveOR
-    mutating func EOR(operand: Operand) {
-        A ^= read(at: operand)
+    static func EOR(operand: Operand, on cpu: inout CPU) {
+        cpu.A ^= cpu.read(at: operand)
     }
 
     /// bitwiseORwithAccumulator
-    mutating func ORA(operand: Operand) {
-        A |= read(at: operand)
+    static func ORA(operand: Operand, on cpu: inout CPU) {
+        cpu.A |= cpu.read(at: operand)
     }
 
     /// testBits
-    mutating func BIT(operand: Operand) {
-        let value = read(at: operand)
-        let data = A & value
-        P.remove([.Z, .V, .N])
-        if data == 0 { P.formUnion(.Z) } else { P.remove(.Z) }
-        if value[6] == 1 { P.formUnion(.V) } else { P.remove(.V) }
-        if value[7] == 1 { P.formUnion(.N) } else { P.remove(.N) }
+    static func BIT(operand: Operand, on cpu: inout CPU) {
+        let value = cpu.read(at: operand)
+        let data = cpu.A & value
+        cpu.P.remove([.Z, .V, .N])
+        if data == 0 { cpu.P.formUnion(.Z) } else { cpu.P.remove(.Z) }
+        if value[6] == 1 { cpu.P.formUnion(.V) } else { cpu.P.remove(.V) }
+        if value[7] == 1 { cpu.P.formUnion(.N) } else { cpu.P.remove(.N) }
     }
 
     // MARK: - Arithmetic instructions
 
     /// addWithCarry
-    mutating func ADC(operand: Operand) {
-        let a = A
-        let val = read(at: operand)
+    static func ADC(operand: Operand, on cpu: inout CPU) {
+        let a = cpu.A
+        let val = cpu.read(at: operand)
         var result = a &+ val
 
-        if P.contains(.C) { result &+= 1 }
+        if cpu.P.contains(.C) { result &+= 1 }
 
-        P.remove([.C, .Z, .V, .N])
+        cpu.P.remove([.C, .Z, .V, .N])
 
         // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
         let a7 = a[7]
@@ -614,21 +614,21 @@ extension CPU {
         let c6 = a7 ^ v7 ^ result[7]
         let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
 
-        if c7 == 1 { P.formUnion(.C) }
-        if c6 ^ c7 == 1 { P.formUnion(.V) }
+        if c7 == 1 { cpu.P.formUnion(.C) }
+        if c6 ^ c7 == 1 { cpu.P.formUnion(.V) }
 
-        A = result
+        cpu.A = result
     }
 
     /// subtractWithCarry
-    mutating func SBC(operand: Operand) {
-        let a = A
-        let val = ~read(at: operand)
+    static func SBC(operand: Operand, on cpu: inout CPU) {
+        let a = cpu.A
+        let val = ~cpu.read(at: operand)
         var result = a &+ val
 
-        if P.contains(.C) { result &+= 1 }
+        if cpu.P.contains(.C) { result &+= 1 }
 
-        P.remove([.C, .Z, .V, .N])
+        cpu.P.remove([.C, .Z, .V, .N])
 
         // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
         let a7 = a[7]
@@ -636,447 +636,447 @@ extension CPU {
         let c6 = a7 ^ v7 ^ result[7]
         let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
 
-        if c7 == 1 { P.formUnion(.C) }
-        if c6 ^ c7 == 1 { P.formUnion(.V) }
+        if c7 == 1 { cpu.P.formUnion(.C) }
+        if c6 ^ c7 == 1 { cpu.P.formUnion(.V) }
 
-        A = result
+        cpu.A = result
     }
 
     /// compareAccumulator
-    mutating func CMP(operand: Operand) {
-        let cmp = Int16(A) &- Int16(read(at: operand))
+    static func CMP(operand: Operand, on cpu: inout CPU) {
+        let cmp = Int16(cpu.A) &- Int16(cpu.read(at: operand))
 
-        P.remove([.C, .Z, .N])
-        P.setZN(cmp)
-        if 0 <= cmp { P.formUnion(.C) } else { P.remove(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        cpu.P.setZN(cmp)
+        if 0 <= cmp { cpu.P.formUnion(.C) } else { cpu.P.remove(.C) }
 
     }
 
     /// compareXRegister
-    mutating func CPX(operand: Operand) {
-        let value = read(at: operand)
-        let cmp = X &- value
+    static func CPX(operand: Operand, on cpu: inout CPU) {
+        let value = cpu.read(at: operand)
+        let cmp = cpu.X &- value
 
-        P.remove([.C, .Z, .N])
-        P.setZN(cmp)
-        if X >= value { P.formUnion(.C) } else { P.remove(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        cpu.P.setZN(cmp)
+        if cpu.X >= value { cpu.P.formUnion(.C) } else { cpu.P.remove(.C) }
 
     }
 
     /// compareYRegister
-    mutating func CPY(operand: Operand) {
-        let value = read(at: operand)
-        let cmp = Y &- value
+    static func CPY(operand: Operand, on cpu: inout CPU) {
+        let value = cpu.read(at: operand)
+        let cmp = cpu.Y &- value
 
-        P.remove([.C, .Z, .N])
-        P.setZN(cmp)
-        if Y >= value { P.formUnion(.C) } else { P.remove(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        cpu.P.setZN(cmp)
+        if cpu.Y >= value { cpu.P.formUnion(.C) } else { cpu.P.remove(.C) }
 
     }
 
     // MARK: - Increment/Decrement instructions
 
     /// incrementMemory
-    mutating func INC(operand: Operand) {
-        let result = read(at: operand) &+ 1
+    static func INC(operand: Operand, on cpu: inout CPU) {
+        let result = cpu.read(at: operand) &+ 1
 
-        P.setZN(result)
-        write(result, at: operand)
+        cpu.P.setZN(result)
+        cpu.write(result, at: operand)
 
-        tick()
+        cpu.tick()
 
     }
 
     /// incrementX
-    mutating func INX(operand: Operand) {
-        X = X &+ 1
-        tick()
+    static func INX(operand: Operand, on cpu: inout CPU) {
+        cpu.X = cpu.X &+ 1
+        cpu.tick()
     }
 
     /// incrementY
-    mutating func INY(operand: Operand) {
-        Y = Y &+ 1
-        tick()
+    static func INY(operand: Operand, on cpu: inout CPU) {
+        cpu.Y = cpu.Y &+ 1
+        cpu.tick()
     }
 
     /// decrementMemory
-    mutating func DEC(operand: Operand) {
-        let result = read(at: operand) &- 1
-        P.setZN(result)
+    static func DEC(operand: Operand, on cpu: inout CPU) {
+        let result = cpu.read(at: operand) &- 1
+        cpu.P.setZN(result)
 
-        write(result, at: operand)
-        tick()
+        cpu.write(result, at: operand)
+        cpu.tick()
     }
 
     /// decrementX
-    mutating func DEX(operand: Operand) {
-        X = X &- 1
-        tick()
+    static func DEX(operand: Operand, on cpu: inout CPU) {
+        cpu.X = cpu.X &- 1
+        cpu.tick()
     }
 
     /// decrementY
-    mutating func DEY(operand: Operand) {
-        Y = Y &- 1
-        tick()
+    static func DEY(operand: Operand, on cpu: inout CPU) {
+        cpu.Y = cpu.Y &- 1
+        cpu.tick()
     }
 
     // MARK: - Shift instructions
 
     /// arithmeticShiftLeft
-    mutating func ASL(operand: Operand) {
-        var data = read(at: operand)
+    static func ASL(operand: Operand, on cpu: inout CPU) {
+        var data = cpu.read(at: operand)
 
-        P.remove([.C, .Z, .N])
-        if data[7] == 1 { P.formUnion(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        if data[7] == 1 { cpu.P.formUnion(.C) }
 
         data <<= 1
 
-        P.setZN(data)
+        cpu.P.setZN(data)
 
-        write(data, at: operand)
+        cpu.write(data, at: operand)
 
-        tick()
+        cpu.tick()
     }
 
-    mutating func ASLForAccumulator(operand: Operand) {
-        P.remove([.C, .Z, .N])
-        if A[7] == 1 { P.formUnion(.C) }
+    static func ASLForAccumulator(operand: Operand, on cpu: inout CPU) {
+        cpu.P.remove([.C, .Z, .N])
+        if cpu.A[7] == 1 { cpu.P.formUnion(.C) }
 
-        A <<= 1
+        cpu.A <<= 1
 
-        tick()
+        cpu.tick()
     }
 
     /// logicalShiftRight
-    mutating func LSR(operand: Operand) {
-        var data = read(at: operand)
+    static func LSR(operand: Operand, on cpu: inout CPU) {
+        var data = cpu.read(at: operand)
 
-        P.remove([.C, .Z, .N])
-        if data[0] == 1 { P.formUnion(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        if data[0] == 1 { cpu.P.formUnion(.C) }
 
         data >>= 1
 
-        P.setZN(data)
+        cpu.P.setZN(data)
 
-        write(data, at: operand)
+        cpu.write(data, at: operand)
 
-        tick()
+        cpu.tick()
     }
 
-    mutating func LSRForAccumulator(operand: Operand) {
-        P.remove([.C, .Z, .N])
-        if A[0] == 1 { P.formUnion(.C) }
+    static func LSRForAccumulator(operand: Operand, on cpu: inout CPU) {
+        cpu.P.remove([.C, .Z, .N])
+        if cpu.A[0] == 1 { cpu.P.formUnion(.C) }
 
-        A >>= 1
+        cpu.A >>= 1
 
-        tick()
+        cpu.tick()
     }
 
     /// rotateLeft
-    mutating func ROL(operand: Operand) {
-        var data = read(at: operand)
+    static func ROL(operand: Operand, on cpu: inout CPU) {
+        var data = cpu.read(at: operand)
         let c = data & 0x80
 
         data <<= 1
-        if P.contains(.C) { data |= 0x01 }
+        if cpu.P.contains(.C) { data |= 0x01 }
 
-        P.remove([.C, .Z, .N])
-        if c == 0x80 { P.formUnion(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 { cpu.P.formUnion(.C) }
 
-        P.setZN(data)
+        cpu.P.setZN(data)
 
-        write(data, at: operand)
+        cpu.write(data, at: operand)
 
-        tick()
+        cpu.tick()
     }
 
-    mutating func ROLForAccumulator(operand: Operand) {
-        let c = A & 0x80
+    static func ROLForAccumulator(operand: Operand, on cpu: inout CPU) {
+        let c = cpu.A & 0x80
 
-        var a = A << 1
-        if P.contains(.C) { a |= 0x01 }
+        var a = cpu.A << 1
+        if cpu.P.contains(.C) { a |= 0x01 }
 
-        P.remove([.C, .Z, .N])
-        if c == 0x80 { P.formUnion(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 { cpu.P.formUnion(.C) }
 
-        A = a
+        cpu.A = a
 
-        tick()
+        cpu.tick()
     }
 
     /// rotateRight
-    mutating func ROR(operand: Operand) {
-        var data = read(at: operand)
+    static func ROR(operand: Operand, on cpu: inout CPU) {
+        var data = cpu.read(at: operand)
         let c = data & 0x01
 
         data >>= 1
-        if P.contains(.C) { data |= 0x80 }
+        if cpu.P.contains(.C) { data |= 0x80 }
 
-        P.remove([.C, .Z, .N])
-        if c == 1 { P.formUnion(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        if c == 1 { cpu.P.formUnion(.C) }
 
-        P.setZN(data)
+        cpu.P.setZN(data)
 
-        write(data, at: operand)
+        cpu.write(data, at: operand)
 
-        tick()
+        cpu.tick()
     }
 
-    mutating func RORForAccumulator(operand: Operand) {
-        let c = A & 0x01
+    static func RORForAccumulator(operand: Operand, on cpu: inout CPU) {
+        let c = cpu.A & 0x01
 
-        var a = A >> 1
-        if P.contains(.C) { a |= 0x80 }
+        var a = cpu.A >> 1
+        if cpu.P.contains(.C) { a |= 0x80 }
 
-        P.remove([.C, .Z, .N])
-        if c == 1 { P.formUnion(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        if c == 1 { cpu.P.formUnion(.C) }
 
-        A = a
+        cpu.A = a
 
-        tick()
+        cpu.tick()
     }
 
     // MARK: - Jump instructions
 
     /// jump
-    mutating func JMP(operand: Operand) {
-        PC = operand
+    static func JMP(operand: Operand, on cpu: inout CPU) {
+        cpu.PC = operand
     }
 
     /// jumpToSubroutine
-    mutating func JSR(operand: Operand) {
-        pushStack(word: PC &- 1, to: &self)
-        tick()
-        PC = operand
+    static func JSR(operand: Operand, on cpu: inout CPU) {
+        pushStack(word: cpu.PC &- 1, to: &cpu)
+        cpu.tick()
+        cpu.PC = operand
     }
 
     /// returnFromSubroutine
-    mutating func RTS(operand: Operand) {
-        tick(count: 3)
-        PC = pullStack(from: &self) &+ 1
+    static func RTS(operand: Operand, on cpu: inout CPU) {
+        cpu.tick(count: 3)
+        cpu.PC = pullStack(from: &cpu) &+ 1
     }
 
     /// returnFromInterrupt
-    mutating func RTI(operand: Operand) {
+    static func RTI(operand: Operand, on cpu: inout CPU) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        tick(count: 2)
-        P = Status(rawValue: pullStack(from: &self) & ~Status.B.rawValue | Status.R.rawValue)
-        PC = pullStack(from: &self)
+        cpu.tick(count: 2)
+        cpu.P = Status(rawValue: pullStack(from: &cpu) & ~Status.B.rawValue | Status.R.rawValue)
+        cpu.PC = pullStack(from: &cpu)
     }
 
     // MARK: - Branch instructions
 
-    private mutating func branch(operand: Operand, test: Bool) {
+    private static func branch(operand: Operand, test: Bool, on cpu: inout CPU) {
         if test {
-            tick()
-            let pc = Int(PC)
+            cpu.tick()
+            let pc = Int(cpu.PC)
             let offset = Int(operand.i8)
             if pageCrossed(value: pc, operand: offset) {
-                tick()
+                cpu.tick()
             }
-            PC = UInt16(pc &+ offset)
+            cpu.PC = UInt16(pc &+ offset)
         }
     }
 
     /// branchIfCarryClear
-    mutating func BCC(operand: Operand) {
-        branch(operand: operand, test: !P.contains(.C))
+    static func BCC(operand: Operand, on cpu: inout CPU) {
+        branch(operand: operand, test: !cpu.P.contains(.C), on: &cpu)
     }
 
     /// branchIfCarrySet
-    mutating func BCS(operand: Operand) {
-        branch(operand: operand, test: P.contains(.C))
+    static func BCS(operand: Operand, on cpu: inout CPU) {
+        branch(operand: operand, test: cpu.P.contains(.C), on: &cpu)
     }
 
     /// branchIfEqual
-    mutating func BEQ(operand: Operand) {
-        branch(operand: operand, test: P.contains(.Z))
+    static func BEQ(operand: Operand, on cpu: inout CPU) {
+        branch(operand: operand, test: cpu.P.contains(.Z), on: &cpu)
     }
 
     /// branchIfMinus
-    mutating func BMI(operand: Operand) {
-        branch(operand: operand, test: P.contains(.N))
+    static func BMI(operand: Operand, on cpu: inout CPU) {
+        branch(operand: operand, test: cpu.P.contains(.N), on: &cpu)
     }
 
     /// branchIfNotEqual
-    mutating func BNE(operand: Operand) {
-        branch(operand: operand, test: !P.contains(.Z))
+    static func BNE(operand: Operand, on cpu: inout CPU) {
+        branch(operand: operand, test: !cpu.P.contains(.Z), on: &cpu)
     }
 
     /// branchIfPlus
-    mutating func BPL(operand: Operand) {
-        branch(operand: operand, test: !P.contains(.N))
+    static func BPL(operand: Operand, on cpu: inout CPU) {
+        branch(operand: operand, test: !cpu.P.contains(.N), on: &cpu)
     }
 
     /// branchIfOverflowClear
-    mutating func BVC(operand: Operand) {
-        branch(operand: operand, test: !P.contains(.V))
+    static func BVC(operand: Operand, on cpu: inout CPU) {
+        branch(operand: operand, test: !cpu.P.contains(.V), on: &cpu)
     }
 
     /// branchIfOverflowSet
-    mutating func BVS(operand: Operand) {
-        branch(operand: operand, test: P.contains(.V))
+    static func BVS(operand: Operand, on cpu: inout CPU) {
+        branch(operand: operand, test: cpu.P.contains(.V), on: &cpu)
     }
 
     // MARK: - Flag control instructions
 
     /// clearCarry
-    mutating func CLC(operand: Operand) {
-        P.remove(.C)
-        tick()
+    static func CLC(operand: Operand, on cpu: inout CPU) {
+        cpu.P.remove(.C)
+        cpu.tick()
     }
 
     /// clearDecimal
-    mutating func CLD(operand: Operand) {
-        P.remove(.D)
-        tick()
+    static func CLD(operand: Operand, on cpu: inout CPU) {
+        cpu.P.remove(.D)
+        cpu.tick()
     }
 
     /// clearInterrupt
-    mutating func CLI(operand: Operand) {
-        P.remove(.I)
-        tick()
+    static func CLI(operand: Operand, on cpu: inout CPU) {
+        cpu.P.remove(.I)
+        cpu.tick()
     }
 
     /// clearOverflow
-    mutating func CLV(operand: Operand) {
-        P.remove(.V)
-        tick()
+    static func CLV(operand: Operand, on cpu: inout CPU) {
+        cpu.P.remove(.V)
+        cpu.tick()
     }
 
     /// setCarryFlag
-    mutating func SEC(operand: Operand) {
-        P.formUnion(.C)
-        tick()
+    static func SEC(operand: Operand, on cpu: inout CPU) {
+        cpu.P.formUnion(.C)
+        cpu.tick()
     }
 
     /// setDecimalFlag
-    mutating func SED(operand: Operand) {
-        P.formUnion(.D)
-        tick()
+    static func SED(operand: Operand, on cpu: inout CPU) {
+        cpu.P.formUnion(.D)
+        cpu.tick()
     }
 
     /// setInterruptDisable
-    mutating func SEI(operand: Operand) {
-        P.formUnion(.I)
-        tick()
+    static func SEI(operand: Operand, on cpu: inout CPU) {
+        cpu.P.formUnion(.I)
+        cpu.tick()
     }
 
     // MARK: - Misc
 
     /// forceInterrupt
-    mutating func BRK(operand: Operand) {
-        pushStack(word: PC, to: &self)
+    static func BRK(operand: Operand, on cpu: inout CPU) {
+        pushStack(word: cpu.PC, to: &cpu)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.interruptedB.rawValue, to: &self)
-        tick()
-        PC = readWord(at: 0xFFFE)
+        pushStack(cpu.P.rawValue | Status.interruptedB.rawValue, to: &cpu)
+        cpu.tick()
+        cpu.PC = cpu.readWord(at: 0xFFFE)
     }
 
     /// doNothing
-    mutating func NOP(operand: Operand) {
-        tick()
+    static func NOP(operand: Operand, on cpu: inout CPU) {
+        cpu.tick()
     }
 
     // MARK: - Unofficial
 
     /// loadAccumulatorAndX
-    mutating func LAX(operand: Operand) {
-        let data = read(at: operand)
-        A = data
-        X = data
+    static func LAX(operand: Operand, on cpu: inout CPU) {
+        let data = cpu.read(at: operand)
+        cpu.A = data
+        cpu.X = data
     }
 
     /// storeAccumulatorAndX
-    mutating func SAX(operand: Operand) {
-        write(A & X, at: operand)
+    static func SAX(operand: Operand, on cpu: inout CPU) {
+        cpu.write(cpu.A & cpu.X, at: operand)
     }
 
     /// decrementMemoryAndCompareAccumulator
-    mutating func DCP(operand: Operand) {
-        // decrementMemory excluding tick
-        let result = read(at: operand) &- 1
-        P.setZN(result)
-        write(result, at: operand)
+    static func DCP(operand: Operand, on cpu: inout CPU) {
+        // decrementMemory excluding cpu.tick
+        let result = cpu.read(at: operand) &- 1
+        cpu.P.setZN(result)
+        cpu.write(result, at: operand)
 
-        CMP(operand: operand)
+        CMP(operand: operand, on: &cpu)
     }
 
     /// incrementMemoryAndSubtractWithCarry
-    mutating func ISB(operand: Operand) {
-        // incrementMemory excluding tick
-        let result = read(at: operand) &+ 1
-        P.setZN(result)
-        write(result, at: operand)
+    static func ISB(operand: Operand, on cpu: inout CPU) {
+        // incrementMemory excluding cpu.tick
+        let result = cpu.read(at: operand) &+ 1
+        cpu.P.setZN(result)
+        cpu.write(result, at: operand)
 
-        SBC(operand: operand)
+        SBC(operand: operand, on: &cpu)
     }
 
     /// arithmeticShiftLeftAndBitwiseORwithAccumulator
-    mutating func SLO(operand: Operand) {
-        // arithmeticShiftLeft excluding tick
-        var data = read(at: operand)
-        P.remove([.C, .Z, .N])
-        if data[7] == 1 { P.formUnion(.C) }
+    static func SLO(operand: Operand, on cpu: inout CPU) {
+        // arithmeticShiftLeft excluding cpu.tick
+        var data = cpu.read(at: operand)
+        cpu.P.remove([.C, .Z, .N])
+        if data[7] == 1 { cpu.P.formUnion(.C) }
 
         data <<= 1
-        P.setZN(data)
-        write(data, at: operand)
+        cpu.P.setZN(data)
+        cpu.write(data, at: operand)
 
-        ORA(operand: operand)
+        ORA(operand: operand, on: &cpu)
     }
 
     /// rotateLeftAndBitwiseANDwithAccumulator
-    mutating func RLA(operand: Operand) {
-        // rotateLeft excluding tick
-        var data = read(at: operand)
+    static func RLA(operand: Operand, on cpu: inout CPU) {
+        // rotateLeft excluding cpu.tick
+        var data = cpu.read(at: operand)
         let c = data & 0x80
 
         data <<= 1
-        if P.contains(.C) { data |= 0x01 }
+        if cpu.P.contains(.C) { data |= 0x01 }
 
-        P.remove([.C, .Z, .N])
-        if c == 0x80 { P.formUnion(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 { cpu.P.formUnion(.C) }
 
-        P.setZN(data)
-        write(data, at: operand)
+        cpu.P.setZN(data)
+        cpu.write(data, at: operand)
 
-        AND(operand: operand)
+        AND(operand: operand, on: &cpu)
     }
 
     /// logicalShiftRightAndBitwiseExclusiveOR
-    mutating func SRE(operand: Operand) {
-        // logicalShiftRight excluding tick
-        var data = read(at: operand)
-        P.remove([.C, .Z, .N])
-        if data[0] == 1 { P.formUnion(.C) }
+    static func SRE(operand: Operand, on cpu: inout CPU) {
+        // logicalShiftRight excluding cpu.tick
+        var data = cpu.read(at: operand)
+        cpu.P.remove([.C, .Z, .N])
+        if data[0] == 1 { cpu.P.formUnion(.C) }
 
         data >>= 1
 
-        P.setZN(data)
-        write(data, at: operand)
+        cpu.P.setZN(data)
+        cpu.write(data, at: operand)
 
-        EOR(operand: operand)
+        EOR(operand: operand, on: &cpu)
     }
 
     /// rotateRightAndAddWithCarry
-    mutating func RRA(operand: Operand) {
-        // rotateRight excluding tick
-        var data = read(at: operand)
+    static func RRA(operand: Operand, on cpu: inout CPU) {
+        // rotateRight excluding cpu.tick
+        var data = cpu.read(at: operand)
         let c = data & 0x01
 
         data >>= 1
-        if P.contains(.C) { data |= 0x80 }
+        if cpu.P.contains(.C) { data |= 0x80 }
 
-        P.remove([.C, .Z, .N])
-        if c == 1 { P.formUnion(.C) }
+        cpu.P.remove([.C, .Z, .N])
+        if c == 1 { cpu.P.formUnion(.C) }
 
-        P.setZN(data)
-        write(data, at: operand)
+        cpu.P.setZN(data)
+        cpu.write(data, at: operand)
 
-        ADC(operand: operand)
+        ADC(operand: operand, on: &cpu)
     }
 }
 
