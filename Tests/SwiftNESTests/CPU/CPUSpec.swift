@@ -28,10 +28,10 @@ class CPUSpec: QuickSpec {
 
                 cpu.PC = 0x9052
 
-                var opcode = cpu.fetchOperand()
+                var opcode = CPU.fetchOperand(from: &cpu)
                 expect(opcode).to(equal(0x3F))
 
-                opcode = cpu.fetchOperand()
+                opcode = CPU.fetchOperand(from: &cpu)
                 expect(opcode).to(equal(0x81))
             }
         }

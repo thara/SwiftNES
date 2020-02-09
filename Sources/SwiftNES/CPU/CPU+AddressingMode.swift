@@ -2,130 +2,130 @@
 extension CPU {
 
     @inline(__always)
-    mutating func implicit() -> UInt16 {
+    static func implicit(on cpu: inout CPU) -> UInt16 {
         return 0x00
     }
 
     @inline(__always)
-    mutating func accumulator() -> UInt16 {
-        return A.u16
+    static func accumulator(on cpu: inout CPU) -> UInt16 {
+        return cpu.A.u16
     }
 
     @inline(__always)
-    mutating func immediate() -> UInt16 {
-        let operand = PC
-        PC &+= 1
+    static func immediate(on cpu: inout CPU) -> UInt16 {
+        let operand = cpu.PC
+        cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    mutating func zeroPage() -> UInt16 {
-        let operand = read(at: PC).u16 & 0xFF
-        PC &+= 1
+    static func zeroPage(on cpu: inout CPU) -> UInt16 {
+        let operand = cpu.read(at: cpu.PC).u16 & 0xFF
+        cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    mutating func zeroPageX() -> UInt16 {
-        tick()
+    static func zeroPageX(on cpu: inout CPU) -> UInt16 {
+        cpu.tick()
 
-        let operand = (read(at: PC).u16 &+ X.u16) & 0xFF
-        PC &+= 1
+        let operand = (cpu.read(at: cpu.PC).u16 &+ cpu.X.u16) & 0xFF
+        cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    mutating func zeroPageY() -> UInt16 {
-        tick()
+    static func zeroPageY(on cpu: inout CPU) -> UInt16 {
+        cpu.tick()
 
-        let operand = (read(at: PC).u16 &+ Y.u16) & 0xFF
-        PC &+= 1
+        let operand = (cpu.read(at: cpu.PC).u16 &+ cpu.Y.u16) & 0xFF
+        cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    mutating func absolute() -> UInt16 {
-        let operand = readWord(at: PC)
-        PC &+= 2
+    static func absolute(on cpu: inout CPU) -> UInt16 {
+        let operand = cpu.readWord(at: cpu.PC)
+        cpu.PC &+= 2
         return operand
     }
 
     @inline(__always)
-    mutating func absoluteX() -> UInt16 {
-        let data = readWord(at: PC)
-        let operand = data &+ X.u16 & 0xFFFF
-        PC &+= 2
-        tick()
+    static func absoluteX(on cpu: inout CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.PC)
+        let operand = data &+ cpu.X.u16 & 0xFFFF
+        cpu.PC &+= 2
+        cpu.tick()
         return operand
     }
 
     @inline(__always)
-    mutating func absoluteXWithPenalty() -> UInt16 {
-        let data = readWord(at: PC)
-        let operand = data &+ X.u16 & 0xFFFF
-        PC &+= 2
+    static func absoluteXWithPenalty(on cpu: inout CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.PC)
+        let operand = data &+ cpu.X.u16 & 0xFFFF
+        cpu.PC &+= 2
 
-        if pageCrossed(value: data, operand: X) {
-            tick()
+        if pageCrossed(value: data, operand: cpu.X) {
+            cpu.tick()
         }
         return operand
     }
 
     @inline(__always)
-    mutating func absoluteY() -> UInt16 {
-        let data = readWord(at: PC)
-        let operand = data &+ Y.u16 & 0xFFFF
-        PC &+= 2
-        tick()
+    static func absoluteY(on cpu: inout CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.PC)
+        let operand = data &+ cpu.Y.u16 & 0xFFFF
+        cpu.PC &+= 2
+        cpu.tick()
         return operand
     }
 
     @inline(__always)
-    mutating func absoluteYWithPenalty() -> UInt16 {
-        let data = readWord(at: PC)
-        let operand = data &+ Y.u16 & 0xFFFF
-        PC &+= 2
+    static func absoluteYWithPenalty(on cpu: inout CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.PC)
+        let operand = data &+ cpu.Y.u16 & 0xFFFF
+        cpu.PC &+= 2
 
-        if pageCrossed(value: data, operand: Y) {
-            tick()
+        if pageCrossed(value: data, operand: cpu.Y) {
+            cpu.tick()
         }
         return operand
     }
 
     @inline(__always)
-    mutating func relative() -> UInt16 {
-        let operand = read(at: PC).u16
-        PC &+= 1
+    static func relative(on cpu: inout CPU) -> UInt16 {
+        let operand = cpu.read(at: cpu.PC).u16
+        cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    mutating func indirect() -> UInt16 {
-        let data = readWord(at: PC)
-        let operand = readOnIndirect(operand: data)
-        PC &+= 2
+    static func indirect(on cpu: inout CPU) -> UInt16 {
+        let data = cpu.readWord(at: cpu.PC)
+        let operand = cpu.readOnIndirect(operand: data)
+        cpu.PC &+= 2
         return operand
     }
 
     @inline(__always)
-    mutating func indexedIndirect() -> UInt16 {
-        let data = read(at: PC)
-        let operand = readOnIndirect(operand: (data &+ X).u16 & 0xFF)
-        PC &+= 1
+    static func indexedIndirect(on cpu: inout CPU) -> UInt16 {
+        let data = cpu.read(at: cpu.PC)
+        let operand = cpu.readOnIndirect(operand: (data &+ cpu.X).u16 & 0xFF)
+        cpu.PC &+= 1
 
-        tick()
+        cpu.tick()
 
         return operand
     }
 
     @inline(__always)
-    mutating func indirectIndexed() -> UInt16 {
-        let data = read(at: PC).u16
-        let operand = readOnIndirect(operand: data) &+ Y.u16
-        PC &+= 1
+    static func indirectIndexed(on cpu: inout CPU) -> UInt16 {
+        let data = cpu.read(at: cpu.PC).u16
+        let operand = cpu.readOnIndirect(operand: data) &+ cpu.Y.u16
+        cpu.PC &+= 1
 
-        if pageCrossed(value: operand &- Y.u16, operand: Y) {
-            tick()
+        if pageCrossed(value: operand &- cpu.Y.u16, operand: cpu.Y) {
+            cpu.tick()
         }
         return operand
     }

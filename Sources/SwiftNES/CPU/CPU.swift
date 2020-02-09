@@ -62,8 +62,8 @@ struct CPU {
                 interruptLine.clear(.BRK)
             }
         default:
-            let opcode = fetchOperand()
-            excuteInstruction(opcode: opcode)
+            let opcode = CPU.fetchOperand(from: &self)
+            CPU.excuteInstruction(opcode: opcode, on: &self)
         }
 
         if before <= cycles {
