@@ -1,12 +1,13 @@
 public final class NES {
     fileprivate var cpu: CPU
-    fileprivate var ppu: PPU
+    var ppu: PPU
     fileprivate var apu: APU
 
     private let cpuMemory = CPUMemory()
     private let ppuMemory = PPUMemory()
 
-    private let controllerPort = ControllerPort()
+    let controllerPort = ControllerPort()
+    var cartridge: Cartridge?
 
     fileprivate let interruptLine: InterruptLine
 
@@ -27,16 +28,16 @@ public final class NES {
 
         cpu = CPU(memory: cpuMemory)
         ppu = PPU(memory: ppuMemory)
-        cpuMemory.ppuPort = ppu
-        cpuMemory.controllerPort = controllerPort
 
         apu = APU()
 
         nestest = NESTest(interruptLine: interruptLine)
+
+        cpuMemory.nes = self
     }
 
     public func insert(cartridge: Cartridge) {
-        cpuMemory.cartridge = cartridge
+        self.cartridge = cartridge
         ppuMemory.cartridge = cartridge
 
         cpu.powerOn()
