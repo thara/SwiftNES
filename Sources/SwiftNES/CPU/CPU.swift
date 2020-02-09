@@ -46,19 +46,19 @@ struct CPU {
 
         switch interruptLine.get() {
         case .RESET:
-            reset()
+            CPU.reset(on: &self)
             interruptLine.clear(.RESET)
         case .NMI:
-            handleNMI()
+            CPU.handleNMI(on: &self)
             interruptLine.clear(.NMI)
         case .IRQ:
             if P.contains(.I) {
-                handleIRQ()
+                CPU.handleIRQ(on: &self)
                 interruptLine.clear(.IRQ)
             }
         case .BRK:
             if P.contains(.I) {
-                handleBRK()
+                CPU.handleBRK(on: &self)
                 interruptLine.clear(.BRK)
             }
         default:

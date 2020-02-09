@@ -1,48 +1,48 @@
 extension CPU {
     /// Reset registers & memory state
-    mutating func reset() {
-        tick(count: 5)
+    static func reset(on cpu: inout CPU) {
+        cpu.tick(count: 5)
 #if nestest
-        PC = 0xC000
-        tick(count: 2)
+        cpu.PC = 0xC000
+        cpu.tick(count: 2)
 #else
-        PC = readWord(at: 0xFFFC)
-        P.formUnion(.I)
-        S -= 3
+        cpu.PC = cpu.readWord(at: 0xFFFC)
+        cpu.P.formUnion(.I)
+        cpu.S -= 3
 #endif
     }
 
-    mutating func handleNMI() {
-        tick(count: 2)
+    static func handleNMI(on cpu: inout CPU) {
+        cpu.tick(count: 2)
 
-        pushStack(word: PC, to: &self)
+        pushStack(word: cpu.PC, to: &cpu)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.interruptedB.rawValue, to: &self)
-        P.formUnion(.I)
-        PC = readWord(at: 0xFFFA)
+        pushStack(cpu.P.rawValue | Status.interruptedB.rawValue, to: &cpu)
+        cpu.P.formUnion(.I)
+        cpu.PC = cpu.readWord(at: 0xFFFA)
     }
 
-    mutating func handleIRQ() {
-        tick(count: 2)
+    static func handleIRQ(on cpu: inout CPU) {
+        cpu.tick(count: 2)
 
-        pushStack(word: PC, to: &self)
+        pushStack(word: cpu.PC, to: &cpu)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.interruptedB.rawValue, to: &self)
-        P.formUnion(.I)
-        PC = readWord(at: 0xFFFE)
+        pushStack(cpu.P.rawValue | Status.interruptedB.rawValue, to: &cpu)
+        cpu.P.formUnion(.I)
+        cpu.PC = cpu.readWord(at: 0xFFFE)
     }
 
-    mutating func handleBRK() {
-        tick(count: 2)
+    static func handleBRK(on cpu: inout CPU) {
+        cpu.tick(count: 2)
 
-        PC &+= 1
-        pushStack(word: PC, to: &self)
+        cpu.PC &+= 1
+        pushStack(word: cpu.PC, to: &cpu)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.interruptedB.rawValue, to: &self)
-        P.formUnion(.I)
-        PC = readWord(at: 0xFFFE)
+        pushStack(cpu.P.rawValue | Status.interruptedB.rawValue, to: &cpu)
+        cpu.P.formUnion(.I)
+        cpu.PC = cpu.readWord(at: 0xFFFE)
     }
 }
