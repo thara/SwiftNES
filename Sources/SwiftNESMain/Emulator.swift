@@ -8,7 +8,7 @@ let screenHeight = 224
 
 final class Emulator {
 
-    private let nes: NES
+    private var nes: NES
 
     private let window: SDLWindow
     private let windowTitle: String
@@ -87,7 +87,7 @@ final class Emulator {
 
             controller.update(keys: currentKeys)
 
-            nes.runFrame(onLineEnd: frameRenderer.newLine)
+            runFrame(nes, onLineEnd: frameRenderer.newLine)
 
             let endPerf = SDL_GetPerformanceCounter()
 

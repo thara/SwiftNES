@@ -1,14 +1,14 @@
 public final class NES {
-    private var cpu: CPU
-    private let ppu: PPU
-    private let apu: APU
+    fileprivate var cpu: CPU
+    fileprivate var ppu: PPU
+    fileprivate var apu: APU
 
     private let cpuMemory = CPUMemory()
     private let ppuMemory = PPUMemory()
 
     private let controllerPort = ControllerPort()
 
-    private let interruptLine: InterruptLine
+    fileprivate let interruptLine: InterruptLine
 
     public static let maxDot = 340
     public static let maxLine = 261
@@ -18,9 +18,9 @@ public final class NES {
 
     private var nestest: NESTest
 
-    private(set) var cycles: UInt = 0
+    fileprivate var cycles: UInt = 0
 
-    private var lineBuffer = LineBuffer()
+    fileprivate var lineBuffer = LineBuffer()
 
     public init() {
         interruptLine = InterruptLine()
@@ -33,43 +33,6 @@ public final class NES {
         apu = APU()
 
         nestest = NESTest(interruptLine: interruptLine)
-    }
-
-    public func runFrame(onLineEnd render: (Int, inout LineBuffer) -> Void) {
-        let currentFrame = ppu.frames
-
-        repeat {
-            step(onLineEnd: render)
-        } while currentFrame == ppu.frames
-    }
-
-    public func step(onLineEnd render: (Int, inout LineBuffer) -> Void) {
-#if nestest
-        if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
-#endif
-
-        let cpuCycles = SwiftNES.step(cpu: &cpu, interruptLine: interruptLine)
-        cycles &+= cpuCycles
-
-        apu.step()
-
-#if nestest
-        nestest.print(ppu: ppu, cycles: cycles)
-        if interruptLine.interrupted { return }
-#endif
-
-        var ppuCycles = cpuCycles &* 3
-        while 0 < ppuCycles {
-            let currentLine = ppu.line
-
-            ppu.step(writeTo: &lineBuffer, interruptLine: interruptLine)
-
-            if currentLine != ppu.line {
-                render(currentLine, &lineBuffer)
-            }
-
-            ppuCycles &-= 1
-        }
     }
 
     public func insert(cartridge: Cartridge) {
@@ -89,5 +52,42 @@ public final class NES {
     public func connect(controller1: Controller?, controller2: Controller?) {
         controllerPort.port1 = controller1
         controllerPort.port2 = controller2
+    }
+}
+
+public func runFrame(_ nes: NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
+    let currentFrame = nes.ppu.frames
+
+    repeat {
+        step(nes, onLineEnd: render)
+    } while currentFrame == nes.ppu.frames
+}
+
+func step(_ nes: NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
+#if nestest
+    if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
+#endif
+
+    let cpuCycles = SwiftNES.step(cpu: &nes.cpu, interruptLine: nes.interruptLine)
+    nes.cycles &+= cpuCycles
+
+    nes.apu.step()
+
+#if nestest
+    nestest.print(ppu: nes.ppu, cycles: cycles)
+    if interruptLine.interrupted { return }
+#endif
+
+    var ppuCycles = cpuCycles &* 3
+    while 0 < ppuCycles {
+        let currentLine = nes.ppu.scan.line
+
+        nes.ppu.step(writeTo: &nes.lineBuffer, interruptLine: nes.interruptLine)
+
+        if currentLine != nes.ppu.scan.line {
+            render(currentLine, &nes.lineBuffer)
+        }
+
+        ppuCycles &-= 1
     }
 }

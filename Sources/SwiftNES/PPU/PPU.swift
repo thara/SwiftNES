@@ -35,9 +35,12 @@ final class PPU {
 
     func step(writeTo lineBuffer: inout LineBuffer, interruptLine: InterruptLine) {
         switch scan.line {
-        case 261:
+        case 0...239, 261:
+            // Visible
+            renderPixel(to: &lineBuffer)
+
             // Pre Render
-            defer {
+            if scan.line == 261 {
                 if scan.dot == 1 {
                     registers.status.remove([.vblank, .spriteZeroHit, .spriteOverflow])
                 }
@@ -46,11 +49,6 @@ final class PPU {
                     scan.skip()
                 }
             }
-
-            fallthrough
-        case 0...239:
-            // Visible
-            renderPixel(to: &lineBuffer)
         case 240:
             // Post Render
             break
