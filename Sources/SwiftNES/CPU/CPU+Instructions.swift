@@ -2,6 +2,8 @@ typealias OpCode = UInt8
 
 typealias Operand = UInt16
 
+typealias CPUOperation = (Operand, inout CPU) -> Void
+
 // swiftlint:disable file_length cyclomatic_complexity function_body_length
 extension CPU {
 
@@ -13,451 +15,451 @@ extension CPU {
     }
 
     @inline(__always)
-    static func excuteInstruction(opcode: OpCode, on cpu: inout CPU) {
+    static func decode(opcode: OpCode, on cpu: inout CPU) -> (CPUOperation, FetchOperand) {
         switch opcode {
         case 0xA9:
-            CPU.LDA(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.LDA, CPU.immediate)
         case 0xA5:
-            CPU.LDA(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.LDA, CPU.zeroPage)
         case 0xB5:
-            CPU.LDA(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.LDA, CPU.zeroPageX)
         case 0xAD:
-            CPU.LDA(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.LDA, CPU.absolute)
         case 0xBD:
-            CPU.LDA(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.LDA, CPU.absoluteXWithPenalty)
         case 0xB9:
-            CPU.LDA(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.LDA, CPU.absoluteYWithPenalty)
         case 0xA1:
-            CPU.LDA(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.LDA, CPU.indexedIndirect)
         case 0xB1:
-            CPU.LDA(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.LDA, CPU.indirectIndexed)
         case 0xA2:
-            CPU.LDX(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.LDX, CPU.immediate)
         case 0xA6:
-            CPU.LDX(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.LDX, CPU.zeroPage)
         case 0xB6:
-            CPU.LDX(operand: CPU.zeroPageY(on: &cpu), on: &cpu)
+            return (CPU.LDX, CPU.zeroPageY)
         case 0xAE:
-            CPU.LDX(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.LDX, CPU.absolute)
         case 0xBE:
-            CPU.LDX(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.LDX, CPU.absoluteYWithPenalty)
         case 0xA0:
-            CPU.LDY(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.LDY, CPU.immediate)
         case 0xA4:
-            CPU.LDY(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.LDY, CPU.zeroPage)
         case 0xB4:
-            CPU.LDY(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.LDY, CPU.zeroPageX)
         case 0xAC:
-            CPU.LDY(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.LDY, CPU.absolute)
         case 0xBC:
-            CPU.LDY(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.LDY, CPU.absoluteXWithPenalty)
         case 0x85:
-            CPU.STA(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.STA, CPU.zeroPage)
         case 0x95:
-            CPU.STA(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.STA, CPU.zeroPageX)
         case 0x8D:
-            CPU.STA(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.STA, CPU.absolute)
         case 0x9D:
-            CPU.STA(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.STA, CPU.absoluteX)
         case 0x99:
-            CPU.STA(operand: CPU.absoluteY(on: &cpu), on: &cpu)
+            return (CPU.STA, CPU.absoluteY)
         case 0x81:
-            CPU.STA(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.STA, CPU.indexedIndirect)
         case 0x91:
-            CPU.STAWithTick(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.STAWithTick, CPU.indirectIndexed)
         case 0x86:
-            CPU.STX(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.STX, CPU.zeroPage)
         case 0x96:
-            CPU.STX(operand: CPU.zeroPageY(on: &cpu), on: &cpu)
+            return (CPU.STX, CPU.zeroPageY)
         case 0x8E:
-            CPU.STX(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.STX, CPU.absolute)
         case 0x84:
-            CPU.STY(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.STY, CPU.zeroPage)
         case 0x94:
-            CPU.STY(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.STY, CPU.zeroPageX)
         case 0x8C:
-            CPU.STY(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.STY, CPU.absolute)
         case 0xAA:
-            CPU.TAX(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.TAX, CPU.implicit)
         case 0xBA:
-            CPU.TSX(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.TSX, CPU.implicit)
         case 0xA8:
-            CPU.TAY(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.TAY, CPU.implicit)
         case 0x8A:
-            CPU.TXA(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.TXA, CPU.implicit)
         case 0x9A:
-            CPU.TXS(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.TXS, CPU.implicit)
         case 0x98:
-            CPU.TYA(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.TYA, CPU.implicit)
 
         case 0x48:
-            CPU.PHA(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.PHA, CPU.implicit)
         case 0x08:
-            CPU.PHP(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.PHP, CPU.implicit)
         case 0x68:
-            CPU.PLA(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.PLA, CPU.implicit)
         case 0x28:
-            CPU.PLP(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.PLP, CPU.implicit)
 
         case 0x29:
-            CPU.AND(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.AND, CPU.immediate)
         case 0x25:
-            CPU.AND(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.AND, CPU.zeroPage)
         case 0x35:
-            CPU.AND(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.AND, CPU.zeroPageX)
         case 0x2D:
-            CPU.AND(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.AND, CPU.absolute)
         case 0x3D:
-            CPU.AND(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.AND, CPU.absoluteXWithPenalty)
         case 0x39:
-            CPU.AND(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.AND, CPU.absoluteYWithPenalty)
         case 0x21:
-            CPU.AND(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.AND, CPU.indexedIndirect)
         case 0x31:
-            CPU.AND(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.AND, CPU.indirectIndexed)
         case 0x49:
-            CPU.EOR(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.EOR, CPU.immediate)
         case 0x45:
-            CPU.EOR(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.EOR, CPU.zeroPage)
         case 0x55:
-            CPU.EOR(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.EOR, CPU.zeroPageX)
         case 0x4D:
-            CPU.EOR(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.EOR, CPU.absolute)
         case 0x5D:
-            CPU.EOR(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.EOR, CPU.absoluteXWithPenalty)
         case 0x59:
-            CPU.EOR(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.EOR, CPU.absoluteYWithPenalty)
         case 0x41:
-            CPU.EOR(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.EOR, CPU.indexedIndirect)
         case 0x51:
-            CPU.EOR(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.EOR, CPU.indirectIndexed)
         case 0x09:
-            CPU.ORA(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.ORA, CPU.immediate)
         case 0x05:
-            CPU.ORA(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.ORA, CPU.zeroPage)
         case 0x15:
-            CPU.ORA(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.ORA, CPU.zeroPageX)
         case 0x0D:
-            CPU.ORA(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.ORA, CPU.absolute)
         case 0x1D:
-            CPU.ORA(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.ORA, CPU.absoluteXWithPenalty)
         case 0x19:
-            CPU.ORA(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.ORA, CPU.absoluteYWithPenalty)
         case 0x01:
-            CPU.ORA(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.ORA, CPU.indexedIndirect)
         case 0x11:
-            CPU.ORA(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.ORA, CPU.indirectIndexed)
         case 0x24:
-            CPU.BIT(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.BIT, CPU.zeroPage)
         case 0x2C:
-            CPU.BIT(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.BIT, CPU.absolute)
 
         case 0x69:
-            CPU.ADC(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.ADC, CPU.immediate)
         case 0x65:
-            CPU.ADC(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.ADC, CPU.zeroPage)
         case 0x75:
-            CPU.ADC(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.ADC, CPU.zeroPageX)
         case 0x6D:
-            CPU.ADC(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.ADC, CPU.absolute)
         case 0x7D:
-            CPU.ADC(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.ADC, CPU.absoluteXWithPenalty)
         case 0x79:
-            CPU.ADC(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.ADC, CPU.absoluteYWithPenalty)
         case 0x61:
-            CPU.ADC(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.ADC, CPU.indexedIndirect)
         case 0x71:
-            CPU.ADC(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.ADC, CPU.indirectIndexed)
         case 0xE9:
-            CPU.SBC(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.immediate)
         case 0xE5:
-            CPU.SBC(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.zeroPage)
         case 0xF5:
-            CPU.SBC(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.zeroPageX)
         case 0xED:
-            CPU.SBC(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.absolute)
         case 0xFD:
-            CPU.SBC(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.absoluteXWithPenalty)
         case 0xF9:
-            CPU.SBC(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.absoluteYWithPenalty)
         case 0xE1:
-            CPU.SBC(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.indexedIndirect)
         case 0xF1:
-            CPU.SBC(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.indirectIndexed)
         case 0xC9:
-            CPU.CMP(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.CMP, CPU.immediate)
         case 0xC5:
-            CPU.CMP(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.CMP, CPU.zeroPage)
         case 0xD5:
-            CPU.CMP(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.CMP, CPU.zeroPageX)
         case 0xCD:
-            CPU.CMP(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.CMP, CPU.absolute)
         case 0xDD:
-            CPU.CMP(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.CMP, CPU.absoluteXWithPenalty)
         case 0xD9:
-            CPU.CMP(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.CMP, CPU.absoluteYWithPenalty)
         case 0xC1:
-            CPU.CMP(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.CMP, CPU.indexedIndirect)
         case 0xD1:
-            CPU.CMP(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.CMP, CPU.indirectIndexed)
         case 0xE0:
-            CPU.CPX(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.CPX, CPU.immediate)
         case 0xE4:
-            CPU.CPX(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.CPX, CPU.zeroPage)
         case 0xEC:
-            CPU.CPX(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.CPX, CPU.absolute)
         case 0xC0:
-            CPU.CPY(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.CPY, CPU.immediate)
         case 0xC4:
-            CPU.CPY(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.CPY, CPU.zeroPage)
         case 0xCC:
-            CPU.CPY(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.CPY, CPU.absolute)
 
         case 0xE6:
-            CPU.INC(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.INC, CPU.zeroPage)
         case 0xF6:
-            CPU.INC(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.INC, CPU.zeroPageX)
         case 0xEE:
-            CPU.INC(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.INC, CPU.absolute)
         case 0xFE:
-            CPU.INC(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.INC, CPU.absoluteX)
         case 0xE8:
-            CPU.INX(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.INX, CPU.implicit)
         case 0xC8:
-            CPU.INY(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.INY, CPU.implicit)
         case 0xC6:
-            CPU.DEC(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.DEC, CPU.zeroPage)
         case 0xD6:
-            CPU.DEC(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.DEC, CPU.zeroPageX)
         case 0xCE:
-            CPU.DEC(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.DEC, CPU.absolute)
         case 0xDE:
-            CPU.DEC(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.DEC, CPU.absoluteX)
         case 0xCA:
-            CPU.DEX(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.DEX, CPU.implicit)
         case 0x88:
-            CPU.DEY(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.DEY, CPU.implicit)
 
         case 0x0A:
-            CPU.ASLForAccumulator(operand: CPU.accumulator(on: &cpu), on: &cpu)
+            return (CPU.ASLForAccumulator, CPU.accumulator)
         case 0x06:
-            CPU.ASL(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.ASL, CPU.zeroPage)
         case 0x16:
-            CPU.ASL(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.ASL, CPU.zeroPageX)
         case 0x0E:
-            CPU.ASL(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.ASL, CPU.absolute)
         case 0x1E:
-            CPU.ASL(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.ASL, CPU.absoluteX)
         case 0x4A:
-            CPU.LSRForAccumulator(operand: CPU.accumulator(on: &cpu), on: &cpu)
+            return (CPU.LSRForAccumulator, CPU.accumulator)
         case 0x46:
-            CPU.LSR(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.LSR, CPU.zeroPage)
         case 0x56:
-            CPU.LSR(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.LSR, CPU.zeroPageX)
         case 0x4E:
-            CPU.LSR(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.LSR, CPU.absolute)
         case 0x5E:
-            CPU.LSR(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.LSR, CPU.absoluteX)
         case 0x2A:
-            CPU.ROLForAccumulator(operand: CPU.accumulator(on: &cpu), on: &cpu)
+            return (CPU.ROLForAccumulator, CPU.accumulator)
         case 0x26:
-            CPU.ROL(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.ROL, CPU.zeroPage)
         case 0x36:
-            CPU.ROL(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.ROL, CPU.zeroPageX)
         case 0x2E:
-            CPU.ROL(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.ROL, CPU.absolute)
         case 0x3E:
-            CPU.ROL(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.ROL, CPU.absoluteX)
         case 0x6A:
-            CPU.RORForAccumulator(operand: CPU.accumulator(on: &cpu), on: &cpu)
+            return (CPU.RORForAccumulator, CPU.accumulator)
         case 0x66:
-            CPU.ROR(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.ROR, CPU.zeroPage)
         case 0x76:
-            CPU.ROR(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.ROR, CPU.zeroPageX)
         case 0x6E:
-            CPU.ROR(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.ROR, CPU.absolute)
         case 0x7E:
-            CPU.ROR(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.ROR, CPU.absoluteX)
 
         case 0x4C:
-            CPU.JMP(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.JMP, CPU.absolute)
         case 0x6C:
-            CPU.JMP(operand: CPU.indirect(on: &cpu), on: &cpu)
+            return (CPU.JMP, CPU.indirect)
         case 0x20:
-            CPU.JSR(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.JSR, CPU.absolute)
         case 0x60:
-            CPU.RTS(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.RTS, CPU.implicit)
         case 0x40:
-            CPU.RTI(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.RTI, CPU.implicit)
 
         case 0x90:
-            CPU.BCC(operand: CPU.relative(on: &cpu), on: &cpu)
+            return (CPU.BCC, CPU.relative)
         case 0xB0:
-            CPU.BCS(operand: CPU.relative(on: &cpu), on: &cpu)
+            return (CPU.BCS, CPU.relative)
         case 0xF0:
-            CPU.BEQ(operand: CPU.relative(on: &cpu), on: &cpu)
+            return (CPU.BEQ, CPU.relative)
         case 0x30:
-            CPU.BMI(operand: CPU.relative(on: &cpu), on: &cpu)
+            return (CPU.BMI, CPU.relative)
         case 0xD0:
-            CPU.BNE(operand: CPU.relative(on: &cpu), on: &cpu)
+            return (CPU.BNE, CPU.relative)
         case 0x10:
-            CPU.BPL(operand: CPU.relative(on: &cpu), on: &cpu)
+            return (CPU.BPL, CPU.relative)
         case 0x50:
-            CPU.BVC(operand: CPU.relative(on: &cpu), on: &cpu)
+            return (CPU.BVC, CPU.relative)
         case 0x70:
-            CPU.BVS(operand: CPU.relative(on: &cpu), on: &cpu)
+            return (CPU.BVS, CPU.relative)
 
         case 0x18:
-            CPU.CLC(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.CLC, CPU.implicit)
         case 0xD8:
-            CPU.CLD(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.CLD, CPU.implicit)
         case 0x58:
-            CPU.CLI(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.CLI, CPU.implicit)
         case 0xB8:
-            CPU.CLV(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.CLV, CPU.implicit)
 
         case 0x38:
-            CPU.SEC(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.SEC, CPU.implicit)
         case 0xF8:
-            CPU.SED(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.SED, CPU.implicit)
         case 0x78:
-            CPU.SEI(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.SEI, CPU.implicit)
 
         case 0x00:
-            CPU.BRK(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.BRK, CPU.implicit)
 
         // Undocumented
 
         case 0xEB:
-            CPU.SBC(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.SBC, CPU.immediate)
 
         case 0x04, 0x44, 0x64:
-            CPU.NOP(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.NOP, CPU.zeroPage)
         case 0x0C:
-            CPU.NOP(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.NOP, CPU.absolute)
         case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4:
-            CPU.NOP(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.NOP, CPU.zeroPageX)
         case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA:
-            CPU.NOP(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.NOP, CPU.implicit)
         case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC:
-            CPU.NOP(operand: CPU.absoluteXWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.NOP, CPU.absoluteXWithPenalty)
         case 0x80, 0x82, 0x89, 0xC2, 0xE2:
-            CPU.NOP(operand: CPU.immediate(on: &cpu), on: &cpu)
+            return (CPU.NOP, CPU.immediate)
 
         case 0xA3:
-            CPU.LAX(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.LAX, CPU.indexedIndirect)
         case 0xA7:
-            CPU.LAX(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.LAX, CPU.zeroPage)
         case 0xAF:
-            CPU.LAX(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.LAX, CPU.absolute)
         case 0xB3:
-            CPU.LAX(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.LAX, CPU.indirectIndexed)
         case 0xB7:
-            CPU.LAX(operand: CPU.zeroPageY(on: &cpu), on: &cpu)
+            return (CPU.LAX, CPU.zeroPageY)
         case 0xBF:
-            CPU.LAX(operand: CPU.absoluteYWithPenalty(on: &cpu), on: &cpu)
+            return (CPU.LAX, CPU.absoluteYWithPenalty)
 
         case 0x83:
-            CPU.SAX(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.SAX, CPU.indexedIndirect)
         case 0x87:
-            CPU.SAX(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.SAX, CPU.zeroPage)
         case 0x8F:
-            CPU.SAX(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.SAX, CPU.absolute)
         case 0x97:
-            CPU.SAX(operand: CPU.zeroPageY(on: &cpu), on: &cpu)
+            return (CPU.SAX, CPU.zeroPageY)
 
         case 0xC3:
-            CPU.DCP(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.DCP, CPU.indexedIndirect)
         case 0xC7:
-            CPU.DCP(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.DCP, CPU.zeroPage)
         case 0xCF:
-            CPU.DCP(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.DCP, CPU.absolute)
         case 0xD3:
-            CPU.DCP(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.DCP, CPU.indirectIndexed)
         case 0xD7:
-            CPU.DCP(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.DCP, CPU.zeroPageX)
         case 0xDB:
-            CPU.DCP(operand: CPU.absoluteY(on: &cpu), on: &cpu)
+            return (CPU.DCP, CPU.absoluteY)
         case 0xDF:
-            CPU.DCP(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.DCP, CPU.absoluteX)
 
         case 0xE3:
-            CPU.ISB(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.ISB, CPU.indexedIndirect)
         case 0xE7:
-            CPU.ISB(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.ISB, CPU.zeroPage)
         case 0xEF:
-            CPU.ISB(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.ISB, CPU.absolute)
         case 0xF3:
-            CPU.ISB(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.ISB, CPU.indirectIndexed)
         case 0xF7:
-            CPU.ISB(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.ISB, CPU.zeroPageX)
         case 0xFB:
-            CPU.ISB(operand: CPU.absoluteY(on: &cpu), on: &cpu)
+            return (CPU.ISB, CPU.absoluteY)
         case 0xFF:
-            CPU.ISB(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.ISB, CPU.absoluteX)
 
         case 0x03:
-            CPU.SLO(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.SLO, CPU.indexedIndirect)
         case 0x07:
-            CPU.SLO(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.SLO, CPU.zeroPage)
         case 0x0F:
-            CPU.SLO(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.SLO, CPU.absolute)
         case 0x13:
-            CPU.SLO(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.SLO, CPU.indirectIndexed)
         case 0x17:
-            CPU.SLO(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.SLO, CPU.zeroPageX)
         case 0x1B:
-            CPU.SLO(operand: CPU.absoluteY(on: &cpu), on: &cpu)
+            return (CPU.SLO, CPU.absoluteY)
         case 0x1F:
-            CPU.SLO(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.SLO, CPU.absoluteX)
 
         case 0x23:
-            CPU.RLA(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.RLA, CPU.indexedIndirect)
         case 0x27:
-            CPU.RLA(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.RLA, CPU.zeroPage)
         case 0x2F:
-            CPU.RLA(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.RLA, CPU.absolute)
         case 0x33:
-            CPU.RLA(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.RLA, CPU.indirectIndexed)
         case 0x37:
-            CPU.RLA(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.RLA, CPU.zeroPageX)
         case 0x3B:
-            CPU.RLA(operand: CPU.absoluteY(on: &cpu), on: &cpu)
+            return (CPU.RLA, CPU.absoluteY)
         case 0x3F:
-            CPU.RLA(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.RLA, CPU.absoluteX)
 
         case 0x43:
-            CPU.SRE(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.SRE, CPU.indexedIndirect)
         case 0x47:
-            CPU.SRE(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.SRE, CPU.zeroPage)
         case 0x4F:
-            CPU.SRE(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.SRE, CPU.absolute)
         case 0x53:
-            CPU.SRE(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.SRE, CPU.indirectIndexed)
         case 0x57:
-            CPU.SRE(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.SRE, CPU.zeroPageX)
         case 0x5B:
-            CPU.SRE(operand: CPU.absoluteY(on: &cpu), on: &cpu)
+            return (CPU.SRE, CPU.absoluteY)
         case 0x5F:
-            CPU.SRE(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.SRE, CPU.absoluteX)
 
         case 0x63:
-            CPU.RRA(operand: CPU.indexedIndirect(on: &cpu), on: &cpu)
+            return (CPU.RRA, CPU.indexedIndirect)
         case 0x67:
-            CPU.RRA(operand: CPU.zeroPage(on: &cpu), on: &cpu)
+            return (CPU.RRA, CPU.zeroPage)
         case 0x6F:
-            CPU.RRA(operand: CPU.absolute(on: &cpu), on: &cpu)
+            return (CPU.RRA, CPU.absolute)
         case 0x73:
-            CPU.RRA(operand: CPU.indirectIndexed(on: &cpu), on: &cpu)
+            return (CPU.RRA, CPU.indirectIndexed)
         case 0x77:
-            CPU.RRA(operand: CPU.zeroPageX(on: &cpu), on: &cpu)
+            return (CPU.RRA, CPU.zeroPageX)
         case 0x7B:
-            CPU.RRA(operand: CPU.absoluteY(on: &cpu), on: &cpu)
+            return (CPU.RRA, CPU.absoluteY)
         case 0x7F:
-            CPU.RRA(operand: CPU.absoluteX(on: &cpu), on: &cpu)
+            return (CPU.RRA, CPU.absoluteX)
 
         default:
-            CPU.NOP(operand: CPU.implicit(on: &cpu), on: &cpu)
+            return (CPU.NOP, CPU.implicit)
         }
     }
 }

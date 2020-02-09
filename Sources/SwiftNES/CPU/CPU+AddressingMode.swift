@@ -1,4 +1,6 @@
 // http://wiki.nesdev.com/w/index.php/CPU_addressing_modes
+typealias FetchOperand = (inout CPU) -> UInt16
+
 extension CPU {
 
     @inline(__always)

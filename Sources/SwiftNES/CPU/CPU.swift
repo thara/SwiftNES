@@ -63,7 +63,9 @@ struct CPU {
             }
         default:
             let opcode = CPU.fetchOperand(from: &self)
-            CPU.excuteInstruction(opcode: opcode, on: &self)
+            let (operation, fetchOperand) = CPU.decode(opcode: opcode, on: &self)
+            let operand = fetchOperand(&self)
+            operation(operand, &self)
         }
 
         if before <= cycles {
