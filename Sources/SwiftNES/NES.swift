@@ -57,24 +57,24 @@ public final class NES {
 }
 
 public protocol RunFrame {
-    static func runFrame(_ nes: inout Self, onLineEnd render: (Int, inout LineBuffer) -> Void)
+    static func runFrame(_ nes: Self, onLineEnd render: (Int, inout LineBuffer) -> Void)
 }
 
 extension NES: RunFrame {
-    public static func runFrame(_ nes: inout NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
+    public static func runFrame(_ nes: NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
         let currentFrame = nes.ppu.frames
 
         repeat {
-            step(&nes, onLineEnd: render)
+            step(nes, onLineEnd: render)
         } while currentFrame == nes.ppu.frames
     }
 
-    static func step(_ nes: inout NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
+    static func step(_ nes: NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
     #if nestest
         if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
     #endif
 
-        let cpuCycles = cpuStep(interruptLine: nes.interruptLine, on: &nes)
+        let cpuCycles = cpuStep(interruptLine: nes.interruptLine, on: nes)
         // nes.cycles &+= cpuCycles
 
         nes.apu.step()

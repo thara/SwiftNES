@@ -1,13 +1,13 @@
 extension NES: ReadWrite {
 
-    static func read(at address: UInt16, from nes: inout NES) -> UInt8 {
+    static func read(at address: UInt16, from nes: NES) -> UInt8 {
         nes.cpu.tick()
         return nes.cpuMemory.read(at: address)
     }
 
-    static func write(_ value: UInt8, at address: UInt16, to nes: inout NES) {
+    static func write(_ value: UInt8, at address: UInt16, to nes: NES) {
         if address == 0x4014 { // OAMDMA
-            writeOAM(value, to: &nes)
+            writeOAM(value, to: nes)
             return
         }
         nes.cpu.tick()
@@ -16,7 +16,7 @@ extension NES: ReadWrite {
     }
 
     // http://wiki.nesdev.com/w/index.php/PPU_registers#OAM_DMA_.28.244014.29_.3E_write
-    static func writeOAM(_ value: UInt8, to nes: inout NES) {
+    static func writeOAM(_ value: UInt8, to nes: NES) {
         let start = value.u16 &* 0x100
         for address in start...(start &+ 0xFF) {
             let data = nes.cpuMemory.read(at: address)
@@ -125,9 +125,9 @@ final class CPUMemoryBus: Memory {
 }
 
 extension ReadWrite {
-    static func readOnIndirect(operand: UInt16, from rw: inout Self) -> UInt16 {
-        let low = read(at: operand, from: &rw).u16
-        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF), from: &rw).u16 &<< 8   // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
+    static func readOnIndirect(operand: UInt16, from rw: Self) -> UInt16 {
+        let low = read(at: operand, from: rw).u16
+        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF), from: rw).u16 &<< 8   // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
         return low | high
     }
 }
