@@ -1,140 +1,152 @@
 // http://wiki.nesdev.com/w/index.php/CPU_addressing_modes
-typealias FetchOperand<M: CPUMemory> = (inout CPU, inout M) -> UInt16
+typealias FetchOperand<T: AddressingMode> = (inout T) -> UInt16
 
 protocol AddressingMode: ReadWrite {
-    static func implicit(on cpu: inout CPU, memory: inout Self) -> UInt16
+    static func implicit(on: inout Self) -> UInt16
+    static func accumulator(on: inout Self) -> UInt16
+    static func immediate(on: inout Self) -> UInt16
+    static func zeroPage(on: inout Self) -> UInt16
+    static func zeroPageX(on: inout Self) -> UInt16
+    static func zeroPageY(on: inout Self) -> UInt16
+    static func absolute(on: inout Self) -> UInt16
+    static func absoluteX(on: inout Self) -> UInt16
+    static func absoluteXWithPenalty(on: inout Self) -> UInt16
+    static func absoluteY(on: inout Self) -> UInt16
+    static func absoluteYWithPenalty(on: inout Self) -> UInt16
+    static func relative(on: inout Self) -> UInt16
+    static func indirect(on: inout Self) -> UInt16
+    static func indexedIndirect(on: inout Self) -> UInt16
+    static func indirectIndexed(on: inout Self) -> UInt16
 }
 
-extension AddressingMode {
+extension NES: AddressingMode {
 
     @inline(__always)
-    static func implicit(on cpu: inout CPU, memory: inout Self) -> UInt16 {
+    static func implicit(on nes: inout NES) -> UInt16 {
         return 0x00
     }
 
     @inline(__always)
-    static func accumulator(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        return cpu.A.u16
+    static func accumulator(on nes: inout NES) -> UInt16 {
+        return nes.cpu.A.u16
     }
 
     @inline(__always)
-    static func immediate(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let operand = cpu.PC
-        cpu.PC &+= 1
+    static func immediate(on nes: inout NES) -> UInt16 {
+        let operand = nes.cpu.PC
+        nes.cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    static func zeroPage(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let operand = Self.read(at: cpu.PC, from: &memory).u16 & 0xFF
-        cpu.PC &+= 1
+    static func zeroPage(on nes: inout NES) -> UInt16 {
+        let operand = read(at: nes.cpu.PC, from: &nes).u16 & 0xFF
+        nes.cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    static func zeroPageX(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        cpu.tick()
+    static func zeroPageX(on nes: inout NES) -> UInt16 {
+        nes.cpu.tick()
 
-        let operand = (Self.read(at: cpu.PC, from: &memory).u16 &+ cpu.X.u16) & 0xFF
-        cpu.PC &+= 1
+        let operand = (read(at: nes.cpu.PC, from: &nes).u16 &+ nes.cpu.X.u16) & 0xFF
+        nes.cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    static func zeroPageY(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        cpu.tick()
+    static func zeroPageY(on nes: inout NES) -> UInt16 {
+        nes.cpu.tick()
 
-        let operand = (Self.read(at: cpu.PC, from: &memory).u16 &+ cpu.Y.u16) & 0xFF
-        cpu.PC &+= 1
+        let operand = (read(at: nes.cpu.PC, from: &nes).u16 &+ nes.cpu.Y.u16) & 0xFF
+        nes.cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    static func absolute(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let operand = Self.readWord(at: cpu.PC, from: &memory)
-        cpu.PC &+= 2
+    static func absolute(on nes: inout NES) -> UInt16 {
+        let operand = readWord(at: nes.cpu.PC, from: &nes)
+        nes.cpu.PC &+= 2
         return operand
     }
 
     @inline(__always)
-    static func absoluteX(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let data = Self.readWord(at: cpu.PC, from: &memory)
-        let operand = data &+ cpu.X.u16 & 0xFFFF
-        cpu.PC &+= 2
-        cpu.tick()
+    static func absoluteX(on nes: inout NES) -> UInt16 {
+        let data = readWord(at: nes.cpu.PC, from: &nes)
+        let operand = data &+ nes.cpu.X.u16 & 0xFFFF
+        nes.cpu.PC &+= 2
+        nes.cpu.tick()
         return operand
     }
 
     @inline(__always)
-    static func absoluteXWithPenalty(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let data = Self.readWord(at: cpu.PC, from: &memory)
-        let operand = data &+ cpu.X.u16 & 0xFFFF
-        cpu.PC &+= 2
+    static func absoluteXWithPenalty(on nes: inout NES) -> UInt16 {
+        let data = readWord(at: nes.cpu.PC, from: &nes)
+        let operand = data &+ nes.cpu.X.u16 & 0xFFFF
+        nes.cpu.PC &+= 2
 
-        if pageCrossed(value: data, operand: cpu.X) {
-            cpu.tick()
+        if pageCrossed(value: data, operand: nes.cpu.X) {
+            nes.cpu.tick()
         }
         return operand
     }
 
     @inline(__always)
-    static func absoluteY(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let data = Self.readWord(at: cpu.PC, from: &memory)
-        let operand = data &+ cpu.Y.u16 & 0xFFFF
-        cpu.PC &+= 2
-        cpu.tick()
+    static func absoluteY(on nes: inout NES) -> UInt16 {
+        let data = readWord(at: nes.cpu.PC, from: &nes)
+        let operand = data &+ nes.cpu.Y.u16 & 0xFFFF
+        nes.cpu.PC &+= 2
+        nes.cpu.tick()
         return operand
     }
 
     @inline(__always)
-    static func absoluteYWithPenalty(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let data = Self.readWord(at: cpu.PC, from: &memory)
-        let operand = data &+ cpu.Y.u16 & 0xFFFF
-        cpu.PC &+= 2
+    static func absoluteYWithPenalty(on nes: inout NES) -> UInt16 {
+        let data = readWord(at: nes.cpu.PC, from: &nes)
+        let operand = data &+ nes.cpu.Y.u16 & 0xFFFF
+        nes.cpu.PC &+= 2
 
-        if pageCrossed(value: data, operand: cpu.Y) {
-            cpu.tick()
+        if pageCrossed(value: data, operand: nes.cpu.Y) {
+            nes.cpu.tick()
         }
         return operand
     }
 
     @inline(__always)
-    static func relative(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let operand = Self.read(at: cpu.PC, from: &memory).u16
-        cpu.PC &+= 1
+    static func relative(on nes: inout NES) -> UInt16 {
+        let operand = read(at: nes.cpu.PC, from: &nes).u16
+        nes.cpu.PC &+= 1
         return operand
     }
 
     @inline(__always)
-    static func indirect(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let data = Self.readWord(at: cpu.PC, from: &memory)
-        let operand = Self.readOnIndirect(operand: data, from: &memory)
-        cpu.PC &+= 2
+    static func indirect(on nes: inout NES) -> UInt16 {
+        let data = readWord(at: nes.cpu.PC, from: &nes)
+        let operand = readOnIndirect(operand: data, from: &nes)
+        nes.cpu.PC &+= 2
         return operand
     }
 
     @inline(__always)
-    static func indexedIndirect(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let data = Self.read(at: cpu.PC, from: &memory)
-        let operand = Self.readOnIndirect(operand: (data &+ cpu.X).u16 & 0xFF, from: &memory)
-        cpu.PC &+= 1
+    static func indexedIndirect(on nes: inout NES) -> UInt16 {
+        let data = read(at: nes.cpu.PC, from: &nes)
+        let operand = readOnIndirect(operand: (data &+ nes.cpu.X).u16 & 0xFF, from: &nes)
+        nes.cpu.PC &+= 1
 
-        cpu.tick()
+        nes.cpu.tick()
 
         return operand
     }
 
     @inline(__always)
-    static func indirectIndexed(on cpu: inout CPU, memory: inout Self) -> UInt16 {
-        let data = Self.read(at: cpu.PC, from: &memory).u16
-        let operand = Self.readOnIndirect(operand: data, from: &memory) &+ cpu.Y.u16
-        cpu.PC &+= 1
+    static func indirectIndexed(on nes: inout NES) -> UInt16 {
+        let data = read(at: nes.cpu.PC, from: &nes).u16
+        let operand = readOnIndirect(operand: data, from: &nes) &+ nes.cpu.Y.u16
+        nes.cpu.PC &+= 1
 
-        if pageCrossed(value: operand &- cpu.Y.u16, operand: cpu.Y) {
-            cpu.tick()
+        if pageCrossed(value: operand &- nes.cpu.Y.u16, operand: nes.cpu.Y) {
+            nes.cpu.tick()
         }
         return operand
     }
 }
-
-extension NES: AddressingMode {}

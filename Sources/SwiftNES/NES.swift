@@ -74,7 +74,7 @@ extension NES: RunFrame {
         if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
     #endif
 
-        let cpuCycles = step(cpu: &nes.cpu, interruptLine: nes.interruptLine, with: &nes)
+        let cpuCycles = cpuStep(interruptLine: nes.interruptLine, on: &nes)
         // nes.cycles &+= cpuCycles
 
         nes.apu.step()

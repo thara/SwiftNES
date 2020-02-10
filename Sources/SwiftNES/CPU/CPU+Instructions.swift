@@ -2,24 +2,24 @@ typealias OpCode = UInt8
 
 typealias Operand = UInt16
 
-typealias CPUOperation<M: CPUMemory> = (Operand, inout CPU, inout M) -> Void
+typealias CPUOperation<T: CPUInstructions> = (Operand, inout T) -> Void
 
 protocol CPUInstructions: CPUStack, AddressingMode {
-    static func fetchOperand(from cpu: inout CPU, memory: inout Self) -> OpCode
+    static func fetchOperand(from: inout Self) -> OpCode
     static func decode(_ opcode: OpCode) -> (CPUOperation<Self>, FetchOperand<Self>)
 }
 
-extension CPUInstructions {
+extension NES: CPUInstructions {
     // swiftlint:disable file_length cyclomatic_complexity function_body_length
     @inline(__always)
-    static func fetchOperand(from cpu: inout CPU, memory: inout Self) -> OpCode {
-        let opcode = Self.read(at: cpu.PC, from: &memory)
-        cpu.PC &+= 1
+    static func fetchOperand(from nes: inout NES) -> OpCode {
+        let opcode = read(at: nes.cpu.PC, from: &nes)
+        nes.cpu.PC &+= 1
         return opcode
     }
 
     @inline(__always)
-    static func decode(_ opcode: OpCode) -> (CPUOperation<Self>, FetchOperand<Self>) {
+    static func decode(_ opcode: OpCode) -> (CPUOperation<NES>, FetchOperand<NES>) {
         switch opcode {
         case 0xA9:
             return (LDA, immediate)
@@ -468,152 +468,151 @@ extension CPUInstructions {
     }
 }
 
-
 // MARK: - Operations
-extension CPUInstructions {
+extension NES {
     // Implements for Load/Store Operations
 
     /// loadAccumulator
-    static func LDA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.A = Self.read(at: operand, from: &memory)
+    static func LDA(operand: Operand, on nes: inout NES) {
+        nes.cpu.A = read(at: operand, from: &nes)
     }
 
     /// loadXRegister
-    static func LDX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.X = Self.read(at: operand, from: &memory)
+    static func LDX(operand: Operand, on nes: inout NES) {
+        nes.cpu.X = read(at: operand, from: &nes)
     }
 
     /// loadYRegister
-    static func LDY(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.Y = Self.read(at: operand, from: &memory)
+    static func LDY(operand: Operand, on nes: inout NES) {
+        nes.cpu.Y = read(at: operand, from: &nes)
     }
 
     /// storeAccumulator
-    static func STA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        Self.write(cpu.A, at: operand, to: &memory)
+    static func STA(operand: Operand, on nes: inout NES) {
+        write(nes.cpu.A, at: operand, to: &nes)
     }
 
-    static func STAWithTick(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        Self.write(cpu.A, at: operand, to: &memory)
-        cpu.tick()
+    static func STAWithTick(operand: Operand, on nes: inout NES) {
+        write(nes.cpu.A, at: operand, to: &nes)
+        nes.cpu.tick()
     }
 
     /// storeXRegister
-    static func STX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        Self.write(cpu.X, at: operand, to: &memory)
+    static func STX(operand: Operand, on nes: inout NES) {
+        write(nes.cpu.X, at: operand, to: &nes)
     }
 
     /// storeYRegister
-    static func STY(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        Self.write(cpu.Y, at: operand, to: &memory)
+    static func STY(operand: Operand, on nes: inout NES) {
+        write(nes.cpu.Y, at: operand, to: &nes)
     }
 
     // MARK: - Register Operations
 
     /// transferAccumulatorToX
-    static func TAX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.X = cpu.A
-        cpu.tick()
+    static func TAX(operand: Operand, on nes: inout NES) {
+        nes.cpu.X = nes.cpu.A
+        nes.cpu.tick()
     }
 
     /// transferStackPointerToX
-    static func TSX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.X = cpu.S
-        cpu.tick()
+    static func TSX(operand: Operand, on nes: inout NES) {
+        nes.cpu.X = nes.cpu.S
+        nes.cpu.tick()
     }
 
     /// transferAccumulatorToY
-    static func TAY(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.Y = cpu.A
-        cpu.tick()
+    static func TAY(operand: Operand, on nes: inout NES) {
+        nes.cpu.Y = nes.cpu.A
+        nes.cpu.tick()
     }
 
     /// transferXtoAccumulator
-    static func TXA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.A = cpu.X
-        cpu.tick()
+    static func TXA(operand: Operand, on nes: inout NES) {
+        nes.cpu.A = nes.cpu.X
+        nes.cpu.tick()
     }
 
     /// transferXtoStackPointer
-    static func TXS(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.S = cpu.X
-        cpu.tick()
+    static func TXS(operand: Operand, on nes: inout NES) {
+        nes.cpu.S = nes.cpu.X
+        nes.cpu.tick()
     }
 
     /// transferYtoAccumulator
-    static func TYA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.A = cpu.Y
-        cpu.tick()
+    static func TYA(operand: Operand, on nes: inout NES) {
+        nes.cpu.A = nes.cpu.Y
+        nes.cpu.tick()
     }
 
     // MARK: - Stack instructions
 
     /// pushAccumulator
-    static func PHA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        Self.pushStack(cpu.A, to: &memory, on: &cpu)
-        cpu.tick()
+    static func PHA(operand: Operand, on nes: inout NES) {
+        pushStack(nes.cpu.A, to: &nes)
+        nes.cpu.tick()
     }
 
     /// pushProcessorStatus
-    static func PHP(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
+    static func PHP(operand: Operand, on nes: inout NES) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        Self.pushStack(cpu.P.rawValue | CPU.Status.operatedB.rawValue, to: &memory, on: &cpu)
-        cpu.tick()
+        pushStack(nes.cpu.P.rawValue | CPU.Status.operatedB.rawValue, to: &nes)
+        nes.cpu.tick()
     }
 
     /// pullAccumulator
-    static func PLA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.A = pullStack(from: &memory, on: &cpu)
-        cpu.tick(count: 2)
+    static func PLA(operand: Operand, on nes: inout NES) {
+        nes.cpu.A = pullStack(from: &nes)
+        nes.cpu.tick(count: 2)
     }
 
     /// pullProcessorStatus
-    static func PLP(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
+    static func PLP(operand: Operand, on nes: inout NES) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        cpu.P = CPU.Status(rawValue: pullStack(from: &memory, on: &cpu) & ~CPU.Status.B.rawValue | CPU.Status.R.rawValue)
-        cpu.tick(count: 2)
+        nes.cpu.P = CPU.Status(rawValue: pullStack(from: &nes) & ~CPU.Status.B.rawValue | CPU.Status.R.rawValue)
+        nes.cpu.tick(count: 2)
     }
 
     // MARK: - Logical instructions
 
     /// bitwiseANDwithAccumulator
-    static func AND(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.A &= Self.read(at: operand, from: &memory)
+    static func AND(operand: Operand, on nes: inout NES) {
+        nes.cpu.A &= read(at: operand, from: &nes)
     }
 
     /// bitwiseExclusiveOR
-    static func EOR(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.A ^= Self.read(at: operand, from: &memory)
+    static func EOR(operand: Operand, on nes: inout NES) {
+        nes.cpu.A ^= read(at: operand, from: &nes)
     }
 
     /// bitwiseORwithAccumulator
-    static func ORA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.A |= Self.read(at: operand, from: &memory)
+    static func ORA(operand: Operand, on nes: inout NES) {
+        nes.cpu.A |= read(at: operand, from: &nes)
     }
 
     /// testBits
-    static func BIT(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let value = Self.read(at: operand, from: &memory)
-        let data = cpu.A & value
-        cpu.P.remove([.Z, .V, .N])
-        if data == 0 { cpu.P.formUnion(.Z) } else { cpu.P.remove(.Z) }
-        if value[6] == 1 { cpu.P.formUnion(.V) } else { cpu.P.remove(.V) }
-        if value[7] == 1 { cpu.P.formUnion(.N) } else { cpu.P.remove(.N) }
+    static func BIT(operand: Operand, on nes: inout NES) {
+        let value = read(at: operand, from: &nes)
+        let data = nes.cpu.A & value
+        nes.cpu.P.remove([.Z, .V, .N])
+        if data == 0 { nes.cpu.P.formUnion(.Z) } else { nes.cpu.P.remove(.Z) }
+        if value[6] == 1 { nes.cpu.P.formUnion(.V) } else { nes.cpu.P.remove(.V) }
+        if value[7] == 1 { nes.cpu.P.formUnion(.N) } else { nes.cpu.P.remove(.N) }
     }
 
     // MARK: - Arithmetic instructions
 
     /// addWithCarry
-    static func ADC(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let a = cpu.A
-        let val = Self.read(at: operand, from: &memory)
+    static func ADC(operand: Operand, on nes: inout NES) {
+        let a = nes.cpu.A
+        let val = read(at: operand, from: &nes)
         var result = a &+ val
 
-        if cpu.P.contains(.C) { result &+= 1 }
+        if nes.cpu.P.contains(.C) { result &+= 1 }
 
-        cpu.P.remove([.C, .Z, .V, .N])
+        nes.cpu.P.remove([.C, .Z, .V, .N])
 
         // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
         let a7 = a[7]
@@ -621,21 +620,21 @@ extension CPUInstructions {
         let c6 = a7 ^ v7 ^ result[7]
         let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
 
-        if c7 == 1 { cpu.P.formUnion(.C) }
-        if c6 ^ c7 == 1 { cpu.P.formUnion(.V) }
+        if c7 == 1 { nes.cpu.P.formUnion(.C) }
+        if c6 ^ c7 == 1 { nes.cpu.P.formUnion(.V) }
 
-        cpu.A = result
+        nes.cpu.A = result
     }
 
     /// subtractWithCarry
-    static func SBC(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let a = cpu.A
-        let val = ~Self.read(at: operand, from: &memory)
+    static func SBC(operand: Operand, on nes: inout NES) {
+        let a = nes.cpu.A
+        let val = ~read(at: operand, from: &nes)
         var result = a &+ val
 
-        if cpu.P.contains(.C) { result &+= 1 }
+        if nes.cpu.P.contains(.C) { result &+= 1 }
 
-        cpu.P.remove([.C, .Z, .V, .N])
+        nes.cpu.P.remove([.C, .Z, .V, .N])
 
         // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
         let a7 = a[7]
@@ -643,481 +642,481 @@ extension CPUInstructions {
         let c6 = a7 ^ v7 ^ result[7]
         let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
 
-        if c7 == 1 { cpu.P.formUnion(.C) }
-        if c6 ^ c7 == 1 { cpu.P.formUnion(.V) }
+        if c7 == 1 { nes.cpu.P.formUnion(.C) }
+        if c6 ^ c7 == 1 { nes.cpu.P.formUnion(.V) }
 
-        cpu.A = result
+        nes.cpu.A = result
     }
 
     /// compareAccumulator
-    static func CMP(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let cmp = Int16(cpu.A) &- Int16(Self.read(at: operand, from: &memory))
+    static func CMP(operand: Operand, on nes: inout NES) {
+        let cmp = Int16(nes.cpu.A) &- Int16(read(at: operand, from: &nes))
 
-        cpu.P.remove([.C, .Z, .N])
-        cpu.P.setZN(cmp)
-        if 0 <= cmp { cpu.P.formUnion(.C) } else { cpu.P.remove(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        nes.cpu.P.setZN(cmp)
+        if 0 <= cmp { nes.cpu.P.formUnion(.C) } else { nes.cpu.P.remove(.C) }
 
     }
 
     /// compareXRegister
-    static func CPX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let value = Self.read(at: operand, from: &memory)
-        let cmp = cpu.X &- value
+    static func CPX(operand: Operand, on nes: inout NES) {
+        let value = read(at: operand, from: &nes)
+        let cmp = nes.cpu.X &- value
 
-        cpu.P.remove([.C, .Z, .N])
-        cpu.P.setZN(cmp)
-        if cpu.X >= value { cpu.P.formUnion(.C) } else { cpu.P.remove(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        nes.cpu.P.setZN(cmp)
+        if nes.cpu.X >= value { nes.cpu.P.formUnion(.C) } else { nes.cpu.P.remove(.C) }
 
     }
 
     /// compareYRegister
-    static func CPY(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let value = Self.read(at: operand, from: &memory)
-        let cmp = cpu.Y &- value
+    static func CPY(operand: Operand, on nes: inout NES) {
+        let value = read(at: operand, from: &nes)
+        let cmp = nes.cpu.Y &- value
 
-        cpu.P.remove([.C, .Z, .N])
-        cpu.P.setZN(cmp)
-        if cpu.Y >= value { cpu.P.formUnion(.C) } else { cpu.P.remove(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        nes.cpu.P.setZN(cmp)
+        if nes.cpu.Y >= value { nes.cpu.P.formUnion(.C) } else { nes.cpu.P.remove(.C) }
 
     }
 
     // MARK: - Increment/Decrement instructions
 
-    /// incrementMemory
-    static func INC(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let result = Self.read(at: operand, from: &memory) &+ 1
+    /// incrementnes
+    static func INC(operand: Operand, on nes: inout NES) {
+        let result = read(at: operand, from: &nes) &+ 1
 
-        cpu.P.setZN(result)
-        Self.write(result, at: operand, to: &memory)
+        nes.cpu.P.setZN(result)
+        write(result, at: operand, to: &nes)
 
-        cpu.tick()
+        nes.cpu.tick()
 
     }
 
     /// incrementX
-    static func INX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.X = cpu.X &+ 1
-        cpu.tick()
+    static func INX(operand: Operand, on nes: inout NES) {
+        nes.cpu.X = nes.cpu.X &+ 1
+        nes.cpu.tick()
     }
 
     /// incrementY
-    static func INY(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.Y = cpu.Y &+ 1
-        cpu.tick()
+    static func INY(operand: Operand, on nes: inout NES) {
+        nes.cpu.Y = nes.cpu.Y &+ 1
+        nes.cpu.tick()
     }
 
-    /// decrementMemory
-    static func DEC(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let result = Self.read(at: operand, from: &memory) &- 1
-        cpu.P.setZN(result)
+    /// decrementnes
+    static func DEC(operand: Operand, on nes: inout NES) {
+        let result = read(at: operand, from: &nes) &- 1
+        nes.cpu.P.setZN(result)
 
-        Self.write(result, at: operand, to: &memory)
-        cpu.tick()
+        write(result, at: operand, to: &nes)
+        nes.cpu.tick()
     }
 
     /// decrementX
-    static func DEX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.X = cpu.X &- 1
-        cpu.tick()
+    static func DEX(operand: Operand, on nes: inout NES) {
+        nes.cpu.X = nes.cpu.X &- 1
+        nes.cpu.tick()
     }
 
     /// decrementY
-    static func DEY(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.Y = cpu.Y &- 1
-        cpu.tick()
+    static func DEY(operand: Operand, on nes: inout NES) {
+        nes.cpu.Y = nes.cpu.Y &- 1
+        nes.cpu.tick()
     }
 
     // MARK: - Shift instructions
 
     /// arithmeticShiftLeft
-    static func ASL(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        var data = Self.read(at: operand, from: &memory)
+    static func ASL(operand: Operand, on nes: inout NES) {
+        var data = read(at: operand, from: &nes)
 
-        cpu.P.remove([.C, .Z, .N])
-        if data[7] == 1 { cpu.P.formUnion(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        if data[7] == 1 { nes.cpu.P.formUnion(.C) }
 
         data <<= 1
 
-        cpu.P.setZN(data)
+        nes.cpu.P.setZN(data)
 
-        Self.write(data, at: operand, to: &memory)
+        write(data, at: operand, to: &nes)
 
-        cpu.tick()
+        nes.cpu.tick()
     }
 
-    static func ASLForAccumulator(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.remove([.C, .Z, .N])
-        if cpu.A[7] == 1 { cpu.P.formUnion(.C) }
+    static func ASLForAccumulator(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.remove([.C, .Z, .N])
+        if nes.cpu.A[7] == 1 { nes.cpu.P.formUnion(.C) }
 
-        cpu.A <<= 1
+        nes.cpu.A <<= 1
 
-        cpu.tick()
+        nes.cpu.tick()
     }
 
     /// logicalShiftRight
-    static func LSR(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        var data = Self.read(at: operand, from: &memory)
+    static func LSR(operand: Operand, on nes: inout NES) {
+        var data = read(at: operand, from: &nes)
 
-        cpu.P.remove([.C, .Z, .N])
-        if data[0] == 1 { cpu.P.formUnion(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        if data[0] == 1 { nes.cpu.P.formUnion(.C) }
 
         data >>= 1
 
-        cpu.P.setZN(data)
+        nes.cpu.P.setZN(data)
 
-        Self.write(data, at: operand, to: &memory)
+        write(data, at: operand, to: &nes)
 
-        cpu.tick()
+        nes.cpu.tick()
     }
 
-    static func LSRForAccumulator(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.remove([.C, .Z, .N])
-        if cpu.A[0] == 1 { cpu.P.formUnion(.C) }
+    static func LSRForAccumulator(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.remove([.C, .Z, .N])
+        if nes.cpu.A[0] == 1 { nes.cpu.P.formUnion(.C) }
 
-        cpu.A >>= 1
+        nes.cpu.A >>= 1
 
-        cpu.tick()
+        nes.cpu.tick()
     }
 
     /// rotateLeft
-    static func ROL(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        var data = Self.read(at: operand, from: &memory)
+    static func ROL(operand: Operand, on nes: inout NES) {
+        var data = read(at: operand, from: &nes)
         let c = data & 0x80
 
         data <<= 1
-        if cpu.P.contains(.C) { data |= 0x01 }
+        if nes.cpu.P.contains(.C) { data |= 0x01 }
 
-        cpu.P.remove([.C, .Z, .N])
-        if c == 0x80 { cpu.P.formUnion(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 { nes.cpu.P.formUnion(.C) }
 
-        cpu.P.setZN(data)
+        nes.cpu.P.setZN(data)
 
-        Self.write(data, at: operand, to: &memory)
+        write(data, at: operand, to: &nes)
 
-        cpu.tick()
+        nes.cpu.tick()
     }
 
-    static func ROLForAccumulator(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let c = cpu.A & 0x80
+    static func ROLForAccumulator(operand: Operand, on nes: inout NES) {
+        let c = nes.cpu.A & 0x80
 
-        var a = cpu.A << 1
-        if cpu.P.contains(.C) { a |= 0x01 }
+        var a = nes.cpu.A << 1
+        if nes.cpu.P.contains(.C) { a |= 0x01 }
 
-        cpu.P.remove([.C, .Z, .N])
-        if c == 0x80 { cpu.P.formUnion(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 { nes.cpu.P.formUnion(.C) }
 
-        cpu.A = a
+        nes.cpu.A = a
 
-        cpu.tick()
+        nes.cpu.tick()
     }
 
     /// rotateRight
-    static func ROR(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        var data = Self.read(at: operand, from: &memory)
+    static func ROR(operand: Operand, on nes: inout NES) {
+        var data = read(at: operand, from: &nes)
         let c = data & 0x01
 
         data >>= 1
-        if cpu.P.contains(.C) { data |= 0x80 }
+        if nes.cpu.P.contains(.C) { data |= 0x80 }
 
-        cpu.P.remove([.C, .Z, .N])
-        if c == 1 { cpu.P.formUnion(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        if c == 1 { nes.cpu.P.formUnion(.C) }
 
-        cpu.P.setZN(data)
+        nes.cpu.P.setZN(data)
 
-        Self.write(data, at: operand, to: &memory)
+        write(data, at: operand, to: &nes)
 
-        cpu.tick()
+        nes.cpu.tick()
     }
 
-    static func RORForAccumulator(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let c = cpu.A & 0x01
+    static func RORForAccumulator(operand: Operand, on nes: inout NES) {
+        let c = nes.cpu.A & 0x01
 
-        var a = cpu.A >> 1
-        if cpu.P.contains(.C) { a |= 0x80 }
+        var a = nes.cpu.A >> 1
+        if nes.cpu.P.contains(.C) { a |= 0x80 }
 
-        cpu.P.remove([.C, .Z, .N])
-        if c == 1 { cpu.P.formUnion(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        if c == 1 { nes.cpu.P.formUnion(.C) }
 
-        cpu.A = a
+        nes.cpu.A = a
 
-        cpu.tick()
+        nes.cpu.tick()
     }
 
     // MARK: - Jump instructions
 
     /// jump
-    static func JMP(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.PC = operand
+    static func JMP(operand: Operand, on nes: inout NES) {
+        nes.cpu.PC = operand
     }
 
     /// jumpToSubroutine
-    static func JSR(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        Self.pushStack(word: cpu.PC &- 1, to: &memory, on: &cpu)
-        cpu.tick()
-        cpu.PC = operand
+    static func JSR(operand: Operand, on nes: inout NES) {
+        pushStack(word: nes.cpu.PC &- 1, to: &nes)
+        nes.cpu.tick()
+        nes.cpu.PC = operand
     }
 
     /// returnFromSubroutine
-    static func RTS(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.tick(count: 3)
-        cpu.PC = pullStack(from: &memory, on: &cpu) &+ 1
+    static func RTS(operand: Operand, on nes: inout NES) {
+        nes.cpu.tick(count: 3)
+        nes.cpu.PC = pullStack(from: &nes) &+ 1
     }
 
     /// returnFromInterrupt
-    static func RTI(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
+    static func RTI(operand: Operand, on nes: inout NES) {
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        cpu.tick(count: 2)
-        cpu.P = CPU.Status(rawValue: pullStack(from: &memory, on: &cpu) & ~CPU.Status.B.rawValue | CPU.Status.R.rawValue)
-        cpu.PC = pullStack(from: &memory, on: &cpu)
+        nes.cpu.tick(count: 2)
+        nes.cpu.P = CPU.Status(rawValue: pullStack(from: &nes) & ~CPU.Status.B.rawValue | CPU.Status.R.rawValue)
+        nes.cpu.PC = pullStack(from: &nes)
     }
 
     // MARK: - Branch instructions
 
-    private static func branch(operand: Operand, test: Bool, on cpu: inout CPU) {
+    private static func branch(operand: Operand, test: Bool, on nes: inout NES) {
         if test {
-            cpu.tick()
-            let pc = Int(cpu.PC)
+            nes.cpu.tick()
+            let pc = Int(nes.cpu.PC)
             let offset = Int(operand.i8)
             if pageCrossed(value: pc, operand: offset) {
-                cpu.tick()
+                nes.cpu.tick()
             }
-            cpu.PC = UInt16(pc &+ offset)
+            nes.cpu.PC = UInt16(pc &+ offset)
         }
     }
 
     /// branchIfCarryClear
-    static func BCC(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        branch(operand: operand, test: !cpu.P.contains(.C), on: &cpu)
+    static func BCC(operand: Operand, on nes: inout NES) {
+        branch(operand: operand, test: !nes.cpu.P.contains(.C), on: &nes)
     }
 
     /// branchIfCarrySet
-    static func BCS(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        branch(operand: operand, test: cpu.P.contains(.C), on: &cpu)
+    static func BCS(operand: Operand, on nes: inout NES) {
+        branch(operand: operand, test: nes.cpu.P.contains(.C), on: &nes)
     }
 
     /// branchIfEqual
-    static func BEQ(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        branch(operand: operand, test: cpu.P.contains(.Z), on: &cpu)
+    static func BEQ(operand: Operand, on nes: inout NES) {
+        branch(operand: operand, test: nes.cpu.P.contains(.Z), on: &nes)
     }
 
     /// branchIfMinus
-    static func BMI(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        branch(operand: operand, test: cpu.P.contains(.N), on: &cpu)
+    static func BMI(operand: Operand, on nes: inout NES) {
+        branch(operand: operand, test: nes.cpu.P.contains(.N), on: &nes)
     }
 
     /// branchIfNotEqual
-    static func BNE(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        branch(operand: operand, test: !cpu.P.contains(.Z), on: &cpu)
+    static func BNE(operand: Operand, on nes: inout NES) {
+        branch(operand: operand, test: !nes.cpu.P.contains(.Z), on: &nes)
     }
 
     /// branchIfPlus
-    static func BPL(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        branch(operand: operand, test: !cpu.P.contains(.N), on: &cpu)
+    static func BPL(operand: Operand, on nes: inout NES) {
+        branch(operand: operand, test: !nes.cpu.P.contains(.N), on: &nes)
     }
 
     /// branchIfOverflowClear
-    static func BVC(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        branch(operand: operand, test: !cpu.P.contains(.V), on: &cpu)
+    static func BVC(operand: Operand, on nes: inout NES) {
+        branch(operand: operand, test: !nes.cpu.P.contains(.V), on: &nes)
     }
 
     /// branchIfOverflowSet
-    static func BVS(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        branch(operand: operand, test: cpu.P.contains(.V), on: &cpu)
+    static func BVS(operand: Operand, on nes: inout NES) {
+        branch(operand: operand, test: nes.cpu.P.contains(.V), on: &nes)
     }
 
     // MARK: - Flag control instructions
 
     /// clearCarry
-    static func CLC(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.remove(.C)
-        cpu.tick()
+    static func CLC(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.remove(.C)
+        nes.cpu.tick()
     }
 
     /// clearDecimal
-    static func CLD(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.remove(.D)
-        cpu.tick()
+    static func CLD(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.remove(.D)
+        nes.cpu.tick()
     }
 
     /// clearInterrupt
-    static func CLI(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.remove(.I)
-        cpu.tick()
+    static func CLI(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.remove(.I)
+        nes.cpu.tick()
     }
 
     /// clearOverflow
-    static func CLV(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.remove(.V)
-        cpu.tick()
+    static func CLV(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.remove(.V)
+        nes.cpu.tick()
     }
 
     /// setCarryFlag
-    static func SEC(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.formUnion(.C)
-        cpu.tick()
+    static func SEC(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.formUnion(.C)
+        nes.cpu.tick()
     }
 
     /// setDecimalFlag
-    static func SED(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.formUnion(.D)
-        cpu.tick()
+    static func SED(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.formUnion(.D)
+        nes.cpu.tick()
     }
 
     /// setInterruptDisable
-    static func SEI(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.P.formUnion(.I)
-        cpu.tick()
+    static func SEI(operand: Operand, on nes: inout NES) {
+        nes.cpu.P.formUnion(.I)
+        nes.cpu.tick()
     }
 
     // MARK: - Misc
 
     /// forceInterrupt
-    static func BRK(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        Self.pushStack(word: cpu.PC, to: &memory, on: &cpu)
+    static func BRK(operand: Operand, on nes: inout NES) {
+        pushStack(word: nes.cpu.PC, to: &nes)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        Self.pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue, to: &memory, on: &cpu)
-        cpu.tick()
-        cpu.PC = Self.readWord(at: 0xFFFE, from: &memory)
+        pushStack(nes.cpu.P.rawValue | CPU.Status.interruptedB.rawValue, to: &nes)
+        nes.cpu.tick()
+        nes.cpu.PC = readWord(at: 0xFFFE, from: &nes)
     }
 
     /// doNothing
-    static func NOP(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        cpu.tick()
+    static func NOP(operand: Operand, on nes: inout NES) {
+        nes.cpu.tick()
     }
 
     // MARK: - Unofficial
 
     /// loadAccumulatorAndX
-    static func LAX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        let data = Self.read(at: operand, from: &memory)
-        cpu.A = data
-        cpu.X = data
+    static func LAX(operand: Operand, on nes: inout NES) {
+        let data = read(at: operand, from: &nes)
+        nes.cpu.A = data
+        nes.cpu.X = data
     }
 
     /// storeAccumulatorAndX
-    static func SAX(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        Self.write(cpu.A & cpu.X, at: operand, to: &memory)
+    static func SAX(operand: Operand, on nes: inout NES) {
+        write(nes.cpu.A & nes.cpu.X, at: operand, to: &nes)
     }
 
-    /// decrementMemoryAndCompareAccumulator
-    static func DCP(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        // decrementMemory excluding cpu.tick
-        let result = Self.read(at: operand, from: &memory) &- 1
-        cpu.P.setZN(result)
-        Self.write(result, at: operand, to: &memory)
+    /// decrementnesAndCompareAccumulator
+    static func DCP(operand: Operand, on nes: inout NES) {
+        // decrementnes excluding nes.cpu.tick
+        let result = read(at: operand, from: &nes) &- 1
+        nes.cpu.P.setZN(result)
+        write(result, at: operand, to: &nes)
 
-        CMP(operand: operand, on: &cpu, with: &memory)
+        CMP(operand: operand, on: &nes)
     }
 
-    /// incrementMemoryAndSubtractWithCarry
-    static func ISB(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        // incrementMemory excluding cpu.tick
-        let result = Self.read(at: operand, from: &memory) &+ 1
-        cpu.P.setZN(result)
-        Self.write(result, at: operand, to: &memory)
+    /// incrementnesAndSubtractWithCarry
+    static func ISB(operand: Operand, on nes: inout NES) {
+        // incrementnes excluding nes.cpu.tick
+        let result = read(at: operand, from: &nes) &+ 1
+        nes.cpu.P.setZN(result)
+        write(result, at: operand, to: &nes)
 
-        SBC(operand: operand, on: &cpu, with: &memory)
+        SBC(operand: operand, on: &nes)
     }
 
     /// arithmeticShiftLeftAndBitwiseORwithAccumulator
-    static func SLO(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        // arithmeticShiftLeft excluding cpu.tick
-        var data = Self.read(at: operand, from: &memory)
-        cpu.P.remove([.C, .Z, .N])
-        if data[7] == 1 { cpu.P.formUnion(.C) }
+    static func SLO(operand: Operand, on nes: inout NES) {
+        // arithmeticShiftLeft excluding nes.cpu.tick
+        var data = read(at: operand, from: &nes)
+        nes.cpu.P.remove([.C, .Z, .N])
+        if data[7] == 1 { nes.cpu.P.formUnion(.C) }
 
         data <<= 1
-        cpu.P.setZN(data)
-        Self.write(data, at: operand, to: &memory)
+        nes.cpu.P.setZN(data)
+        write(data, at: operand, to: &nes)
 
-        ORA(operand: operand, on: &cpu, with: &memory)
+        ORA(operand: operand, on: &nes)
     }
 
     /// rotateLeftAndBitwiseANDwithAccumulator
-    static func RLA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        // rotateLeft excluding cpu.tick
-        var data = Self.read(at: operand, from: &memory)
+    static func RLA(operand: Operand, on nes: inout NES) {
+        // rotateLeft excluding nes.cpu.tick
+        var data = read(at: operand, from: &nes)
         let c = data & 0x80
 
         data <<= 1
-        if cpu.P.contains(.C) { data |= 0x01 }
+        if nes.cpu.P.contains(.C) { data |= 0x01 }
 
-        cpu.P.remove([.C, .Z, .N])
-        if c == 0x80 { cpu.P.formUnion(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 { nes.cpu.P.formUnion(.C) }
 
-        cpu.P.setZN(data)
-        Self.write(data, at: operand, to: &memory)
+        nes.cpu.P.setZN(data)
+        write(data, at: operand, to: &nes)
 
-        AND(operand: operand, on: &cpu, with: &memory)
+        AND(operand: operand, on: &nes)
     }
 
     /// logicalShiftRightAndBitwiseExclusiveOR
-    static func SRE(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        // logicalShiftRight excluding cpu.tick
-        var data = Self.read(at: operand, from: &memory)
-        cpu.P.remove([.C, .Z, .N])
-        if data[0] == 1 { cpu.P.formUnion(.C) }
+    static func SRE(operand: Operand, on nes: inout NES) {
+        // logicalShiftRight excluding nes.cpu.tick
+        var data = read(at: operand, from: &nes)
+        nes.cpu.P.remove([.C, .Z, .N])
+        if data[0] == 1 { nes.cpu.P.formUnion(.C) }
 
         data >>= 1
 
-        cpu.P.setZN(data)
-        Self.write(data, at: operand, to: &memory)
+        nes.cpu.P.setZN(data)
+        write(data, at: operand, to: &nes)
 
-        EOR(operand: operand, on: &cpu, with: &memory)
+        EOR(operand: operand, on: &nes)
     }
 
     /// rotateRightAndAddWithCarry
-    static func RRA(operand: Operand, on cpu: inout CPU, with memory: inout Self) {
-        // rotateRight excluding cpu.tick
-        var data = Self.read(at: operand, from: &memory)
+    static func RRA(operand: Operand, on nes: inout NES) {
+        // rotateRight excluding nes.cpu.tick
+        var data = read(at: operand, from: &nes)
         let c = data & 0x01
 
         data >>= 1
-        if cpu.P.contains(.C) { data |= 0x80 }
+        if nes.cpu.P.contains(.C) { data |= 0x80 }
 
-        cpu.P.remove([.C, .Z, .N])
-        if c == 1 { cpu.P.formUnion(.C) }
+        nes.cpu.P.remove([.C, .Z, .N])
+        if c == 1 { nes.cpu.P.formUnion(.C) }
 
-        cpu.P.setZN(data)
-        Self.write(data, at: operand, to: &memory)
+        nes.cpu.P.setZN(data)
+        write(data, at: operand, to: &nes)
 
-        ADC(operand: operand, on: &cpu, with: &memory)
+        ADC(operand: operand, on: &nes)
     }
 }
 
 // MARK: - Stack
 protocol CPUStack: ReadWrite {
-    static func pushStack(_ value: UInt8, to memory: inout Self, on cpu: inout CPU)
-    static func pushStack(word: UInt16, to memory: inout Self, on cpu: inout CPU)
-    static func pullStack(from memory: inout Self, on cpu: inout CPU) -> UInt8
-    static func pullStack(from memory: inout Self, on cpu: inout CPU) -> UInt16
+    static func pushStack(_ value: UInt8, to: inout Self)
+    static func pushStack(word: UInt16, to: inout Self)
+    static func pullStack(from: inout Self) -> UInt8
+    static func pullStack(from: inout Self) -> UInt16
 }
 
-extension CPUStack {
+extension NES: CPUStack {
     @inline(__always)
-    static func pushStack(_ value: UInt8, to memory: inout Self, on cpu: inout CPU) {
-        Self.write(value, at: cpu.S.u16 &+ 0x100, to: &memory)
-        cpu.S &-= 1
+    static func pushStack(_ value: UInt8, to nes: inout NES) {
+        write(value, at: nes.cpu.S.u16 &+ 0x100, to: &nes)
+        nes.cpu.S &-= 1
     }
 
     @inline(__always)
-    static func pushStack(word: UInt16, to memory: inout Self, on cpu: inout CPU) {
-        pushStack(UInt8(word >> 8), to: &memory, on: &cpu)
-        pushStack(UInt8(word & 0xFF), to: &memory, on: &cpu)
+    static func pushStack(word: UInt16, to nes: inout NES) {
+        pushStack(UInt8(word >> 8), to: &nes)
+        pushStack(UInt8(word & 0xFF), to: &nes)
     }
 
     @inline(__always)
-    static func pullStack(from memory: inout Self, on cpu: inout CPU) -> UInt8 {
-        cpu.S &+= 1
-        return Self.read(at: cpu.S.u16 &+ 0x100, from: &memory)
+    static func pullStack(from nes: inout NES) -> UInt8 {
+        nes.cpu.S &+= 1
+        return read(at: nes.cpu.S.u16 &+ 0x100, from: &nes)
     }
 
     @inline(__always)
-    static func pullStack(from memory: inout Self, on cpu: inout CPU) -> UInt16 {
-        let lo: UInt8 = pullStack(from: &memory, on: &cpu)
-        let ho: UInt8 = pullStack(from: &memory, on: &cpu)
+    static func pullStack(from nes: inout NES) -> UInt16 {
+        let lo: UInt8 = pullStack(from: &nes)
+        let ho: UInt8 = pullStack(from: &nes)
         return ho.u16 &<< 8 | lo.u16
     }
 }
