@@ -1,9 +1,9 @@
 public final class NES {
-    fileprivate var cpu: CPU
+    var cpu: CPU
     var ppu: PPU
     fileprivate var apu: APU
 
-    private let cpuMemory = CPUMemory()
+    let cpuMemory = CPUMemoryBus()
     private let ppuMemory = PPUMemory()
 
     let controllerPort = ControllerPort()
@@ -19,14 +19,14 @@ public final class NES {
 
     private var nestest: NESTest
 
-    fileprivate var cycles: UInt = 0
+    var cycles: UInt = 0
 
     fileprivate var lineBuffer = LineBuffer()
 
     public init() {
         interruptLine = InterruptLine()
 
-        cpu = CPU(memory: cpuMemory)
+        cpu = CPU()
         ppu = PPU(memory: ppuMemory)
 
         apu = APU()
@@ -45,7 +45,7 @@ public final class NES {
         interruptLine.clear([.NMI, .IRQ])
         interruptLine.send(.RESET)
 
-        cpu.memory.clear()
+        cpuMemory.clear()
         ppu.reset()
         lineBuffer.clear()
     }
@@ -56,39 +56,45 @@ public final class NES {
     }
 }
 
-public func runFrame(_ nes: NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
-    let currentFrame = nes.ppu.frames
-
-    repeat {
-        step(nes, onLineEnd: render)
-    } while currentFrame == nes.ppu.frames
+public protocol RunFrame {
+    static func runFrame(_ nes: inout Self, onLineEnd render: (Int, inout LineBuffer) -> Void)
 }
 
-func step(_ nes: NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
-#if nestest
-    if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
-#endif
+extension NES: RunFrame {
+    public static func runFrame(_ nes: inout NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
+        let currentFrame = nes.ppu.frames
 
-    let cpuCycles = SwiftNES.step(cpu: &nes.cpu, interruptLine: nes.interruptLine)
-    nes.cycles &+= cpuCycles
+        repeat {
+            step(&nes, onLineEnd: render)
+        } while currentFrame == nes.ppu.frames
+    }
 
-    nes.apu.step()
+    static func step(_ nes: inout NES, onLineEnd render: (Int, inout LineBuffer) -> Void) {
+    #if nestest
+        if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
+    #endif
 
-#if nestest
-    nestest.print(ppu: nes.ppu, cycles: cycles)
-    if interruptLine.interrupted { return }
-#endif
+        let cpuCycles = step(cpu: &nes.cpu, interruptLine: nes.interruptLine, with: &nes)
+        // nes.cycles &+= cpuCycles
 
-    var ppuCycles = cpuCycles &* 3
-    while 0 < ppuCycles {
-        let currentLine = nes.ppu.scan.line
+        nes.apu.step()
 
-        nes.ppu.step(writeTo: &nes.lineBuffer, interruptLine: nes.interruptLine)
+    #if nestest
+        nestest.print(ppu: nes.ppu, cycles: cycles)
+        if interruptLine.interrupted { return }
+    #endif
 
-        if currentLine != nes.ppu.scan.line {
-            render(currentLine, &nes.lineBuffer)
+        var ppuCycles = cpuCycles &* 3
+        while 0 < ppuCycles {
+            let currentLine = nes.ppu.scan.line
+
+            nes.ppu.step(writeTo: &nes.lineBuffer, interruptLine: nes.interruptLine)
+
+            if currentLine != nes.ppu.scan.line {
+                render(currentLine, &nes.lineBuffer)
+            }
+
+            ppuCycles &-= 1
         }
-
-        ppuCycles &-= 1
     }
 }

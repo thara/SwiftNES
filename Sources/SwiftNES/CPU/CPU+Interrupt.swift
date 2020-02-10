@@ -1,46 +1,55 @@
-/// Reset registers & memory state
-func reset(on cpu: inout CPU) {
-    cpu.tick(count: 5)
-#if nestest
-    cpu.PC = 0xC000
-    cpu.tick(count: 2)
-#else
-    cpu.PC = cpu.readWord(at: 0xFFFC)
-    cpu.P.formUnion(.I)
-    cpu.S -= 3
-#endif
+protocol CPUInterrupt: CPUStack {
+    static func reset(on cpu: inout CPU, with: inout Self)
+    static func handleNMI(on cpu: inout CPU, with: inout Self)
+    static func handleIRQ(on cpu: inout CPU, with: inout Self)
+    static func handleBRK(on cpu: inout CPU, with: inout Self)
 }
 
-func handleNMI(on cpu: inout CPU) {
-    cpu.tick(count: 2)
+extension CPUInterrupt {
+    /// Reset registers & memory state
+    static func reset(on cpu: inout CPU, with memory: inout Self) {
+        cpu.tick(count: 5)
+    #if nestest
+        cpu.PC = 0xC000
+        cpu.tick(count: 2)
+    #else
+        cpu.PC = Self.readWord(at: 0xFFFC, from: &memory)
+        cpu.P.formUnion(.I)
+        cpu.S -= 3
+    #endif
+    }
 
-    pushStack(word: cpu.PC, to: &cpu)
-    // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
-    // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue, to: &cpu)
-    cpu.P.formUnion(.I)
-    cpu.PC = cpu.readWord(at: 0xFFFA)
-}
+    static func handleNMI(on cpu: inout CPU, with memory: inout Self) {
+        cpu.tick(count: 2)
 
-func handleIRQ(on cpu: inout CPU) {
-    cpu.tick(count: 2)
+        pushStack(word: cpu.PC, to: &memory, on: &cpu)
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue, to: &memory, on: &cpu)
+        cpu.P.formUnion(.I)
+        cpu.PC = readWord(at: 0xFFFA, from: &memory)
+    }
 
-    pushStack(word: cpu.PC, to: &cpu)
-    // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
-    // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue, to: &cpu)
-    cpu.P.formUnion(.I)
-    cpu.PC = cpu.readWord(at: 0xFFFE)
-}
+    static func handleIRQ(on cpu: inout CPU, with memory: inout Self) {
+        cpu.tick(count: 2)
 
-func handleBRK(on cpu: inout CPU) {
-    cpu.tick(count: 2)
+        pushStack(word: cpu.PC, to: &memory, on: &cpu)
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue, to: &memory, on: &cpu)
+        cpu.P.formUnion(.I)
+        cpu.PC = readWord(at: 0xFFFE, from: &memory)
+    }
 
-    cpu.PC &+= 1
-    pushStack(word: cpu.PC, to: &cpu)
-    // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
-    // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue, to: &cpu)
-    cpu.P.formUnion(.I)
-    cpu.PC = cpu.readWord(at: 0xFFFE)
+    static func handleBRK(on cpu: inout CPU, with memory: inout Self) {
+        cpu.tick(count: 2)
+
+        cpu.PC &+= 1
+        pushStack(word: cpu.PC, to: &memory, on: &cpu)
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue, to: &memory, on: &cpu)
+        cpu.P.formUnion(.I)
+        cpu.PC = readWord(at: 0xFFFE, from: &memory)
+    }
 }

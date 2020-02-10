@@ -1,3 +1,5 @@
+typealias CPUMemory = ReadWrite
+
 struct CPU {
     /// Accumulator
     var A: UInt8 = 0x00 { didSet { P.setZN(A) } }
@@ -32,8 +34,6 @@ struct CPU {
     /// Program Counter
     var PC: UInt16 = 0x00
 
-    var memory: Memory
-
     private(set) var cycles: UInt = 0
 
     @inline(__always)
@@ -55,39 +55,47 @@ struct CPU {
     }
 }
 
-func step(cpu: inout CPU, interruptLine: InterruptLine) -> UInt {
-    let before = cpu.cycles
+protocol CPUStep: CPUInstructions, CPUInterrupt {
+    static func step(cpu: inout CPU, interruptLine: InterruptLine, with: inout Self) -> UInt
+}
 
-    switch interruptLine.get() {
-    case .RESET:
-        reset(on: &cpu)
-        interruptLine.clear(.RESET)
-    case .NMI:
-        handleNMI(on: &cpu)
-        interruptLine.clear(.NMI)
-    case .IRQ:
-        if cpu.P.contains(.I) {
-            handleIRQ(on: &cpu)
-            interruptLine.clear(.IRQ)
-        }
-    case .BRK:
-        if cpu.P.contains(.I) {
-            handleBRK(on: &cpu)
-            interruptLine.clear(.BRK)
-        }
-    default:
-        let opcode = fetchOperand(from: &cpu)
-        let (operation, fetchOperand) = decode(opcode)
-        let operand = fetchOperand(&cpu)
-        operation(operand, &cpu)
-    }
+extension NES: CPUStep {
 
-    if before <= cpu.cycles {
-        return cpu.cycles &- before
-    } else {
-        return UInt.max &- before &+ cpu.cycles
+    static func step(cpu: inout CPU, interruptLine: InterruptLine, with nes: inout NES) -> UInt {
+        let before = cpu.cycles
+
+        switch interruptLine.get() {
+        case .RESET:
+            reset(on: &cpu, with: &nes)
+            interruptLine.clear(.RESET)
+        case .NMI:
+            handleNMI(on: &cpu, with: &nes)
+            interruptLine.clear(.NMI)
+        case .IRQ:
+            if cpu.P.contains(.I) {
+                handleIRQ(on: &cpu, with: &nes)
+                interruptLine.clear(.IRQ)
+            }
+        case .BRK:
+            if cpu.P.contains(.I) {
+                handleBRK(on: &cpu, with: &nes)
+                interruptLine.clear(.BRK)
+            }
+        default:
+            let opcode = fetchOperand(from: &cpu, memory: &nes)
+            let (operation, fetchOperand) = decode(opcode)
+            let operand = fetchOperand(&cpu, &nes)
+            operation(operand, &cpu, &nes)
+        }
+
+        if before <= cpu.cycles {
+            return cpu.cycles &- before
+        } else {
+            return UInt.max &- before &+ cpu.cycles
+        }
     }
 }
+
 
 extension CPU.Status {
     mutating func setZN(_ value: UInt8) {

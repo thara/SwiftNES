@@ -15,10 +15,10 @@ struct NESTest {
 
     mutating func before(cpu: inout CPU) {
         enabled = !interruptLine.interrupted
-        if enabled {
-            (machineCode, assemblyCode) = Disassembler.disassemble(cpu: &cpu)
-            self.cpu = cpu
-        }
+        // if enabled {
+        //     (machineCode, assemblyCode) = Disassembler.disassemble(cpu: &cpu)
+        //     self.cpu = cpu
+        // }
     }
 
     func print(ppu: PPU, cycles: UInt) {

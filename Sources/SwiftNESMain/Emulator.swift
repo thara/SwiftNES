@@ -87,7 +87,7 @@ final class Emulator {
 
             controller.update(keys: currentKeys)
 
-            runFrame(nes, onLineEnd: frameRenderer.newLine)
+            NES.runFrame(&nes, onLineEnd: frameRenderer.newLine)
 
             let endPerf = SDL_GetPerformanceCounter()
 
