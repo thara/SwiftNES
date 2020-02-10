@@ -1,8 +1,8 @@
-protocol ReadWrite: class {
+protocol ReadWrite {
     /// Read a byte at the given `address` on this memory
-    static func read(at address: UInt16, from: Self) -> UInt8
+    static func read(at address: UInt16, from: inout Self) -> UInt8
     /// Write the given `value` at the `address` into this memory
-    static func write(_ value: UInt8, at address: UInt16, to: Self)
+    static func write(_ value: UInt8, at address: UInt16, to: inout Self)
 }
 
 protocol Memory {
@@ -18,8 +18,8 @@ protocol Memory {
 }
 
 extension ReadWrite {
-    static func readWord(at address: UInt16, from rw: Self) -> UInt16 {
-        return read(at: address, from: rw).u16 | (read(at: address + 1, from: rw).u16 << 8)
+    static func readWord(at address: UInt16, from rw: inout Self) -> UInt16 {
+        return read(at: address, from: &rw).u16 | (read(at: address + 1, from: &rw).u16 << 8)
     }
 }
 

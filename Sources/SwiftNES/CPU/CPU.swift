@@ -56,36 +56,36 @@ struct CPU {
 }
 
 protocol CPUStep: CPUInstructions, CPUInterrupt {
-    static func cpuStep(interruptLine: InterruptLine, on: Self) -> UInt
+    static func cpuStep(interruptLine: InterruptLine, on: inout Self) -> UInt
 }
 
 extension NES: CPUStep {
 
-    static func cpuStep(interruptLine: InterruptLine, on nes: NES) -> UInt {
+    static func cpuStep(interruptLine: InterruptLine, on nes: inout NES) -> UInt {
         let before = nes.cpu.cycles
 
         switch interruptLine.get() {
         case .RESET:
-            reset(on: nes)
+            reset(on: &nes)
             interruptLine.clear(.RESET)
         case .NMI:
-            handleNMI(on: nes)
+            handleNMI(on: &nes)
             interruptLine.clear(.NMI)
         case .IRQ:
             if nes.cpu.P.contains(.I) {
-                handleIRQ(on: nes)
+                handleIRQ(on: &nes)
                 interruptLine.clear(.IRQ)
             }
         case .BRK:
             if nes.cpu.P.contains(.I) {
-                handleBRK(on: nes)
+                handleBRK(on: &nes)
                 interruptLine.clear(.BRK)
             }
         default:
-            let opcode = fetchOperand(from: nes)
+            let opcode = fetchOperand(from: &nes)
             let (operation, fetchOperand) = decode(opcode)
-            let operand = fetchOperand(nes)
-            operation(operand, nes)
+            let operand = fetchOperand(&nes)
+            operation(operand, &nes)
         }
 
         if before <= nes.cpu.cycles {
