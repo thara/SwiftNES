@@ -1,5 +1,5 @@
 public final class NES {
-    private var cpu: CPU
+    var cpu: CPU
     private let ppu: PPU
     private let apu: APU
 
@@ -31,8 +31,9 @@ public final class NES {
         cpuMemory.controllerPort = controllerPort
 
         apu = APU()
-
         nestest = NESTest(interruptLine: interruptLine)
+
+        apu.dmcReader(self)
     }
 
     public func runFrame(onLineEnd render: (Int, inout LineBuffer) -> Void) {
@@ -51,7 +52,7 @@ public final class NES {
         let cpuCycles = cpu.step(interruptLine: interruptLine)
         cycles &+= cpuCycles
 
-        apu.step()
+        // apu.step()
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)

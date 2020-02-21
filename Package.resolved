@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "NesSndEmuSwift",
+        "repositoryURL": "https://github.com/thara/NesSndEmuSwift.git",
+        "state": {
+          "branch": null,
+          "revision": "8bc14fc993abe4de6da1f7b35702e3c4a4beb73d",
+          "version": "0.2.0"
+        }
+      },
+      {
         "package": "Nimble",
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {

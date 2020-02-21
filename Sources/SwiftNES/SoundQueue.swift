@@ -4,14 +4,14 @@ let soundBufferSize = 2048
 let soundBufferCount = 3
 
 public struct SoundQueue {
-    var buffer = [UInt16](repeating: 0x00, count: soundBufferSize * soundBufferCount)
+    var buffer = [Int16](repeating: 0x00, count: soundBufferSize * soundBufferCount)
 
     var readBufferIndex = 0
     var writeBufferIndex = 0
 
     var currentWritePosition = 0
 
-    public mutating func write(_ values: inout [UInt16], count: Int) {
+    public mutating func write(_ values: inout [Int16], count: Int) {
         var count = count
 
         var input = 0
@@ -36,7 +36,7 @@ public struct SoundQueue {
         }
     }
 
-    public mutating func read(count: Int) -> ArraySlice<UInt16> {
+    public mutating func read(count: Int) -> ArraySlice<Int16> {
         defer {
             readBufferIndex = (readBufferIndex &+ 1) % soundBufferCount
         }
