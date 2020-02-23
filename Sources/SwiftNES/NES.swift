@@ -42,6 +42,7 @@ public final class NES {
         repeat {
             step(onLineEnd: render)
         } while currentFrame == ppu.frames
+        apu.runFrame()
     }
 
     public func step(onLineEnd render: (Int, inout LineBuffer) -> Void) {
@@ -52,7 +53,9 @@ public final class NES {
         let cpuCycles = cpu.step(interruptLine: interruptLine)
         cycles &+= cpuCycles
 
-        // apu.step()
+        for _ in 0..<cpuCycles {
+            apu.tick()
+        }
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)

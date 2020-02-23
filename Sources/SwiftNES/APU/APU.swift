@@ -8,6 +8,8 @@ class APU {
 
     var outBuffer = [Int16](repeating: 0, count: outSize)
 
+    var cycles: Int = 0
+
     var soundQueue: SoundQueue?
 
     init() {
@@ -15,6 +17,10 @@ class APU {
         buffer.clockRate = 1789773
 
         apu.output(buffer: buffer)
+    }
+
+    func tick() {
+        cycles += 1
     }
 
     func dmcReader(_ nes: NES) {
@@ -26,20 +32,9 @@ class APU {
         buffer.clear()
     }
 
-    func write(_ value: Int32, at addr: UInt16, elapsed: Int) {
-        apu.writeRegister(cpuTime: elapsed, cpuAddress: UInt32(addr), data: value)
-    }
-
-    func read(at addr: UInt16, elapsed: Int) -> Int32 {
-        if addr == 0x4015 {
-            return apu.readStatus(cpuTime: elapsed)
-        }
-        return 0
-    }
-
-    func runFrame(elapsed: Int) {
-        apu.endFrame(cpuTime: elapsed)
-        buffer.endFrame(elapsed)
+    func runFrame() {
+        apu.endFrame(cpuTime: 29580)
+        buffer.endFrame(29580)
 
         if outSize <= buffer.availableSamples {
             let count = buffer.readSamples(into: &outBuffer, until: outSize)
@@ -51,5 +46,18 @@ class APU {
 extension NES {
     func dmcReader(_ addr: UInt32) -> Int32 {
         return Int32(cpu.read(at: UInt16(addr)))
+    }
+}
+
+extension APU: IOPort {
+    func read(from address: UInt16) -> UInt8 {
+        if address == 0x4015 {
+            return UInt8(apu.readStatus(cpuTime: cycles))
+        }
+        return 0
+    }
+
+    func write(_ value: UInt8, to address: UInt16) {
+        apu.writeRegister(cpuTime: cycles, cpuAddress: UInt32(address), data: Int32(value))
     }
 }
