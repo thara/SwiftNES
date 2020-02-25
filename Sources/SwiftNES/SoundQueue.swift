@@ -3,7 +3,7 @@ import Foundation
 let soundBufferSize = 2048
 let soundBufferCount = 3
 
-public struct SoundQueue {
+public class SoundQueue {
     var buffer = [Int16](repeating: 0x00, count: soundBufferSize * soundBufferCount)
 
     var readBufferIndex = 0
@@ -11,7 +11,9 @@ public struct SoundQueue {
 
     var currentWritePosition = 0
 
-    public mutating func write(_ values: inout [Int16], count: Int) {
+    let semaphore = DispatchSemaphore(value: 0)
+
+    public func write(_ values: inout [Int16], count: Int) {
         var count = count
 
         var input = 0
@@ -31,16 +33,19 @@ public struct SoundQueue {
             if soundBufferSize <= currentWritePosition {
                 currentWritePosition = 0
                 writeBufferIndex = (writeBufferIndex &+ 1) % soundBufferCount
-                print("writeBufferIndex", writeBufferIndex)
+                semaphore.wait()
             }
         }
     }
 
-    public mutating func read(count: Int) -> ArraySlice<Int16> {
-        defer {
+    public func read(count: Int) -> [Int16] {
+        if semaphore.signal() < currentWritePosition - 1 {
+            let start = readBufferIndex * soundBufferSize
+            let result = Array(buffer[start..<(start &+ count)])
             readBufferIndex = (readBufferIndex &+ 1) % soundBufferCount
+            return result
+        } else {
+            return [Int16](repeating: 0, count: count)
         }
-        let start = readBufferIndex * soundBufferSize
-        return buffer[start..<(start &+ count)]
     }
 }

@@ -1,5 +1,6 @@
 import CSDL2
 import SDL
+import SoundIO
 
 import SwiftNES
 
@@ -70,6 +71,37 @@ final class Emulator {
         let keyboardState = SDL_GetKeyboardState(nil)
         let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 226)
 
+        var secondsOffset: Float = 0.0
+
+        let soundio = try SoundIO()
+        try soundio.connect()
+        soundio.flushEvents()
+
+        let outputDeviceIndex = try soundio.defaultOutputDeviceIndex()
+        let device = try soundio.getOutputDevice(at: outputDeviceIndex)
+        let outstream = try OutStream(to: device)
+        outstream.format = .float32bitLittleEndian
+
+        outstream.writeCallback { (outstream, _, frameCountMax) in
+            let layout = outstream.layout
+            let secondsPerFrame = 1.0 / Float(outstream.sampleRate)
+
+            try! outstream.write(frameCount: frameCountMax) { (areas, frameCount) in
+                let pitch: Float = 440.0
+                let radiansPerSecond = pitch * 2.0 * .pi
+                for frame in 0..<frameCount {
+                    let sample = sin((secondsOffset + Float(frame) * secondsPerFrame) * radiansPerSecond)
+                    for area in areas.iterate(over: layout.channelCount) {
+                        area.write(sample, stepBy: frame)
+                    }
+                }
+                secondsOffset = (secondsOffset + secondsPerFrame * Float(frameCount)).truncatingRemainder(dividingBy: 1)
+            }
+        }
+
+        try outstream.open()
+        try outstream.start()
+
         while isRunning {
             let startTicks = SDL_GetTicks()
             let startPerf = SDL_GetPerformanceCounter()
@@ -103,6 +135,8 @@ final class Emulator {
             if 0 < frameTicks {
                 window.title = "\(windowTitle) - \(toString(1 / frameTicks)) fps"
             }
+
+            soundio.flushEvents()
         }
     }
 }
