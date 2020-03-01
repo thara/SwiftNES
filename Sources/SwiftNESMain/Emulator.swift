@@ -71,31 +71,30 @@ final class Emulator {
         let keyboardState = SDL_GetKeyboardState(nil)
         let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 226)
 
-        var secondsOffset: Float = 0.0
-
         let soundio = try SoundIO()
         try soundio.connect()
         soundio.flushEvents()
 
+        let soundQueue = SoundQueue(ringBuffer: try RingBuffer(for: soundio, capacity: 2048))
+        nes.soundQueue = soundQueue
+
         let outputDeviceIndex = try soundio.defaultOutputDeviceIndex()
         let device = try soundio.getOutputDevice(at: outputDeviceIndex)
         let outstream = try OutStream(to: device)
-        outstream.format = .float32bitLittleEndian
+        outstream.format = .signed16bitLittleEndian
 
-        outstream.writeCallback { (outstream, _, frameCountMax) in
+        outstream.writeCallback { (outstream, frameCountMin, frameCountMax) in
+            guard frameCountMin == 0 else { return }
+
             let layout = outstream.layout
-            let secondsPerFrame = 1.0 / Float(outstream.sampleRate)
-
-            try! outstream.write(frameCount: frameCountMax) { (areas, frameCount) in
-                let pitch: Float = 440.0
-                let radiansPerSecond = pitch * 2.0 * .pi
-                for frame in 0..<frameCount {
-                    let sample = sin((secondsOffset + Float(frame) * secondsPerFrame) * radiansPerSecond)
-                    for area in areas.iterate(over: layout.channelCount) {
-                        area.write(sample, stepBy: frame)
+            try? outstream.write(frameCount: frameCountMax) { (areas, frameCount) in
+                for _ in 0..<frameCount {
+                    for var area in areas!.iterate(over: layout.channelCount) {
+                        memcpy(area.ptr, soundQueue.readPtr, Int(outstream.bytesPerFrame))
+                        area.ptr = area.ptr.advanced(by: Int(area.step))
+                        soundQueue.readPtr = soundQueue.readPtr.advanced(by: Int(outstream.bytesPerFrame))
                     }
                 }
-                secondsOffset = (secondsOffset + secondsPerFrame * Float(frameCount)).truncatingRemainder(dividingBy: 1)
             }
         }
 

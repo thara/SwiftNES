@@ -36,6 +36,15 @@ public final class NES {
         apu.dmcReader(self)
     }
 
+    public var soundQueue: SoundQueue? {
+        get {
+            apu.soundQueue
+        }
+        set {
+            apu.soundQueue = newValue
+        }
+    }
+
     public func runFrame(onLineEnd render: (Int, inout LineBuffer) -> Void) {
         let currentFrame = ppu.frames
 
