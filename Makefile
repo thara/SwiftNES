@@ -11,6 +11,9 @@ lint:  ## Run lint
 build:  ## Build
 	@swift build -Xlinker -L/usr/local/lib
 
+debug:  ## Debug Run emulator
+	@swift run -c debug -Xlinker -L/usr/local/lib SwiftNESMain run ${ROM}
+
 run:  ## Run emulator
 	@mkdir -p .log
 	@rm -f .log/debug.log
