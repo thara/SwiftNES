@@ -31,6 +31,8 @@ public final class NES {
         cpuMemory.controllerPort = controllerPort
 
         apu = APU()
+        cpuMemory.apuPort = apu
+
         nestest = NESTest(interruptLine: interruptLine)
 
         apu.dmcReader(self)
@@ -96,6 +98,7 @@ public final class NES {
 
         cpu.memory.clear()
         ppu.reset()
+        apu.reset()
         lineBuffer.clear()
     }
 

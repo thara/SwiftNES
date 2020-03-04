@@ -37,13 +37,13 @@ final class CPUMemory: Memory {
             wram.write(value, at: address)
         case 0x2000...0x3FFF:
             ppuPort?.write(value, to: ppuAddress(address))
-        case 0x4000...0x4013, 0x4015:
+        case 0x4000...0x4013, 0x4015, 0x4017:
             apuPort?.write(value, to: address)
         case 0x4016:
             controllerPort?.write(value)
-        case 0x4017:
-            controllerPort?.write(value)
-            apuPort?.write(value, to: address)
+        // case 0x4017:
+        //     controllerPort?.write(value)
+        //     apuPort?.write(value, to: address)
         case 0x4020...0xFFFF:
             cartridge?.write(value, at: address)
         default:

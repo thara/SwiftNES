@@ -92,7 +92,7 @@ final class Emulator {
                     for var area in areas!.iterate(over: layout.channelCount) {
                         memcpy(area.ptr, soundQueue.readPtr, Int(outstream.bytesPerFrame))
                         area.ptr = area.ptr.advanced(by: Int(area.step))
-                        soundQueue.readPtr = soundQueue.readPtr.advanced(by: Int(outstream.bytesPerFrame))
+                        soundQueue.ringBuffer.advanceReadPointer(by: Int32(outstream.bytesPerFrame))
                     }
                 }
             }

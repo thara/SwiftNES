@@ -33,8 +33,8 @@ class APU {
     }
 
     func runFrame() {
-        apu.endFrame(cpuTime: 29580)
-        buffer.endFrame(29580)
+        apu.endFrame(cpuTime: 29781)
+        buffer.endFrame(29781)
 
         if outSize <= buffer.availableSamples {
             let count = buffer.readSamples(into: &outBuffer, until: outSize)
