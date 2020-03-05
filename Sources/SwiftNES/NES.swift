@@ -1,3 +1,5 @@
+import SoundQueue
+
 public final class NES {
     var cpu: CPU
     private let ppu: PPU
@@ -31,6 +33,7 @@ public final class NES {
         cpuMemory.controllerPort = controllerPort
 
         apu = APU()
+        apu.soundQueue = SoundQueue()
         cpuMemory.apuPort = apu
 
         nestest = NESTest(interruptLine: interruptLine)

@@ -1,6 +1,6 @@
 import CSDL2
 import SDL
-import SoundIO
+import SoundQueue
 
 import SwiftNES
 
@@ -23,7 +23,7 @@ final class Emulator {
     private let frameRenderer: SDLFrameRenderer
 
     init(windowTitle: String, windowScale: Int) throws {
-        try SDL.initialize(subSystems: [.video])
+        try SDL.initialize(subSystems: [.video, .audio])
 
         self.windowTitle = windowTitle
 
@@ -53,6 +53,8 @@ final class Emulator {
         nes = NES()
         nes.connect(controller1: controller.nesController, controller2: nil)
 
+        nes.soundQueue!.initialize(sampleRate: 44100)
+
         event = SDL_Event()
     }
 
@@ -70,36 +72,6 @@ final class Emulator {
 
         let keyboardState = SDL_GetKeyboardState(nil)
         let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 226)
-
-        let soundio = try SoundIO()
-        try soundio.connect()
-        soundio.flushEvents()
-
-        let soundQueue = SoundQueue(ringBuffer: try RingBuffer(for: soundio, capacity: 2048))
-        nes.soundQueue = soundQueue
-
-        let outputDeviceIndex = try soundio.defaultOutputDeviceIndex()
-        let device = try soundio.getOutputDevice(at: outputDeviceIndex)
-        let outstream = try OutStream(to: device)
-        outstream.format = .signed16bitLittleEndian
-
-        outstream.writeCallback { (outstream, frameCountMin, frameCountMax) in
-            guard frameCountMin == 0 else { return }
-
-            let layout = outstream.layout
-            try? outstream.write(frameCount: frameCountMax) { (areas, frameCount) in
-                for _ in 0..<frameCount {
-                    for var area in areas!.iterate(over: layout.channelCount) {
-                        memcpy(area.ptr, soundQueue.readPtr, Int(outstream.bytesPerFrame))
-                        area.ptr = area.ptr.advanced(by: Int(area.step))
-                        soundQueue.ringBuffer.advanceReadPointer(by: Int32(outstream.bytesPerFrame))
-                    }
-                }
-            }
-        }
-
-        try outstream.open()
-        try outstream.start()
 
         while isRunning {
             let startTicks = SDL_GetTicks()
@@ -134,8 +106,6 @@ final class Emulator {
             if 0 < frameTicks {
                 window.title = "\(windowTitle) - \(toString(1 / frameTicks)) fps"
             }
-
-            soundio.flushEvents()
         }
     }
 }
