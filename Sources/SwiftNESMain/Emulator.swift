@@ -75,8 +75,8 @@ final class Emulator {
         try soundio.connect()
         soundio.flushEvents()
 
-        let soundQueue = SoundQueue(ringBuffer: try RingBuffer(for: soundio, capacity: 4096))
-        nes.soundQueue = soundQueue
+        let ringBuffer = try RingBuffer(for: soundio, capacity: 4096)
+        nes.soundQueue = SoundQueue(ringBuffer: ringBuffer)
 
         let outputDeviceIndex = try soundio.defaultOutputDeviceIndex()
         let device = try soundio.getOutputDevice(at: outputDeviceIndex)
@@ -86,16 +86,20 @@ final class Emulator {
         outstream.writeCallback { (outstream, frameCountMin, frameCountMax) in
             guard 0 < frameCountMin else { return }
 
+            var readPtr = ringBuffer.readPointer!
+            let fillCount = ringBuffer.fillCount
+
             let layout = outstream.layout
             try? outstream.write(frameCount: frameCountMax) { (areas, frameCount) in
                 for _ in 0..<frameCount {
                     for var area in areas!.iterate(over: layout.channelCount) {
-                        memcpy(area.ptr, soundQueue.readPtr, Int(outstream.bytesPerFrame))
-                        area.ptr = area.ptr.advanced(by: Int(area.step))
-                        soundQueue.ringBuffer.advanceReadPointer(by: Int32(outstream.bytesPerFrame))
+                        memcpy(area.ptr, readPtr, Int(fillCount))
+                        area.ptr += Int(area.step)
+                        readPtr += Int(fillCount)
                     }
                 }
             }
+            ringBuffer.advanceReadPointer(by: fillCount)
         }
 
         try outstream.open()
