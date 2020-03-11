@@ -8,7 +8,7 @@ class APU {
 
     var outBuffer = [Int16](repeating: 0, count: outSize)
 
-    var cycles: Int = 0
+    var frameCycles: Int = 0
 
     var soundQueue: SoundQueue?
 
@@ -20,7 +20,7 @@ class APU {
     }
 
     func tick() {
-        cycles += 1
+        frameCycles &+= 1
     }
 
     func dmcReader(_ nes: NES) {
@@ -38,8 +38,9 @@ class APU {
 
         if outSize <= buffer.availableSamples {
             let count = buffer.readSamples(into: &outBuffer, until: outSize)
-            soundQueue?.write(&outBuffer, count: count)
+            soundQueue!.write(&outBuffer, count: count)
         }
+        frameCycles = 0
     }
 }
 
@@ -52,12 +53,12 @@ extension NES {
 extension APU: IOPort {
     func read(from address: UInt16) -> UInt8 {
         if address == 0x4015 {
-            return UInt8(apu.readStatus(cpuTime: cycles))
+            return UInt8(apu.readStatus(cpuTime: frameCycles))
         }
         return 0
     }
 
     func write(_ value: UInt8, to address: UInt16) {
-        apu.writeRegister(cpuTime: cycles, cpuAddress: UInt32(address), data: Int32(value))
+        apu.writeRegister(cpuTime: frameCycles, cpuAddress: UInt32(address), data: Int32(value))
     }
 }
