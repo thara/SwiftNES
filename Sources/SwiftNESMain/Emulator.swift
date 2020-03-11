@@ -75,7 +75,7 @@ final class Emulator {
         try soundio.connect()
         soundio.flushEvents()
 
-        let soundQueue = SoundQueue(ringBuffer: try RingBuffer(for: soundio, capacity: 2048))
+        let soundQueue = SoundQueue(ringBuffer: try RingBuffer(for: soundio, capacity: 4096))
         nes.soundQueue = soundQueue
 
         let outputDeviceIndex = try soundio.defaultOutputDeviceIndex()
@@ -84,7 +84,7 @@ final class Emulator {
         outstream.format = .signed16bitLittleEndian
 
         outstream.writeCallback { (outstream, frameCountMin, frameCountMax) in
-            guard frameCountMin == 0 else { return }
+            guard 0 < frameCountMin else { return }
 
             let layout = outstream.layout
             try? outstream.write(frameCount: frameCountMax) { (areas, frameCount) in
