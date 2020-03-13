@@ -16,8 +16,9 @@ public class SoundQueue {
     }
 
     func write(_ values: inout [Int16], count: Int) {
-        let writePtr = ringBuffer.writePointer!.withMemoryRebound(to: Int16.self, capacity: count) { $0 }
-        memcpy(writePtr, values, count)
-        ringBuffer.advanceWritePointer(by: Int32(count))
+        let writeCount = min(Int(ringBuffer.freeCount), count)
+        let writePtr = ringBuffer.writePointer!.withMemoryRebound(to: Int16.self, capacity: writeCount) { $0 }
+        memcpy(writePtr, values, writeCount)
+        ringBuffer.advanceWritePointer(by: Int32(writeCount))
     }
 }

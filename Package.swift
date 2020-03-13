@@ -10,7 +10,7 @@ let package = Package(
 
         .package(url: "https://github.com/thara/SDL.git", .branch("swiftnes-2")),
         .package(url: "https://github.com/twostraws/SwiftGD.git", from: "2.0.0"),
-        .package(url: "https://github.com/thara/SoundIO.git", from: "0.3.1"),
+        .package(url: "https://github.com/thara/SoundIO.git", from: "0.3.3"),
         .package(url: "https://github.com/thara/NesSndEmuSwift.git", from: "0.2.0"),
 
         .package(url: "https://github.com/Quick/Quick.git", from: "2.2.0"),

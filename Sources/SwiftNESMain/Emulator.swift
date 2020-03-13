@@ -84,22 +84,39 @@ final class Emulator {
         outstream.format = .signed16bitLittleEndian
 
         outstream.writeCallback { (outstream, frameCountMin, frameCountMax) in
-            guard 0 < frameCountMin else { return }
+            let fillBytes = ringBuffer.fillCount
+            let bufferedFrames = fillBytes / outstream.bytesPerFrame
+
+            let readCount = min(bufferedFrames, frameCountMax)
+            guard 0 < readCount else { return }
 
             var readPtr = ringBuffer.readPointer!
-            let fillCount = ringBuffer.fillCount
-
             let layout = outstream.layout
-            try? outstream.write(frameCount: frameCountMax) { (areas, frameCount) in
+
+            var framesLeft = readCount
+            while 0 < framesLeft {
+                var frameCount = framesLeft
+                let areas = try! outstream.beginWriting(theNumberOf: &frameCount)
+                if frameCount == 0 {
+                    break
+                }
                 for _ in 0..<frameCount {
                     for var area in areas!.iterate(over: layout.channelCount) {
-                        memcpy(area.ptr, readPtr, Int(fillCount))
+                        // memset(area.ptr, 0, Int(outstream.bytesPerSample))
+                        // area.ptr += Int(area.step)
+                        memcpy(area.ptr, readPtr, Int(outstream.bytesPerSample))
                         area.ptr += Int(area.step)
-                        readPtr += Int(fillCount)
+                        readPtr += Int(outstream.bytesPerSample)
                     }
                 }
+                try? outstream.endWrite()
+
+                framesLeft -= frameCountMax
+                if framesLeft <= 0 {
+                    break
+                }
             }
-            ringBuffer.advanceReadPointer(by: fillCount)
+            ringBuffer.advanceReadPointer(by: readCount * outstream.bytesPerFrame)
         }
 
         try outstream.open()

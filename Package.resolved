@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/thara/SoundIO.git",
         "state": {
           "branch": null,
-          "revision": "e398eff3824f3c15210698b2653be6b74cbdef57",
-          "version": "0.3.1"
+          "revision": "35a99fd182a64a35f8af32833da4923d5ef7e7f8",
+          "version": "0.3.3"
         }
       },
       {
