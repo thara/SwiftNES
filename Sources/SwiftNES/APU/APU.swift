@@ -5,7 +5,9 @@ class APU {
 
     let mixer = Mixer()
 
-    static let sampleRate: Double = 96000
+    let sampleRate: UInt = 96000
+    let clockRate: UInt = 1789773
+    // let frameRate = 240
 
     private var cycles: UInt = 0
 
@@ -18,10 +20,8 @@ class APU {
         frameCounter.timers.append(pulse2.timer)
     }
 
-    func step() {
-        let before = cycles
+    func step<T: AudioBuffer>(audioBuffer: T) {
         cycles &+= 1
-        let after = cycles
 
         if cycles % 2 == 0 {
             pulse1.timer.clock()
@@ -30,13 +30,17 @@ class APU {
 
         frameCounter.clock()
 
-        if Double(before) / APU.sampleRate != Double(after) / APU.sampleRate {
+        if cycles % (clockRate / sampleRate) == 0 {
             let p1 = pulse1.output()
             let p2 = pulse2.output()
-            //TODO Write to audio buffer
-            _ = mixer.mix(pulse1: p1, pulse2: p2)
+            let sample = mixer.mix(pulse1: p1, pulse2: p2)
+            audioBuffer.write(sample)
         }
     }
+}
+
+public protocol AudioBuffer {
+    func write(_ sample: Double)
 }
 
 // MARK: - IO Port

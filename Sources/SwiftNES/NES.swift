@@ -35,15 +35,19 @@ public final class NES {
         nestest = NESTest(interruptLine: interruptLine)
     }
 
-    public func runFrame(onLineEnd render: (Int, inout LineBuffer) -> Void) {
+    public func runFrame<T: AudioBuffer>(
+        onLineEnd render: (Int, inout LineBuffer) -> Void,
+        withAudio audioBuffer: T) {
         let currentFrame = ppu.frames
 
         repeat {
-            step(onLineEnd: render)
+            step(onLineEnd: render, withAudio: audioBuffer)
         } while currentFrame == ppu.frames
     }
 
-    public func step(onLineEnd render: (Int, inout LineBuffer) -> Void) {
+    public func step<T: AudioBuffer>(
+        onLineEnd render: (Int, inout LineBuffer) -> Void,
+        withAudio audioBuffer: T) {
 #if nestest
         if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
 #endif
@@ -51,7 +55,7 @@ public final class NES {
         let cpuCycles = cpu.step(interruptLine: interruptLine)
         cycles &+= cpuCycles
 
-        apu.step()
+        apu.step(audioBuffer: audioBuffer)
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)

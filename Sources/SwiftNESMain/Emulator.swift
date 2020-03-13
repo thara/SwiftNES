@@ -21,6 +21,8 @@ final class Emulator {
 
     private let frameRenderer: SDLFrameRenderer
 
+    private let audioBuffer: SDLAudioBuffer
+
     init(windowTitle: String, windowScale: Int) throws {
         try SDL.initialize(subSystems: [.video])
 
@@ -53,6 +55,8 @@ final class Emulator {
         nes.connect(controller1: controller.nesController, controller2: nil)
 
         event = SDL_Event()
+
+        audioBuffer = SDLAudioBuffer()
     }
 
     deinit {
@@ -87,7 +91,7 @@ final class Emulator {
 
             controller.update(keys: currentKeys)
 
-            nes.runFrame(onLineEnd: frameRenderer.newLine)
+            nes.runFrame(onLineEnd: frameRenderer.newLine, withAudio: audioBuffer)
 
             let endPerf = SDL_GetPerformanceCounter()
 
