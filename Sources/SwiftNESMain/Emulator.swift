@@ -75,7 +75,7 @@ final class Emulator {
         try soundio.connect()
         soundio.flushEvents()
 
-        let ringBuffer = try RingBuffer(for: soundio, capacity: 4096)
+        let ringBuffer = try RingBuffer(for: soundio, capacity: 2048 * 4)
         nes.soundQueue = SoundQueue(ringBuffer: ringBuffer)
 
         let outputDeviceIndex = try soundio.defaultOutputDeviceIndex()
@@ -90,7 +90,7 @@ final class Emulator {
             let readCount = min(bufferedFrames, frameCountMax)
             guard 0 < readCount else { return }
 
-            var readPtr = ringBuffer.readPointer!
+            var readPtr: UnsafeMutablePointer<Int8>  = ringBuffer.readPointer!
             let layout = outstream.layout
 
             var framesLeft = readCount
@@ -104,7 +104,9 @@ final class Emulator {
                     for var area in areas!.iterate(over: layout.channelCount) {
                         // memset(area.ptr, 0, Int(outstream.bytesPerSample))
                         // area.ptr += Int(area.step)
+                        print("read before \(readPtr.pointee) \(area.ptr.pointee) \(framesLeft) \(readCount)")
                         memcpy(area.ptr, readPtr, Int(outstream.bytesPerSample))
+                        print("read \(readPtr.pointee) \(area.ptr.pointee)")
                         area.ptr += Int(area.step)
                         readPtr += Int(outstream.bytesPerSample)
                     }
