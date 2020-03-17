@@ -34,7 +34,7 @@ class LengthCounter {
     }
 }
 
-private func lookupLength(_ bitPattern: UInt8) -> Int {
+func lookupLength(_ bitPattern: UInt8) -> Int {
     let tableIndex = Int(bitPattern & 0b11110000 >> 4)
     let lengthIndex = Int(bitPattern[3])
     return lookupTable[tableIndex][lengthIndex]
