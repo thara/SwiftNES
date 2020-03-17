@@ -1,7 +1,7 @@
 public final class NES {
     private var cpu: CPU
     private let ppu: PPU
-    private let apu: APU
+    var apu: APU
 
     private let cpuMemory = CPUMemory()
     private let ppuMemory = PPUMemory()
@@ -22,6 +22,9 @@ public final class NES {
 
     private var lineBuffer = LineBuffer()
 
+    let samplingFrequency: UInt = 1789772
+    let downSamplingRate: UInt = 44100
+
     public init() {
         interruptLine = InterruptLine()
 
@@ -30,7 +33,7 @@ public final class NES {
         cpuMemory.ppuPort = ppu
         cpuMemory.controllerPort = controllerPort
 
-        apu = APU()
+        apu = APU(sampleRate: samplingFrequency / downSamplingRate, framePeriod: 7458)
 
         nestest = NESTest(interruptLine: interruptLine)
     }
