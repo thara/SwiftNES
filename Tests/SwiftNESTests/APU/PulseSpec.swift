@@ -130,5 +130,100 @@ class PulseSpec: QuickSpec {
             }
         }
 
+        describe("sweepUnitMuted") {
+            context("timerPeriod < 8") {
+                it("returns true") {
+                    pulse.timerPeriod = 7
+                    expect(pulse.sweepUnitMuted) == true
+                }
+            }
+
+            context("0x7FF < timerPeriod") {
+                it("returns true") {
+                    pulse.timerPeriod = 0x800
+                    expect(pulse.sweepUnitMuted) == true
+                }
+            }
+
+            context("8 <= timerPeriod") {
+                it("returns true") {
+                    pulse.timerPeriod = 8
+                    expect(pulse.sweepUnitMuted) == false
+                }
+            }
+
+            context("timerPeriod <= 0x7FF") {
+                it("returns true") {
+                    pulse.timerPeriod = 0x7FE
+                    expect(pulse.sweepUnitMuted) == false
+                }
+            }
+        }
+
+        describe("clockSweepUnit") {
+            beforeEach {
+                pulse.sweep = 0b10101000
+            }
+
+            context("sweep unit counter is not 0") {
+                beforeEach {
+                    pulse.sweepUnit.counter = 3
+                }
+
+                it("decrements sweep unit counter") {
+                    let before = pulse.sweepUnit.counter
+
+                    pulse.clockSweepUnit()
+
+                    expect(pulse.sweepUnit.counter) == before - 1
+                }
+            }
+
+            context("sweep unit counter is 0") {
+                beforeEach {
+                    pulse.sweepUnit.counter = 0
+                    pulse.sweepUnit.reload = true
+                }
+
+                it("reloads sweep unit counter and clear reload flag") {
+                    pulse.clockSweepUnit()
+
+                    expect(pulse.sweepUnit.counter) == pulse.sweepPeriod
+                    expect(pulse.sweepUnit.reload) == false
+                }
+            }
+
+            context("sweep unit reload is true") {
+                beforeEach {
+                    pulse.sweepUnit.counter = 1
+                    pulse.sweepUnit.reload = true
+                }
+
+                it("reloads sweep unit counter and clear reload flag") {
+                    pulse.clockSweepUnit()
+
+                    expect(pulse.sweepUnit.counter) == pulse.sweepPeriod
+                    expect(pulse.sweepUnit.reload) == false
+                }
+            }
+
+            context("sweep unit couner is zero and enabled and not muted") {
+                beforeEach {
+                    pulse.sweep = 0b10000001
+                    pulse.sweepUnit.counter = 0
+                    // not muted
+                    pulse.timerPeriod = 0b1000
+                }
+
+                it("reloads sweep unit counter and clear reload flag") {
+                    let before = pulse.timerPeriod
+
+                    pulse.clockSweepUnit()
+
+                    expect(pulse.timerPeriod) == before + 0b100
+                }
+            }
+        }
+
     }
 }
