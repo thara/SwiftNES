@@ -222,6 +222,43 @@ class PulseSpec: QuickSpec {
 
                     expect(pulse.timerPeriod) == before + 0b100
                 }
+
+                context("if negated") {
+                    context("carry mode is ones' complement") {
+                        beforeEach {
+                            pulse.sweep = 0b10101010
+                            // negate = true, shift count = 2
+                            pulse.timerPeriod = 0b101010010
+                        }
+
+                        it("negated by ones' complement") {
+                            let before = pulse.timerPeriod
+
+                            pulse.clockSweepUnit()
+                            // 0b101010010 >> 2 -> 0b1010100
+                            // 0b1010100 * -1 - 1 -> -85
+                            // 0b101010010 - 85 -> 253
+                            expect(pulse.timerPeriod) == 253
+                        }
+                    }
+                    context("carry mode is twos' complement") {
+                        beforeEach {
+                            pulse = Pulse(carryMode: .twosComplement)
+                            pulse.sweep = 0b10101010
+                            pulse.sweepUnit.counter = 0
+                            // negate = true, shift count = 2
+                            pulse.timerPeriod = 0b101010010
+                        }
+
+                        it("negated by ones' complement") {
+                            pulse.clockSweepUnit()
+                            // 0b101010010 >> 2 -> 0b1010100
+                            // 0b1010100 * -1 -> -84
+                            // 0b101010010 - 84 -> 254
+                            expect(pulse.timerPeriod) == 254
+                        }
+                    }
+                }
             }
         }
 

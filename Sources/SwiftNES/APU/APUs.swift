@@ -169,17 +169,20 @@ extension Pulse: Oscillator {
 
     mutating func clockSweepUnit() {
         // Updating the period
+        print("clockSweepUnit \(sweepUnit.counter) \(sweepEnabled) \(sweepUnitMuted)")
         if sweepUnit.counter == 0 && sweepEnabled && !sweepUnitMuted {
-            var changeAmount = Int16(timerPeriod >> sweepShift)
+            var changeAmount = timerPeriod >> sweepShift
+            print("changeAmount \(changeAmount)")
             if sweepNegate {
                 switch carryMode {
                 case .onesComplement:
                     changeAmount = changeAmount * -1 - 1
                 case .twosComplement:
+                    print("twosComplement \(changeAmount)")
                     changeAmount = changeAmount * -1      // swiftlint:disable shorthand_operator
                 }
             }
-            timerPeriod &+= UInt16(changeAmount)
+            timerPeriod &+= changeAmount
         }
 
         if sweepUnit.counter == 0 || sweepUnit.reload {

@@ -30,7 +30,7 @@ struct Pulse {
 
     var timerCounter: UInt16 = 0
     var sequencer: UInt = 0
-    var timerPeriod: UInt16 = 0
+    var timerPeriod: Int16 = 0
 
     var envelope = Envelope()
 
