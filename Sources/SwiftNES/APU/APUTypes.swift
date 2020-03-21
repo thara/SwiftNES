@@ -1,17 +1,17 @@
-struct MyAPU {
+struct APU {
     let sampleRate: UInt
     let framePeriod: UInt
 
-    var pulse1 = Pulse(carryMode: .onesComplement)
-    var pulse2 = Pulse(carryMode: .twosComplement)
+    var pulse1 = PulseChannel(carryMode: .onesComplement)
+    var pulse2 = PulseChannel(carryMode: .twosComplement)
 
     var cycles: UInt = 0
 
-    var frameCounter = FrameCounter2()
+    var frameCounter = FrameCounter()
     var frameInterrupted = false
 }
 
-struct Pulse {
+struct PulseChannel {
     var volume: UInt8 = 0
     var sweep: UInt8 = 0
     var low: UInt8 = 0
@@ -76,7 +76,7 @@ struct Sweep {
     var reload = false
 }
 
-struct FrameCounter2 {
+struct FrameCounter {
     var value: UInt8 = 0
 
     enum SequenceMode { case fourStep, fiveStep }
