@@ -305,5 +305,33 @@ class PulseSpec: QuickSpec {
                 }
             }
         }
+
+        describe("high did set") {
+            context("if pulse is enabled") {
+                beforeEach {
+                    pulse.enabled = true
+                }
+
+                it("reloads the length counter by lookup table") {
+                    pulse.high = 0b10101000
+                    // 1 0101 (15)
+                    expect(pulse.lengthCounter) == 0x0A
+                }
+            }
+
+            context("if pulse is disabled") {
+                beforeEach {
+                    pulse.enabled = false
+                }
+
+                it("does't reload the length counter") {
+                    let before = pulse.lengthCounter
+
+                    pulse.high = 0b11
+
+                    expect(pulse.lengthCounter) == before
+                }
+            }
+        }
     }
 }
