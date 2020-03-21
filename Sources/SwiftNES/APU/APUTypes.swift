@@ -1,4 +1,6 @@
 struct MyAPU {
+    let sampleRate: UInt
+
     var pulse1 = Pulse(carryMode: .onesComplement)
     var pulse2 = Pulse(carryMode: .twosComplement)
 

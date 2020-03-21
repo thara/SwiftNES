@@ -5,18 +5,21 @@ protocol APUStep: APUPort {
 
 extension APUStep {
     mutating func step() {
-        apu.cpuCycles &+= 1
+        apu.cycles &+= 1
 
-        // if apu.cpuCycles % 2 == 0 {
-        //     apu.pulse1.clock()
-        //     apu.pulse2.clock()
+        if apu.cycles % apu.sampleRate == 0 {
+            sample()
+        }
+
+        // if apu.cycles % 2 == 0 {
+        //     apu.pulse1.clockTimer()
+        //     apu.pulse2.clockTimer()
         // }
     }
 
-    mutating func run(until cpuCycles: UInt) {
-        apu.cpuCycles &+= cpuCycles
+    mutating func run(until cycles: UInt) {
 
-        if apu.cpuCycles % 7456 == 0 {
+        if apu.cycles % 7456 == 0 {
             switch apu.frameCounter.mode {
             case .fourStep:
                 if apu.frameCounter.step < 4 {
@@ -52,6 +55,21 @@ extension APUStep {
                 apu.frameCounter.step = (apu.frameCounter.step + 1) % 5
             }
         }
+    }
+
+    func sample() {
+        let p1 = Float(apu.pulse1.output())
+        let p2 = Float(apu.pulse2.output())
+        let triangle: Float = 0.0
+        let noise: Float = 0.0
+        let dmc: Float = 0.0
+
+        //TODO Lookup Table
+        let pulseOut = 95.88 / ((8128 / (p1 + p2)) + 100)
+        let tndOut = 159.79 / (1 / ((triangle / 8227) + (noise / 12241) + (dmc / 22638)) + 100)
+
+        let sample = pulseOut + tndOut
+        //TODO Output to audio buffer
     }
 }
 
@@ -115,7 +133,6 @@ protocol WithAPU {
 
 protocol Oscillator {
     mutating func write(_ value: UInt8, at address: UInt16)
-    mutating func clock()
 
     func output() -> UInt8
 }
@@ -136,7 +153,7 @@ extension Pulse: Oscillator {
         }
     }
 
-    mutating func clock() {
+    mutating func clockTimer() {
         if 0 < timerCounter {
             timerCounter &-= 1
         } else {

@@ -10,7 +10,7 @@ class PulseSpec: QuickSpec {
             pulse = Pulse(carryMode: .onesComplement)
         }
 
-        describe("clock") {
+        describe("clockTimer") {
             beforeEach {
                 pulse.low = 0b11
                 pulse.high = 0
@@ -21,7 +21,7 @@ class PulseSpec: QuickSpec {
             context("if timerCounter is greater than zero") {
 
                 it("decrements timerCounter") {
-                    pulse.clock()
+                    pulse.clockTimer()
 
                     expect(pulse.timerCounter) == 2
                 }
@@ -31,7 +31,7 @@ class PulseSpec: QuickSpec {
 
                 beforeEach {
                     for _ in 0..<3 {
-                        pulse.clock()
+                        pulse.clockTimer()
                     }
                     expect(pulse.timerCounter) == 0
                 }
@@ -39,7 +39,7 @@ class PulseSpec: QuickSpec {
                 it("reloads timerCounter and increments sequencer") {
                     let before = pulse.sequencer
 
-                    pulse.clock()
+                    pulse.clockTimer()
 
                     expect(pulse.timerCounter) == 0b11
                     expect(pulse.sequencer) == before + 1
@@ -51,7 +51,7 @@ class PulseSpec: QuickSpec {
                     }
 
                     it("reset sequencer") {
-                        pulse.clock()
+                        pulse.clockTimer()
 
                         expect(pulse.sequencer) == 0
                     }
