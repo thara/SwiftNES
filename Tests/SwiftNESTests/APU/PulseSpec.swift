@@ -262,5 +262,48 @@ class PulseSpec: QuickSpec {
             }
         }
 
+        describe("clockLengthCounter") {
+            context("length counter over 0") {
+                beforeEach {
+                    pulse.lengthCounter = 3
+                }
+
+                context("length counter is halt") {
+                    beforeEach {
+                        pulse.volume = 0b0100000
+                    }
+
+                    it("doesn't decrements the length counter") {
+                        let before = pulse.lengthCounter
+                        pulse.clockLengthCounter()
+                        expect(pulse.lengthCounter) == before
+                    }
+                }
+
+                context("length counter is not halt") {
+                    beforeEach {
+                        pulse.volume = 0b1011111
+                    }
+
+                    it("decrements the length counter") {
+                        let before = pulse.lengthCounter
+                        pulse.clockLengthCounter()
+                        expect(pulse.lengthCounter) == before &- 1
+                    }
+                }
+            }
+
+            context("length counter is 0") {
+                beforeEach {
+                    pulse.lengthCounter = 0
+                }
+
+                it("doesn't decrements the length counter") {
+                    let before = pulse.lengthCounter
+                    pulse.clockLengthCounter()
+                    expect(pulse.lengthCounter) == before
+                }
+            }
+        }
     }
 }

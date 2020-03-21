@@ -83,4 +83,3 @@ struct FrameCounter2 {
 
     var step = 0
 }
-
