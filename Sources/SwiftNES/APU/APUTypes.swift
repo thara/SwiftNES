@@ -1,10 +1,11 @@
 struct MyAPU {
     let sampleRate: UInt
+    let framePeriod: UInt
 
     var pulse1 = Pulse(carryMode: .onesComplement)
     var pulse2 = Pulse(carryMode: .twosComplement)
 
-    var cpuCycles: UInt = 0
+    var cycles: UInt = 0
 
     var frameCounter = FrameCounter2()
     var frameInterrupted = false
