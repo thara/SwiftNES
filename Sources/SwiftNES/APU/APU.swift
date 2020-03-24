@@ -1,5 +1,16 @@
 extension APU {
 
+    mutating func reset() {
+        write(0, to: 0x4017)  // frame irq enabled
+        write(0, to: 0x4015)  // all channels disabled
+        for addr in 0x4000...0x400F {
+            write(0, to: UInt16(addr))
+        }
+        for addr in 0x4010...0x4013 {
+            write(0, to: UInt16(addr))
+        }
+    }
+
     mutating func step<T: AudioBuffer>(audioBuffer: T) {
         cycles &+= 1
 
@@ -51,7 +62,7 @@ extension APU {
         }
     }
 
-    func sample() -> Float {
+    private func sample() -> Float {
         let p1 = Float(pulse1.output())
         let p2 = Float(pulse2.output())
         let triangle: Float = 0.0
@@ -65,7 +76,7 @@ extension APU {
     }
 }
 
-extension APU {
+extension APU : IOPort {
     mutating func read(from address: UInt16) -> UInt8 {
         switch address {
         case 0x4015:

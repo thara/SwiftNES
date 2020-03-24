@@ -34,6 +34,7 @@ public final class NES {
         cpuMemory.controllerPort = controllerPort
 
         apu = APU(sampleRate: samplingFrequency / downSamplingRate, framePeriod: 7458)
+        cpuMemory.apuPort = apu
 
         nestest = NESTest(interruptLine: interruptLine)
     }
@@ -91,6 +92,8 @@ public final class NES {
         cpu.memory.clear()
         ppu.reset()
         lineBuffer.clear()
+
+        apu.reset()
     }
 
     public func connect(controller1: Controller?, controller2: Controller?) {
