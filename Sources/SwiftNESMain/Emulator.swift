@@ -24,7 +24,7 @@ final class Emulator {
     private let audioBuffer: SDLAudioBuffer
 
     init(windowTitle: String, windowScale: Int) throws {
-        try SDL.initialize(subSystems: [.video])
+        try SDL.initialize(subSystems: [.video, .audio])
 
         self.windowTitle = windowTitle
 
@@ -56,7 +56,7 @@ final class Emulator {
 
         event = SDL_Event()
 
-        audioBuffer = SDLAudioBuffer()
+        audioBuffer = SDLAudioBuffer(sampleRate: 96000, channels: 3, bufferSize: 2048)
     }
 
     deinit {
