@@ -1,3 +1,4 @@
+import Foundation
 import SwiftNES
 import SDL
 import CSDL2
@@ -6,7 +7,9 @@ private let bufferCount: UInt32 = 3
 
 class SDLAudioBuffer: AudioBuffer {
 
-    let semaphore = SDLSemaphore(initialValue: bufferCount)
+    var buffer = [Float](repeating: 0.0, count: 2048)
+    var index: Int = 0
+    var prev: UInt8 = 0
 
     init(sampleRate: Int32, channels: UInt8, bufferSize: UInt16) {
         var audioSpec = SDLAudioSpec()
@@ -24,14 +27,34 @@ class SDLAudioBuffer: AudioBuffer {
     }
 
     func write(_ sample: Float) {
-        //print(sample)
+        guard index < buffer.count else {
+            return
+        }
+
+        buffer[index] = sample
+        index &+= 1
     }
 
     func fill(into samples: UnsafeMutablePointer<UInt8>, count: Int32) {
-        if semaphore.value < bufferCount - 1 {
-            try? semaphore.post()
-        } else {
-            memset(samples, 0, Int(count))
+        let src = buffer.withUnsafeBufferPointer { Data(buffer: $0) }
+
+        let readCount = min(Int(count), index)
+        src.copyBytes(to: samples, from: 0..<readCount)
+
+        prev = src.last!
+
+        if readCount == index {
+            let base = (samples + index)
+            for b in base..<(base + Int(count)) {
+                b.pointee = prev
+            }
         }
+
+        var i = 0
+        for j in buffer.count..<index {
+            buffer[i] = buffer[j]
+            i &+= 1
+        }
+        self.index = i
     }
 }
