@@ -8,6 +8,9 @@ NESTEST_ROM = nestest.nes
 lint:  ## Run lint
 	@swiftlint autocorrect -- && swiftlint
 
+debug:  ## Debug emulator
+	@swift run -c debug SwiftNESMain run ${ROM}
+
 run:  ## Run emulator
 	@mkdir -p .log
 	@rm -f .log/debug.log
