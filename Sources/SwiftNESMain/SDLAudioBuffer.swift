@@ -11,9 +11,9 @@ class SDLAudioBuffer: AudioBuffer {
     var index: Int = 0
     var prev: UInt8 = 0
 
-    init(sampleRate: Int32, channels: UInt8, bufferSize: UInt16) {
-        var audioSpec = SDLAudioSpec()
+    var audioSpec = SDLAudioSpec()
 
+    init(sampleRate: Int32, channels: UInt8, bufferSize: UInt16) {
         audioSpec.freq = sampleRate
         audioSpec.format = UInt16(AUDIO_S16SYS)
         audioSpec.channels = channels
