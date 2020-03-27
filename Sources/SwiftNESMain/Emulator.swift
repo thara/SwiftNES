@@ -56,7 +56,7 @@ final class Emulator {
 
         event = SDL_Event()
 
-        audioBuffer = SDLAudioBuffer(sampleRate: 96000, channels: 3, bufferSize: 2048)
+        audioBuffer = SDLAudioBuffer(sampleRate: 96000, channels: 2, bufferSize: 4096)
     }
 
     deinit {
@@ -75,7 +75,7 @@ final class Emulator {
         let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 226)
 
         var obtained: SDLAudioSpec? = nil
-        openAudio(desired: &audioBuffer.audioSpec, obtained: &obtained)
+        try openAudio(desired: &audioBuffer.audioSpec, obtained: &obtained)
         pauseAudio(false)
 
         defer {

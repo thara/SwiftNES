@@ -8,7 +8,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
 
-        .package(url: "https://github.com/thara/SDL.git", .branch("swiftnes-4")),
+        .package(url: "https://github.com/thara/SDL.git", .branch("swiftnes-5")),
         .package(url: "https://github.com/twostraws/SwiftGD.git", from: "2.0.0"),
 
         .package(url: "https://github.com/Quick/Quick.git", from: "2.2.0"),

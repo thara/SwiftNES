@@ -7,7 +7,7 @@ private let bufferCount: UInt32 = 3
 
 class SDLAudioBuffer: AudioBuffer {
 
-    var buffer = [Float](repeating: 0.0, count: 2048)
+    var buffer = [Float](repeating: 0.0, count: 2048 * 2)
     var index: Int = 0
     var prev: UInt8 = 0
 
@@ -45,16 +45,20 @@ class SDLAudioBuffer: AudioBuffer {
 
         if readCount == index {
             let base = (samples + index)
-            for b in base..<(base + Int(count)) {
+            for b in base..<(base + Int(count) - index) {
                 b.pointee = prev
             }
         }
 
         var i = 0
-        for j in buffer.count..<index {
-            buffer[i] = buffer[j]
-            i &+= 1
+
+        if Int(count) < index {
+            for j in Int(count)..<index {
+                buffer[i] = buffer[j]
+                i &+= 1
+            }
         }
+
         self.index = i
     }
 }
