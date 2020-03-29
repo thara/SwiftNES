@@ -24,13 +24,15 @@ extension APU {
             pulse2.clockTimer()
         }
 
+        triangle.clockTimer()
+
         if cycles % framePeriod == 0 {
             switch frameCounter.mode {
             case .fourStep:
                 if frameCounter.step < 4 {
                     pulse1.clockEnvelope()
                     pulse2.clockEnvelope()
-                    //TODO Others
+                    triangle.clockLinearCounter()
                 }
 
                 if frameCounter.step == 1 || frameCounter.step == 3 {
@@ -46,7 +48,7 @@ extension APU {
                 if frameCounter.step < 4 || frameCounter.step == 5 {
                     pulse1.clockEnvelope()
                     pulse2.clockEnvelope()
-                    //TODO Others
+                    triangle.clockLinearCounter()
                 }
 
                 if frameCounter.step == 1 || frameCounter.step == 4 {
@@ -76,7 +78,7 @@ extension APU {
     }
 }
 
-extension APU : IOPort {
+extension APU: IOPort {
     mutating func read(from address: UInt16) -> UInt8 {
         switch address {
         case 0x4015:
@@ -104,7 +106,7 @@ extension APU : IOPort {
         case 0x4004...0x4007:
             pulse2.write(value, at: address)
         case 0x4008...0x400B:
-            //TODO Triangle
+            triangle.write(value, at: address)
             break
         case 0x400C...0x400F:
             //TODO Noise
@@ -115,7 +117,8 @@ extension APU : IOPort {
         case 0x4015:
             pulse1.enabled = value[0] == 1
             pulse2.enabled = value[1] == 1
-            //TODO triangle, noise, DMC
+            triangle.enabled = value[2] == 1
+            //TODO noise, DMC
         case 0x4017:
             frameCounter.value = value
         default:
@@ -148,7 +151,7 @@ extension PulseChannel {
         if 0 < timerCounter {
             timerCounter &-= 1
         } else {
-            timerCounter = timer
+            timerCounter = timerReload
             sequencer &+= 1
             if 8 <= sequencer {
                 sequencer = 0
@@ -215,7 +218,57 @@ extension PulseChannel {
     var sweepUnitMuted: Bool {
         return timerPeriod < 8 || 0x7FF < timerPeriod
     }
+}
 
+extension TriangleChannel {
+    mutating func write(_ value: UInt8, at address: UInt16) {
+        switch address {
+        case 0x4008:
+            linearCounterSetup = value
+        case 0x400A:
+            low = value
+        case 0x400B:
+            high = value
+        default:
+            break
+        }
+    }
+
+    mutating func clockTimer() {
+        if 0 < timerCounter {
+            timerCounter &-= 1
+        } else {
+            timerCounter = timerReload
+            if 0 < linearCounter && 0 < lengthCounter {
+                sequencer &+= 1
+                if sequencer == 32 {
+                    sequencer = 0
+                }
+            }
+        }
+    }
+
+    mutating func clockLinearCounter() {
+        if linearCounterReloadFlag {
+            linearCounter = linearCounterReload
+        } else {
+            linearCounter &-= 1
+        }
+
+        if controlFlag {
+            linearCounterReloadFlag = false
+        }
+    }
+
+    func output() -> UInt8 {
+        guard !controlFlag && enabled && 0 < linearCounter && 0 < lengthCounter else {
+            return 0
+        }
+        // 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0
+        //  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
+        let s = Int(sequencer)
+        return UInt8(abs(Int(s) - 15 - (s / 16)))
+    }
 }
 
 let waveforms: [[UInt8]] = [

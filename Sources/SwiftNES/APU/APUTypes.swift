@@ -4,6 +4,7 @@ struct APU {
 
     var pulse1 = PulseChannel(carryMode: .onesComplement)
     var pulse2 = PulseChannel(carryMode: .twosComplement)
+    var triangle = TriangleChannel()
 
     var cycles: UInt = 0
 
@@ -52,7 +53,7 @@ struct PulseChannel {
     var timerHigh: UInt8 { high & 0b111 }
     var lengthCounterLoad: UInt8 { (high & 0b11111000) >> 3 }
 
-    var timer: UInt16 { low.u16 | (timerHigh.u16 << 8) }
+    var timerReload: UInt16 { low.u16 | (timerHigh.u16 << 8) }
 
     enum CarryMode {
         case onesComplement, twosComplement
@@ -85,4 +86,39 @@ struct FrameCounter {
     var mode: SequenceMode { value[7] == 0 ? .fourStep : .fiveStep }
 
     var step = 0
+}
+
+struct TriangleChannel {
+    var linearCounterSetup: UInt8 = 0
+    var low: UInt8 = 0
+    var high: UInt8 = 0 {
+        didSet { linearCounterReloadFlag = true }
+    }
+
+    var controlFlag: Bool {
+        linearCounterSetup[7] == 1
+    }
+
+    var linearCounterReload: UInt8 {
+        linearCounterSetup & 0b01111111
+    }
+
+    var timerLow: UInt8 { low }
+    var timerHigh: UInt8 { high & 0b111 }
+
+    var linearCounterReloadFlag: Bool = false
+
+    var timerReload: UInt16 { low.u16 | (timerHigh.u16 << 8) }
+
+    var timerCounter: UInt16 = 0
+    var sequencer: UInt8 = 0
+
+    var linearCounter: UInt8 = 0
+    var lengthCounter: UInt = 0
+
+    var enabled: Bool = false {
+        didSet {
+            if !enabled { lengthCounter = 0 }
+        }
+    }
 }
