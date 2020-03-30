@@ -5,6 +5,7 @@ struct APU {
     var pulse1 = PulseChannel(carryMode: .onesComplement)
     var pulse2 = PulseChannel(carryMode: .twosComplement)
     var triangle = TriangleChannel()
+    var noise = NoiseChannel()
 
     var cycles: UInt = 0
 
@@ -121,4 +122,19 @@ struct TriangleChannel {
             if !enabled { lengthCounter = 0 }
         }
     }
+}
+
+struct NoiseChannel {
+    var envelope: UInt8 = 0
+    var period: UInt8 = 0
+    var lengthCounterLoad: UInt8 = 0
+
+    var lengthCounterHalt: Bool { envelope[5] == 1 }
+    var useConstantVolume: Bool { envelope[4] == 1 }
+    var envelopePeriod: UInt8 { envelope & 0b1111 }
+
+    var mode: Bool { period[7] == 1 }
+    var timerPeriod: UInt8 { period & 0b1111 }
+
+    var shiftRegister: UInt16 = 0
 }

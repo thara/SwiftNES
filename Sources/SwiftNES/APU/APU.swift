@@ -22,6 +22,7 @@ extension APU {
         if cycles % 2 == 0 {
             pulse1.clockTimer()
             pulse2.clockTimer()
+            // Others
         }
 
         triangle.clockTimer()
@@ -107,10 +108,8 @@ extension APU: IOPort {
             pulse2.write(value, at: address)
         case 0x4008...0x400B:
             triangle.write(value, at: address)
-            break
         case 0x400C...0x400F:
-            //TODO Noise
-            break
+            noise.write(value, at: address)
         case 0x4010...0x4013:
             //TODO DMC
             break
@@ -268,6 +267,28 @@ extension TriangleChannel {
         //  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
         let s = Int(sequencer)
         return UInt8(abs(Int(s) - 15 - (s / 16)))
+    }
+}
+
+extension NoiseChannel {
+    mutating func write(_ value: UInt8, at address: UInt16) {
+        switch address {
+        case 0x400C:
+            envelope = value
+        case 0x400E:
+            period = value
+        case 0x400F:
+            lengthCounterLoad = value
+        default:
+            break
+        }
+    }
+
+    mutating func clockTimer() {
+        // LFSR
+        let feedback = shiftRegister ^ shiftRegister[mode ? 6 : 1]
+        shiftRegister &>>= 1
+        shiftRegister |= (feedback << 14)
     }
 }
 
