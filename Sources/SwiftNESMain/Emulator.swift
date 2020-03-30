@@ -74,7 +74,7 @@ final class Emulator {
         let keyboardState = SDL_GetKeyboardState(nil)
         let currentKeys = UnsafeBufferPointer(start: keyboardState, count: 226)
 
-        var obtained: SDLAudioSpec? = nil
+        var obtained: SDLAudioSpec?
         try openAudio(desired: &audioBuffer.audioSpec, obtained: &obtained)
         pauseAudio(false)
 
