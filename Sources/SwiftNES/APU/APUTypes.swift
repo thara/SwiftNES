@@ -20,7 +20,7 @@ struct PulseChannel {
     var high: UInt8 = 0 {
         didSet {
             if enabled {
-                lengthCounter = UInt(lookupLength(lengthCounterLoad))
+                lengthCounter = UInt(lookupLength((high & 0b11111000) >> 3))
             }
         }
     }
@@ -52,7 +52,6 @@ struct PulseChannel {
     var sweepShift: UInt8 { sweep & 0b111 }
 
     var timerHigh: UInt8 { high & 0b111 }
-    var lengthCounterLoad: UInt8 { (high & 0b11111000) >> 3 }
 
     var timerReload: UInt16 { low.u16 | (timerHigh.u16 << 8) }
 
@@ -93,7 +92,12 @@ struct TriangleChannel {
     var linearCounterSetup: UInt8 = 0
     var low: UInt8 = 0
     var high: UInt8 = 0 {
-        didSet { linearCounterReloadFlag = true }
+        didSet {
+            linearCounterReloadFlag = true
+            if enabled {
+                lengthCounter = UInt(lookupLength((high & 0b11111000) >> 3))
+            }
+        }
     }
 
     var controlFlag: Bool {
