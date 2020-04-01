@@ -278,7 +278,7 @@ extension NoiseChannel {
         case 0x400E:
             period = value
         case 0x400F:
-            lengthCounterLoad = value
+            envelopeRestart = value
         default:
             break
         }
@@ -289,6 +289,19 @@ extension NoiseChannel {
         let feedback = shiftRegister ^ shiftRegister[mode ? 6 : 1]
         shiftRegister &>>= 1
         shiftRegister |= (feedback << 14)
+    }
+
+    mutating func clockLengthCounter() {
+        if 0 < lengthCounter && !lengthCounterHalt {
+            lengthCounter &-= 1
+        }
+    }
+
+    func output() -> UInt8 {
+        guard shiftRegister[0] == 0 || lengthCounter == 0 else {
+            return 0
+        }
+        return UInt8(shiftRegister[0])
     }
 }
 

@@ -131,7 +131,13 @@ struct TriangleChannel {
 struct NoiseChannel {
     var envelope: UInt8 = 0
     var period: UInt8 = 0
-    var lengthCounterLoad: UInt8 = 0
+    var envelopeRestart: UInt8 = 0 {
+        didSet {
+            if enabled {
+                lengthCounter = UInt(lookupLength((envelopeRestart & 0b11111000) >> 3))
+            }
+        }
+    }
 
     var lengthCounterHalt: Bool { envelope[5] == 1 }
     var useConstantVolume: Bool { envelope[4] == 1 }
@@ -141,4 +147,11 @@ struct NoiseChannel {
     var timerPeriod: UInt8 { period & 0b1111 }
 
     var shiftRegister: UInt16 = 0
+    var lengthCounter: UInt = 0
+
+    var enabled: Bool = false {
+        didSet {
+            if !enabled { lengthCounter = 0 }
+        }
+    }
 }
