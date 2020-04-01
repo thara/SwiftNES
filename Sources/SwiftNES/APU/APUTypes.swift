@@ -100,13 +100,9 @@ struct TriangleChannel {
         }
     }
 
-    var controlFlag: Bool {
-        linearCounterSetup[7] == 1
-    }
-
-    var linearCounterReload: UInt8 {
-        linearCounterSetup & 0b01111111
-    }
+    var controlFlag: Bool { linearCounterSetup[7] == 1 }
+    var lengthCounterHalt: Bool { linearCounterSetup[7] == 1 }
+    var linearCounterReload: UInt8 { linearCounterSetup & 0b01111111 }
 
     var timerLow: UInt8 { low }
     var timerHigh: UInt8 { high & 0b111 }

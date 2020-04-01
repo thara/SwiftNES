@@ -41,7 +41,8 @@ extension APU {
                     pulse1.clockSweepUnit()
                     pulse2.clockLengthCounter()
                     pulse2.clockSweepUnit()
-                    //TODO Others
+                    triangle.clockLengthCounter()
+                    noise.clockLengthCounter()
                 }
 
                 frameCounter.step = (frameCounter.step + 1) % 5
@@ -57,7 +58,8 @@ extension APU {
                     pulse1.clockSweepUnit()
                     pulse2.clockLengthCounter()
                     pulse2.clockSweepUnit()
-                    //TODO Others
+                    triangle.clockLengthCounter()
+                    noise.clockLengthCounter()
                 }
 
                 frameCounter.step = (frameCounter.step + 1) % 5
@@ -244,6 +246,12 @@ extension TriangleChannel {
                     sequencer = 0
                 }
             }
+        }
+    }
+
+    mutating func clockLengthCounter() {
+        if 0 < lengthCounter && !lengthCounterHalt {
+            lengthCounter &-= 1
         }
     }
 
