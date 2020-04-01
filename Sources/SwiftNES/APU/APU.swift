@@ -70,8 +70,8 @@ extension APU {
     private func sample() -> Float {
         let p1 = Float(pulse1.output())
         let p2 = Float(pulse2.output())
-        let triangle: Float = 0.0
-        let noise: Float = 0.0
+        let triangle: Float = Float(self.triangle.output())
+        let noise: Float = Float(self.noise.output())
         let dmc: Float = 0.0
 
         let pulseOut = 95.88 / ((8128 / (p1 + p2)) + 100)
