@@ -89,8 +89,8 @@ extension APU: IOPort {
             // if dmcInterrupt { value |= 0x80 }
             if frameInterrupted && !frameCounter.interruptInhibit { value |= 0x40 }
             // if dmcActive { value |= 0x20 }
-            // if noise { value |= 0x08 }
-            // if triangle { value |= 0x04 }
+            if 0 < noise.lengthCounter { value |= 0x08 }
+            if 0 < triangle.lengthCounter { value |= 0x04 }
             if 0 < pulse2.lengthCounter { value |= 0x02 }
             if 0 < pulse1.lengthCounter { value |= 0x01 }
 
@@ -119,7 +119,8 @@ extension APU: IOPort {
             pulse1.enabled = value[0] == 1
             pulse2.enabled = value[1] == 1
             triangle.enabled = value[2] == 1
-            //TODO noise, DMC
+            noise.enabled = value[3] == 1
+            //TODO DMC
         case 0x4017:
             frameCounter.value = value
         default:
