@@ -22,7 +22,8 @@ extension APU {
         if cycles % 2 == 0 {
             pulse1.clockTimer()
             pulse2.clockTimer()
-            // Others
+            noise.clockTimer()
+            // TODO DMC
         }
 
         triangle.clockTimer()
