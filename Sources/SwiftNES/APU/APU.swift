@@ -329,6 +329,52 @@ extension DMC {
             break
         }
     }
+
+    mutating func clockTimer() {
+        if 0 < timerCounter {
+            timerCounter &-= 1
+        } else {
+            // the output cycle ends
+            timerCounter = 8
+
+            // Memory Reader
+            //TODO
+
+            // Output unit
+            if sampleBufferEmpty {
+                silence = true
+            } else {
+                silence = false
+                shiftRegister = sampleBuffer
+                sampleBufferEmpty = true
+                sampleBuffer = 0
+            }
+
+            if silence == false {
+                if shiftRegister[0] == 1 {
+                    if outputLevel < outputLevel &+ 2 {
+                        outputLevel &+= 2
+                    }
+                } else {
+                    if outputLevel &- 2 < outputLevel {
+                        outputLevel &-= 2
+                    }
+                }
+            }
+            shiftRegister >>= 1
+            bitsRemainingCounter &-= 1
+        }
+    }
+
+    mutating func start() {
+        currentAddress = sampleAddress
+        bytesRemainingCounter = sampleLength
+    }
+
+    func output() -> UInt8 {
+        //TODO
+        0
+    }
 }
 
 let waveforms: [[UInt8]] = [

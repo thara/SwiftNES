@@ -167,5 +167,21 @@ struct DMC {
     var sampleAddress: UInt16 { 0xC000 + UInt16(address) * 64 }
     var sampleLength: UInt16 { UInt16(length) * 16 + 1 }
 
+    var timerCounter: UInt8 = 0
+
+    var bitsRemainingCounter: UInt8 = 0
+    var bytesRemainingCounter: UInt16 = 0
+
+    var memoryReader: UInt8 = 0
     var enabled: Bool = false
+    var sampleBuffer: UInt8 = 0
+
+    var currentAddress: UInt16 = 0
+
+    var outputLevel: UInt8 = 0
+
+    var silence = false
+    var sampleBufferEmpty = false
+
+    var shiftRegister: UInt8 = 0
 }
