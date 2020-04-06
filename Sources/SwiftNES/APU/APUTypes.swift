@@ -6,6 +6,7 @@ struct APU {
     var pulse2 = PulseChannel(carryMode: .twosComplement)
     var triangle = TriangleChannel()
     var noise = NoiseChannel()
+    var dmc = DMC()
 
     var cycles: UInt = 0
 
@@ -150,4 +151,21 @@ struct NoiseChannel {
             if !enabled { lengthCounter = 0 }
         }
     }
+}
+
+struct DMC {
+    var flags: UInt8 = 0
+    var direct: UInt8 = 0
+    var address: UInt8 = 0
+    var length: UInt8 = 0
+
+    var loopFlag: Bool { flags[7] == 1 }
+    var rateIndex: UInt8 { flags & 0b1111 }
+
+    var directLoad: UInt8 { flags & 0b01111111 }
+
+    var sampleAddress: UInt16 { 0xC000 + UInt16(address) * 64 }
+    var sampleLength: UInt16 { UInt16(length) * 16 + 1 }
+
+    var enabled: Bool = false
 }

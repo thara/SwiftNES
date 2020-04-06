@@ -113,14 +113,13 @@ extension APU: IOPort {
         case 0x400C...0x400F:
             noise.write(value, at: address)
         case 0x4010...0x4013:
-            //TODO DMC
-            break
+            dmc.write(value, at: address)
         case 0x4015:
             pulse1.enabled = value[0] == 1
             pulse2.enabled = value[1] == 1
             triangle.enabled = value[2] == 1
             noise.enabled = value[3] == 1
-            //TODO DMC
+            dmc.enabled = value[4] == 1
         case 0x4017:
             frameCounter.value = value
         default:
@@ -314,6 +313,23 @@ extension NoiseChannel {
     }
 }
 
+extension DMC {
+    mutating func write(_ value: UInt8, at address: UInt16) {
+        switch address {
+        case 0x4010:
+            flags = value
+        case 0x4011:
+            direct = value
+        case 0x4012:
+            self.address = value
+        case 0x4013:
+            length = value
+        default:
+            break
+        }
+    }
+}
+
 let waveforms: [[UInt8]] = [
     [0, 1, 0, 0, 0, 0, 0, 0],  // 12.5%
     [0, 1, 1, 0, 0, 0, 0, 0],  // 25%
@@ -345,6 +361,8 @@ private let lookupTable = [
     [0x10, 0x1C],
     [0x20, 0x1E]
 ]
+
+private let dmcRates = [428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54]
 
 public protocol AudioBuffer {
     func write(_ sample: Float)
