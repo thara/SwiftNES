@@ -155,14 +155,18 @@ struct NoiseChannel {
 
 struct DMC {
     var flags: UInt8 = 0
-    var direct: UInt8 = 0
+    var direct: UInt8 = 0 {
+        didSet {
+            outputLevel = directLoad
+        }
+    }
     var address: UInt8 = 0
     var length: UInt8 = 0
 
     var loopFlag: Bool { flags[7] == 1 }
     var rateIndex: UInt8 { flags & 0b1111 }
 
-    var directLoad: UInt8 { flags & 0b01111111 }
+    var directLoad: UInt8 { direct & 0b01111111 }
 
     var sampleAddress: UInt16 { 0xC000 + UInt16(address) * 64 }
     var sampleLength: UInt16 { UInt16(length) * 16 + 1 }
@@ -170,13 +174,14 @@ struct DMC {
     var timerCounter: UInt8 = 0
 
     var bitsRemainingCounter: UInt8 = 0
-    var bytesRemainingCounter: UInt16 = 0
 
-    var memoryReader: UInt8 = 0
     var enabled: Bool = false
+
     var sampleBuffer: UInt8 = 0
 
-    var currentAddress: UInt16 = 0
+    // Memory reader
+    var addressCounter: UInt16 = 0
+    var bytesRemainingCounter: UInt16 = 0
 
     var outputLevel: UInt8 = 0
 

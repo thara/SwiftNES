@@ -59,7 +59,10 @@ public final class NES {
         let cpuCycles = cpu.step(interruptLine: interruptLine)
         cycles &+= cpuCycles
 
-        apu.step(audioBuffer: audioBuffer)
+        let cpuSteel = apu.step(audioBuffer: audioBuffer, memoryReader: cpuMemory)
+        if cpuSteel {
+            cycles &+= 4
+        }
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)
@@ -101,3 +104,5 @@ public final class NES {
         controllerPort.port2 = controller2
     }
 }
+
+extension CPUMemory: DMCMemoryReader {}

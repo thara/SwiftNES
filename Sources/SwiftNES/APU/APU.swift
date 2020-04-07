@@ -11,7 +11,7 @@ extension APU {
         }
     }
 
-    mutating func step<T: AudioBuffer>(audioBuffer: T) {
+    mutating func step<A: AudioBuffer, M: DMCMemoryReader>(audioBuffer: A, memoryReader: M) -> Bool {
         cycles &+= 1
 
         // Down sampling
@@ -19,11 +19,12 @@ extension APU {
             audioBuffer.write(sample())
         }
 
+        var cpuStall = false
         if cycles % 2 == 0 {
             pulse1.clockTimer()
             pulse2.clockTimer()
             noise.clockTimer()
-            // TODO DMC
+            cpuStall = dmc.clockTimer(memoryReader)
         }
 
         triangle.clockTimer()
@@ -66,6 +67,8 @@ extension APU {
                 frameCounter.step = (frameCounter.step + 1) % 5
             }
         }
+
+        return cpuStall
     }
 
     private func sample() -> Float {
@@ -330,7 +333,9 @@ extension DMC {
         }
     }
 
-    mutating func clockTimer() {
+    mutating func clockTimer<M: DMCMemoryReader>(_ memoryReader: M) -> Bool {
+        var cpuStall = false
+
         if 0 < timerCounter {
             timerCounter &-= 1
         } else {
@@ -338,7 +343,23 @@ extension DMC {
             timerCounter = 8
 
             // Memory Reader
-            //TODO
+            if sampleBufferEmpty && bytesRemainingCounter != 0 {
+                sampleBuffer = memoryReader.read(at: addressCounter)
+                addressCounter &+= 1
+                if addressCounter == 0 {
+                    addressCounter = 0x8000
+                }
+                bytesRemainingCounter &-= 1
+
+                if bytesRemainingCounter == 0 {
+                    if loopFlag {
+                        start()
+                    }
+                    //TODO the IRQ enabled flag is set, the interrupt flag is set.
+                }
+
+                cpuStall = true
+            }
 
             // Output unit
             if sampleBufferEmpty {
@@ -364,16 +385,17 @@ extension DMC {
             shiftRegister >>= 1
             bitsRemainingCounter &-= 1
         }
+        return cpuStall
     }
 
     mutating func start() {
-        currentAddress = sampleAddress
+        outputLevel = directLoad
+        addressCounter = sampleAddress
         bytesRemainingCounter = sampleLength
     }
 
     func output() -> UInt8 {
-        //TODO
-        0
+        outputLevel & 0b01111111
     }
 }
 
@@ -413,4 +435,8 @@ private let dmcRates = [428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 1
 
 public protocol AudioBuffer {
     func write(_ sample: Float)
+}
+
+public protocol DMCMemoryReader {
+    func read(at address: UInt16) -> UInt8
 }
