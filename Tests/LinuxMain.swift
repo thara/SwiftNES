@@ -8,12 +8,7 @@ QCKMain([
     SoundQueueSpec.self,
 
     // APU
-    DividerSpec.self,
-    EnvelopeGeneratorSpec.self,
-    LengthCounterSpec.self,
-    SequencerSpec.self,
-    SweepUnitSpec.self,
-    TimerSpec.self,
+    PulseSpec.self,
 
     // CPU
     AddressingModeSpec.self,
