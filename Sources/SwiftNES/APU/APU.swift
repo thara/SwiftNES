@@ -84,7 +84,7 @@ extension APU {
         let p2 = Float(pulse2.output())
         let triangle: Float = Float(self.triangle.output())
         let noise: Float = Float(self.noise.output())
-        let dmc: Float = 0.0
+        let dmc: Float = Float(self.dmc.output())
 
         let pulseOut = 95.88 / ((8128 / (p1 + p2)) + 100)
         let tndOut = 159.79 / (1 / ((triangle / 8227) + (noise / 12241) + (dmc / 22638)) + 100)
