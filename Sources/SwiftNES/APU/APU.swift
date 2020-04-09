@@ -47,6 +47,10 @@ extension APU {
                     noise.clockLengthCounter()
                 }
 
+                if frameCounter.step == 3 && !frameCounter.interruptInhibit {
+                    frameInterrupted = true
+                }
+
                 frameCounter.step = (frameCounter.step + 1) % 5
             case .fiveStep:
                 if frameCounter.step < 4 || frameCounter.step == 5 {
@@ -65,6 +69,10 @@ extension APU {
                 }
 
                 frameCounter.step = (frameCounter.step + 1) % 5
+            }
+
+            if dmc.interrupted {
+                frameInterrupted = true
             }
         }
 
@@ -90,9 +98,9 @@ extension APU: IOPort {
         switch address {
         case 0x4015:
             var value: UInt8 = 0
-            // if dmcInterrupt { value |= 0x80 }
+            if dmc.interrupted { value |= 0x80 }
             if frameInterrupted && !frameCounter.interruptInhibit { value |= 0x40 }
-            // if dmcActive { value |= 0x20 }
+            if 0 < dmc.bytesRemainingCounter {  value |= 0x20  }
             if 0 < noise.lengthCounter { value |= 0x08 }
             if 0 < triangle.lengthCounter { value |= 0x04 }
             if 0 < pulse2.lengthCounter { value |= 0x02 }
@@ -355,7 +363,9 @@ extension DMC {
                     if loopFlag {
                         start()
                     }
-                    //TODO the IRQ enabled flag is set, the interrupt flag is set.
+                    if irqEnabled {
+                        interrupted = true
+                    }
                 }
 
                 cpuStall = true
@@ -371,7 +381,7 @@ extension DMC {
                 sampleBuffer = 0
             }
 
-            if silence == false {
+            if !silence {
                 if shiftRegister[0] == 1 {
                     if outputLevel < outputLevel &+ 2 {
                         outputLevel &+= 2
@@ -395,7 +405,7 @@ extension DMC {
     }
 
     func output() -> UInt8 {
-        outputLevel & 0b01111111
+        silence ? 0 : (outputLevel & 0b01111111)
     }
 }
 

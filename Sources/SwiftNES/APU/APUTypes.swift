@@ -163,7 +163,8 @@ struct DMC {
     var address: UInt8 = 0
     var length: UInt8 = 0
 
-    var loopFlag: Bool { flags[7] == 1 }
+    var irqEnabled: Bool { flags[7] == 1 }
+    var loopFlag: Bool { flags[6] == 1 }
     var rateIndex: UInt8 { flags & 0b1111 }
 
     var directLoad: UInt8 { direct & 0b01111111 }
@@ -189,4 +190,6 @@ struct DMC {
     var sampleBufferEmpty = false
 
     var shiftRegister: UInt8 = 0
+
+    var interrupted = false
 }
