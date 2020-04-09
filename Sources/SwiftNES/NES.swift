@@ -63,6 +63,9 @@ public final class NES {
         if cpuSteel {
             cycles &+= 4
         }
+        if apu.frameInterrupted {
+            interruptLine.send(.IRQ)
+        }
 
 #if nestest
         nestest.print(ppu: ppu, cycles: cycles)
