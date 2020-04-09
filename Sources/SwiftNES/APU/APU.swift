@@ -138,10 +138,6 @@ extension APU: IOPort {
             break
         }
     }
-
-    func clear() {
-        //TODO
-    }
 }
 
 extension PulseChannel {
