@@ -72,8 +72,8 @@ final class SDLFrameRenderer {
 
     func render() {
         do {
-            let p = UnsafePointer(frameBuffer)
-            try frameTexture.update(pixels: UnsafeMutablePointer(mutating: p), pitch: pitch)
+            let p = frameBuffer.withUnsafeBufferPointer { $0.baseAddress! }
+            try frameTexture.update(pixels: UnsafeMutableRawPointer(mutating: p), pitch: pitch)
 
             // background
             try renderer.setDrawColor(red: 0x00, green: 0x00, blue: 0x00, alpha: 0xFF)
