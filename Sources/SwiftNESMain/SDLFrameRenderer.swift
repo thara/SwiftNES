@@ -10,7 +10,7 @@ private let pitch = {
 
 private let safeAreaHeight = (NES.height &- screenHeight) / 2
 
-final class SDLFrameRenderer {
+final class SDLFrameRenderer: LineRenderer {
 
     private let renderer: SDLRenderer
     private let screenRect: SDL_Rect
@@ -37,7 +37,7 @@ final class SDLFrameRenderer {
         frameBuffer = [UInt32](repeating: 0x00, count: rowPixels * screenHeight)
     }
 
-    func newLine(number: Int, lineBuffer: inout LineBuffer) {
+    func newLine(at number: Int, by lineBuffer: inout LineBuffer) {
         switch renderingMode {
         case .prioring:
             newLine(number: number, pixels: lineBuffer.buffer)

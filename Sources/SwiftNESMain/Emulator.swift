@@ -100,7 +100,7 @@ final class Emulator {
 
             controller.update(keys: currentKeys)
 
-            nes.runFrame(onLineEnd: frameRenderer.newLine, withAudio: audioBuffer)
+            nes.runFrame(withRenderer: frameRenderer, withAudio: audioBuffer)
 
             let endPerf = SDL_GetPerformanceCounter()
 

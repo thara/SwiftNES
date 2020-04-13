@@ -39,19 +39,17 @@ public final class NES {
         nestest = NESTest(interruptLine: interruptLine)
     }
 
-    public func runFrame<T: AudioBuffer>(
-        onLineEnd render: (Int, inout LineBuffer) -> Void,
-        withAudio audioBuffer: T) {
+    public func runFrame<L: LineRenderer, A: AudioBuffer>(
+        withRenderer renderer: L, withAudio audioBuffer: A) {
         let currentFrame = ppu.frames
 
         repeat {
-            step(onLineEnd: render, withAudio: audioBuffer)
+            step(withRenderer: renderer, withAudio: audioBuffer)
         } while currentFrame == ppu.frames
     }
 
-    public func step<T: AudioBuffer>(
-        onLineEnd render: (Int, inout LineBuffer) -> Void,
-        withAudio audioBuffer: T) {
+    public func step<L: LineRenderer, A: AudioBuffer>(
+        withRenderer renderer: L, withAudio audioBuffer: A) {
 #if nestest
         if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
 #endif
@@ -80,7 +78,7 @@ public final class NES {
             ppu.step(writeTo: &lineBuffer, interruptLine: interruptLine)
 
             if currentLine != ppu.line {
-                render(currentLine, &lineBuffer)
+                renderer.newLine(at: currentLine, by: &lineBuffer)
             }
 
             ppuCycles &-= 1
@@ -107,6 +105,10 @@ public final class NES {
         controllerPort.port1 = controller1
         controllerPort.port2 = controller2
     }
+}
+
+public protocol LineRenderer {
+    func newLine(at: Int, by: inout LineBuffer)
 }
 
 extension CPUMemory: DMCMemoryReader {}
