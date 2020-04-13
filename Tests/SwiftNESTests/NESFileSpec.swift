@@ -1,6 +1,6 @@
 import Foundation
-import Quick
 import Nimble
+import Quick
 
 @testable import SwiftNES
 
@@ -13,7 +13,7 @@ class NESFileSpec: QuickSpec {
                         0x4E, 0x45, 0x53, 0x1A,
                         0x93, 0x34,
                         0xF1, 0xF2, 0xF3, 0xF4, 0xF5,
-                        0x00, 0x00, 0x00, 0x00, 0x00
+                        0x00, 0x00, 0x00, 0x00, 0x00,
                     ]
                     let header = NESFileHeader(bytes: data)
 
@@ -34,7 +34,7 @@ class NESFileSpec: QuickSpec {
                         0x4E, 0x45, 0x53, 0x1B,
                         0x93, 0x34,
                         0xF1, 0xF2, 0xF3, 0xF4, 0xF5,
-                        0x00, 0x00, 0x00, 0x00, 0x00
+                        0x00, 0x00, 0x00, 0x00, 0x00,
                     ]
                     let header = NESFileHeader(bytes: data)
 

@@ -1,7 +1,7 @@
-import Foundation
-import SwiftNES
-import SDL
 import CSDL2
+import Foundation
+import SDL
+import SwiftNES
 
 private let bufferCount: UInt32 = 3
 

@@ -6,6 +6,7 @@ disabled_rules:
   - strict_fileprivate
   - switch_case_on_newline
   - type_body_length
+  - opening_brace
 
 included:
   - Sources/SwiftNES
@@ -19,3 +20,6 @@ file_length:
 function_body_length:
   warning: 100
   error: 200
+
+trailing_comma:
+    mandatory_comma: true

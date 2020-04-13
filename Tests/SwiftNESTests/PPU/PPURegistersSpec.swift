@@ -1,5 +1,5 @@
-import Quick
 import Nimble
+import Quick
 
 @testable import SwiftNES
 
@@ -44,7 +44,7 @@ class PPURegistersSpec: QuickSpec {
                 registers.v = vramAddress(fineYScroll: 0b101, nameTableNo: 2, coarseYScroll: 0b10101, coarseXScroll: 0b11101)
 
                 registers.incrY()
-                expect(registers.v).to(equal(0b0110101010111101))
+                expect(registers.v).to(equal(0b01101010_10111101))
             }
 
             context("if fine Y == 7") {
@@ -93,7 +93,7 @@ class PPURegistersSpec: QuickSpec {
             it("update coarse X and name table select of VRAM address") {
                 registers.v = vramAddress(nameTableNo: 2, coarseYScroll: 11, coarseXScroll: 29)
 
-                registers.t = 0b110101000101
+                registers.t = 0b1101_01000101
                 expect(registers.t.nameTableNo).to(equal(3))
                 expect(registers.t.coarseXScroll).to(equal(5))
                 expect(registers.t.coarseYScroll).to(equal(10))
@@ -115,7 +115,7 @@ class PPURegistersSpec: QuickSpec {
             it("update coarse Y and name table select of VRAM address") {
                 registers.v = vramAddress(nameTableNo: 2, coarseYScroll: 11, coarseXScroll: 29)
 
-                registers.t = 0b010101000101
+                registers.t = 0b0101_01000101
                 expect(registers.t.nameTableNo).to(equal(1))
                 expect(registers.t.coarseXScroll).to(equal(5))
                 expect(registers.t.coarseYScroll).to(equal(10))

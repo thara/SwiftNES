@@ -94,7 +94,7 @@ extension PPU {
             let high = memory.read(at: tileAddr &+ 8)
 
             let pixel = low[col] &+ (high[col] &<< 1)
-            if pixel == 0 { // transparent
+            if pixel == 0 {  // transparent
                 continue
             }
 
@@ -103,7 +103,8 @@ extension PPU {
                 && registers.renderingEnabled
                 && !registers.status.contains(.spriteZeroHit)
                 && sprite.x != 0xFF && x < 0xFF
-                && bg.enabled {
+                && bg.enabled
+            {
                 registers.status.formUnion(.spriteZeroHit)
             }
 

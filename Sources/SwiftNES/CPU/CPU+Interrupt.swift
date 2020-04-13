@@ -2,14 +2,14 @@ extension CPU {
     /// Reset registers & memory state
     mutating func reset() {
         tick(count: 5)
-#if nestest
-        PC = 0xC000
-        tick(count: 2)
-#else
-        PC = readWord(at: 0xFFFC)
-        P.formUnion(.I)
-        S -= 3
-#endif
+        #if nestest
+            PC = 0xC000
+            tick(count: 2)
+        #else
+            PC = readWord(at: 0xFFFC)
+            P.formUnion(.I)
+            S -= 3
+        #endif
     }
 
     mutating func handleNMI() {

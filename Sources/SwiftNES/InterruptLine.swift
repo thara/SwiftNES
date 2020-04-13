@@ -9,10 +9,18 @@ struct Interrupt: OptionSet, CustomDebugStringConvertible {
 
     var debugDescription: String {
         var s: [String] = []
-        if contains(.RESET) { s.append("RESET") }
-        if contains(.NMI) { s.append("NMI") }
-        if contains(.IRQ) { s.append("IRQ") }
-        if contains(.BRK) { s.append("BRK") }
+        if contains(.RESET) {
+            s.append("RESET")
+        }
+        if contains(.NMI) {
+            s.append("NMI")
+        }
+        if contains(.IRQ) {
+            s.append("IRQ")
+        }
+        if contains(.BRK) {
+            s.append("BRK")
+        }
         return s.joined(separator: ",")
     }
 }

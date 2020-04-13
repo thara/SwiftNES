@@ -1,6 +1,5 @@
 import CSDL2
 import SDL
-
 import SwiftNES
 
 struct VirtualStandardController {
@@ -24,6 +23,6 @@ struct VirtualStandardController {
         Int(SDL_SCANCODE_LCTRL.rawValue): StandardController.Button.select.rawValue,
 
         Int(SDL_SCANCODE_J.rawValue): StandardController.Button.B.rawValue,
-        Int(SDL_SCANCODE_K.rawValue): StandardController.Button.A.rawValue
+        Int(SDL_SCANCODE_K.rawValue): StandardController.Button.A.rawValue,
     ]
 }

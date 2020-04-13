@@ -33,8 +33,12 @@ extension PPU {
                 // Fetch attribute table byte : step 2
                 attrTableEntry = memory.read(at: bgTempAddr)
                 // select area
-                if registers.v.coarseXScroll[1] == 1 { attrTableEntry &>>= 2 }
-                if registers.v.coarseYScroll[1] == 1 { attrTableEntry &>>= 4 }
+                if registers.v.coarseXScroll[1] == 1 {
+                    attrTableEntry &>>= 2
+                }
+                if registers.v.coarseYScroll[1] == 1 {
+                    attrTableEntry &>>= 4
+                }
             case 5:
                 // Fetch tile bitmap low byte : step 1
                 let base: UInt16 = registers.controller.contains(.bgTableAddr) ? 0x1000 : 0x0000

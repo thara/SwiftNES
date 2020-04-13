@@ -15,6 +15,8 @@ let package = Package(
         .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.0"),
 
         .package(url: "https://github.com/kylef/Commander.git", from: "0.9.0"),
+
+        .package(url: "https://github.com/apple/swift-format.git", .branch("swift-5.2-branch")),
     ],
     targets: [
         .target(name: "SwiftNES"),

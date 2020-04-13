@@ -54,7 +54,7 @@ extension PPU: IOPort {
             registers.incrV()
         default:
             break
-            // NOP
+        // NOP
         }
     }
 }

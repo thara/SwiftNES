@@ -98,13 +98,27 @@ extension APU: IOPort {
         switch address {
         case 0x4015:
             var value: UInt8 = 0
-            if dmc.interrupted { value |= 0x80 }
-            if frameInterrupted && !frameCounter.interruptInhibit { value |= 0x40 }
-            if 0 < dmc.bytesRemainingCounter {  value |= 0x20  }
-            if 0 < noise.lengthCounter { value |= 0x08 }
-            if 0 < triangle.lengthCounter { value |= 0x04 }
-            if 0 < pulse2.lengthCounter { value |= 0x02 }
-            if 0 < pulse1.lengthCounter { value |= 0x01 }
+            if dmc.interrupted {
+                value |= 0x80
+            }
+            if frameInterrupted && !frameCounter.interruptInhibit {
+                value |= 0x40
+            }
+            if 0 < dmc.bytesRemainingCounter {
+                value |= 0x20
+            }
+            if 0 < noise.lengthCounter {
+                value |= 0x08
+            }
+            if 0 < triangle.lengthCounter {
+                value |= 0x04
+            }
+            if 0 < pulse2.lengthCounter {
+                value |= 0x02
+            }
+            if 0 < pulse1.lengthCounter {
+                value |= 0x01
+            }
 
             frameInterrupted = false
 
@@ -196,7 +210,7 @@ extension PulseChannel {
                 case .onesComplement:
                     changeAmount = changeAmount * -1 - 1
                 case .twosComplement:
-                    changeAmount = changeAmount * -1      // swiftlint:disable shorthand_operator
+                    changeAmount = changeAmount * -1  // swiftlint:disable shorthand_operator
                 }
             }
             timerPeriod &+= changeAmount
@@ -409,7 +423,7 @@ let waveforms: [[UInt8]] = [
     [0, 1, 0, 0, 0, 0, 0, 0],  // 12.5%
     [0, 1, 1, 0, 0, 0, 0, 0],  // 25%
     [0, 1, 1, 1, 1, 0, 0, 0],  // 50%
-    [1, 0, 0, 1, 1, 1, 1, 1]  // 25% negated
+    [1, 0, 0, 1, 1, 1, 1, 1],  // 25% negated
 ]
 
 func lookupLength(_ bitPattern: UInt8) -> Int {
@@ -434,7 +448,7 @@ private let lookupTable = [
     [0xC0, 0x18],
     [0x48, 0x1A],
     [0x10, 0x1C],
-    [0x20, 0x1E]
+    [0x20, 0x1E],
 ]
 
 private let dmcRates = [428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54]

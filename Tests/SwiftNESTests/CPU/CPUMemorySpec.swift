@@ -1,5 +1,5 @@
-import Quick
 import Nimble
+import Quick
 
 @testable import SwiftNES
 
@@ -56,15 +56,15 @@ class CPUMemorySpec: QuickSpec {
                 map.write(1, at: 128)
                 map.write(1, at: 129)
 
-                expect(map.readWord(at: 128)).to(equal(0b0000000100000001))
+                expect(map.readWord(at: 128)).to(equal(0b00000001_00000001))
 
                 map.write(64, at: 10)
                 map.write(32, at: 11)
                 map.write(255, at: 12)
 
-                expect(map.readWord(at: 10)).to(equal(0b0010000001000000))
-                expect(map.readWord(at: 11)).to(equal(0b1111111100100000))
-                expect(map.readWord(at: 12)).to(equal(0b0000000011111111))
+                expect(map.readWord(at: 10)).to(equal(0b00100000_01000000))
+                expect(map.readWord(at: 11)).to(equal(0b11111111_00100000))
+                expect(map.readWord(at: 12)).to(equal(0b00000000_11111111))
             }
         }
     }

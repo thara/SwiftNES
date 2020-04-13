@@ -78,12 +78,12 @@ struct CPU {
         X = 0
         Y = 0
         S = 0xFD
-#if nestest
-        // https://wiki.nesdev.com/w/index.php/CPU_power_up_state#cite_ref-1
-        P = Status(rawValue: 0x24)
-#else
-        P = Status(rawValue: 0x34)
-#endif
+        #if nestest
+            // https://wiki.nesdev.com/w/index.php/CPU_power_up_state#cite_ref-1
+            P = Status(rawValue: 0x24)
+        #else
+            P = Status(rawValue: 0x34)
+        #endif
     }
 }
 
@@ -95,7 +95,7 @@ extension CPU {
     }
 
     mutating func write(_ value: UInt8, at address: UInt16) {
-        if address == 0x4014 { // OAMDMA
+        if address == 0x4014 {  // OAMDMA
             writeOAM(value)
             return
         }
@@ -123,12 +123,28 @@ extension CPU {
 
 extension CPU.Status {
     mutating func setZN(_ value: UInt8) {
-        if value == 0 { formUnion(.Z) } else { remove(.Z) }
-        if value[7] == 1 { formUnion(.N) } else { remove(.N) }
+        if value == 0 {
+            formUnion(.Z)
+        } else {
+            remove(.Z)
+        }
+        if value[7] == 1 {
+            formUnion(.N)
+        } else {
+            remove(.N)
+        }
     }
 
     mutating func setZN(_ value: Int16) {
-        if value == 0 { formUnion(.Z) } else { remove(.Z) }
-        if value[7] == 1 { formUnion(.N) } else { remove(.N) }
+        if value == 0 {
+            formUnion(.Z)
+        } else {
+            remove(.Z)
+        }
+        if value[7] == 1 {
+            formUnion(.N)
+        } else {
+            remove(.N)
+        }
     }
 }

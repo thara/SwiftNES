@@ -1,9 +1,7 @@
-import Foundation
-
 import Commander
+import Foundation
 import Logging
 import SwiftGD
-
 import SwiftNES
 
 let palletes: [UInt32] = [
@@ -46,4 +44,3 @@ command { (filename: String) in
         exit(EXIT_FAILURE)
     }
 }.run()
-

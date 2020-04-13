@@ -1,6 +1,5 @@
 import CSDL2
 import SDL
-
 import SwiftNES
 
 let screenWidth = NES.width
@@ -30,14 +29,17 @@ final class Emulator {
 
         let windowSize = (
             width: screenWidth * windowScale,
-            height: screenHeight * windowScale)
-        window = try SDLWindow(title: windowTitle,
-                               frame: (
-                                   x: .centered,
-                                   y: .centered,
-                                   width: windowSize.width,
-                                   height: windowSize.height),
-                               options: [.shown, .inputFocus])
+            height: screenHeight * windowScale
+        )
+        window = try SDLWindow(
+            title: windowTitle,
+            frame: (
+                x: .centered,
+                y: .centered,
+                width: windowSize.width,
+                height: windowSize.height
+            ),
+            options: [.shown, .inputFocus])
         fps = UInt32(try window.displayMode().refreshRate)
 
         let driver = SDLRenderer.Driver.default
@@ -60,7 +62,7 @@ final class Emulator {
     }
 
     deinit {
-         SDL.quit()
+        SDL.quit()
     }
 
     func loadNESFile(path: String) throws {

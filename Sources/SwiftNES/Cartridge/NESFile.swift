@@ -1,7 +1,7 @@
 import Foundation
 
-fileprivate extension FileHandle {
-    func readBytes(ofLength length: Int) -> [UInt8] {
+extension FileHandle {
+    fileprivate func readBytes(ofLength length: Int) -> [UInt8] {
         let data = readData(ofLength: length)
         return [UInt8](data)
     }

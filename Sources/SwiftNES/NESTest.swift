@@ -32,23 +32,23 @@ struct NESTest {
 }
 
 #if nestest
-public func nestest(romPath: String) throws {
-    let cartridge = try Cartridge(file: try NESFile(path: romPath))
+    public func nestest(romPath: String) throws {
+        let cartridge = try Cartridge(file: try NESFile(path: romPath))
 
-    let nes = NES()
-    nes.insert(cartridge: cartridge)
+        let nes = NES()
+        nes.insert(cartridge: cartridge)
 
-    while true {
-        nes.step(onLineEnd: {_, _ in })
-        if 26554 < nes.cycles {
-            break
+        while true {
+            nes.step(onLineEnd: { _, _ in })
+            if 26554 < nes.cycles {
+                break
+            }
         }
     }
-}
 #endif
 
-fileprivate extension String {
-    func padding(_ length: Int) -> String {
+extension String {
+    fileprivate func padding(_ length: Int) -> String {
         return padding(toLength: length, withPad: " ", startingAt: 0)
     }
 }

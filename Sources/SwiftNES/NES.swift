@@ -22,7 +22,7 @@ public final class NES {
 
     private var lineBuffer = LineBuffer()
 
-    let samplingFrequency: UInt = 1789772
+    let samplingFrequency: UInt = 1_789_772
     let downSamplingRate: UInt = 44100
 
     public init() {
@@ -40,7 +40,8 @@ public final class NES {
     }
 
     public func runFrame<L: LineRenderer, A: AudioBuffer>(
-        withRenderer renderer: L, withAudio audioBuffer: A) {
+        withRenderer renderer: L, withAudio audioBuffer: A
+    ) {
         let currentFrame = ppu.frames
 
         repeat {
@@ -49,10 +50,13 @@ public final class NES {
     }
 
     public func step<L: LineRenderer, A: AudioBuffer>(
-        withRenderer renderer: L, withAudio audioBuffer: A) {
-#if nestest
-        if !interruptLine.interrupted { nestest.before(cpu: &cpu) }
-#endif
+        withRenderer renderer: L, withAudio audioBuffer: A
+    ) {
+        #if nestest
+            if !interruptLine.interrupted {
+                nestest.before(cpu: &cpu)
+            }
+        #endif
 
         let cpuCycles = cpu.step(interruptLine: interruptLine)
         cycles &+= cpuCycles
@@ -66,10 +70,12 @@ public final class NES {
         //     interruptLine.send(.IRQ)
         // }
 
-#if nestest
-        nestest.print(ppu: ppu, cycles: cycles)
-        if interruptLine.interrupted { return }
-#endif
+        #if nestest
+            nestest.print(ppu: ppu, cycles: cycles)
+            if interruptLine.interrupted {
+                return
+            }
+        #endif
 
         var ppuCycles = cpuCycles &* 3
         while 0 < ppuCycles {

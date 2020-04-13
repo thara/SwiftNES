@@ -30,7 +30,9 @@ struct PulseChannel {
 
     var enabled: Bool = false {
         didSet {
-            if !enabled { lengthCounter = 0 }
+            if !enabled {
+                lengthCounter = 0
+            }
         }
     }
 
@@ -120,7 +122,9 @@ struct TriangleChannel {
 
     var enabled: Bool = false {
         didSet {
-            if !enabled { lengthCounter = 0 }
+            if !enabled {
+                lengthCounter = 0
+            }
         }
     }
 }
@@ -148,7 +152,9 @@ struct NoiseChannel {
 
     var enabled: Bool = false {
         didSet {
-            if !enabled { lengthCounter = 0 }
+            if !enabled {
+                lengthCounter = 0
+            }
         }
     }
 }

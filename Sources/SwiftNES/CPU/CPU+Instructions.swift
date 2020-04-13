@@ -591,9 +591,21 @@ extension CPU {
         let value = read(at: operand)
         let data = A & value
         P.remove([.Z, .V, .N])
-        if data == 0 { P.formUnion(.Z) } else { P.remove(.Z) }
-        if value[6] == 1 { P.formUnion(.V) } else { P.remove(.V) }
-        if value[7] == 1 { P.formUnion(.N) } else { P.remove(.N) }
+        if data == 0 {
+            P.formUnion(.Z)
+        } else {
+            P.remove(.Z)
+        }
+        if value[6] == 1 {
+            P.formUnion(.V)
+        } else {
+            P.remove(.V)
+        }
+        if value[7] == 1 {
+            P.formUnion(.N)
+        } else {
+            P.remove(.N)
+        }
     }
 
     // MARK: - Arithmetic instructions
@@ -604,7 +616,9 @@ extension CPU {
         let val = read(at: operand)
         var result = a &+ val
 
-        if P.contains(.C) { result &+= 1 }
+        if P.contains(.C) {
+            result &+= 1
+        }
 
         P.remove([.C, .Z, .V, .N])
 
@@ -614,8 +628,12 @@ extension CPU {
         let c6 = a7 ^ v7 ^ result[7]
         let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
 
-        if c7 == 1 { P.formUnion(.C) }
-        if c6 ^ c7 == 1 { P.formUnion(.V) }
+        if c7 == 1 {
+            P.formUnion(.C)
+        }
+        if c6 ^ c7 == 1 {
+            P.formUnion(.V)
+        }
 
         A = result
     }
@@ -626,7 +644,9 @@ extension CPU {
         let val = ~read(at: operand)
         var result = a &+ val
 
-        if P.contains(.C) { result &+= 1 }
+        if P.contains(.C) {
+            result &+= 1
+        }
 
         P.remove([.C, .Z, .V, .N])
 
@@ -636,8 +656,12 @@ extension CPU {
         let c6 = a7 ^ v7 ^ result[7]
         let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
 
-        if c7 == 1 { P.formUnion(.C) }
-        if c6 ^ c7 == 1 { P.formUnion(.V) }
+        if c7 == 1 {
+            P.formUnion(.C)
+        }
+        if c6 ^ c7 == 1 {
+            P.formUnion(.V)
+        }
 
         A = result
     }
@@ -648,7 +672,11 @@ extension CPU {
 
         P.remove([.C, .Z, .N])
         P.setZN(cmp)
-        if 0 <= cmp { P.formUnion(.C) } else { P.remove(.C) }
+        if 0 <= cmp {
+            P.formUnion(.C)
+        } else {
+            P.remove(.C)
+        }
 
     }
 
@@ -659,7 +687,11 @@ extension CPU {
 
         P.remove([.C, .Z, .N])
         P.setZN(cmp)
-        if X >= value { P.formUnion(.C) } else { P.remove(.C) }
+        if X >= value {
+            P.formUnion(.C)
+        } else {
+            P.remove(.C)
+        }
 
     }
 
@@ -670,7 +702,11 @@ extension CPU {
 
         P.remove([.C, .Z, .N])
         P.setZN(cmp)
-        if Y >= value { P.formUnion(.C) } else { P.remove(.C) }
+        if Y >= value {
+            P.formUnion(.C)
+        } else {
+            P.remove(.C)
+        }
 
     }
 
@@ -727,7 +763,9 @@ extension CPU {
         var data = read(at: operand)
 
         P.remove([.C, .Z, .N])
-        if data[7] == 1 { P.formUnion(.C) }
+        if data[7] == 1 {
+            P.formUnion(.C)
+        }
 
         data <<= 1
 
@@ -740,7 +778,9 @@ extension CPU {
 
     mutating func ASLForAccumulator(operand: Operand) {
         P.remove([.C, .Z, .N])
-        if A[7] == 1 { P.formUnion(.C) }
+        if A[7] == 1 {
+            P.formUnion(.C)
+        }
 
         A <<= 1
 
@@ -752,7 +792,9 @@ extension CPU {
         var data = read(at: operand)
 
         P.remove([.C, .Z, .N])
-        if data[0] == 1 { P.formUnion(.C) }
+        if data[0] == 1 {
+            P.formUnion(.C)
+        }
 
         data >>= 1
 
@@ -765,7 +807,9 @@ extension CPU {
 
     mutating func LSRForAccumulator(operand: Operand) {
         P.remove([.C, .Z, .N])
-        if A[0] == 1 { P.formUnion(.C) }
+        if A[0] == 1 {
+            P.formUnion(.C)
+        }
 
         A >>= 1
 
@@ -778,10 +822,14 @@ extension CPU {
         let c = data & 0x80
 
         data <<= 1
-        if P.contains(.C) { data |= 0x01 }
+        if P.contains(.C) {
+            data |= 0x01
+        }
 
         P.remove([.C, .Z, .N])
-        if c == 0x80 { P.formUnion(.C) }
+        if c == 0x80 {
+            P.formUnion(.C)
+        }
 
         P.setZN(data)
 
@@ -794,10 +842,14 @@ extension CPU {
         let c = A & 0x80
 
         var a = A << 1
-        if P.contains(.C) { a |= 0x01 }
+        if P.contains(.C) {
+            a |= 0x01
+        }
 
         P.remove([.C, .Z, .N])
-        if c == 0x80 { P.formUnion(.C) }
+        if c == 0x80 {
+            P.formUnion(.C)
+        }
 
         A = a
 
@@ -810,10 +862,14 @@ extension CPU {
         let c = data & 0x01
 
         data >>= 1
-        if P.contains(.C) { data |= 0x80 }
+        if P.contains(.C) {
+            data |= 0x80
+        }
 
         P.remove([.C, .Z, .N])
-        if c == 1 { P.formUnion(.C) }
+        if c == 1 {
+            P.formUnion(.C)
+        }
 
         P.setZN(data)
 
@@ -826,10 +882,14 @@ extension CPU {
         let c = A & 0x01
 
         var a = A >> 1
-        if P.contains(.C) { a |= 0x80 }
+        if P.contains(.C) {
+            a |= 0x80
+        }
 
         P.remove([.C, .Z, .N])
-        if c == 1 { P.formUnion(.C) }
+        if c == 1 {
+            P.formUnion(.C)
+        }
 
         A = a
 
@@ -1019,7 +1079,9 @@ extension CPU {
         // arithmeticShiftLeft excluding tick
         var data = read(at: operand)
         P.remove([.C, .Z, .N])
-        if data[7] == 1 { P.formUnion(.C) }
+        if data[7] == 1 {
+            P.formUnion(.C)
+        }
 
         data <<= 1
         P.setZN(data)
@@ -1035,10 +1097,14 @@ extension CPU {
         let c = data & 0x80
 
         data <<= 1
-        if P.contains(.C) { data |= 0x01 }
+        if P.contains(.C) {
+            data |= 0x01
+        }
 
         P.remove([.C, .Z, .N])
-        if c == 0x80 { P.formUnion(.C) }
+        if c == 0x80 {
+            P.formUnion(.C)
+        }
 
         P.setZN(data)
         write(data, at: operand)
@@ -1051,7 +1117,9 @@ extension CPU {
         // logicalShiftRight excluding tick
         var data = read(at: operand)
         P.remove([.C, .Z, .N])
-        if data[0] == 1 { P.formUnion(.C) }
+        if data[0] == 1 {
+            P.formUnion(.C)
+        }
 
         data >>= 1
 
@@ -1068,10 +1136,14 @@ extension CPU {
         let c = data & 0x01
 
         data >>= 1
-        if P.contains(.C) { data |= 0x80 }
+        if P.contains(.C) {
+            data |= 0x80
+        }
 
         P.remove([.C, .Z, .N])
-        if c == 1 { P.formUnion(.C) }
+        if c == 1 {
+            P.formUnion(.C)
+        }
 
         P.setZN(data)
         write(data, at: operand)

@@ -1,11 +1,8 @@
-import Foundation
-
 import CSDL2
-import SDL
-
 import Commander
+import Foundation
 import Logging
-
+import SDL
 import SwiftNES
 
 var mainLogger = Logger(label: "SwiftNESMain")
@@ -36,11 +33,11 @@ Group {
         }
     }
 
-#if nestest
-    $0.command("nestest") { (romPath: String?) in
-        run {
-            try SwiftNES.nestest(romPath: romPath ?? "nestest.nes")
+    #if nestest
+        $0.command("nestest") { (romPath: String?) in
+            run {
+                try SwiftNES.nestest(romPath: romPath ?? "nestest.nes")
+            }
         }
-    }
-#endif
+    #endif
 }.run()

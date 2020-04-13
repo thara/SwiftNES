@@ -118,7 +118,7 @@ extension PPU {
     }
 }
 
-private extension BinaryInteger {
+extension BinaryInteger {
     @inline(__always)
-    var isOdd: Bool { return self.magnitude % 2 != 0 }
+    fileprivate var isOdd: Bool { return self.magnitude % 2 != 0 }
 }

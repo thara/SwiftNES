@@ -41,7 +41,7 @@ final class PPUMemory: Memory {
         case 0x3F00...0x3FFF:
             paletteRAMIndexes.write(value, at: toPalleteAddress(address))
         default:
-            break // NOP
+            break  // NOP
         }
     }
 

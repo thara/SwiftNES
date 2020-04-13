@@ -18,7 +18,7 @@ extension UInt16 {
     }
 
     var coarseY: UInt16 {
-        return self & 0b1111100000
+        return self & 0b11_11100000
     }
 
     var coarseYScroll: UInt16 {
@@ -26,19 +26,19 @@ extension UInt16 {
     }
 
     var fineY: UInt16 {
-        return self & 0b111000000000000
+        return self & 0b1110000_00000000
     }
 
     var fineYScroll: UInt8 {
-        return UInt8((self & 0b111000000000000) >> 12)
+        return UInt8((self & 0b1110000_00000000) >> 12)
     }
 
     var nameTableAddressIndex: UInt16 {
-        return self & 0b111111111111
+        return self & 0b1111_11111111
     }
 
     var nameTableSelect: UInt16 {
-        return self & 0b110000000000
+        return self & 0b1100_00000000
     }
 
     var nameTableNo: UInt16 {

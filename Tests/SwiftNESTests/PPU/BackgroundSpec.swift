@@ -1,5 +1,5 @@
-import Quick
 import Nimble
+import Quick
 
 @testable import SwiftNES
 
@@ -32,8 +32,8 @@ class BackgroundSpec: QuickSpec {
 
             describe("reloadShift") {
                 it("reload shift registers") {
-                    tile.currentPattern.low = 0b1010100100101101
-                    tile.currentPattern.high = 0b1110110100011001
+                    tile.currentPattern.low = 0b10101001_00101101
+                    tile.currentPattern.high = 0b11101101_00011001
                     tile.currentAttribute.lowLatch = false
                     tile.currentAttribute.highLatch = false
 
@@ -43,8 +43,8 @@ class BackgroundSpec: QuickSpec {
 
                     tile.reload(for: nextPattern, with: 0b1010110)
 
-                    expect(tile.currentPattern.low).to(equal(0b1010100111111111))
-                    expect(tile.currentPattern.high).to(equal(0b1110110100000000))
+                    expect(tile.currentPattern.low).to(equal(0b10101001_11111111))
+                    expect(tile.currentPattern.high).to(equal(0b11101101_00000000))
                     expect(tile.currentAttribute.lowLatch).to(beFalsy())
                     expect(tile.currentAttribute.highLatch).to(beTruthy())
                 }

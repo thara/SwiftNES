@@ -1,6 +1,5 @@
 import CSDL2
 import SDL
-
 import SwiftNES
 
 private let rowPixels = screenWidth

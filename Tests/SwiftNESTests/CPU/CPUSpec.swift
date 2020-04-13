@@ -1,5 +1,5 @@
-import Quick
 import Nimble
+import Quick
 
 @testable import SwiftNES
 
@@ -45,7 +45,7 @@ class CPUSpec: QuickSpec {
                 cpu.Y = 0x59
                 cpu.S = 0x37
                 cpu.P = [CPU.Status.N, CPU.Status.V]
-                cpu.PC = 0b0101011010001101
+                cpu.PC = 0b01010110_10001101
 
                 cpu.write(1, at: 0xFFFB)
                 cpu.write(32, at: 0xFFFC)
@@ -59,7 +59,7 @@ class CPUSpec: QuickSpec {
                 expect(cpu.Y).to(equal(0x59))
                 expect(cpu.S).to(equal(0x34))
                 expect(cpu.P).to(equal([CPU.Status.N, CPU.Status.V, CPU.Status.I]))
-                expect(cpu.PC).to(equal(0b0111111100100000))
+                expect(cpu.PC).to(equal(0b01111111_00100000))
             }
         }
 

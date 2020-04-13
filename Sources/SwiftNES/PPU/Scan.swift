@@ -1,6 +1,8 @@
 struct Scan: CustomDebugStringConvertible {
     enum Update: Equatable {
-        case dot, line(lastLine: Int), frame(lastLine: Int)
+        case dot
+        case line(lastLine: Int)
+        case frame(lastLine: Int)
     }
 
     var dot: Int = 0

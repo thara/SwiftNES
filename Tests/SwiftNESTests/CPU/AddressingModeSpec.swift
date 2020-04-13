@@ -1,5 +1,5 @@
-import Quick
 import Nimble
+import Quick
 
 @testable import SwiftNES
 
@@ -63,7 +63,7 @@ class AddressingModeSpec: QuickSpec {
             context("zeroPageX") {
                 it("return 8 bit operand at addressing by PC added X on memory") {
                     let (operand, pc) = cpu.measurePC { $0.zeroPageX() }
-                    expect(operand).to(equal(0x95)) // (0x90 + 0x05) & 0xFF
+                    expect(operand).to(equal(0x95))  // (0x90 + 0x05) & 0xFF
                     expect(pc).to(equal(1))
                 }
             }
@@ -71,7 +71,7 @@ class AddressingModeSpec: QuickSpec {
             context("zeroPageY") {
                 it("return 8 bit operand at addressing by PC added Y on memory") {
                     let (operand, pc) = cpu.measurePC { $0.zeroPageY() }
-                    expect(operand).to(equal(0x10)) // (0x90 + 0x80) & 0xFF
+                    expect(operand).to(equal(0x10))  // (0x90 + 0x80) & 0xFF
                     expect(pc).to(equal(1))
                 }
             }
@@ -142,9 +142,9 @@ class AddressingModeSpec: QuickSpec {
     }
 }
 
-private extension CPU {
+extension CPU {
 
-    mutating func measurePC(_ fetchOperand: (inout CPU) -> UInt16) -> (UInt16, UInt16) {
+    fileprivate mutating func measurePC(_ fetchOperand: (inout CPU) -> UInt16) -> (UInt16, UInt16) {
         let pc = PC
         let operand = fetchOperand(&self)
         return (operand, PC - pc)
