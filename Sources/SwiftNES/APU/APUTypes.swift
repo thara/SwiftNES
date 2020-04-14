@@ -14,6 +14,14 @@ struct APU {
     var frameInterrupted = false
 }
 
+final class APUPort: IOPort {
+    var apu: APU
+
+    init(apu: APU) {
+        self.apu = apu
+    }
+}
+
 struct PulseChannel {
     var volume: UInt8 = 0
     var sweep: UInt8 = 0

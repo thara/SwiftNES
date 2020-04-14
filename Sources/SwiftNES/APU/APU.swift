@@ -1,16 +1,5 @@
 extension APU {
 
-    mutating func reset() {
-        write(0, to: 0x4017)  // frame irq enabled
-        write(0, to: 0x4015)  // all channels disabled
-        for addr in 0x4000...0x400F {
-            write(0, to: UInt16(addr))
-        }
-        for addr in 0x4010...0x4013 {
-            write(0, to: UInt16(addr))
-        }
-    }
-
     mutating func step<A: AudioBuffer, M: DMCMemoryReader>(audioBuffer: A, memoryReader: M) -> Bool {
         cycles &+= 1
 
@@ -79,7 +68,7 @@ extension APU {
         return cpuStall
     }
 
-    private func sample() -> Float {
+    private mutating func sample() -> Float {
         let p1 = Float(pulse1.output())
         let p2 = Float(pulse2.output())
         let triangle: Float = Float(self.triangle.output())
@@ -93,34 +82,50 @@ extension APU {
     }
 }
 
-extension APU: IOPort {
-    mutating func read(from address: UInt16) -> UInt8 {
+extension APUPort {
+
+    func step<A: AudioBuffer, M: DMCMemoryReader>(audioBuffer: A, memoryReader: M) -> Bool {
+        apu.step(audioBuffer: audioBuffer, memoryReader: memoryReader)
+    }
+
+    func reset() {
+        write(0, to: 0x4017)  // frame irq enabled
+        write(0, to: 0x4015)  // all channels disabled
+        for addr in 0x4000...0x400F {
+            write(0, to: UInt16(addr))
+        }
+        for addr in 0x4010...0x4013 {
+            write(0, to: UInt16(addr))
+        }
+    }
+
+    func read(from address: UInt16) -> UInt8 {
         switch address {
         case 0x4015:
             var value: UInt8 = 0
-            if dmc.interrupted {
+            if apu.dmc.interrupted {
                 value |= 0x80
             }
-            if frameInterrupted && !frameCounter.interruptInhibit {
+            if apu.frameInterrupted && !apu.frameCounter.interruptInhibit {
                 value |= 0x40
             }
-            if 0 < dmc.bytesRemainingCounter {
+            if 0 < apu.dmc.bytesRemainingCounter {
                 value |= 0x20
             }
-            if 0 < noise.lengthCounter {
+            if 0 < apu.noise.lengthCounter {
                 value |= 0x08
             }
-            if 0 < triangle.lengthCounter {
+            if 0 < apu.triangle.lengthCounter {
                 value |= 0x04
             }
-            if 0 < pulse2.lengthCounter {
+            if 0 < apu.pulse2.lengthCounter {
                 value |= 0x02
             }
-            if 0 < pulse1.lengthCounter {
+            if 0 < apu.pulse1.lengthCounter {
                 value |= 0x01
             }
 
-            frameInterrupted = false
+            apu.frameInterrupted = false
 
             return value
         default:
@@ -128,26 +133,26 @@ extension APU: IOPort {
         }
     }
 
-    mutating func write(_ value: UInt8, to address: UInt16) {
+    func write(_ value: UInt8, to address: UInt16) {
         switch address {
         case 0x4000...0x4003:
-            pulse1.write(value, at: address)
+            apu.pulse1.write(value, at: address)
         case 0x4004...0x4007:
-            pulse2.write(value, at: address)
+            apu.pulse2.write(value, at: address)
         case 0x4008...0x400B:
-            triangle.write(value, at: address)
+            apu.triangle.write(value, at: address)
         case 0x400C...0x400F:
-            noise.write(value, at: address)
+            apu.noise.write(value, at: address)
         case 0x4010...0x4013:
-            dmc.write(value, at: address)
+            apu.dmc.write(value, at: address)
         case 0x4015:
-            pulse1.enabled = value[0] == 1
-            pulse2.enabled = value[1] == 1
-            triangle.enabled = value[2] == 1
-            noise.enabled = value[3] == 1
-            dmc.enabled = value[4] == 1
+            apu.pulse1.enabled = value[0] == 1
+            apu.pulse2.enabled = value[1] == 1
+            apu.triangle.enabled = value[2] == 1
+            apu.noise.enabled = value[3] == 1
+            apu.dmc.enabled = value[4] == 1
         case 0x4017:
-            frameCounter.value = value
+            apu.frameCounter.value = value
         default:
             break
         }
