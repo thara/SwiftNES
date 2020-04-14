@@ -71,9 +71,9 @@ extension APU {
     private mutating func sample() -> Float {
         let p1 = Float(pulse1.output())
         let p2 = Float(pulse2.output())
-        let triangle: Float = Float(self.triangle.output())
-        let noise: Float = Float(self.noise.output())
-        let dmc: Float = Float(self.dmc.output())
+        let triangle = Float(self.triangle.output())
+        let noise = Float(self.noise.output())
+        let dmc = Float(self.dmc.output())
 
         let pulseOut: Float
         if p1 != 0.0 || p2 != 0.0 {
