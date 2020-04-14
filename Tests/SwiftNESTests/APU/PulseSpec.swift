@@ -10,6 +10,40 @@ class PulseSpec: QuickSpec {
             pulse = PulseChannel(carryMode: .onesComplement)
         }
 
+        describe("registers") {
+            describe("0x4000") {
+                it("duty, length halt, constant volume, period") {
+                    pulse.write(0b10111111, at: 0x4000)
+
+                    expect(pulse.dutyCycle) == 0b10
+                    expect(pulse.lengthCounterHalt) == true
+                    expect(pulse.useConstantVolume) == true
+                    expect(pulse.envelopePeriod) == 0b1111
+                }
+            }
+
+            describe("0x4001") {
+                it("enable sweep, period, negate, amount") {
+                    pulse.write(0b10101011, at: 0x4001)
+
+                    expect(pulse.sweepEnabled) == true
+                    expect(pulse.sweepPeriod) == 0b010
+                    expect(pulse.sweepNegate) == true
+                    expect(pulse.sweepShift) == 0b011
+                }
+            }
+
+            describe("0x4002 & 0x4003") {
+                it("timer") {
+                    pulse.write(0b00000100, at: 0x4002)
+                    pulse.write(0b11111011, at: 0x4003)
+
+                    expect(pulse.timerReload) == 0b011_00000100
+                    expect(pulse.lengthCounterLoad) == 0b11111
+                }
+            }
+        }
+
         describe("clockTimer") {
             beforeEach {
                 pulse.low = 0b11
