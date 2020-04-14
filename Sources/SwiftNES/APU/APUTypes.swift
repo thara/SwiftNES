@@ -36,7 +36,10 @@ struct PulseChannel {
     var sequencer: UInt = 0
     var timerPeriod: Int16 = 0
 
-    var envelope = Envelope()
+    var envelopeCounter: UInt8 = 0
+    var envelopeDecayLevelCounter: UInt8 = 0
+    var envelopeStart: Bool = false
+    var envelopeLoop: Bool { volume[5] == 1 }
 
     var dutyCycle: Int { Int(volume >> 6) }
     var lengthCounterHalt: Bool { volume[5] == 1 }
@@ -51,7 +54,7 @@ struct PulseChannel {
     var sweepShift: UInt8 { sweep & 0b111 }
 
     var timerHigh: UInt8 { high & 0b111 }
-    var lengthCounterLoad: UInt8 { ( high & 0b11111000) >> 3}
+    var lengthCounterLoad: UInt8 { (high & 0b11111000) >> 3 }
 
     var timerReload: UInt16 { low.u16 | (timerHigh.u16 << 8) }
 
@@ -59,13 +62,6 @@ struct PulseChannel {
         case onesComplement, twosComplement
     }
     let carryMode: CarryMode
-}
-
-struct Envelope {
-    var counter: UInt8 = 0
-    var decayLevelCounter: UInt8 = 0
-    var start: Bool = false
-    var loop: Bool = false
 }
 
 struct Sweep {
@@ -102,7 +98,7 @@ struct TriangleChannel {
 
     var timerLow: UInt8 { low }
     var timerHigh: UInt8 { high & 0b111 }
-    var lengthCounterLoad: UInt8 { ( high & 0b11111000) >> 3}
+    var lengthCounterLoad: UInt8 { (high & 0b11111000) >> 3 }
 
     var linearCounterReloadFlag: Bool = false
 

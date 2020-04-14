@@ -97,67 +97,73 @@ class PulseSpec: QuickSpec {
             context("start is on") {
                 beforeEach {
                     pulse.volume = 0b111
-                    pulse.envelope.start = true
+                    pulse.envelopeStart = true
                 }
 
                 it("updates envelope") {
                     pulse.clockEnvelope()
 
-                    expect(pulse.envelope.decayLevelCounter) == 15
-                    expect(pulse.envelope.counter) == pulse.envelopePeriod
-                    expect(pulse.envelope.start) == false
+                    expect(pulse.envelopeDecayLevelCounter) == 15
+                    expect(pulse.envelopeCounter) == pulse.envelopePeriod
+                    expect(pulse.envelopeStart) == false
                 }
             }
 
             context("start is off") {
                 beforeEach {
                     pulse.volume = 0b111
-                    pulse.envelope.counter = pulse.envelopePeriod
-                    pulse.envelope.start = false
+                    pulse.envelopeCounter = pulse.envelopePeriod
+                    pulse.envelopeStart = false
                 }
 
-                it("decrements envelope's couter") {
-                    let before = pulse.envelope.counter
-                    pulse.clockEnvelope()
+                context("envelope's counter is greater than zero after clocked") {
+                    beforeEach {
+                        pulse.envelopeCounter = 2
+                    }
 
-                    expect(pulse.envelope.counter) == before - 1
+                    it("decrements envelope's couter") {
+                        let before = pulse.envelopeCounter
+                        pulse.clockEnvelope()
+
+                        expect(pulse.envelopeCounter) == before - 1
+                    }
                 }
 
                 context("envelope's counter is zero after clocked") {
                     beforeEach {
-                        pulse.envelope.counter = 1
+                        pulse.envelopeCounter = 0
                     }
 
                     it("reloads envelope's counter") {
                         pulse.clockEnvelope()
 
-                        expect(pulse.envelope.counter) == pulse.envelopePeriod
+                        expect(pulse.envelopeCounter) == pulse.envelopePeriod
                     }
 
                     context("envelope's decayLevelCounter become to be greater than 0 after clocked") {
                         beforeEach {
-                            pulse.envelope.decayLevelCounter = 2
+                            pulse.envelopeDecayLevelCounter = 2
                         }
 
                         it("decrements envelope's decayLevelCounter") {
-                            let before = pulse.envelope.decayLevelCounter
+                            let before = pulse.envelopeDecayLevelCounter
 
                             pulse.clockEnvelope()
 
-                            expect(pulse.envelope.decayLevelCounter) == before - 1
+                            expect(pulse.envelopeDecayLevelCounter) == before - 1
                         }
                     }
 
                     context("envelope's decayLevelCounter become 0 after clocked") {
                         beforeEach {
-                            pulse.envelope.decayLevelCounter = 0
+                            pulse.volume = 0b100000
+                            pulse.envelopeDecayLevelCounter = 0
                         }
 
                         it("reload envelope's decayLevelCounter and loop enabled") {
                             pulse.clockEnvelope()
 
-                            expect(pulse.envelope.loop) == true
-                            expect(pulse.envelope.decayLevelCounter) == 15
+                            expect(pulse.envelopeDecayLevelCounter) == 15
                         }
                     }
                 }

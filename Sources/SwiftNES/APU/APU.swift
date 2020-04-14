@@ -199,19 +199,19 @@ extension PulseChannel {
     }
 
     mutating func clockEnvelope() {
-        if envelope.start {
-            envelope.decayLevelCounter = 15
-            envelope.counter = envelopePeriod
-            envelope.start = false
+        if envelopeStart {
+            envelopeDecayLevelCounter = 15
+            envelopeCounter = envelopePeriod
+            envelopeStart = false
         } else {
-            envelope.counter &-= 1
-            if envelope.counter == 0 {
-                envelope.counter = envelopePeriod
-                if 0 < envelope.decayLevelCounter {
-                    envelope.decayLevelCounter &-= 1
-                } else {
-                    envelope.loop = true
-                    envelope.decayLevelCounter = 15
+            if 0 < envelopeCounter {
+                envelopeCounter &-= 1
+            } else {
+                envelopeCounter = envelopePeriod
+                if 0 < envelopeDecayLevelCounter {
+                    envelopeDecayLevelCounter &-= 1
+                } else if envelopeLoop {
+                    envelopeDecayLevelCounter = 15
                 }
             }
         }
@@ -251,7 +251,7 @@ extension PulseChannel {
         if !enabled || lengthCounter == 0 || timerCounter == 0 || waveforms[dutyCycle][Int(sequencer)] == 0 {
             return 0
         }
-        let volume = useConstantVolume ? envelopePeriod : envelope.decayLevelCounter
+        let volume = useConstantVolume ? envelopePeriod : envelopeDecayLevelCounter
         return volume & 0b1111
     }
 
