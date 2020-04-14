@@ -219,7 +219,7 @@ extension PulseChannel {
 
     mutating func clockSweepUnit() {
         // Updating the period
-        if sweepUnit.counter == 0 && sweepEnabled && !sweepUnitMuted {
+        if sweepCounter == 0 && sweepEnabled && !sweepUnitMuted {
             var changeAmount = timerPeriod >> sweepShift
             if sweepNegate {
                 switch carryMode {
@@ -232,11 +232,11 @@ extension PulseChannel {
             timerPeriod &+= changeAmount
         }
 
-        if sweepUnit.counter == 0 || sweepUnit.reload {
-            sweepUnit.counter = sweepPeriod
-            sweepUnit.reload = false
+        if sweepCounter == 0 || sweepReload {
+            sweepCounter = sweepPeriod
+            sweepReload = false
         } else {
-            sweepUnit.counter &-= 1
+            sweepCounter &-= 1
         }
     }
 

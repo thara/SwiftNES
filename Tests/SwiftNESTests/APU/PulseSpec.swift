@@ -207,50 +207,50 @@ class PulseSpec: QuickSpec {
 
             context("sweep unit counter is not 0") {
                 beforeEach {
-                    pulse.sweepUnit.counter = 3
+                    pulse.sweepCounter = 3
                 }
 
                 it("decrements sweep unit counter") {
-                    let before = pulse.sweepUnit.counter
+                    let before = pulse.sweepCounter
 
                     pulse.clockSweepUnit()
 
-                    expect(pulse.sweepUnit.counter) == before - 1
+                    expect(pulse.sweepCounter) == before - 1
                 }
             }
 
             context("sweep unit counter is 0") {
                 beforeEach {
-                    pulse.sweepUnit.counter = 0
-                    pulse.sweepUnit.reload = true
+                    pulse.sweepCounter = 0
+                    pulse.sweepReload = true
                 }
 
                 it("reloads sweep unit counter and clear reload flag") {
                     pulse.clockSweepUnit()
 
-                    expect(pulse.sweepUnit.counter) == pulse.sweepPeriod
-                    expect(pulse.sweepUnit.reload) == false
+                    expect(pulse.sweepCounter) == pulse.sweepPeriod
+                    expect(pulse.sweepReload) == false
                 }
             }
 
             context("sweep unit reload is true") {
                 beforeEach {
-                    pulse.sweepUnit.counter = 1
-                    pulse.sweepUnit.reload = true
+                    pulse.sweepCounter = 1
+                    pulse.sweepReload = true
                 }
 
                 it("reloads sweep unit counter and clear reload flag") {
                     pulse.clockSweepUnit()
 
-                    expect(pulse.sweepUnit.counter) == pulse.sweepPeriod
-                    expect(pulse.sweepUnit.reload) == false
+                    expect(pulse.sweepCounter) == pulse.sweepPeriod
+                    expect(pulse.sweepReload) == false
                 }
             }
 
             context("sweep unit couner is zero and enabled and not muted") {
                 beforeEach {
                     pulse.sweep = 0b10000001
-                    pulse.sweepUnit.counter = 0
+                    pulse.sweepCounter = 0
                     // not muted
                     pulse.timerPeriod = 0b1000
                 }
@@ -283,7 +283,7 @@ class PulseSpec: QuickSpec {
                         beforeEach {
                             pulse = PulseChannel(carryMode: .twosComplement)
                             pulse.sweep = 0b10101010
-                            pulse.sweepUnit.counter = 0
+                            pulse.sweepCounter = 0
                             // negate = true, shift count = 2
                             pulse.timerPeriod = 0b101010010
                         }

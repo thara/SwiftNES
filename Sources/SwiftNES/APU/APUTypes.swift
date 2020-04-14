@@ -46,7 +46,8 @@ struct PulseChannel {
     var useConstantVolume: Bool { volume[4] == 1 }
     var envelopePeriod: UInt8 { volume & 0b1111 }
 
-    var sweepUnit = Sweep()
+    var sweepCounter: UInt8 = 0
+    var sweepReload = false
 
     var sweepEnabled: Bool { sweep[7] == 1 }
     var sweepPeriod: UInt8 { (sweep & 0b01110000) >> 4 }
@@ -62,11 +63,6 @@ struct PulseChannel {
         case onesComplement, twosComplement
     }
     let carryMode: CarryMode
-}
-
-struct Sweep {
-    var counter: UInt8 = 0
-    var reload = false
 }
 
 struct FrameCounter {
