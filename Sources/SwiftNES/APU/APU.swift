@@ -147,7 +147,7 @@ extension APUPort {
             apu.dmc.write(value, at: address)
         case 0x4015:
             apu.pulse1.enable(value[0] == 1)
-            apu.pulse1.enable(value[1] == 1)
+            apu.pulse2.enable(value[1] == 1)
             apu.triangle.enabled = value[2] == 1
             apu.noise.enabled = value[3] == 1
             apu.dmc.enabled = value[4] == 1
