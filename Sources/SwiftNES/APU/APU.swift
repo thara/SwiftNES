@@ -213,9 +213,9 @@ extension PulseChannel {
             if sweepNegate {
                 switch carryMode {
                 case .onesComplement:
-                    changeAmount = changeAmount * -1 - 1
+                    changeAmount = ~changeAmount
                 case .twosComplement:
-                    changeAmount = changeAmount * -1  // swiftlint:disable shorthand_operator
+                    changeAmount = -changeAmount  // swiftlint:disable shorthand_operator
                 }
             }
             timerPeriod &+= changeAmount
