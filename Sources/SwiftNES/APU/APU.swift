@@ -75,10 +75,22 @@ extension APU {
         let noise: Float = Float(self.noise.output())
         let dmc: Float = Float(self.dmc.output())
 
-        let pulseOut = 95.88 / ((8128 / (p1 + p2)) + 100)
-        let tndOut = 159.79 / (1 / ((triangle / 8227) + (noise / 12241) + (dmc / 22638)) + 100)
+        let pulseOut: Float
+        if p1 != 0.0 || p2 != 0.0 {
+            pulseOut = 95.88 / ((8128 / (p1 + p2)) + 100)
+        } else {
+            pulseOut = 0.0
+        }
 
-        return pulseOut + tndOut
+        let tndOut: Float
+        if triangle != 0.0 || noise != 0.0 || dmc != 0.0 {
+            tndOut = 159.79 / (1 / ((triangle / 8227) + (noise / 12241) + (dmc / 22638)) + 100)
+        } else {
+            tndOut = 0.0
+        }
+
+        return pulseOut
+        // return pulseOut + tndOut
     }
 }
 
