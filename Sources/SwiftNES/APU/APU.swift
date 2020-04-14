@@ -146,8 +146,8 @@ extension APUPort {
         case 0x4010...0x4013:
             apu.dmc.write(value, at: address)
         case 0x4015:
-            apu.pulse1.enabled = value[0] == 1
-            apu.pulse2.enabled = value[1] == 1
+            apu.pulse1.enable(value[0] == 1)
+            apu.pulse1.enable(value[1] == 1)
             apu.triangle.enabled = value[2] == 1
             apu.noise.enabled = value[3] == 1
             apu.dmc.enabled = value[4] == 1
@@ -160,8 +160,9 @@ extension APUPort {
 }
 
 extension PulseChannel {
+
     mutating func write(_ value: UInt8, at address: UInt16) {
-        switch address & 0x4003 {
+        switch address {
         case 0x4000:
             volume = value
         case 0x4001:
@@ -170,8 +171,18 @@ extension PulseChannel {
             low = value
         case 0x4003:
             high = value
+            if enabled {
+                lengthCounter = UInt(lookupLength(lengthCounterLoad))
+            }
         default:
             break
+        }
+    }
+
+    mutating func enable(_ value: Bool) {
+        enabled = value
+        if !enabled {
+            lengthCounter = 0
         }
     }
 
@@ -236,6 +247,7 @@ extension PulseChannel {
     }
 
     func output() -> UInt8 {
+        // print(carryMode, enabled, lengthCounter, timerCounter, dutyCycle, sequencer)
         if !enabled || lengthCounter == 0 || timerCounter == 0 || waveforms[dutyCycle][Int(sequencer)] == 0 {
             return 0
         }

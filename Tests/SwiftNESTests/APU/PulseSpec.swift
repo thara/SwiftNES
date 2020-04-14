@@ -338,14 +338,14 @@ class PulseSpec: QuickSpec {
             }
         }
 
-        describe("high did set") {
+        describe("enable") {
             context("if pulse is enabled") {
                 beforeEach {
-                    pulse.enabled = true
+                    pulse.enable(true)
                 }
 
                 it("reloads the length counter by lookup table") {
-                    pulse.high = 0b10101000
+                    pulse.write(0b10101000, at: 0x4003)
                     // 1 0101 (15)
                     expect(pulse.lengthCounter) == 0x0A
                 }
@@ -353,13 +353,13 @@ class PulseSpec: QuickSpec {
 
             context("if pulse is disabled") {
                 beforeEach {
-                    pulse.enabled = false
+                    pulse.enable(false)
                 }
 
                 it("does't reload the length counter") {
                     let before = pulse.lengthCounter
 
-                    pulse.high = 0b11
+                    pulse.write(0b11, at: 0x4003)
 
                     expect(pulse.lengthCounter) == before
                 }

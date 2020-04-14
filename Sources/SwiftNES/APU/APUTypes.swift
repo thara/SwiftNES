@@ -26,23 +26,11 @@ struct PulseChannel {
     var volume: UInt8 = 0
     var sweep: UInt8 = 0
     var low: UInt8 = 0
-    var high: UInt8 = 0 {
-        didSet {
-            if enabled {
-                lengthCounter = UInt(lookupLength((high & 0b11111000) >> 3))
-            }
-        }
-    }
+    var high: UInt8 = 0
 
     var lengthCounter: UInt = 0
 
-    var enabled: Bool = false {
-        didSet {
-            if !enabled {
-                lengthCounter = 0
-            }
-        }
-    }
+    var enabled: Bool = false
 
     var timerCounter: UInt16 = 0
     var sequencer: UInt = 0
@@ -63,6 +51,7 @@ struct PulseChannel {
     var sweepShift: UInt8 { sweep & 0b111 }
 
     var timerHigh: UInt8 { high & 0b111 }
+    var lengthCounterLoad: UInt8 { ( high & 0b11111000) >> 3}
 
     var timerReload: UInt16 { low.u16 | (timerHigh.u16 << 8) }
 
@@ -70,10 +59,6 @@ struct PulseChannel {
         case onesComplement, twosComplement
     }
     let carryMode: CarryMode
-
-    init(carryMode: CarryMode) {
-        self.carryMode = carryMode
-    }
 }
 
 struct Envelope {
@@ -106,7 +91,7 @@ struct TriangleChannel {
         didSet {
             linearCounterReloadFlag = true
             if enabled {
-                lengthCounter = UInt(lookupLength((high & 0b11111000) >> 3))
+                lengthCounter = UInt(lookupLength(lengthCounterLoad))
             }
         }
     }
@@ -117,6 +102,7 @@ struct TriangleChannel {
 
     var timerLow: UInt8 { low }
     var timerHigh: UInt8 { high & 0b111 }
+    var lengthCounterLoad: UInt8 { ( high & 0b11111000) >> 3}
 
     var linearCounterReloadFlag: Bool = false
 
@@ -155,7 +141,7 @@ struct NoiseChannel {
     var mode: Bool { period[7] == 1 }
     var timerPeriod: UInt8 { period & 0b1111 }
 
-    var shiftRegister: UInt16 = 0
+    var shiftRegister: UInt16 = 1
     var lengthCounter: UInt = 0
 
     var enabled: Bool = false {
