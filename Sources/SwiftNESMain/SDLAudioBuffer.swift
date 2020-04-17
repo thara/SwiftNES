@@ -7,9 +7,9 @@ private let bufferCount: UInt32 = 3
 
 class SDLAudioBuffer: AudioBuffer {
 
-    var buffer = [Float](repeating: 0.0, count: 2048 * 2)
+    var samples = [Float](repeating: 0.0, count: 4096 * 2)
     var index: Int = 0
-    var prev: UInt8 = 0
+    var prev: Float = 0.0
 
     var audioSpec = SDLAudioSpec()
 
@@ -27,38 +27,45 @@ class SDLAudioBuffer: AudioBuffer {
     }
 
     func write(_ sample: Float) {
-        guard index < buffer.count else {
+        guard index < samples.count else {
             return
         }
 
-        buffer[index] = sample
+        samples[index] = sample
         index &+= 1
     }
 
-    func fill(into samples: UnsafeMutablePointer<UInt8>, count: Int32) {
-        let src = buffer.withUnsafeBufferPointer { Data(buffer: $0) }
+    func fill(into buffer: UnsafeMutablePointer<UInt8>, count: Int32) {
+        let bufferCount = Int(count) / MemoryLayout<Float>.size
 
-        let readCount = min(Int(count), index)
-        src.copyBytes(to: samples, from: 0..<readCount)
+        buffer.withMemoryRebound(to: Float.self, capacity: bufferCount) { p in
+            let p = UnsafeMutableBufferPointer(start: p, count: bufferCount)
 
-        prev = src.last!
-
-        if readCount == index {
-            let base = (samples + index)
-            for b in base..<(base + Int(count) - index) {
-                b.pointee = prev
+            var writeIndex = 0
+            for _ in stride(from: p.startIndex, to: p.endIndex, by: 1) {
+                let sample: Float
+                if index <= writeIndex {
+                    sample = prev
+                } else {
+                    sample = samples[writeIndex]
+                }
+                if 0 < sample {
+                    print(writeIndex, index, prev, sample)
+                }
+                p[writeIndex] = sample
+                prev = sample
+                p[writeIndex] *= 0.10  // Take care of your ears...
+                writeIndex &+= 1
             }
-        }
 
-        var i = 0
-
-        if Int(count) < index {
-            for j in Int(count)..<index {
-                buffer[i] = buffer[j]
-                i &+= 1
+            writeIndex = 0
+            if bufferCount < index {
+                for i in stride(from: bufferCount, to: index, by: 1) {
+                    samples[writeIndex] = samples[i]
+                    writeIndex &+= 1
+                }
             }
+            self.index = writeIndex
         }
-
-        self.index = i
     }
 }

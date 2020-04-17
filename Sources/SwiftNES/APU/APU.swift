@@ -82,15 +82,14 @@ extension APU {
             pulseOut = 0.0
         }
 
-        let tndOut: Float
-        if triangle != 0.0 || noise != 0.0 || dmc != 0.0 {
-            tndOut = 159.79 / (1 / ((triangle / 8227) + (noise / 12241) + (dmc / 22638)) + 100)
-        } else {
-            tndOut = 0.0
-        }
+        let tndOut: Float = 0.0
+        // if triangle != 0.0 || noise != 0.0 || dmc != 0.0 {
+        //     tndOut = 159.79 / (1 / ((triangle / 8227) + (noise / 12241) + (dmc / 22638)) + 100)
+        // } else {
+        //     tndOut = 0.0
+        // }
 
-        return pulseOut
-        // return pulseOut + tndOut
+        return pulseOut + tndOut
     }
 }
 

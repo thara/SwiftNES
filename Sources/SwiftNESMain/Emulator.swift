@@ -58,7 +58,8 @@ final class Emulator {
 
         event = SDL_Event()
 
-        audioBuffer = SDLAudioBuffer(sampleRate: 96000, channels: 2, bufferSize: 4096)
+        //audioBuffer = SDLAudioBuffer(sampleRate: 96000, channels: 2, bufferSize: 4096)
+        audioBuffer = SDLAudioBuffer(sampleRate: 44100, channels: 1, bufferSize: 4096)
     }
 
     deinit {
