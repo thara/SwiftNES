@@ -170,6 +170,23 @@ extension APUPort {
 
 extension PulseChannel {
 
+    var envelopeLoop: Bool { volume[5] == 1 }
+
+    var dutyCycle: Int { Int(volume >> 6) }
+    var lengthCounterHalt: Bool { volume[5] == 1 }
+    var useConstantVolume: Bool { volume[4] == 1 }
+    var envelopePeriod: UInt8 { volume & 0b1111 }
+
+    var sweepEnabled: Bool { sweep[7] == 1 }
+    var sweepPeriod: UInt8 { (sweep & 0b01110000) >> 4 }
+    var sweepNegate: Bool { sweep[3] == 1 }
+    var sweepShift: UInt8 { sweep & 0b111 }
+
+    var timerHigh: UInt8 { high & 0b111 }
+    var lengthCounterLoad: UInt8 { (high & 0b11111000) >> 3 }
+
+    var timerReload: UInt16 { low.u16 | (timerHigh.u16 << 8) }
+
     mutating func write(_ value: UInt8, at address: UInt16) {
         switch address {
         case 0x4000:
@@ -200,9 +217,9 @@ extension PulseChannel {
             timerCounter &-= 1
         } else {
             timerCounter = timerReload
-            sequencer &+= 1
-            if 8 <= sequencer {
-                sequencer = 0
+            timerSequencer &+= 1
+            if timerSequencer == 8 {
+                timerSequencer = 0
             }
         }
     }
@@ -257,7 +274,7 @@ extension PulseChannel {
 
     func output() -> UInt8 {
         // print(carryMode, enabled, lengthCounter, timerCounter, dutyCycle, sequencer)
-        if !enabled || lengthCounter == 0 || timerCounter == 0 || waveforms[dutyCycle][Int(sequencer)] == 0 {
+        if lengthCounter == 0 || sweepUnitMuted || waveforms[dutyCycle][timerSequencer] == 0 {
             return 0
         }
         let volume = useConstantVolume ? envelopePeriod : envelopeDecayLevelCounter
