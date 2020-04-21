@@ -193,13 +193,18 @@ extension PulseChannel {
             volume = value
         case 0x4001:
             sweep = value
+            sweepReload = true
         case 0x4002:
             low = value
+            timerPeriod = timerReload
         case 0x4003:
             high = value
             if enabled {
                 lengthCounter = UInt(lookupLength(lengthCounterLoad))
             }
+            timerPeriod = timerReload
+            timerSequencer = 0
+            envelopeStart = true
         default:
             break
         }
@@ -245,14 +250,14 @@ extension PulseChannel {
 
     mutating func clockSweepUnit() {
         // Updating the period
-        if sweepCounter == 0 && sweepEnabled && !sweepUnitMuted {
+        if sweepCounter == 0 && sweepEnabled && sweepShift != 0 && !sweepUnitMuted {
             var changeAmount = timerPeriod >> sweepShift
             if sweepNegate {
                 switch carryMode {
                 case .onesComplement:
                     changeAmount = ~changeAmount
                 case .twosComplement:
-                    changeAmount = -changeAmount  // swiftlint:disable shorthand_operator
+                    changeAmount = ~changeAmount + 1 // swiftlint:disable shorthand_operator
                 }
             }
             timerPeriod &+= changeAmount
