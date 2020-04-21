@@ -15,7 +15,7 @@ class SDLAudioBuffer: AudioBuffer {
 
     init(sampleRate: Int32, channels: UInt8, bufferSize: UInt16) {
         audioSpec.freq = sampleRate
-        audioSpec.format = UInt16(AUDIO_S16SYS)
+        audioSpec.format = UInt16(AUDIO_F32LSB)
         audioSpec.channels = channels
         audioSpec.silence = 0
         audioSpec.samples = bufferSize
@@ -42,7 +42,7 @@ class SDLAudioBuffer: AudioBuffer {
             let p = UnsafeMutableBufferPointer(start: p, count: bufferCount)
 
             var writeIndex = 0
-            for _ in stride(from: p.startIndex, to: p.endIndex, by: 1) {
+            for i in stride(from: p.startIndex, to: p.endIndex, by: 1) {
                 let sample: Float
                 if index <= writeIndex {
                     sample = prev
@@ -52,7 +52,7 @@ class SDLAudioBuffer: AudioBuffer {
                 if 0 < sample {
                     print(writeIndex, index, prev, sample)
                 }
-                p[writeIndex] = sample
+                p[i] = sample
                 prev = sample
                 p[writeIndex] *= 0.10  // Take care of your ears...
                 writeIndex &+= 1
