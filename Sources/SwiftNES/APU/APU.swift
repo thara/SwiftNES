@@ -21,11 +21,9 @@ extension APU {
         if cycles % framePeriod == 0 {
             switch frameCounter.mode {
             case .fourStep:
-                if frameCounter.step < 4 {
-                    pulse1.clockEnvelope()
-                    pulse2.clockEnvelope()
-                    triangle.clockLinearCounter()
-                }
+                pulse1.clockEnvelope()
+                pulse2.clockEnvelope()
+                triangle.clockLinearCounter()
 
                 if frameCounter.step == 1 || frameCounter.step == 3 {
                     pulse1.clockLengthCounter()
@@ -40,7 +38,7 @@ extension APU {
                     frameInterrupted = true
                 }
 
-                frameCounter.step = (frameCounter.step + 1) % 5
+                frameCounter.step = (frameCounter.step + 1) % 4
             case .fiveStep:
                 if frameCounter.step < 4 || frameCounter.step == 5 {
                     pulse1.clockEnvelope()
