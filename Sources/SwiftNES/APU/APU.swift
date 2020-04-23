@@ -189,11 +189,12 @@ extension Oscillator {
 
 extension PulseChannel: Oscillator {
 
-    var envelopeLoop: Bool { volume[5] == 1 }
-
     var dutyCycle: Int { Int(volume >> 6) }
+
+    var envelopeLoop: Bool { volume[5] == 1 }
     var lengthCounterHalt: Bool { volume[5] == 1 }
     var useConstantVolume: Bool { volume[4] == 1 }
+
     var envelopePeriod: UInt8 { volume & 0b1111 }
 
     var sweepEnabled: Bool { sweep[7] == 1 }
