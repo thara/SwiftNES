@@ -200,7 +200,7 @@ extension PulseChannel {
         case 0x4003:
             high = value
             if enabled {
-                lengthCounter = UInt(lookupLength(lengthCounterLoad))
+                lengthCounter = lengthTable[Int(lengthCounterLoad)]
             }
             timerPeriod = timerReload
             timerSequencer = 0
@@ -474,29 +474,9 @@ let waveforms: [[UInt8]] = [
     [1, 0, 0, 1, 1, 1, 1, 1],  // 25% negated
 ]
 
-func lookupLength(_ bitPattern: UInt8) -> Int {
-    let tableIndex = Int(bitPattern & 0b11110000 >> 4)
-    let lengthIndex = Int(bitPattern[4])
-    return lookupTable[tableIndex][lengthIndex]
-}
-
-private let lookupTable = [
-    [0x0A, 0xFE],
-    [0x14, 0x02],
-    [0x28, 0x04],
-    [0x50, 0x06],
-    [0xA0, 0x08],
-    [0x3C, 0x0A],
-    [0x0E, 0x0C],
-    [0x1A, 0x0E],
-    [0x0C, 0x10],
-    [0x18, 0x12],
-    [0x30, 0x14],
-    [0x60, 0x16],
-    [0xC0, 0x18],
-    [0x48, 0x1A],
-    [0x10, 0x1C],
-    [0x20, 0x1E],
+let lengthTable: [UInt] = [
+    10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,
+    12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30
 ]
 
 private let dmcRates = [428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54]

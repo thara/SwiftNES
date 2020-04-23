@@ -67,7 +67,7 @@ struct TriangleChannel {
         didSet {
             linearCounterReloadFlag = true
             if enabled {
-                lengthCounter = UInt(lookupLength(lengthCounterLoad))
+                lengthCounter = lengthTable[Int(lengthCounterLoad)]
             }
         }
     }
@@ -105,7 +105,7 @@ struct NoiseChannel {
     var envelopeRestart: UInt8 = 0 {
         didSet {
             if enabled {
-                lengthCounter = UInt(lookupLength((envelopeRestart & 0b11111000) >> 3))
+                lengthCounter = lengthTable[Int((envelopeRestart & 0b11111000) >> 3)]
             }
         }
     }
