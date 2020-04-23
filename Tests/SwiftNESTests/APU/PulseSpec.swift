@@ -71,23 +71,23 @@ class PulseSpec: QuickSpec {
                 }
 
                 it("reloads timerCounter and increments sequencer") {
-                    let before = pulse.sequencer
+                    let before = pulse.timerSequencer
 
                     pulse.clockTimer()
 
                     expect(pulse.timerCounter) == 0b11
-                    expect(pulse.sequencer) == before + 1
+                    expect(pulse.timerSequencer) == before + 1
                 }
 
                 context("if sequencer become over 8") {
                     beforeEach {
-                        pulse.sequencer = 7
+                        pulse.timerSequencer = 7
                     }
 
                     it("reset sequencer") {
                         pulse.clockTimer()
 
-                        expect(pulse.sequencer) == 0
+                        expect(pulse.timerSequencer) == 0
                     }
                 }
             }
@@ -350,10 +350,10 @@ class PulseSpec: QuickSpec {
                     pulse.enable(true)
                 }
 
-                it("reloads the length counter by lookup table") {
+                it("reloads the length counter by length table") {
                     pulse.write(0b10101000, at: 0x4003)
-                    // 1 0101 (15)
-                    expect(pulse.lengthCounter) == 0x0A
+                    // 1 0101 (21)
+                    expect(pulse.lengthCounter) == 0x14
                 }
             }
 
