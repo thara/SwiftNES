@@ -62,10 +62,13 @@ public final class NES {
         let cpuCycles = cpu.step(interruptLine: interruptLine)
         cycles &+= cpuCycles
 
-        let cpuSteel = apu.step(audioBuffer: audioBuffer, memoryReader: cpuMemory)
-        if cpuSteel {
-            cycles &+= 4
+        for _ in 0..<cpuCycles {
+            let cpuSteel = apu.step(audioBuffer: audioBuffer, memoryReader: cpuMemory)
+            if cpuSteel {
+                cycles &+= 4
+            }
         }
+
         //FIXME
         // if apu.frameInterrupted {
         //     interruptLine.send(.IRQ)
