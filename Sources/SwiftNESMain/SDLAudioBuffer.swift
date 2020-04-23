@@ -39,33 +39,32 @@ class SDLAudioBuffer: AudioBuffer {
         let bufferCount = Int(count) / MemoryLayout<Float>.size
 
         buffer.withMemoryRebound(to: Float.self, capacity: bufferCount) { p in
-            let p = UnsafeMutableBufferPointer(start: p, count: bufferCount)
+            var p = p
 
             var writeIndex = 0
-            for i in stride(from: p.startIndex, to: p.endIndex, by: 1) {
+            for _ in 0..<bufferCount {
                 let sample: Float
-                if index <= writeIndex {
+                if self.index <= writeIndex {
                     sample = prev
                 } else {
                     sample = samples[writeIndex]
                 }
-                if 0 < sample {
-                    print(writeIndex, index, prev, sample)
-                }
-                p[i] = sample
+
+                p.pointee = sample
+                p += 1
+
                 prev = sample
-                p[writeIndex] *= 0.10  // Take care of your ears...
                 writeIndex &+= 1
             }
 
-            writeIndex = 0
+            var index = 0
             if bufferCount < index {
                 for i in stride(from: bufferCount, to: index, by: 1) {
-                    samples[writeIndex] = samples[i]
-                    writeIndex &+= 1
+                    samples[index] = samples[i]
+                    index &+= 1
                 }
             }
-            self.index = writeIndex
+            self.index = index
         }
     }
 }
