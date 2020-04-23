@@ -19,13 +19,13 @@ extension APU {
         triangle.clockTimer()
 
         if cycles % framePeriod == 0 {
-            switch frameCounter.mode {
+            switch frameSequenceMode {
             case .fourStep:
                 pulse1.clockEnvelope()
                 pulse2.clockEnvelope()
                 triangle.clockLinearCounter()
 
-                if frameCounter.step == 1 || frameCounter.step == 3 {
+                if frameSequenceStep == 1 || frameSequenceStep == 3 {
                     pulse1.clockLengthCounter()
                     pulse1.clockSweepUnit()
                     pulse2.clockLengthCounter()
@@ -34,19 +34,19 @@ extension APU {
                     noise.clockLengthCounter()
                 }
 
-                if frameCounter.step == 3 && !frameCounter.interruptInhibit {
+                if frameSequenceStep == 3 && !frameInterruptInhibit {
                     frameInterrupted = true
                 }
 
-                frameCounter.step = (frameCounter.step + 1) % 4
+                frameSequenceStep = (frameSequenceStep + 1) % 4
             case .fiveStep:
-                if frameCounter.step < 4 || frameCounter.step == 5 {
+                if frameSequenceStep < 4 || frameSequenceStep == 5 {
                     pulse1.clockEnvelope()
                     pulse2.clockEnvelope()
                     triangle.clockLinearCounter()
                 }
 
-                if frameCounter.step == 1 || frameCounter.step == 4 {
+                if frameSequenceStep == 1 || frameSequenceStep == 4 {
                     pulse1.clockLengthCounter()
                     pulse1.clockSweepUnit()
                     pulse2.clockLengthCounter()
@@ -55,7 +55,7 @@ extension APU {
                     noise.clockLengthCounter()
                 }
 
-                frameCounter.step = (frameCounter.step + 1) % 5
+                frameSequenceStep = (frameSequenceStep + 1) % 5
             }
 
             if dmc.interrupted {
@@ -89,6 +89,11 @@ extension APU {
 
         return pulseOut + tndOut
     }
+
+    var frameInterruptInhibit: Bool { frameCounterControl[6] == 1 }
+
+    enum FrameSequenceMode { case fourStep, fiveStep }
+    var frameSequenceMode: FrameSequenceMode { frameCounterControl[7] == 0 ? .fourStep : .fiveStep }
 }
 
 extension APUPort {
@@ -115,7 +120,7 @@ extension APUPort {
             if apu.dmc.interrupted {
                 value |= 0x80
             }
-            if apu.frameInterrupted && !apu.frameCounter.interruptInhibit {
+            if apu.frameInterrupted && !apu.frameInterruptInhibit {
                 value |= 0x40
             }
             if 0 < apu.dmc.bytesRemainingCounter {
@@ -157,18 +162,32 @@ extension APUPort {
         case 0x4015:
             apu.pulse1.enable(value[0] == 1)
             apu.pulse2.enable(value[1] == 1)
-            apu.triangle.enabled = value[2] == 1
-            apu.noise.enabled = value[3] == 1
+            apu.triangle.enable(value[2] == 1)
+            apu.noise.enable(value[3] == 1)
             apu.dmc.enabled = value[4] == 1
         case 0x4017:
-            apu.frameCounter.value = value
+            apu.frameCounterControl = value
         default:
             break
         }
     }
 }
 
-extension PulseChannel {
+protocol Oscillator {
+    var enabled: Bool { get set }
+    var lengthCounter: UInt { get set }
+}
+
+extension Oscillator {
+    mutating func enable(_ value: Bool) {
+        enabled = value
+        if !enabled {
+            lengthCounter = 0
+        }
+    }
+}
+
+extension PulseChannel: Oscillator {
 
     var envelopeLoop: Bool { volume[5] == 1 }
 
@@ -207,13 +226,6 @@ extension PulseChannel {
             envelopeStart = true
         default:
             break
-        }
-    }
-
-    mutating func enable(_ value: Bool) {
-        enabled = value
-        if !enabled {
-            lengthCounter = 0
         }
     }
 
@@ -278,7 +290,6 @@ extension PulseChannel {
     }
 
     func output() -> UInt8 {
-        // print(carryMode, enabled, lengthCounter, timerCounter, dutyCycle, sequencer)
         if lengthCounter == 0 || sweepUnitMuted || waveforms[dutyCycle][timerSequencer] == 0 {
             return 0
         }
@@ -291,7 +302,18 @@ extension PulseChannel {
     }
 }
 
-extension TriangleChannel {
+extension TriangleChannel: Oscillator {
+
+    var controlFlag: Bool { linearCounterSetup[7] == 1 }
+    var lengthCounterHalt: Bool { linearCounterSetup[7] == 1 }
+    var linearCounterReload: UInt8 { linearCounterSetup & 0b01111111 }
+
+    var timerLow: UInt8 { low }
+    var timerHigh: UInt8 { high & 0b111 }
+    var lengthCounterLoad: UInt8 { (high & 0b11111000) >> 3 }
+
+    var timerReload: UInt16 { low.u16 | (timerHigh.u16 << 8) }
+
     mutating func write(_ value: UInt8, at address: UInt16) {
         switch address {
         case 0x4008:
@@ -300,6 +322,10 @@ extension TriangleChannel {
             low = value
         case 0x400B:
             high = value
+            linearCounterReloadFlag = true
+            if enabled {
+                lengthCounter = lengthTable[Int(lengthCounterLoad)]
+            }
         default:
             break
         }
@@ -348,7 +374,15 @@ extension TriangleChannel {
     }
 }
 
-extension NoiseChannel {
+extension NoiseChannel: Oscillator {
+
+    var lengthCounterHalt: Bool { envelope[5] == 1 }
+    var useConstantVolume: Bool { envelope[4] == 1 }
+    var envelopePeriod: UInt8 { envelope & 0b1111 }
+
+    var mode: Bool { period[7] == 1 }
+    var timerPeriod: UInt8 { period & 0b1111 }
+
     mutating func write(_ value: UInt8, at address: UInt16) {
         switch address {
         case 0x400C:
@@ -357,6 +391,9 @@ extension NoiseChannel {
             period = value
         case 0x400F:
             envelopeRestart = value
+            if enabled {
+                lengthCounter = lengthTable[Int((envelopeRestart & 0b11111000) >> 3)]
+            }
         default:
             break
         }
@@ -384,12 +421,22 @@ extension NoiseChannel {
 }
 
 extension DMC {
+    var irqEnabled: Bool { flags[7] == 1 }
+    var loopFlag: Bool { flags[6] == 1 }
+    var rateIndex: UInt8 { flags & 0b1111 }
+
+    var directLoad: UInt8 { direct & 0b01111111 }
+
+    var sampleAddress: UInt16 { 0xC000 + UInt16(address) * 64 }
+    var sampleLength: UInt16 { UInt16(length) * 16 + 1 }
+
     mutating func write(_ value: UInt8, at address: UInt16) {
         switch address {
         case 0x4010:
             flags = value
         case 0x4011:
             direct = value
+            outputLevel = directLoad
         case 0x4012:
             self.address = value
         case 0x4013:
