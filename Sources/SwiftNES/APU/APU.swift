@@ -385,7 +385,7 @@ extension NoiseChannel: Oscillator {
     var envelopePeriod: UInt8 { envelope & 0b1111 }
 
     var mode: Bool { period[7] == 1 }
-    var timerPeriod: UInt8 { period & 0b1111 }
+    var timerEntry: UInt8 { period & 0b1111 }
 
     mutating func write(_ value: UInt8, at address: UInt16) {
         switch address {
@@ -393,6 +393,7 @@ extension NoiseChannel: Oscillator {
             envelope = value
         case 0x400E:
             period = value
+            timerPeriod = noiseTimerPeriodTable[Int(timerEntry)]
         case 0x400F:
             if enabled {
                 lengthCounter = lengthTable[Int((value & 0b11111000) >> 3)]
@@ -404,10 +405,16 @@ extension NoiseChannel: Oscillator {
     }
 
     mutating func clockTimer() {
-        // LFSR
-        let feedback = shiftRegister ^ shiftRegister[mode ? 6 : 1]
-        shiftRegister &>>= 1
-        shiftRegister |= (feedback << 14)
+        if 0 < timerCounter {
+            timerCounter &-= 1
+        } else {
+            timerCounter = timerPeriod
+
+            // LFSR
+            let feedback = shiftRegister ^ shiftRegister[mode ? 6 : 1]
+            shiftRegister &>>= 1
+            shiftRegister |= (feedback << 14)
+        }
     }
 
     mutating func clockEnvelope() {
@@ -439,7 +446,8 @@ extension NoiseChannel: Oscillator {
         guard shiftRegister[0] == 0 || lengthCounter == 0 else {
             return 0
         }
-        return UInt8(shiftRegister[0])
+        let volume = useConstantVolume ? envelopePeriod : envelopeDecayLevelCounter
+        return volume & 0b1111
     }
 }
 
@@ -547,6 +555,10 @@ let waveforms: [[UInt8]] = [
 let lengthTable: [UInt] = [
     10, 254, 20, 2, 40, 4, 80, 6, 160, 8, 60, 10, 14, 12, 26, 14,
     12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30,
+]
+
+let noiseTimerPeriodTable: [UInt16] = [
+    4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068
 ]
 
 private let dmcRates = [428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54]

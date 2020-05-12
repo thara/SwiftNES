@@ -77,6 +77,9 @@ struct NoiseChannel {
     var shiftRegister: UInt16 = 1
     var lengthCounter: UInt = 0
 
+    var timerCounter: UInt16 = 0
+    var timerPeriod: UInt16 = 0
+
     var enabled: Bool = false
 }
 
