@@ -24,6 +24,7 @@ extension APU {
                 pulse1.clockEnvelope()
                 pulse2.clockEnvelope()
                 triangle.clockLinearCounter()
+                noise.clockEnvelope()
 
                 if frameSequenceStep == 1 || frameSequenceStep == 3 {
                     pulse1.clockLengthCounter()
@@ -44,6 +45,7 @@ extension APU {
                     pulse1.clockEnvelope()
                     pulse2.clockEnvelope()
                     triangle.clockLinearCounter()
+                    noise.clockEnvelope()
                 }
 
                 if frameSequenceStep == 1 || frameSequenceStep == 4 {
@@ -377,6 +379,7 @@ extension TriangleChannel: Oscillator {
 
 extension NoiseChannel: Oscillator {
 
+    var envelopeLoop: Bool { envelope[5] == 1 }
     var lengthCounterHalt: Bool { envelope[5] == 1 }
     var useConstantVolume: Bool { envelope[4] == 1 }
     var envelopePeriod: UInt8 { envelope & 0b1111 }
@@ -391,10 +394,10 @@ extension NoiseChannel: Oscillator {
         case 0x400E:
             period = value
         case 0x400F:
-            envelopeRestart = value
             if enabled {
-                lengthCounter = lengthTable[Int((envelopeRestart & 0b11111000) >> 3)]
+                lengthCounter = lengthTable[Int((value & 0b11111000) >> 3)]
             }
+            envelopeStart = true
         default:
             break
         }
@@ -405,6 +408,25 @@ extension NoiseChannel: Oscillator {
         let feedback = shiftRegister ^ shiftRegister[mode ? 6 : 1]
         shiftRegister &>>= 1
         shiftRegister |= (feedback << 14)
+    }
+
+    mutating func clockEnvelope() {
+        if envelopeStart {
+            envelopeDecayLevelCounter = 15
+            envelopeCounter = envelopePeriod
+            envelopeStart = false
+        } else {
+            if 0 < envelopeCounter {
+                envelopeCounter &-= 1
+            } else {
+                envelopeCounter = envelopePeriod
+                if 0 < envelopeDecayLevelCounter {
+                    envelopeDecayLevelCounter &-= 1
+                } else if envelopeLoop {
+                    envelopeDecayLevelCounter = 15
+                }
+            }
+        }
     }
 
     mutating func clockLengthCounter() {

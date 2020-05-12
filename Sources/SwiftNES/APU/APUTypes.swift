@@ -69,7 +69,10 @@ struct TriangleChannel {
 struct NoiseChannel {
     var envelope: UInt8 = 0
     var period: UInt8 = 0
-    var envelopeRestart: UInt8 = 0
+
+    var envelopeCounter: UInt8 = 0
+    var envelopeDecayLevelCounter: UInt8 = 0
+    var envelopeStart: Bool = false
 
     var shiftRegister: UInt16 = 1
     var lengthCounter: UInt = 0
