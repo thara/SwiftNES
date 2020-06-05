@@ -77,7 +77,7 @@ extension APU {
 
         let pulseOut: Float
         if p1 != 0.0 || p2 != 0.0 {
-            pulseOut = 95.88 / ((8128 / (p1 + p2)) + 100)
+            pulseOut = 95.88 / ((8128.0 / (p1 + p2)) + 100.0)
         } else {
             pulseOut = 0.0
         }
@@ -85,6 +85,7 @@ extension APU {
         let tndOut: Float
         if triangle != 0.0 || noise != 0.0 || dmc != 0.0 {
             tndOut = 159.79 / (1 / ((triangle / 8227) + (noise / 12241) + (dmc / 22638)) + 100)
+            // tndOut = 0.0
         } else {
             tndOut = 0.0
         }
@@ -256,7 +257,7 @@ extension PulseChannel: Oscillator {
                 envelopeCounter = envelopePeriod
                 if 0 < envelopeDecayLevelCounter {
                     envelopeDecayLevelCounter &-= 1
-                } else if envelopeLoop {
+                } else if envelopeDecayLevelCounter == 0 && envelopeLoop {
                     envelopeDecayLevelCounter = 15
                 }
             }
@@ -293,7 +294,7 @@ extension PulseChannel: Oscillator {
     }
 
     func output() -> UInt8 {
-        if lengthCounter == 0 || sweepUnitMuted || waveforms[dutyCycle][timerSequencer] == 0 {
+        if lengthCounter == 0 || sweepUnitMuted || dutyTable[dutyCycle][timerSequencer] == 0 {
             return 0
         }
         let volume = useConstantVolume ? envelopePeriod : envelopeDecayLevelCounter
@@ -545,7 +546,7 @@ extension DMC {
     }
 }
 
-let waveforms: [[UInt8]] = [
+let dutyTable: [[UInt8]] = [
     [0, 1, 0, 0, 0, 0, 0, 0],  // 12.5%
     [0, 1, 1, 0, 0, 0, 0, 0],  // 25%
     [0, 1, 1, 1, 1, 0, 0, 0],  // 50%
