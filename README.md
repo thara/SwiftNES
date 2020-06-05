@@ -40,12 +40,12 @@
 
 ### APU
 
-- [ ] Pulse wave channels
-- [ ] Triangle wave channel
-- [ ] Noise channel
-- [ ] Sampling by DMC
-- [ ] Frame Counter
-- [ ] Mixer
+- [x] Pulse wave channels
+- [x] Triangle wave channel
+- [x] Noise channel
+- [x] Sampling by DMC
+
+The implementation has been completed but sounds are strange...
 
 ### Controllers
 
