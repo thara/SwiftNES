@@ -29,5 +29,7 @@ let package = Package(
         .testTarget(
             name: "SwiftNESTests",
             dependencies: ["SwiftNES", "Quick", "Nimble"]),
+
+        .target(name: "NES"),
     ]
 )
