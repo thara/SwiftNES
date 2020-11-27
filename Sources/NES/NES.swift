@@ -1,4 +1,3 @@
-
 func makeNES() -> NES {
     let nes = NES()
 
@@ -15,6 +14,12 @@ class NES {
     var cpu: CPU
     var ppu: PPU
 
+    var rom: ROM? {
+        didSet {
+            mirroring = rom?.mapper.mirroring
+        }
+    }
+
     var wram: [UInt8]
     var nameTable: [UInt8]
     var paletteRAMIndexes: [UInt8]
@@ -23,15 +28,44 @@ class NES {
 
     var mirroring: Mirroring?
 
+    private(set) var cycles: UInt = 0
+
+    var renderLine: (Int, LineBuffer) -> () = { _, _ in }
+
     init() {
         self.interruptLine = InterruptLine()
 
         self.cpu = CPU(interruptLine: interruptLine)
-        self.ppu = PPU()
+        self.ppu = PPU(interruptLine: interruptLine)
 
         self.wram = [UInt8](repeating: 0x00, count: 32767)
         self.nameTable = [UInt8](repeating: 0x00, count: 0x1000)
         self.paletteRAMIndexes = [UInt8](repeating: 0x00, count: 0x0020)
+    }
+
+    public func runFrame() {
+        let currentFrame = ppu.frames
+
+        repeat {
+            step()
+        } while currentFrame == ppu.frames
+    }
+
+    func step() {
+        let cpuCycles = cpu.step()
+        cycles &+= cpuCycles
+
+        var ppuCycles = cpuCycles &* 3
+        while 0 < ppuCycles {
+            let currentLine = ppu.line
+
+            ppu.step()
+
+            if currentLine != ppu.line {
+                renderLine(currentLine, ppu.lineBuffer)
+            }
+            ppuCycles &-= 1
+        }
     }
 }
 
@@ -48,8 +82,8 @@ extension NES {
         /*     return apuPort?.read(from: address) ?? 0x00 */
         /* case 0x4016, 0x4017: */
         /*     return controllerPort?.read(at: address) ?? 0x00 */
-        /* case 0x4020...0xFFFF: */
-        /*     return cartridge?.read(at: address) ?? 0x00 */
+        case 0x4020...0xFFFF:
+            return nes.rom?.read(at: address) ?? 0x00
         default:
             return 0;
         }
@@ -69,8 +103,8 @@ extension NES {
         /* case 0x4017: */
         /*     controllerPort?.write(value) */
         /*     apuPort?.write(value, to: address) */
-        /* case 0x4020...0xFFFF: */
-        /*     cartridge?.write(value, at: address) */
+        case 0x4020...0xFFFF:
+            nes.rom?.write(value, at: address)
         default:
             break
         }
@@ -85,9 +119,7 @@ extension NES {
     static func readPPUMemory(at address: UInt16, on nes: NES) -> UInt8 {
         switch address {
         case 0x0000...0x1FFF:
-            //TODO
-            /* return cartridge?.read(at: address) ?? 0x00 */
-            return 0
+            return nes.rom?.read(at: address) ?? 0x00
         case 0x2000...0x2FFF:
             return nes.nameTable[Int(toNameTableAddress(address, on: nes))]
         case 0x3000...0x3EFF:
@@ -103,9 +135,7 @@ extension NES {
     static func writePPUMemory(_ value: UInt8, at address: UInt16, on nes: NES) {
         switch address {
         case 0x0000...0x1FFF:
-            //TODO
-            /* cartridge?.write(value, at: address) */
-            break
+            nes.rom?.write(value, at: address)
         case 0x2000...0x2FFF:
             nes.nameTable[Int(toNameTableAddress(address, on: nes))] = value
         case 0x3000...0x3EFF:
@@ -200,3 +230,4 @@ final class InterruptLine {
         return !current.isEmpty
     }
 }
+
