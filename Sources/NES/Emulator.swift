@@ -1,15 +1,18 @@
-struct Emulator {
+struct Emulator<L: LineRenderer> {
     var nes: NES
 
     private(set) var cycles: UInt = 0
 
-    var frames: UInt = 0
-    var scan = Scan()
+    private var frames: UInt = 0
+    private var scan = Scan()
 
     private var lineBuffer = LineBuffer()
 
-    init() {
+    private let lineRenderer: LineRenderer
+
+    init(lineRenderer: L) {
         self.nes = NES()
+        self.lineRenderer = lineRenderer
     }
 
     mutating func step() {
@@ -18,12 +21,30 @@ struct Emulator {
         cpuStep()
 
         let after = nes.cpuCycles
+        let cpuCycles: UInt
         if before <= after {
-            cycles += after &- before
+            cpuCycles = after &- before
         } else {
-            cycles += UInt.max &- before &+ after
+            cpuCycles = UInt.max &- before &+ after
+        }
+        cycles += cpuCycles
+
+        var ppuCycles = cpuCycles &* 3
+        while 0 < ppuCycles {
+            let currentLine = scan.line
+
+            ppuStep()
+
+            if currentLine != scan.line {
+                lineRenderer.rednerLine(at: currentLine, by: &lineBuffer)
+            }
+            ppuCycles &-= 1
         }
     }
+}
+
+public protocol LineRenderer: class {
+    func rednerLine(at: Int, by: inout LineBuffer)
 }
 
 extension Emulator: CPU {}
