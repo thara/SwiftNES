@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.3
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -16,18 +16,28 @@ let package = Package(
 
         .package(url: "https://github.com/kylef/Commander.git", from: "0.9.0"),
 
-        .package(url: "https://github.com/apple/swift-format.git", .branch("swift-5.2-branch")),
+        .package(url: "https://github.com/apple/swift-format.git", .branch("swift-5.3-branch")),
     ],
     targets: [
         .target(name: "SwiftNES"),
-        .target(
-            name: "SwiftNESMain",
-            dependencies: ["SwiftNES", "SDL", "Logging", "Commander"]),
-        .target(
-            name: "DumpSpriteImage",
-            dependencies: ["SwiftNES", "SwiftGD", "Logging", "Commander"]),
-        .testTarget(
-            name: "SwiftNESTests",
-            dependencies: ["SwiftNES", "Quick", "Nimble"]),
+        /* .target( */
+        /*     name: "SwiftNESMain", */
+        /*     dependencies: ["SwiftNES", "SDL", "Logging", "Commander"]), */
+        /* .target( */
+        /*     name: "DumpSpriteImage", */
+        /*     dependencies: ["SwiftNES", "SwiftGD", "Logging", "Commander"]), */
+        /* .testTarget( */
+        /*     name: "SwiftNESTests", */
+        /*     dependencies: ["SwiftNES", "Quick", "Nimble"], */
+        /*     exclude: [ */
+        /*         "fixtures/helloworld/README.md", */
+        /*         "fixtures/helloworld/character.chr", */
+        /*         "fixtures/helloworld/sample1.cfg", */
+        /*         "fixtures/helloworld/makefile", */
+        /*         "fixtures/helloworld/sample1.nes", */
+        /*         "fixtures/helloworld/sample1.asm", */
+        /*     ]), */
+
+        .target(name: "NES"),
     ]
 )
