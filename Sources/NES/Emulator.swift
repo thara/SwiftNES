@@ -1,4 +1,4 @@
-struct Emulator: CPU {
+struct Emulator {
     var nes: NES
 
     private(set) var cycles: UInt = 0
@@ -20,6 +20,8 @@ struct Emulator: CPU {
         }
     }
 }
+
+extension Emulator: CPU {}
 
 extension Emulator: CPURegisters {
     var A: UInt8 {
