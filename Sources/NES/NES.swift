@@ -97,6 +97,9 @@ struct NES {
         // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
         var internalDataBus: UInt8 = 0x00
 
+        var nameTable = [UInt8](repeating: 0x00, count: 0x1000)
+        var paletteRAMIndexes = [UInt8](repeating: 0x00, count: 0x0020)
+
         struct PPUController: OptionSet {
             let rawValue: UInt8
 
@@ -196,6 +199,10 @@ struct NES {
             static let defaultValue = Sprite(y: 0x00, tileIndex: 0x00, attr: [], x: 0x00)
         }
     }
+}
+
+enum Mirroring {
+    case vertical, horizontal
 }
 
 typealias CPUStatus = NES.CPU.Status
