@@ -34,6 +34,11 @@ public struct Emulator<L: LineRenderer> {
         lineBuffer.clear()
     }
 
+    public func connect(controller1: Controller?, controller2: Controller?) {
+        nes.controllers.port1 = controller1
+        nes.controllers.port2 = controller2
+    }
+
     public mutating func step() {
         let before = nes.cpuCycles
 
@@ -114,8 +119,8 @@ extension Emulator: CPUMemory {
             return readPPURegister(from: ppuAddress(address))
         /* case 0x4000...0x4013, 0x4015: */
         /*     return apuPort?.read(from: address) ?? 0x00 */
-        /* case 0x4016, 0x4017: */
-        /*     return controllerPort?.read(at: address) ?? 0x00 */
+        case 0x4016, 0x4017:
+            return nes.controllers.read(at: address)
         case 0x4020...0xFFFF:
             return nes.mapper?.read(at: address) ?? 0x00
         default:
@@ -131,11 +136,11 @@ extension Emulator: CPUMemory {
             writePPURegister(value, to: ppuAddress(address))
         /* case 0x4000...0x4013, 0x4015: */
         /*     apuPort?.write(value, to: address) */
-        /* case 0x4016: */
-        /*     controllerPort?.write(value) */
-        /* case 0x4017: */
-        /*     controllerPort?.write(value) */
-        /*     apuPort?.write(value, to: address) */
+        case 0x4016:
+            nes.controllers.write(value)
+        case 0x4017:
+            nes.controllers.write(value)
+            /* apuPort?.write(value, to: address) */
         case 0x4020...0xFFFF:
             nes.mapper?.write(value, at: address)
         default:

@@ -23,6 +23,7 @@ struct NES {
     var cpuCycles: UInt = 0
 
     var mapper: Mapper?
+    var controllers = ControllerPort()
 
     struct CPU {
         /// Accumulator
@@ -201,6 +202,11 @@ struct NES {
             static let defaultValue = Sprite(y: 0x00, tileIndex: 0x00, attr: [], x: 0x00)
         }
     }
+
+    class ControllerPort {
+        var port1: Controller?
+        var port2: Controller?
+    }
 }
 
 protocol Mapper: class {
@@ -220,6 +226,11 @@ enum Mirroring {
     case vertical, horizontal
 }
 
+public protocol Controller: class {
+    func write(_ value: UInt8)
+    func read() -> UInt8
+}
+
 typealias CPUStatus = NES.CPU.Status
 typealias PPUController = NES.PPU.PPUController
 typealias PPUMask = NES.PPU.PPUMask
@@ -227,6 +238,7 @@ typealias PPUStatus = NES.PPU.PPUStatus
 typealias PPUBgTile = NES.PPU.Tile
 typealias PPUBgTilePattern = NES.PPU.Tile.Pattern
 typealias PPUSprite = NES.PPU.Sprite
+typealias ControllerPort = NES.ControllerPort
 
 extension CPUStatus {
     mutating func setZN(_ value: UInt8) {
