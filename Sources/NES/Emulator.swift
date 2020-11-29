@@ -1,5 +1,5 @@
-struct Emulator<L: LineRenderer> {
-    var nes: NES
+public struct Emulator<L: LineRenderer> {
+    private var nes: NES
 
     private(set) var cycles: UInt = 0
 
@@ -10,12 +10,12 @@ struct Emulator<L: LineRenderer> {
 
     private let lineRenderer: LineRenderer
 
-    init(lineRenderer: L) {
+    public init(lineRenderer: L) {
         self.nes = NES()
         self.lineRenderer = lineRenderer
     }
 
-    mutating func step() {
+    public mutating func step() {
         let before = nes.cpuCycles
 
         cpuStep()
