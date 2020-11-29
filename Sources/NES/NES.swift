@@ -22,6 +22,8 @@ struct NES {
 
     var cpuCycles: UInt = 0
 
+    var mapper: Mapper?
+
     struct CPU {
         /// Accumulator
         var A: UInt8 = 0x00 { didSet { P.setZN(A) } }
@@ -199,6 +201,19 @@ struct NES {
             static let defaultValue = Sprite(y: 0x00, tileIndex: 0x00, attr: [], x: 0x00)
         }
     }
+}
+
+protocol Mapper: class {
+
+    var program: [UInt8] { get }
+    var characterData: [UInt8] { get }
+
+    /// Read a byte at the given `address`
+    func read(at address: UInt16) -> UInt8
+    /// Write the given `value` at the `address`
+    func write(_ value: UInt8, at address: UInt16)
+
+    var mirroring: Mirroring { get }
 }
 
 enum Mirroring {

@@ -10,11 +10,32 @@ public struct Emulator<L: LineRenderer> {
 
     private let lineRenderer: LineRenderer
 
-    var mirroring: Mirroring?
+    var rom: ROM? {
+        didSet {
+            nes.mapper = rom?.mapper
+        }
+    }
 
     public init(lineRenderer: L) {
         self.nes = NES()
         self.lineRenderer = lineRenderer
+    }
+
+    public mutating func insert() {
+        cpuPowerOn()
+        clearInterrupt([.NMI, .IRQ])
+        sendInterrupt(.RESET)
+
+        nes.cpu.wram.fill(0x00)
+
+        ppuRegisterClear()
+
+        nes.ppu.nameTable.fill(0x00)
+        nes.ppu.paletteRAMIndexes.fill(0x00)
+        scan.clear()
+        frames = 0
+
+        lineBuffer.clear()
     }
 
     public mutating func step() {
@@ -99,8 +120,8 @@ extension Emulator: CPUMemory {
         /*     return apuPort?.read(from: address) ?? 0x00 */
         /* case 0x4016, 0x4017: */
         /*     return controllerPort?.read(at: address) ?? 0x00 */
-        /* case 0x4020...0xFFFF: */
-        /*     return cartridge?.read(at: address) ?? 0x00 */
+        case 0x4020...0xFFFF:
+            return nes.mapper?.read(at: address) ?? 0x00
         default:
             return 0x00
         }
@@ -119,8 +140,8 @@ extension Emulator: CPUMemory {
         /* case 0x4017: */
         /*     controllerPort?.write(value) */
         /*     apuPort?.write(value, to: address) */
-        /* case 0x4020...0xFFFF: */
-        /*     cartridge?.write(value, at: address) */
+        case 0x4020...0xFFFF:
+            nes.mapper?.write(value, at: address)
         default:
             break
         }
@@ -210,7 +231,7 @@ extension Emulator: PPUMemory {
     }
 
     func toNameTableAddress(_ baseAddress: UInt16) -> UInt16 {
-        switch mirroring {
+        switch nes.mapper?.mirroring {
         case .vertical?:
             return baseAddress % 0x0800
         case .horizontal?:

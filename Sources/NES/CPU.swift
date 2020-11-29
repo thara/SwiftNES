@@ -13,6 +13,16 @@ protocol CPURegisters {
     var PC: UInt16 { get set }
 }
 
+extension CPURegisters {
+    mutating func cpuPowerOn() {
+        A = 0
+        X = 0
+        Y = 0
+        S = 0xFD
+        P = CPUStatus(rawValue: 0x34)
+    }
+}
+
 protocol CPUCycle {
     mutating func tick()
     mutating func tick(count: UInt)

@@ -17,6 +17,15 @@ protocol PPURegisters {
     var writeToggle: Bool { get set }
 }
 
+extension PPURegisters {
+    mutating func ppuRegisterClear() {
+        controller = []
+        mask = []
+        status = []
+        data = 0x00
+    }
+}
+
 protocol PPUMemory {
     func ppuRead(at address: UInt16) -> UInt8
     mutating func ppuWrite(_ value: UInt8, at address: UInt16)
