@@ -20,8 +20,14 @@ protocol CPUCycle {
 
 protocol CPUMemory {
     mutating func cpuRead(at address: UInt16) -> UInt8
-    mutating func cpuReadWord(at address: UInt16) -> UInt16
     mutating func cpuWrite(_ value: UInt8, at address: UInt16)
+}
+
+extension CPUMemory {
+
+    mutating func cpuReadWord(at address: UInt16) -> UInt16 {
+        return cpuRead(at: address).u16 | (cpuRead(at: address + 1).u16 << 8)
+    }
 }
 
 extension CPU where Self: CPURegisters & CPUCycle & CPUMemory & InterruptLine {

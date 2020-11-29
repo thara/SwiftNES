@@ -104,10 +104,6 @@ extension Emulator: CPUMemory {
         }
     }
 
-    mutating func cpuReadWord(at address: UInt16) -> UInt16 {
-        return cpuRead(at: address).u16 | (cpuRead(at: address + 1).u16 << 8)
-    }
-
     mutating func cpuWrite(_ value: UInt8, at address: UInt16) {
         switch address {
         case 0x0000...0x07FF:

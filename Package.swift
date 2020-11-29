@@ -39,5 +39,8 @@ let package = Package(
         /*     ]), */
 
         .target(name: "NES"),
+        .testTarget(
+            name: "NESTests",
+            dependencies: ["NES", "Quick", "Nimble"]),
     ]
 )
