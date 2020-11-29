@@ -10,18 +10,14 @@ public struct Emulator<L: LineRenderer> {
 
     private let lineRenderer: LineRenderer
 
-    var rom: ROM? {
-        didSet {
-            nes.mapper = rom?.mapper
-        }
-    }
-
     public init(lineRenderer: L) {
         self.nes = NES()
         self.lineRenderer = lineRenderer
     }
 
-    public mutating func insert() {
+    public mutating func insert(cartridge rom: ROM) {
+        nes.mapper = rom.mapper
+
         cpuPowerOn()
         clearInterrupt([.NMI, .IRQ])
         sendInterrupt(.RESET)
@@ -203,7 +199,7 @@ extension Emulator: PPUMemory {
     func ppuRead(at address: UInt16) -> UInt8 {
         switch address {
         case 0x0000...0x1FFF:
-            return rom?.read(at: address) ?? 0x00
+            return nes.mapper?.read(at: address) ?? 0x00
         case 0x2000...0x2FFF:
             return nes.ppu.nameTable.read(at: toNameTableAddress(address))
         case 0x3000...0x3EFF:
@@ -218,7 +214,7 @@ extension Emulator: PPUMemory {
     mutating func ppuWrite(_ value: UInt8, at address: UInt16) {
         switch address {
         case 0x0000...0x1FFF:
-            rom?.write(value, at: address)
+            nes.mapper?.write(value, at: address)
         case 0x2000...0x2FFF:
             nes.ppu.nameTable.write(value, at: toNameTableAddress(address))
         case 0x3000...0x3EFF:
