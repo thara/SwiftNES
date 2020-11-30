@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -39,8 +39,13 @@ let package = Package(
         /*     ]), */
 
         .target(name: "NES"),
+
         .testTarget(
             name: "NESTests",
             dependencies: ["NES", "Quick", "Nimble"]),
+
+        .target(
+            name: "NESMain",
+            dependencies: ["NES", "SDL", "Commander"]),
     ]
 )

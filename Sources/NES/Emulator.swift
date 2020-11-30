@@ -39,7 +39,15 @@ public struct Emulator<L: LineRenderer> {
         nes.controllers.port2 = controller2
     }
 
-    public mutating func step() {
+    public mutating func runFrame() {
+        let before = currentFrames
+
+        repeat {
+            step()
+        } while before == currentFrames
+    }
+
+    mutating func step() {
         let before = nes.cpuCycles
 
         cpuStep()

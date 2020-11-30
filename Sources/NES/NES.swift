@@ -1,8 +1,8 @@
-let maxDot = 340
-let maxLine = 261
+public let maxDot = 340
+public let maxLine = 261
 
-let height = 240
-let width = 256
+public let height = 240
+public let width = 256
 
 let startVerticalBlank = 241
 
