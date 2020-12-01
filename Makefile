@@ -6,7 +6,7 @@ ROM = Tests/SwiftNESTests/fixtures/helloworld/sample1.nes
 NESTEST_ROM = nestest.nes
 
 format:  ## Run Format
-	@swift run swift-format format -r -i Sources/ Tests/
+	@swift run swift-format format -r -i Sources Tests
 
 lint:  ## Run lint
 	@swiftlint autocorrect -- && swiftlint

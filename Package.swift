@@ -16,7 +16,7 @@ let package = Package(
 
         .package(url: "https://github.com/kylef/Commander.git", from: "0.9.0"),
 
-        .package(url: "https://github.com/apple/swift-format.git", .branch("swift-5.2-branch")),
+        .package(url: "https://github.com/apple/swift-format.git", .branch("swift-5.3-branch")),
     ],
     targets: [
         .target(name: "SwiftNES"),
@@ -29,5 +29,7 @@ let package = Package(
         .testTarget(
             name: "SwiftNESTests",
             dependencies: ["SwiftNES", "Quick", "Nimble"]),
+
+        .target(name: "NES"),
     ]
 )
