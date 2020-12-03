@@ -1,4 +1,4 @@
-struct Emulator<M: MemoryMap, L: LineRenderer> {
+struct Emulator<M: MemoryMap, L: LineRenderer, A: AudioBuffer> {
     var nes = NES()
     var memoryMap: M.Type
 
@@ -9,7 +9,8 @@ struct Emulator<M: MemoryMap, L: LineRenderer> {
 
     var cycles: UInt = 0
 
-    let lineRenderer: LineRenderer
+    let lineRenderer: L
+    let audioBuffer: A
 
     mutating func insert(cartridge rom: ROM) {
         nes.mapper = rom.mapper
@@ -52,6 +53,18 @@ struct Emulator<M: MemoryMap, L: LineRenderer> {
         }
         cycles += cpuCycles
 
+        /* for _ in 0..<cpuCycles { */
+        /*     let cpuSteel = apuStep() */
+        /*     if cpuSteel { */
+        /*         cycles &+= 4 */
+        /*     } */
+        /* } */
+
+        //FIXME
+        // if apu.frameInterrupted {
+        //     interruptLine.send(.IRQ)
+        // }
+
         var ppuCycles = cpuCycles &* 3
         while 0 < ppuCycles {
             let currentLine = scan.line
@@ -71,6 +84,10 @@ struct Emulator<M: MemoryMap, L: LineRenderer> {
             ppuCycles &-= 1
         }
     }
+}
+
+public protocol AudioBuffer {
+    func write(_ sample: Float)
 }
 
 public protocol LineRenderer: class {

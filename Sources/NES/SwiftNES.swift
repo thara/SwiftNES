@@ -1,9 +1,9 @@
-public class SwiftNES<L: LineRenderer> {
+public class SwiftNES<L: LineRenderer, A: AudioBuffer> {
 
-    var emulator: Emulator<NESMemoryMap, L>
+    var emulator: Emulator<NESMemoryMap, L, A>
 
-    public init(lineRenderer: L) {
-        self.emulator = Emulator(memoryMap: NESMemoryMap.self, lineRenderer: lineRenderer)
+    public init(lineRenderer: L, audioBuffer: A) {
+        self.emulator = Emulator(memoryMap: NESMemoryMap.self, lineRenderer: lineRenderer, audioBuffer: audioBuffer)
     }
 
     public func insert(cartridge rom: ROM) {
