@@ -31,5 +31,8 @@ let package = Package(
             dependencies: ["SwiftNES", "Quick", "Nimble"]),
 
         .target(name: "NES"),
+        .target(
+            name: "NESMain",
+            dependencies: ["NES", "SDL", "Commander"]),
     ]
 )
