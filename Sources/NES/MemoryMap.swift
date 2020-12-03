@@ -1,5 +1,4 @@
 enum NESMemoryMap: MemoryMap {
-    case instance
 }
 
 extension NESMemoryMap {
@@ -8,7 +7,7 @@ extension NESMemoryMap {
         case 0x0000...0x1FFF:
             return nes.cpu.wram.read(at: address)
         case 0x2000...0x3FFF:
-            return nes.readPPURegister(from: ppuAddress(address), by: Self.instance)
+            return nes.readPPURegister(from: ppuAddress(address), by: self)
         /* case 0x4000...0x4013, 0x4015: */
         /*     return apuPort?.read(from: address) ?? 0x00 */
         /* case 0x4016, 0x4017: */
@@ -25,7 +24,7 @@ extension NESMemoryMap {
         case 0x0000...0x07FF:
             nes.cpu.wram.write(value, at: address)
         case 0x2000...0x3FFF:
-            nes.writePPURegister(value, to: ppuAddress(address), by: Self.instance)
+            nes.writePPURegister(value, to: ppuAddress(address), by: self)
         /* case 0x4000...0x4013, 0x4015: */
         /*     apuPort?.write(value, to: address) */
         /* case 0x4016: */

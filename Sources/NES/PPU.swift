@@ -27,7 +27,7 @@ struct SpritePixel {
 }
 
 extension NES {
-    mutating func readPPURegister<M: MemoryMap>(from address: UInt16, by: M) -> UInt8 {
+    mutating func readPPURegister<M: MemoryMap>(from address: UInt16, by: M.Type) -> UInt8 {
         var result: UInt8
 
         switch address {
@@ -61,7 +61,7 @@ extension NES {
         return result
     }
 
-    mutating func writePPURegister<M: MemoryMap>(_ value: UInt8, to address: UInt16, by: M) {
+    mutating func writePPURegister<M: MemoryMap>(_ value: UInt8, to address: UInt16, by: M.Type) {
         switch address {
         case 0x2000:
             ppu.writeController(value)
