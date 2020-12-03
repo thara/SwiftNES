@@ -10,8 +10,8 @@ extension NESMemoryMap {
             return nes.readPPURegister(from: ppuAddress(address), by: self)
         /* case 0x4000...0x4013, 0x4015: */
         /*     return apuPort?.read(from: address) ?? 0x00 */
-        /* case 0x4016, 0x4017: */
-        /*     return nes.controllers.read(at: address) */
+        case 0x4016, 0x4017:
+            return nes.controllers.read(at: address)
         case 0x4020...0xFFFF:
             return nes.mapper?.read(at: address) ?? 0x00
         default:
@@ -27,10 +27,10 @@ extension NESMemoryMap {
             nes.writePPURegister(value, to: ppuAddress(address), by: self)
         /* case 0x4000...0x4013, 0x4015: */
         /*     apuPort?.write(value, to: address) */
-        /* case 0x4016: */
-        /*     nes.controllers.write(value) */
-        /* case 0x4017: */
-        /*     nes.controllers.write(value) */
+        case 0x4016:
+            nes.controllers.write(value)
+        case 0x4017:
+            nes.controllers.write(value)
         /* apuPort?.write(value, to: address) */
         case 0x4020...0xFFFF:
             nes.mapper?.write(value, at: address)

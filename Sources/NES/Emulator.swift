@@ -1,11 +1,80 @@
-struct Emulator<M: MemoryMap> {
+struct Emulator<M: MemoryMap, L: LineRenderer> {
     var nes = NES()
-    var memoryMap: M
+    var memoryMap: M.Type
 
     var currentFrames: UInt = 0
     var scan = Scan()
 
     var lineBuffer = LineBuffer()
+
+    var cycles: UInt = 0
+
+    let lineRenderer: LineRenderer
+
+    mutating func insert(cartridge rom: ROM) {
+        nes.mapper = rom.mapper
+
+        cpuPowerOn()
+        clearInterrupt([.NMI, .IRQ])
+        sendInterrupt(.RESET)
+
+        nes.cpu.wram.fill(0x00)
+
+        ppuRegisterClear()
+
+        nes.ppu.nameTable.fill(0x00)
+        nes.ppu.paletteRAMIndexes.fill(0x00)
+        scan.clear()
+        currentFrames = 0
+
+        lineBuffer.clear()
+    }
+
+    mutating func runFrame() {
+        let before = currentFrames
+
+        repeat {
+            step()
+        } while before == currentFrames
+    }
+
+    mutating func step() {
+        let before = nes.cpuCycles
+
+        cpuStep()
+
+        let after = nes.cpuCycles
+        let cpuCycles: UInt
+        if before <= after {
+            cpuCycles = after &- before
+        } else {
+            cpuCycles = UInt.max &- before &+ after
+        }
+        cycles += cpuCycles
+
+        var ppuCycles = cpuCycles &* 3
+        while 0 < ppuCycles {
+            let currentLine = scan.line
+
+            ppuStep()
+
+            switch scan.nextDot() {
+            case .frame:
+                currentFrames += 1
+            default:
+                break
+            }
+
+            if currentLine != scan.line {
+                lineRenderer.rednerLine(at: currentLine, by: &lineBuffer)
+            }
+            ppuCycles &-= 1
+        }
+    }
+}
+
+public protocol LineRenderer: class {
+    func rednerLine(at: Int, by: inout LineBuffer)
 }
 
 struct Scan {
