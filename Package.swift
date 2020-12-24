@@ -26,13 +26,18 @@ let package = Package(
         .target(
             name: "DumpSpriteImage",
             dependencies: ["SwiftNES", "SwiftGD", "Logging", "Commander"]),
-        .testTarget(
-            name: "SwiftNESTests",
-            dependencies: ["SwiftNES", "Quick", "Nimble"]),
+        /* .testTarget( */
+        /*     name: "SwiftNESTests", */
+        /*     dependencies: ["SwiftNES", "Quick", "Nimble"]), */
 
         .target(name: "NES"),
         .target(
             name: "NESMain",
             dependencies: ["NES", "SDL", "Commander"]),
+
+        .target(name: "NES2"),
+        .testTarget(
+            name: "NES2Tests",
+            dependencies: ["NES2", "Quick", "Nimble"]),
     ]
 )
