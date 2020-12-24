@@ -1,5 +1,6 @@
 class Emulator {
     var nes = NES()
+
     var cpuRegister = CPURegister()
     var cpuInterconnect: CPUInterconnect
 
