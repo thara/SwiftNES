@@ -6,7 +6,7 @@ typealias Operand = UInt16
 extension CPU {
 
     @inline(__always)
-    mutating func fetchOperand() -> OpCode {
+    mutating func fetchOpcode() -> OpCode {
         let opcode = read(at: PC)
         PC &+= 1
         return opcode

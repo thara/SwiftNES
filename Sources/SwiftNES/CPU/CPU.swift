@@ -62,7 +62,7 @@ struct CPU {
                 interruptLine.clear(.BRK)
             }
         default:
-            let opcode = fetchOperand()
+            let opcode = fetchOpcode()
             excuteInstruction(opcode: opcode)
         }
 
