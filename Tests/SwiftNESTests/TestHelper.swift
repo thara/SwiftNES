@@ -6,13 +6,13 @@ func vramAddress(fineYScroll: UInt16 = 0, nameTableNo: UInt16, coarseYScroll: UI
 
 extension CPU {
     init() {
-        self.init(memory: [UInt8](repeating: 0x00, count: 65536))
+        self.init(bus: [UInt8](repeating: 0x00, count: 65536))
     }
 }
 
 extension PPU {
     convenience init() {
-        self.init(memory: [UInt8](repeating: 0x00, count: 65534))
+        self.init(bus: [UInt8](repeating: 0x00, count: 65534))
     }
 }
 

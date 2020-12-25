@@ -129,7 +129,7 @@ class PPUPortSpec: QuickSpec {
 
                     ppu.write(0x83, to: address)
 
-                    expect(ppu.memory.read(at: 0x2F11)).to(equal(0x83))
+                    expect(ppu.bus.read(at: 0x2F11)).to(equal(0x83))
                 }
             }
         }
