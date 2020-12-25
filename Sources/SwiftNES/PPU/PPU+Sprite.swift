@@ -19,26 +19,36 @@ extension PPU {
 
             // the sprite evaluation phase
             let spriteSize = registers.controller.contains(.spriteSize) ? 16 : 8
+
             var n = 0
+            secondaryOAM.withUnsafeMutableBufferPointer { b in
+                var p = b.baseAddress!
+                let last = p + b.count
 
-            let oamIterator = Iterator(limit: secondaryOAM.count)
-            for i in 0..<spriteCount {
-                let first = i &* 4
-                let y = primaryOAM[first]
+                for i in 0..<spriteCount {
+                    let first = i &* 4
+                    let y = primaryOAM[first]
 
-                if oamIterator.hasNext {
-                    let row = scan.line &- Int(primaryOAM[first])
-                    guard 0 <= row && row < spriteSize else {
-                        continue
+                    if last - p <= b.count {
+                        let row = scan.line &- Int(primaryOAM[first])
+                        guard 0 <= row && row < spriteSize else {
+                            continue
+                        }
+                        if n == 0 {
+                            spriteZeroOnLine = true
+                        }
+
+                        p.pointee = y
+                        p += 1
+                        p.pointee = primaryOAM[first &+ 1]
+                        p += 1
+                        p.pointee = primaryOAM[first &+ 2]
+                        p += 1
+                        p.pointee = primaryOAM[first &+ 3]
+                        p += 1
+
+                        n &+= 1
                     }
-                    if n == 0 {
-                        spriteZeroOnLine = true
-                    }
-                    secondaryOAM[oamIterator] = y
-                    secondaryOAM[oamIterator] = primaryOAM[first &+ 1]
-                    secondaryOAM[oamIterator] = primaryOAM[first &+ 2]
-                    secondaryOAM[oamIterator] = primaryOAM[first &+ 3]
-                    n &+= 1
                 }
             }
             if spriteLimit <= n && registers.renderingEnabled {
@@ -164,36 +174,5 @@ struct Sprite {
             col = 8 &- 1 &- col
         }
         return UInt8(col)
-    }
-}
-
-final class Iterator {
-    fileprivate var pointer = 0
-
-    private let limit: Int
-
-    init(limit: Int) {
-        self.limit = limit
-    }
-
-    @inline(__always)
-    var hasNext: Bool {
-        return pointer < limit
-    }
-}
-
-extension Array where Element == UInt8 {
-
-    @inline(__always)
-    subscript(iterator: SwiftNES.Iterator) -> UInt8 {
-        get {
-            let value = self[iterator.pointer]
-            iterator.pointer += 1
-            return value
-        }
-        set {
-            self[iterator.pointer] = newValue
-            iterator.pointer += 1
-        }
     }
 }
