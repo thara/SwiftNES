@@ -1,4 +1,4 @@
-final class CPUMemory: Memory {
+final class CPUBus: Memory {
     private var wram: [UInt8]
 
     var ppuPort: IOPort?

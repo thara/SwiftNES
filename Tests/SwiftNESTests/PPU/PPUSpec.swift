@@ -15,11 +15,11 @@ class PPUSpec: QuickSpec {
                 beforeEach {
                     ppu.registers.v = vramAddress(fineYScroll: 5, nameTableNo: 2, coarseYScroll: 0b11001, coarseXScroll: 0b11101)
 
-                    ppu.memory.write(0x11, at: 0x0035)
-                    ppu.memory.write(0x81, at: 0x003D)
+                    ppu.bus.write(0x11, at: 0x0035)
+                    ppu.bus.write(0x81, at: 0x003D)
 
-                    ppu.memory.write(0x03, at: 0x2B3D)
-                    ppu.memory.write(0x41, at: 0x2BF7)
+                    ppu.bus.write(0x03, at: 0x2B3D)
+                    ppu.bus.write(0x41, at: 0x2BF7)
 
                 }
 

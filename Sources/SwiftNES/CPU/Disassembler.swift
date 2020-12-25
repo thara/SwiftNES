@@ -55,7 +55,7 @@ class Disassembler {
 
     static func disassemble(cpu: inout CPU) -> (machineCode: String, assemblyCode: String) {
         let currentStep = makeCurrentStep(cpu: &cpu)
-        let opcode = cpu.memory.read(at: currentStep.pc)
+        let opcode = cpu.bus.read(at: currentStep.pc)
         let instruction = instructionTable[Int(opcode)]
         return (
             makeMachineCode(step: currentStep, instruction: instruction),
@@ -67,8 +67,8 @@ class Disassembler {
         let pc = cpu.PC
         return CPUStep(
             pc: cpu.PC,
-            operand1: cpu.memory.read(at: pc &+ 1),
-            operand2: cpu.memory.read(at: pc &+ 2),
+            operand1: cpu.bus.read(at: pc &+ 1),
+            operand2: cpu.bus.read(at: pc &+ 2),
             state: cpu
         )
     }
@@ -120,28 +120,28 @@ class Disassembler {
         case .immediate:
             return String(format: "#$%02X", operand1)
         case .zeroPage:
-            return String(format: "$%02X = %02X", operand1, cpu.memory.read(at: operand1.u16))
+            return String(format: "$%02X = %02X", operand1, cpu.bus.read(at: operand1.u16))
         case .zeroPageX:
-            return String(format: "$%02X,X @ %02X = %02X", operand1, operand1 &+ x, cpu.memory.read(at: (operand1 &+ x).u16))
+            return String(format: "$%02X,X @ %02X = %02X", operand1, operand1 &+ x, cpu.bus.read(at: (operand1 &+ x).u16))
         case .zeroPageY:
-            return String(format: "$%02X,Y @ %02X = %02X", operand1, operand1 &+ y, cpu.memory.read(at: (operand1 &+ y).u16))
+            return String(format: "$%02X,Y @ %02X = %02X", operand1, operand1 &+ y, cpu.bus.read(at: (operand1 &+ y).u16))
         case .absolute:
-            return String(format: "$%04X = %02X", operand16, cpu.memory.read(at: operand16))
+            return String(format: "$%04X = %02X", operand16, cpu.bus.read(at: operand16))
         case .absoluteX:
-            return String(format: "$%04X,X @ %04X = %02X", operand16, operand16 &+ x.u16, cpu.memory.read(at: operand16 &+ x.u16))
+            return String(format: "$%04X,X @ %04X = %02X", operand16, operand16 &+ x.u16, cpu.bus.read(at: operand16 &+ x.u16))
         case .absoluteY:
-            return String(format: "$%04X,Y @ %04X = %02X", operand16, operand16 &+ y.u16, cpu.memory.read(at: operand16 &+ y.u16))
+            return String(format: "$%04X,Y @ %04X = %02X", operand16, operand16 &+ y.u16, cpu.bus.read(at: operand16 &+ y.u16))
         case .relative:
             return String(format: "$%04X", Int(step.pc) &+ 2 &+ Int(operand1.i8))
         case .indirect:
-            return String(format: "($%04X) = %04X", operand16, cpu.memory.readOnIndirect(operand: operand16))
+            return String(format: "($%04X) = %04X", operand16, cpu.bus.readOnIndirect(operand: operand16))
         case .indexedIndirect:
             let operandX = x &+ operand1
-            let address = cpu.memory.readOnIndirect(operand: operandX.u16)
-            return String(format: "($%02X,X) @ %02X = %04X = %02X", operand1, operandX, address, cpu.memory.read(at: address))
+            let address = cpu.bus.readOnIndirect(operand: operandX.u16)
+            return String(format: "($%02X,X) @ %02X = %04X = %02X", operand1, operandX, address, cpu.bus.read(at: address))
         case .indirectIndexed:
-            let data = cpu.memory.readOnIndirect(operand: operand1.u16)
-            return String(format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ y.u16, cpu.memory.read(at: data &+ y.u16))
+            let data = cpu.bus.readOnIndirect(operand: operand1.u16)
+            return String(format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ y.u16, cpu.bus.read(at: data &+ y.u16))
         }
     }
 
@@ -167,11 +167,11 @@ class Disassembler {
         case .relative:
             return step.pc
         case .indirect:
-            return cpu.memory.readOnIndirect(operand: step.operand16)
+            return cpu.bus.readOnIndirect(operand: step.operand16)
         case .indirectIndexed:
-            return cpu.memory.readOnIndirect(operand: (step.operand16 &+ step.state.X.u16) & 0xFF)
+            return cpu.bus.readOnIndirect(operand: (step.operand16 &+ step.state.X.u16) & 0xFF)
         case .indexedIndirect:
-            return cpu.memory.readOnIndirect(operand: step.operand16) &+ step.state.Y.u16
+            return cpu.bus.readOnIndirect(operand: step.operand16) &+ step.state.Y.u16
         default:
             return 0x00
         }

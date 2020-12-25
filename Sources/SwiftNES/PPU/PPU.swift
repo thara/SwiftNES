@@ -2,7 +2,7 @@ let startVerticalBlank = 241
 
 final class PPU {
     var registers = PPURegisters()
-    var memory: Memory
+    var bus: Memory
 
     // Background registers
     var nameTableEntry: UInt8 = 0x00
@@ -25,8 +25,8 @@ final class PPU {
     // http://wiki.nesdev.com/w/index.php/PPU_registers#Ports
     var internalDataBus: UInt8 = 0x00
 
-    init(memory: Memory) {
-        self.memory = memory
+    init(bus: Memory) {
+        self.bus = bus
     }
 
     var line: Int {
@@ -76,7 +76,7 @@ final class PPU {
 
     func reset() {
         registers.clear()
-        memory.clear()
+        bus.clear()
         scan.clear()
         frames = 0
     }
@@ -107,7 +107,7 @@ extension PPU {
     func selectPixel(bg: BackgroundPixel, sprite: SpritePixel) -> Int {
         switch (bg.enabled, sprite.enabled) {
         case (false, false):
-            return Int(memory.read(at: 0x3F00))
+            return Int(bus.read(at: 0x3F00))
         case (false, true):
             return sprite.color
         case (true, false):

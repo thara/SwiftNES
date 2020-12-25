@@ -21,9 +21,9 @@ extension PPU: IOPort {
         case 0x2007:
             if registers.v <= 0x3EFF {
                 result = registers.data
-                registers.data = memory.read(at: registers.v)
+                registers.data = bus.read(at: registers.v)
             } else {
-                result = memory.read(at: registers.v)
+                result = bus.read(at: registers.v)
             }
             registers.incrV()
         default:
@@ -50,7 +50,7 @@ extension PPU: IOPort {
         case 0x2006:
             registers.writeVRAMAddress(addr: value)
         case 0x2007:
-            memory.write(value, at: registers.v)
+            bus.write(value, at: registers.v)
             registers.incrV()
         default:
             break

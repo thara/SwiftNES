@@ -3,8 +3,8 @@ public final class NES {
     private let ppu: PPU
     var apu: APUPort
 
-    private let cpuMemory = CPUMemory()
-    private let ppuMemory = PPUMemory()
+    private let cpuBus = CPUBus()
+    private let ppuBus = PPUBus()
 
     private let controllerPort = ControllerPort()
 
@@ -28,14 +28,14 @@ public final class NES {
     public init() {
         interruptLine = InterruptLine()
 
-        cpu = CPU(memory: cpuMemory)
-        ppu = PPU(memory: ppuMemory)
-        cpuMemory.ppuPort = ppu
-        cpuMemory.controllerPort = controllerPort
+        cpu = CPU(bus: cpuBus)
+        ppu = PPU(bus: ppuBus)
+        cpuBus.ppuPort = ppu
+        cpuBus.controllerPort = controllerPort
 
         let apu = APU(sampleRate: samplingFrequency / downSamplingRate, framePeriod: 7458)
         self.apu = APUPort(apu: apu)
-        cpuMemory.apuPort = self.apu
+        cpuBus.apuPort = self.apu
 
         nestest = NESTest(interruptLine: interruptLine)
     }
@@ -63,7 +63,7 @@ public final class NES {
         cycles &+= cpuCycles
 
         for _ in 0..<cpuCycles {
-            let cpuSteel = apu.step(audioBuffer: audioBuffer, memoryReader: cpuMemory)
+            let cpuSteel = apu.step(audioBuffer: audioBuffer, memoryReader: cpuBus)
             if cpuSteel {
                 cycles &+= 4
             }
@@ -96,15 +96,15 @@ public final class NES {
     }
 
     public func insert(cartridge: Cartridge) {
-        cpuMemory.cartridge = cartridge
-        ppuMemory.cartridge = cartridge
+        cpuBus.cartridge = cartridge
+        ppuBus.cartridge = cartridge
 
         cpu.powerOn()
 
         interruptLine.clear([.NMI, .IRQ])
         interruptLine.send(.RESET)
 
-        cpu.memory.clear()
+        cpu.bus.clear()
         ppu.reset()
         lineBuffer.clear()
 
@@ -121,4 +121,4 @@ public protocol LineRenderer {
     func newLine(at: Int, by: inout LineBuffer)
 }
 
-extension CPUMemory: DMCMemoryReader {}
+extension CPUBus: DMCMemoryReader {}

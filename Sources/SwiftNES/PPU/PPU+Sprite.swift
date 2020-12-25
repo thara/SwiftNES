@@ -100,8 +100,8 @@ extension PPU {
             }
 
             let tileAddr = base &+ tileIndex &* 16 &+ row
-            let low = memory.read(at: tileAddr)
-            let high = memory.read(at: tileAddr &+ 8)
+            let low = bus.read(at: tileAddr)
+            let high = bus.read(at: tileAddr &+ 8)
 
             let pixel = low[col] &+ (high[col] &<< 1)
             if pixel == 0 {  // transparent
@@ -120,7 +120,7 @@ extension PPU {
 
             return SpritePixel(
                 enabled: pixel != 0,
-                color: Int(memory.read(at: 0x3F10 &+ sprite.attr.pallete.u16 &* 4 &+ pixel.u16)),
+                color: Int(bus.read(at: 0x3F10 &+ sprite.attr.pallete.u16 &* 4 &+ pixel.u16)),
                 priority: sprite.attr.contains(.behindBackground))
         }
         return .zero

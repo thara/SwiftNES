@@ -25,13 +25,13 @@ extension PPU {
                 tile.reload(for: nextPattern, with: attrTableEntry)
             case 2:
                 // Fetch nametable byte : step 2
-                nameTableEntry = memory.read(at: bgTempAddr)
+                nameTableEntry = bus.read(at: bgTempAddr)
             case 3:
                 // Fetch attribute table byte : step 1
                 bgTempAddr = attributeTableFirst | registers.v.attributeAddressIndex
             case 4:
                 // Fetch attribute table byte : step 2
-                attrTableEntry = memory.read(at: bgTempAddr)
+                attrTableEntry = bus.read(at: bgTempAddr)
                 // select area
                 if registers.v.coarseXScroll[1] == 1 {
                     attrTableEntry &>>= 2
@@ -46,13 +46,13 @@ extension PPU {
                 bgTempAddr = base &+ index &+ registers.v.fineYScroll.u16
             case 6:
                 // Fetch tile bitmap low byte : step 2
-                nextPattern.low = memory.read(at: bgTempAddr).u16
+                nextPattern.low = bus.read(at: bgTempAddr).u16
             case 7:
                 // Fetch tile bitmap high byte : step 1
                 bgTempAddr &+= tileHeight
             case 0:
                 // Fetch tile bitmap high byte : step 2
-                nextPattern.high = memory.read(at: bgTempAddr).u16
+                nextPattern.high = bus.read(at: bgTempAddr).u16
                 if registers.renderingEnabled {
                     registers.incrCoarseX()
                 }
@@ -60,7 +60,7 @@ extension PPU {
                 break
             }
         case 256:
-            nextPattern.high = memory.read(at: bgTempAddr).u16
+            nextPattern.high = bus.read(at: bgTempAddr).u16
             if registers.renderingEnabled {
                 registers.incrY()
             }
@@ -77,7 +77,7 @@ extension PPU {
         case 337, 339:
             bgTempAddr = nameTableFirst | registers.v.nameTableAddressIndex
         case 338, 340:
-            nameTableEntry = memory.read(at: bgTempAddr)
+            nameTableEntry = bus.read(at: bgTempAddr)
         default:
             break
         }
@@ -97,7 +97,7 @@ extension PPU {
         }
         return BackgroundPixel(
             enabled: pixel != 0,
-            color: Int(memory.read(at: 0x3F00 &+ pallete &* 4 &+ pixel)))
+            color: Int(bus.read(at: 0x3F00 &+ pallete &* 4 &+ pixel)))
     }
 }
 
