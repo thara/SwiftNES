@@ -1,3 +1,7 @@
+typealias OpCode = UInt8
+
+typealias Operand = UInt16
+
 struct CPU {
     /// Accumulator
     var A: UInt8 = 0x00 { didSet { P.setZN(A) } }
@@ -63,7 +67,8 @@ struct CPU {
             }
         default:
             let opcode = fetchOpcode()
-            excuteInstruction(opcode: opcode)
+            let instruction = decode(opcode: opcode)
+            instruction.execute(cpu: &self)
         }
 
         if before <= cycles {
@@ -71,6 +76,13 @@ struct CPU {
         } else {
             return UInt.max &- before &+ cycles
         }
+    }
+
+    @inline(__always)
+    mutating func fetchOpcode() -> OpCode {
+        let opcode = read(at: PC)
+        PC &+= 1
+        return opcode
     }
 
     mutating func powerOn() {
@@ -148,3 +160,31 @@ extension CPU.Status {
         }
     }
 }
+
+ // MARK: - Stack
+ extension CPU {
+     @inline(__always)
+     mutating func pushStack(_ value: UInt8) {
+         write(value, at: S.u16 &+ 0x100)
+         S &-= 1
+     }
+
+     @inline(__always)
+     mutating func pushStack(word: UInt16) {
+         pushStack(UInt8(word >> 8))
+         pushStack(UInt8(word & 0xFF))
+     }
+
+     @inline(__always)
+     mutating func pullStack() -> UInt8 {
+         S &+= 1
+         return read(at: S.u16 &+ 0x100)
+     }
+
+     @inline(__always)
+     mutating func pullStack() -> UInt16 {
+         let lo: UInt8 = pullStack()
+         let ho: UInt8 = pullStack()
+         return ho.u16 &<< 8 | lo.u16
+     }
+ }
