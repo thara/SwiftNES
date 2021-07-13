@@ -32,8 +32,8 @@
         "package": "SDL",
         "repositoryURL": "https://github.com/thara/SDL.git",
         "state": {
-          "branch": "swiftnes-5",
-          "revision": "1c92e896db809b0d177dc1b0106141d954131854",
+          "branch": "swiftnes-6",
+          "revision": "ea999ac1738f3c000813766c49bf09049389d47c",
           "version": null
         }
       },
