@@ -9,7 +9,7 @@ jobs:
       - checkout
       - restore_cache:
           name: Restore swiftlint
-          key: swiftlint-0.38.2-bin-{{ .Environment.CACHE_VERSION }}
+          key: swiftlint-0.43.1-bin-{{ .Environment.CACHE_VERSION }}
       - run:
           name: Workaround of failure to install mercurial
           command: mv /usr/lib/python2.7/site-packages /usr/lib/python2.7/dist-packages; ln -s dist-packages /usr/lib/python2.7/site-packages
@@ -17,7 +17,7 @@ jobs:
           name: Install dependencies
           command: apt-get update && apt-get install -y libgd-dev libsoundio-dev
       - run:
-          name: Install SDL2 2.0.10
+          name: Install SDL2 2.0.14
           command: |
             apt-get install -y mercurial libtool libxext-dev
             mkdir -p ~/tmp/sdl2
@@ -38,7 +38,7 @@ jobs:
             fi
       - save_cache:
           name: Cache swiftlint
-          key: swiftlint-0.38.2-bin-{{ .Environment.CACHE_VERSION }}
+          key: swiftlint-0.43.1-bin-{{ .Environment.CACHE_VERSION }}
           paths:
             - ~/swiftlint
       - run:
