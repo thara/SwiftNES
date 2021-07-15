@@ -69,7 +69,7 @@ public final class NES {
             }
         }
 
-        //FIXME
+        // FIXME
         // if apu.frameInterrupted {
         //     interruptLine.send(.IRQ)
         // }

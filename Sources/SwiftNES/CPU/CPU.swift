@@ -161,30 +161,30 @@ extension CPU.Status {
     }
 }
 
- // MARK: - Stack
- extension CPU {
-     @inline(__always)
-     mutating func pushStack(_ value: UInt8) {
-         write(value, at: S.u16 &+ 0x100)
-         S &-= 1
-     }
+// MARK: - Stack
+extension CPU {
+    @inline(__always)
+    mutating func pushStack(_ value: UInt8) {
+        write(value, at: S.u16 &+ 0x100)
+        S &-= 1
+    }
 
-     @inline(__always)
-     mutating func pushStack(word: UInt16) {
-         pushStack(UInt8(word >> 8))
-         pushStack(UInt8(word & 0xFF))
-     }
+    @inline(__always)
+    mutating func pushStack(word: UInt16) {
+        pushStack(UInt8(word >> 8))
+        pushStack(UInt8(word & 0xFF))
+    }
 
-     @inline(__always)
-     mutating func pullStack() -> UInt8 {
-         S &+= 1
-         return read(at: S.u16 &+ 0x100)
-     }
+    @inline(__always)
+    mutating func pullStack() -> UInt8 {
+        S &+= 1
+        return read(at: S.u16 &+ 0x100)
+    }
 
-     @inline(__always)
-     mutating func pullStack() -> UInt16 {
-         let lo: UInt8 = pullStack()
-         let ho: UInt8 = pullStack()
-         return ho.u16 &<< 8 | lo.u16
-     }
- }
+    @inline(__always)
+    mutating func pullStack() -> UInt16 {
+        let lo: UInt8 = pullStack()
+        let ho: UInt8 = pullStack()
+        return ho.u16 &<< 8 | lo.u16
+    }
+}
