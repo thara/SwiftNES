@@ -1,7 +1,6 @@
 # SwiftNES
 
 ![CI Status for macOS on GitHub Action](https://github.com/thara/SwiftNES/workflows/Swift/badge.svg)
-[![CI Status for Ubuntu on CircleCI](https://circleci.com/gh/thara/SwiftNES.svg?style=svg)](https://circleci.com/gh/thara/SwiftNES)
 
 [WIP] Cross-platform NES Emulator written in Swift
 
