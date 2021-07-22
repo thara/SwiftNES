@@ -1,4 +1,4 @@
-protocol Mapper: class {
+protocol Mapper: AnyObject {
 
     var program: [UInt8] { get }
     var characterData: [UInt8] { get }

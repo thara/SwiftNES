@@ -1,4 +1,4 @@
-public protocol Controller: class {
+public protocol Controller: AnyObject {
     func write(_ value: UInt8)
     func read() -> UInt8
 }
