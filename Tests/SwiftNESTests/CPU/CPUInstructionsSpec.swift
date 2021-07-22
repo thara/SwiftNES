@@ -699,7 +699,6 @@ class InstructionSpec: QuickSpec {
         }
 
         describe("SBC") {
-            // TODO more test patterns
             describe("absolute") {
                 it("subtract with carry") {
                     let opcode: UInt8 = 0xED
@@ -791,8 +790,6 @@ class InstructionSpec: QuickSpec {
 
             // skip other addressing mode because of similar specifications to the above.
         }
-
-        // TODO CPX/CPY test
 
         describe("INC") {
             describe("absolute") {
