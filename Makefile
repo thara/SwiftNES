@@ -5,20 +5,25 @@
 ROM = Tests/SwiftNESTests/fixtures/helloworld/sample1.nes
 NESTEST_ROM = roms/nes-test-roms/other/nestest.nes
 
+.PHONY: fmt
 fmt:  ## Run Format
 	@swift run swift-format format -r -i Sources/ Tests/
 
+.PHONY: lint
 lint:  ## Run lint
 	@swiftlint --fix -- && swiftlint
 
+.PHONY: debug
 debug:  ## Debug emulator
 	@swift run -c debug SwiftNESMain run ${ROM}
 
+.PHONY: run
 run:  ## Run emulator
 	@mkdir -p .log
 	@rm -f .log/debug.log
 	@swift run -c release SwiftNESMain run ${ROM}
 
+.PHONY: nestest
 nestest:  ## Run nestest
 	@mkdir -p .log
 	@rm -f .log/nestest.log
