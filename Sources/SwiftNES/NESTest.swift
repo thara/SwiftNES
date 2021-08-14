@@ -38,8 +38,11 @@ struct NESTest {
         let nes = NES()
         nes.insert(cartridge: cartridge)
 
+        let renderer = DummyLineRenderer()
+        let audioBuffer = DummyAudioBuffer()
+
         while true {
-            nes.step(onLineEnd: { _, _ in })
+            nes.step(withRenderer: renderer, withAudio: audioBuffer)
             if 26554 < nes.cycles {
                 break
             }
@@ -56,5 +59,17 @@ extension String {
 extension CPU: CustomStringConvertible {
     var description: String {
         return "A:\(A.hex2) X:\(X.hex2) Y:\(Y.hex2) P:\(P.rawValue.hex2) SP:\(S.hex2)"
+    }
+}
+
+struct DummyLineRenderer: LineRenderer {
+    func newLine(at: Int, by: inout LineBuffer) {
+        // NOP
+    }
+}
+
+struct DummyAudioBuffer: AudioBuffer {
+    func write(_ sample: Float) {
+        // NOP
     }
 }
