@@ -483,7 +483,8 @@ class InstructionSpec: QuickSpec {
 
                     let cycle = cpu.step(interruptLine: interruptLine)
 
-                    expect(CPU.Status(rawValue: cpu.pullStack())).to(equal([cpu.P, CPU.Status.operatedB] as CPU.Status))
+                    expect(CPU.Status(rawValue: cpu.pullStack())).to(
+                        equal([cpu.P, CPU.Status.operatedB] as CPU.Status))
                     expect(cpu.PC).to(equal(0x0303))
                     expect(cycle).to(equal(3))
                 }

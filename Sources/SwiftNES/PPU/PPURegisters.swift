@@ -150,8 +150,12 @@ struct PPUController: OptionSet {
 
     /// NMI
     static let nmi = PPUController(rawValue: 1 << 7)
+
+    // swiftlint:disable inclusive_language
     /// PPU master/slave (0: master, 1: slave)
     static let slave = PPUController(rawValue: 1 << 6)
+    // swiftlint:enable inclusive_language
+
     /// Sprite size
     static let spriteSize = PPUController(rawValue: 1 << 5)
     /// Background pattern table address

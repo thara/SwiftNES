@@ -1,3 +1,4 @@
+// swiftlint:disable file_length cyclomatic_complexity
 extension APU {
 
     mutating func step<A: AudioBuffer, M: DMCMemoryReader>(audioBuffer: A, memoryReader: M) -> Bool {
@@ -273,7 +274,7 @@ extension PulseChannel: Oscillator {
                 case .onesComplement:
                     changeAmount = ~changeAmount
                 case .twosComplement:
-                    changeAmount = ~changeAmount + 1  // swiftlint:disable shorthand_operator
+                    changeAmount = ~changeAmount + 1
                 }
             }
             timerPeriod &+= changeAmount

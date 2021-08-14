@@ -7,6 +7,8 @@ disabled_rules:
   - switch_case_on_newline
   - type_body_length
   - opening_brace
+  - large_tuple
+  - todo
 
 included:
   - Sources/SwiftNES
@@ -23,3 +25,6 @@ function_body_length:
 
 trailing_comma:
     mandatory_comma: true
+
+line_length:
+    ignores_comments: true

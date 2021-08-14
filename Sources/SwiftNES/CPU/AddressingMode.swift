@@ -10,6 +10,7 @@ enum AddressingMode {
     case relative
     case indirect, indexedIndirect, indirectIndexed
 
+    // swiftlint:disable cyclomatic_complexity
     func getOperand(from cpu: inout CPU) -> Operand {
         switch self {
         case .implicit:
@@ -95,4 +96,5 @@ enum AddressingMode {
             return operand
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 }

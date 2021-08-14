@@ -69,7 +69,8 @@ extension CPU {
 
     mutating func readOnIndirect(operand: UInt16) -> UInt16 {
         let low = read(at: operand).u16
-        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
+        // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
+        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8
         return low | high
     }
 }
@@ -77,7 +78,8 @@ extension CPU {
 extension Memory {
     func readOnIndirect(operand: UInt16) -> UInt16 {
         let low = read(at: operand).u16
-        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8  // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
+        // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
+        let high = read(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8
         return low | high
     }
 }

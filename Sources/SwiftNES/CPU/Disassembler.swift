@@ -107,7 +107,7 @@ class Disassembler {
         return makeAssemblyOperand(step: step, addressingMode: instruction.addressingMode, cpu: &cpu)
     }
 
-    // swiftlint:disable cyclomatic_complexity line_length
+    // swiftlint:disable cyclomatic_complexity
     private static func makeAssemblyOperand(step: CPUStep, addressingMode: AddressingMode, cpu: inout CPU) -> String {
         let operand1 = step.operand1
         let operand16 = step.operand16
@@ -122,15 +122,19 @@ class Disassembler {
         case .zeroPage:
             return String(format: "$%02X = %02X", operand1, cpu.bus.read(at: operand1.u16))
         case .zeroPageX:
-            return String(format: "$%02X,X @ %02X = %02X", operand1, operand1 &+ x, cpu.bus.read(at: (operand1 &+ x).u16))
+            return String(
+                format: "$%02X,X @ %02X = %02X", operand1, operand1 &+ x, cpu.bus.read(at: (operand1 &+ x).u16))
         case .zeroPageY:
-            return String(format: "$%02X,Y @ %02X = %02X", operand1, operand1 &+ y, cpu.bus.read(at: (operand1 &+ y).u16))
+            return String(
+                format: "$%02X,Y @ %02X = %02X", operand1, operand1 &+ y, cpu.bus.read(at: (operand1 &+ y).u16))
         case .absolute:
             return String(format: "$%04X = %02X", operand16, cpu.bus.read(at: operand16))
         case .absoluteX:
-            return String(format: "$%04X,X @ %04X = %02X", operand16, operand16 &+ x.u16, cpu.bus.read(at: operand16 &+ x.u16))
+            return String(
+                format: "$%04X,X @ %04X = %02X", operand16, operand16 &+ x.u16, cpu.bus.read(at: operand16 &+ x.u16))
         case .absoluteY:
-            return String(format: "$%04X,Y @ %04X = %02X", operand16, operand16 &+ y.u16, cpu.bus.read(at: operand16 &+ y.u16))
+            return String(
+                format: "$%04X,Y @ %04X = %02X", operand16, operand16 &+ y.u16, cpu.bus.read(at: operand16 &+ y.u16))
         case .relative:
             return String(format: "$%04X", Int(step.pc) &+ 2 &+ Int(operand1.i8))
         case .indirect:
@@ -138,10 +142,13 @@ class Disassembler {
         case .indexedIndirect:
             let operandX = x &+ operand1
             let address = cpu.bus.readOnIndirect(operand: operandX.u16)
-            return String(format: "($%02X,X) @ %02X = %04X = %02X", operand1, operandX, address, cpu.bus.read(at: address))
+            return String(
+                format: "($%02X,X) @ %02X = %04X = %02X", operand1, operandX, address, cpu.bus.read(at: address))
         case .indirectIndexed:
             let data = cpu.bus.readOnIndirect(operand: operand1.u16)
-            return String(format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ y.u16, cpu.bus.read(at: data &+ y.u16))
+            return String(
+                format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ y.u16, cpu.bus.read(at: data &+ y.u16)
+            )
         }
     }
 
@@ -187,7 +194,7 @@ class Disassembler {
         return table.compactMap { $0 }
     }()
 
-    // swiftlint:disable cyclomatic_complexity function_body_length switch_case_alignment
+    // swiftlint:disable cyclomatic_complexity function_body_length
     private static func decodeInstruction(for opcode: UInt8) -> (Disassembler.Mnemonic, Disassembler.AddressingMode) {
         switch opcode {
         case 0xA9: return (.LDA, .immediate)

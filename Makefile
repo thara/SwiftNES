@@ -5,11 +5,11 @@
 ROM = Tests/SwiftNESTests/fixtures/helloworld/sample1.nes
 NESTEST_ROM = roms/nes-test-roms/other/nestest.nes
 
-format:  ## Run Format
+fmt:  ## Run Format
 	@swift run swift-format format -r -i Sources/ Tests/
 
 lint:  ## Run lint
-	@swiftlint autocorrect -- && swiftlint
+	@swiftlint --fix -- && swiftlint
 
 debug:  ## Debug emulator
 	@swift run -c debug SwiftNESMain run ${ROM}

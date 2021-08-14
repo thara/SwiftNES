@@ -41,7 +41,8 @@ class PPURegistersSpec: QuickSpec {
             }
 
             it("increment fine Y") {
-                registers.v = vramAddress(fineYScroll: 0b101, nameTableNo: 2, coarseYScroll: 0b10101, coarseXScroll: 0b11101)
+                registers.v = vramAddress(
+                    fineYScroll: 0b101, nameTableNo: 2, coarseYScroll: 0b10101, coarseXScroll: 0b11101)
 
                 registers.incrY()
                 expect(registers.v).to(equal(0b01101010_10111101))
@@ -50,7 +51,8 @@ class PPURegistersSpec: QuickSpec {
             context("if fine Y == 7") {
                 context("the last row of tiles in a nametable") {
                     it("switch vertical nametable") {
-                        registers.v = vramAddress(fineYScroll: 7, nameTableNo: 2, coarseYScroll: 29, coarseXScroll: 0b11101)
+                        registers.v = vramAddress(
+                            fineYScroll: 7, nameTableNo: 2, coarseYScroll: 29, coarseXScroll: 0b11101)
 
                         registers.incrY()
                         expect(registers.v.fineYScroll).to(equal(0))
@@ -62,7 +64,8 @@ class PPURegistersSpec: QuickSpec {
 
                 context("out of range") {
                     it("clear coarse Y") {
-                        registers.v = vramAddress(fineYScroll: 7, nameTableNo: 2, coarseYScroll: 31, coarseXScroll: 0b11101)
+                        registers.v = vramAddress(
+                            fineYScroll: 7, nameTableNo: 2, coarseYScroll: 31, coarseXScroll: 0b11101)
 
                         registers.incrY()
                         expect(registers.v.fineYScroll).to(equal(0))

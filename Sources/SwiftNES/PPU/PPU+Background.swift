@@ -147,7 +147,8 @@ struct Tile {
         currentPattern.high &<<= 1
 
         currentAttribute.low = (currentAttribute.low &<< 1) | unsafeBitCast(currentAttribute.lowLatch, to: UInt8.self)
-        currentAttribute.high = (currentAttribute.high &<< 1) | unsafeBitCast(currentAttribute.highLatch, to: UInt8.self)
+        currentAttribute.high =
+            (currentAttribute.high &<< 1) | unsafeBitCast(currentAttribute.highLatch, to: UInt8.self)
     }
 
     @inline(__always)
