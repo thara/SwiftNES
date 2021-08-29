@@ -445,7 +445,7 @@ extension NoiseChannel: Oscillator {
     }
 
     func output() -> UInt8 {
-        guard shiftRegister[0] == 0 || lengthCounter == 0 else {
+        if shiftRegister[0] == 0 || lengthCounter == 0 {
             return 0
         }
         let volume = useConstantVolume ? envelopePeriod : envelopeDecayLevelCounter
