@@ -21,38 +21,25 @@ extension PPU {
             let spriteSize = registers.controller.contains(.spriteSize) ? 16 : 8
 
             var n = 0
-            secondaryOAM.withUnsafeMutableBufferPointer { b in
-                var p = b.baseAddress!
-                let last = p + b.count
-
-                for i in 0..<spriteCount {
-                    let first = i &* 4
-                    let y = primaryOAM[first]
-
-                    if last - p <= b.count {
-                        let row = scan.line &- Int(primaryOAM[first])
-                        guard 0 <= row && row < spriteSize else {
-                            continue
-                        }
-                        if n == 0 {
-                            spriteZeroOnLine = true
-                        }
-
-                        p.pointee = y
-                        p += 1
-                        p.pointee = primaryOAM[first &+ 1]
-                        p += 1
-                        p.pointee = primaryOAM[first &+ 2]
-                        p += 1
-                        p.pointee = primaryOAM[first &+ 3]
-                        p += 1
-
-                        n &+= 1
-                    }
+            for i in 0..<spriteCount {
+                let y = primaryOAM[i*4]
+                let row = scan.line &- Int(y)
+                guard 0 <= row && row < spriteSize else {
+                    continue
                 }
-            }
-            if spriteLimit <= n && registers.renderingEnabled {
-                registers.status.formUnion(.spriteOverflow)
+                if n == 0 {
+                    spriteZeroOnLine = true
+                }
+                secondaryOAM[n] = y
+                secondaryOAM[n+1] = primaryOAM[i*4 &+ 1]
+                secondaryOAM[n+2] = primaryOAM[i*4 &+ 2]
+                secondaryOAM[n+3] = primaryOAM[i*4 &+ 3]
+                n += 4
+
+                if spriteLimit <= n && registers.renderingEnabled {
+                    registers.status.formUnion(.spriteOverflow)
+                    break
+                }
             }
         case 257...320:
             // the sprite fetch phase
