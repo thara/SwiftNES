@@ -53,23 +53,23 @@ class Disassembler {
         let addressingMode: AddressingMode
     }
 
-    static func disassemble(cpu: inout CPU) -> (machineCode: String, assemblyCode: String) {
-        let currentStep = makeCurrentStep(cpu: &cpu)
-        let opcode = cpu.bus.read(at: currentStep.pc)
+    static func disassemble<E: CPUEmulator>(emu: E) -> (machineCode: String, assemblyCode: String) {
+        let currentStep = makeCurrentStep(emu: emu)
+        let opcode = emu.cpuRead(at: currentStep.pc)
         let instruction = instructionTable[Int(opcode)]
         return (
             makeMachineCode(step: currentStep, instruction: instruction),
-            makeAssemblyCode(step: currentStep, instruction: instruction, cpu: &cpu)
+            makeAssemblyCode(step: currentStep, instruction: instruction, emu: emu)
         )
     }
 
-    private static func makeCurrentStep(cpu: inout CPU) -> CPUStep {
-        let pc = cpu.PC
+    private static func makeCurrentStep<E: CPUEmulator>(emu: E) -> CPUStep {
+        let pc = emu.cpu.PC
         return CPUStep(
-            pc: cpu.PC,
-            operand1: cpu.bus.read(at: pc &+ 1),
-            operand2: cpu.bus.read(at: pc &+ 2),
-            state: cpu
+            pc: emu.cpu.PC,
+            operand1: emu.cpuRead(at: pc &+ 1),
+            operand2: emu.cpuRead(at: pc &+ 2),
+            state: emu.cpu
         )
     }
 
@@ -84,17 +84,17 @@ class Disassembler {
         }
     }
 
-    private static func makeAssemblyCode(step: CPUStep, instruction: Instruction, cpu: inout CPU) -> String {
-        let operandString = makeAssemblyOperand(step: step, instruction: instruction, cpu: &cpu)
+    private static func makeAssemblyCode<E: CPUEmulator>(step: CPUStep, instruction: Instruction, emu: E) -> String {
+        let operandString = makeAssemblyOperand(step: step, instruction: instruction, emu: emu)
         let prefix = undocumentedOpcodes.contains(Int(instruction.opcode)) ? "*" : " "
         return "\(prefix)\(instruction.mnemonic) \(operandString)"
     }
 
-    private static func makeAssemblyOperand(step: CPUStep, instruction: Instruction, cpu: inout CPU) -> String {
+    private static func makeAssemblyOperand<E: CPUEmulator>(step: CPUStep, instruction: Instruction, emu: E) -> String {
         switch instruction.mnemonic {
         case .JMP, .JSR:
             if case .absolute = instruction.addressingMode {
-                let address = decodeAddress(step: step, addressingMode: instruction.addressingMode, cpu: &cpu)
+                let address = decodeAddress(step: step, addressingMode: instruction.addressingMode, emu: emu)
                 return String(format: "$%04X", address)
             }
         case .LSR, .ASL, .ROR, .ROL:
@@ -104,11 +104,11 @@ class Disassembler {
         default:
             break
         }
-        return makeAssemblyOperand(step: step, addressingMode: instruction.addressingMode, cpu: &cpu)
+        return makeAssemblyOperand(step: step, addressingMode: instruction.addressingMode, emu: emu)
     }
 
     // swiftlint:disable cyclomatic_complexity
-    private static func makeAssemblyOperand(step: CPUStep, addressingMode: AddressingMode, cpu: inout CPU) -> String {
+    private static func makeAssemblyOperand<E: CPUEmulator>(step: CPUStep, addressingMode: AddressingMode, emu: E) -> String {
         let operand1 = step.operand1
         let operand16 = step.operand16
         let x = step.state.X
@@ -120,40 +120,47 @@ class Disassembler {
         case .immediate:
             return String(format: "#$%02X", operand1)
         case .zeroPage:
-            return String(format: "$%02X = %02X", operand1, cpu.bus.read(at: operand1.u16))
+            return String(format: "$%02X = %02X", operand1, emu.cpuRead(at: operand1.u16))
         case .zeroPageX:
             return String(
-                format: "$%02X,X @ %02X = %02X", operand1, operand1 &+ x, cpu.bus.read(at: (operand1 &+ x).u16))
+                format: "$%02X,X @ %02X = %02X", operand1, operand1 &+ x, emu.cpuRead(at: (operand1 &+ x).u16))
         case .zeroPageY:
             return String(
-                format: "$%02X,Y @ %02X = %02X", operand1, operand1 &+ y, cpu.bus.read(at: (operand1 &+ y).u16))
+                format: "$%02X,Y @ %02X = %02X", operand1, operand1 &+ y, emu.cpuRead(at: (operand1 &+ y).u16))
         case .absolute:
-            return String(format: "$%04X = %02X", operand16, cpu.bus.read(at: operand16))
+            return String(format: "$%04X = %02X", operand16, emu.cpuRead(at: operand16))
         case .absoluteX:
             return String(
-                format: "$%04X,X @ %04X = %02X", operand16, operand16 &+ x.u16, cpu.bus.read(at: operand16 &+ x.u16))
+                format: "$%04X,X @ %04X = %02X", operand16, operand16 &+ x.u16, emu.cpuRead(at: operand16 &+ x.u16))
         case .absoluteY:
             return String(
-                format: "$%04X,Y @ %04X = %02X", operand16, operand16 &+ y.u16, cpu.bus.read(at: operand16 &+ y.u16))
+                format: "$%04X,Y @ %04X = %02X", operand16, operand16 &+ y.u16, emu.cpuRead(at: operand16 &+ y.u16))
         case .relative:
             return String(format: "$%04X", Int(step.pc) &+ 2 &+ Int(operand1.i8))
         case .indirect:
-            return String(format: "($%04X) = %04X", operand16, cpu.bus.readOnIndirect(operand: operand16))
+            return String(format: "($%04X) = %04X", operand16, readOnIndirect(operand: operand16, emu: emu))
         case .indexedIndirect:
             let operandX = x &+ operand1
-            let address = cpu.bus.readOnIndirect(operand: operandX.u16)
+            let address = readOnIndirect(operand: operandX.u16, emu: emu)
             return String(
-                format: "($%02X,X) @ %02X = %04X = %02X", operand1, operandX, address, cpu.bus.read(at: address))
+                format: "($%02X,X) @ %02X = %04X = %02X", operand1, operandX, address, emu.cpuRead(at: address))
         case .indirectIndexed:
-            let data = cpu.bus.readOnIndirect(operand: operand1.u16)
+            let data = emu.readOnIndirect(operand: operand1.u16)
             return String(
-                format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ y.u16, cpu.bus.read(at: data &+ y.u16)
+                format: "($%02X),Y = %04X @ %04X = %02X", operand1, data, data &+ y.u16, emu.cpuRead(at: data &+ y.u16)
             )
         }
     }
 
+    private static func readOnIndirect<E: CPUEmulator>(operand: UInt16, emu: E) -> UInt16 {
+        let low = emu.cpuRead(at: operand).u16
+        // Reproduce 6502 bug; http://nesdev.com/6502bugs.txt
+        let high = emu.cpuRead(at: operand & 0xFF00 | ((operand &+ 1) & 0x00FF)).u16 &<< 8
+        return low | high
+    }
+
     // swiftlint:disable cyclomatic_complexity
-    private static func decodeAddress(step: CPUStep, addressingMode: AddressingMode, cpu: inout CPU) -> UInt16 {
+    private static func decodeAddress<E: CPUEmulator>(step: CPUStep, addressingMode: AddressingMode, emu: E) -> UInt16 {
         switch addressingMode {
         case .implicit:
             return 0x00
@@ -174,11 +181,11 @@ class Disassembler {
         case .relative:
             return step.pc
         case .indirect:
-            return cpu.bus.readOnIndirect(operand: step.operand16)
+            return readOnIndirect(operand: step.operand16, emu: emu)
         case .indirectIndexed:
-            return cpu.bus.readOnIndirect(operand: (step.operand16 &+ step.state.X.u16) & 0xFF)
+            return readOnIndirect(operand: (step.operand16 &+ step.state.X.u16) & 0xFF, emu: emu)
         case .indexedIndirect:
-            return cpu.bus.readOnIndirect(operand: step.operand16) &+ step.state.Y.u16
+            return readOnIndirect(operand: step.operand16, emu: emu) &+ step.state.Y.u16
         default:
             return 0x00
         }

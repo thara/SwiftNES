@@ -473,835 +473,834 @@ func decode(opcode: OpCode) -> CPUInstruction {
     }
 }
 
+extension CPUEmulator {
+    func execute(by instruction: CPUInstruction) {
+        let addressingMode = instruction.addressingMode
+        let operand = getOperand(by: addressingMode)
+
+        switch (instruction.mnemonic, instruction.addressingMode) {
+        case (.LDA, _): LDA(operand: operand)
+        case (.LDX, _): LDX(operand: operand)
+        case (.LDY, _): LDY(operand: operand)
+        case (.STA, .indirectIndexed):
+            STA(operand: operand)
+            tick()
+        case (.STA, _): STA(operand: operand)
+        case (.STX, _): STX(operand: operand)
+        case (.STY, _): STY(operand: operand)
+        case (.TAX, _): TAX()
+        case (.TSX, _): TSX()
+        case (.TAY, _): TAY()
+        case (.TXA, _): TXA()
+        case (.TXS, _): TXS()
+        case (.TYA, _): TYA()
+        case (.PHA, _): PHA()
+        case (.PHP, _): PHP()
+        case (.PLA, _): PLA()
+        case (.PLP, _): PLP()
+        case (.AND, _): AND(operand: operand)
+        case (.EOR, _): EOR(operand: operand)
+        case (.ORA, _): ORA(operand: operand)
+        case (.BIT, _): BIT(operand: operand)
+        case (.ADC, _): ADC(operand: operand)
+        case (.SBC, _): SBC(operand: operand)
+        case (.CMP, _): CMP(operand: operand)
+        case (.CPX, _): CPX(operand: operand)
+        case (.CPY, _): CPY(operand: operand)
+        case (.INC, _): INC(operand: operand)
+        case (.INX, _): INX()
+        case (.INY, _): INY()
+        case (.DEC, _): DEC(operand: operand)
+        case (.DEX, _): DEX()
+        case (.DEY, _): DEY()
+        case (.ASL, .accumulator): ASLForAccumulator()
+        case (.ASL, _): ASL(operand: operand)
+        case (.LSR, .accumulator): LSRForAccumulator()
+        case (.LSR, _): LSR(operand: operand)
+        case (.ROL, .accumulator): ROLForAccumulator()
+        case (.ROL, _): ROL(operand: operand)
+        case (.ROR, .accumulator): RORForAccumulator()
+        case (.ROR, _): ROR(operand: operand)
+        case (.JMP, _): JMP(operand: operand)
+        case (.JSR, _): JSR(operand: operand)
+        case (.RTS, _): RTS()
+        case (.RTI, _): RTI()
+        case (.BCC, _): BCC(operand: operand)
+        case (.BCS, _): BCS(operand: operand)
+        case (.BEQ, _): BEQ(operand: operand)
+        case (.BMI, _): BMI(operand: operand)
+        case (.BNE, _): BNE(operand: operand)
+        case (.BPL, _): BPL(operand: operand)
+        case (.BVC, _): BVC(operand: operand)
+        case (.BVS, _): BVS(operand: operand)
+        case (.CLC, _): CLC()
+        case (.CLD, _): CLD()
+        case (.CLI, _): CLI()
+        case (.CLV, _): CLV()
+        case (.SEC, _): SEC()
+        case (.SED, _): SED()
+        case (.SEI, _): SEI()
+        case (.BRK, _): BRK()
+        case (.NOP, _): NOP()
+        case (.LAX, _): LAX(operand: operand)
+        case (.SAX, _): SAX(operand: operand)
+        case (.DCP, _): DCP(operand: operand)
+        case (.ISB, _): ISB(operand: operand)
+        case (.SLO, _): SLO(operand: operand)
+        case (.RLA, _): RLA(operand: operand)
+        case (.SRE, _): SRE(operand: operand)
+        case (.RRA, _): RRA(operand: operand)
+        }
+    }
+
+
+    // MARK: - Operations
+
+    // Implements for Load/Store Operations
+
+    /// loadAccumulator
+    func LDA(operand: Operand) {
+        cpu.A = read(at: operand)
+    }
+
+    /// loadXRegister
+    func LDX(operand: Operand) {
+        cpu.X = read(at: operand)
+    }
+
+    /// loadYRegister
+    func LDY(operand: Operand) {
+        cpu.Y = read(at: operand)
+    }
+
+    /// storeAccumulator
+    func STA(operand: Operand) {
+        write(cpu.A, at: operand)
+    }
+
+    func STAWithTick(operand: Operand) {
+        write(cpu.A, at: operand)
+        tick()
+    }
+
+    /// storeXRegister
+    func STX(operand: Operand) {
+        write(cpu.X, at: operand)
+    }
+
+    /// storeYRegister
+    func STY(operand: Operand) {
+        write(cpu.Y, at: operand)
+    }
+
+    // MARK: - cpu Operations
+    /// transferAccumulatorToX
+    func TAX() {
+        cpu.X = cpu.A
+        tick()
+    }
+
+    /// transferStackPointerToX
+    func TSX() {
+        cpu.X = cpu.S
+        tick()
+    }
+
+    /// transferAccumulatorToY
+    func TAY() {
+        cpu.Y = cpu.A
+        tick()
+    }
+
+    /// transferXtoAccumulator
+    func TXA() {
+        cpu.A = cpu.X
+        tick()
+    }
+
+    /// transferXtoStackPointer
+    func TXS() {
+        cpu.S = cpu.X
+        tick()
+    }
+
+    /// transferYtoAccumulator
+    func TYA() {
+        cpu.A = cpu.Y
+        tick()
+    }
+
+    // MARK: - Stack instructions
+    /// pushAccumulator
+    func PHA() {
+        pushStack(cpu.A)
+        tick()
+    }
+
+    /// pushProcessorStatus
+    func PHP() {
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        pushStack(cpu.P.rawValue | CPU.Status.operatedB.rawValue)
+        tick()
+    }
+
+    /// pullAccumulator
+    func PLA() {
+        cpu.A = pullStack()
+        tick(count: 2)
+    }
+
+    /// pullProcessorStatus
+    func PLP() {
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        cpu.P = CPU.Status(rawValue: pullStack() & ~CPU.Status.B.rawValue | CPU.Status.R.rawValue)
+        tick(count: 2)
+    }
+
+    // MARK: - Logical instructions
+    /// bitwiseANDwithAccumulator
+    func AND(operand: Operand) {
+        cpu.A &= read(at: operand)
+    }
+
+    func executeAND(operand: Operand) {
+        cpu.A &= read(at: operand)
+    }
+
+    /// bitwiseExclusiveOR
+    func EOR(operand: Operand) {
+        executeEOR(operand: operand)
+    }
+
+    func executeEOR(operand: Operand) {
+        cpu.A ^= read(at: operand)
+    }
+
+    /// bitwiseORwithAccumulator
+    func ORA(operand: Operand) {
+        executeORA(operand: operand)
+    }
+
+    func executeORA(operand: Operand) {
+        cpu.A |= read(at: operand)
+    }
+
+    /// testBits
+    func BIT(operand: Operand) {
+
+        let value = read(at: operand)
+        let data = cpu.A & value
+        cpu.P.remove([.Z, .V, .N])
+        if data == 0 {
+            cpu.P.formUnion(.Z)
+        } else {
+            cpu.P.remove(.Z)
+        }
+        if value[6] == 1 {
+            cpu.P.formUnion(.V)
+        } else {
+            cpu.P.remove(.V)
+        }
+        if value[7] == 1 {
+            cpu.P.formUnion(.N)
+        } else {
+            cpu.P.remove(.N)
+        }
+    }
+
+    // MARK: - Arithmetic instructions
+    /// addWithCarry
+    func ADC(operand: Operand) {
+        executeAOR(operand: operand)
+    }
+
+    func executeAOR(operand: Operand) {
+        let a = cpu.A
+        let val = read(at: operand)
+        var result = a &+ val
+
+        if cpu.P.contains(.C) {
+            result &+= 1
+        }
+
+        cpu.P.remove([.C, .Z, .V, .N])
+
+        // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+        let a7 = a[7]
+        let v7 = val[7]
+        let c6 = a7 ^ v7 ^ result[7]
+        let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
+
+        if c7 == 1 {
+            cpu.P.formUnion(.C)
+        }
+        if c6 ^ c7 == 1 {
+            cpu.P.formUnion(.V)
+        }
+
+        cpu.A = result
+    }
+
+    /// subtractWithCarry
+    func SBC(operand: Operand) {
+
+        let a = cpu.A
+        let val = ~read(at: operand)
+        var result = a &+ val
+
+        if cpu.P.contains(.C) {
+            result &+= 1
+        }
+
+        cpu.P.remove([.C, .Z, .V, .N])
+
+        // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+        let a7 = a[7]
+        let v7 = val[7]
+        let c6 = a7 ^ v7 ^ result[7]
+        let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
+
+        if c7 == 1 {
+            cpu.P.formUnion(.C)
+        }
+        if c6 ^ c7 == 1 {
+            cpu.P.formUnion(.V)
+        }
+
+        cpu.A = result
+    }
+
+    func executeSBC(operand: Operand) {
+        let a = cpu.A
+        let val = ~read(at: operand)
+        var result = a &+ val
+
+        if cpu.P.contains(.C) {
+            result &+= 1
+        }
+
+        cpu.P.remove([.C, .Z, .V, .N])
+
+        // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+        let a7 = a[7]
+        let v7 = val[7]
+        let c6 = a7 ^ v7 ^ result[7]
+        let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
+
+        if c7 == 1 {
+            cpu.P.formUnion(.C)
+        }
+        if c6 ^ c7 == 1 {
+            cpu.P.formUnion(.V)
+        }
+
+        cpu.A = result
+    }
+
+    /// compareAccumulator
+    func CMP(operand: Operand) {
+        executeCMP(operand: operand)
+    }
+
+    func executeCMP(operand: Operand) {
+        let cmp = Int16(cpu.A) &- Int16(read(at: operand))
+
+        cpu.P.remove([.C, .Z, .N])
+        cpu.P.setZN(cmp)
+        if 0 <= cmp {
+            cpu.P.formUnion(.C)
+        } else {
+            cpu.P.remove(.C)
+        }
+    }
+
+    /// compareXRegister
+    func CPX(operand: Operand) {
+
+        let value = read(at: operand)
+        let cmp = cpu.X &- value
+
+        cpu.P.remove([.C, .Z, .N])
+        cpu.P.setZN(cmp)
+        if cpu.X >= value {
+            cpu.P.formUnion(.C)
+        } else {
+            cpu.P.remove(.C)
+        }
+    }
+
+    /// compareYRegister
+    func CPY(operand: Operand) {
+
+        let value = read(at: operand)
+        let cmp = cpu.Y &- value
+
+        cpu.P.remove([.C, .Z, .N])
+        cpu.P.setZN(cmp)
+        if cpu.Y >= value {
+            cpu.P.formUnion(.C)
+        } else {
+            cpu.P.remove(.C)
+        }
+    }
+
+    // MARK: - Increment/Decrement instructions
+    /// incrementMemory
+    func INC(operand: Operand) {
+
+        let result = read(at: operand) &+ 1
+
+        cpu.P.setZN(result)
+        write(result, at: operand)
+
+        tick()
+    }
+
+    /// incrementX
+    func INX() {
+        cpu.X = cpu.X &+ 1
+        tick()
+    }
+
+    /// incrementY
+    func INY() {
+        cpu.Y = cpu.Y &+ 1
+        tick()
+    }
+
+    /// decrementMemory
+    func DEC(operand: Operand) {
+
+        let result = read(at: operand) &- 1
+        cpu.P.setZN(result)
+
+        write(result, at: operand)
+        tick()
+    }
+
+    /// decrementX
+    func DEX() {
+        cpu.X = cpu.X &- 1
+        tick()
+    }
+
+    /// decrementY
+    func DEY() {
+        cpu.Y = cpu.Y &- 1
+        tick()
+    }
+
+    // MARK: - Shift instructions
+    /// arithmeticShiftLeft
+    func ASL(operand: Operand) {
+
+        var data = read(at: operand)
+
+        cpu.P.remove([.C, .Z, .N])
+        if data[7] == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        data <<= 1
+
+        cpu.P.setZN(data)
+
+        write(data, at: operand)
+
+        tick()
+    }
+
+    func ASLForAccumulator() {
+        cpu.P.remove([.C, .Z, .N])
+        if cpu.A[7] == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        cpu.A <<= 1
+
+        tick()
+    }
+
+    /// logicalShiftRight
+    func LSR(operand: Operand) {
+
+        var data = read(at: operand)
+
+        cpu.P.remove([.C, .Z, .N])
+        if data[0] == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        data >>= 1
+
+        cpu.P.setZN(data)
+
+        write(data, at: operand)
+
+        tick()
+    }
+
+    func LSRForAccumulator() {
+        cpu.P.remove([.C, .Z, .N])
+        if cpu.A[0] == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        cpu.A >>= 1
+
+        tick()
+    }
+
+    /// rotateLeft
+    func ROL(operand: Operand) {
+
+        var data = read(at: operand)
+        let c = data & 0x80
+
+        data <<= 1
+        if cpu.P.contains(.C) {
+            data |= 0x01
+        }
+
+        cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 {
+            cpu.P.formUnion(.C)
+        }
+
+        cpu.P.setZN(data)
+
+        write(data, at: operand)
+
+        tick()
+    }
+
+    func ROLForAccumulator() {
+        let c = cpu.A & 0x80
+
+        var a = cpu.A << 1
+        if cpu.P.contains(.C) {
+            a |= 0x01
+        }
+
+        cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 {
+            cpu.P.formUnion(.C)
+        }
+
+        cpu.A = a
+
+        tick()
+    }
+
+    /// rotateRight
+    func ROR(operand: Operand) {
+
+        var data = read(at: operand)
+        let c = data & 0x01
+
+        data >>= 1
+        if cpu.P.contains(.C) {
+            data |= 0x80
+        }
+
+        cpu.P.remove([.C, .Z, .N])
+        if c == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        cpu.P.setZN(data)
+
+        write(data, at: operand)
+
+        tick()
+    }
+
+    func RORForAccumulator() {
+        let c = cpu.A & 0x01
+
+        var a = cpu.A >> 1
+        if cpu.P.contains(.C) {
+            a |= 0x80
+        }
+
+        cpu.P.remove([.C, .Z, .N])
+        if c == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        cpu.A = a
+
+        tick()
+    }
+
+    // MARK: - Jump instructions
+    /// jump
+    func JMP(operand: Operand) {
+
+        cpu.PC = operand
+    }
+
+    /// jumpToSubroutine
+    func JSR(operand: Operand) {
+
+        pushStack(word: cpu.PC &- 1)
+        tick()
+        cpu.PC = operand
+    }
+
+    /// returnFromSubroutine
+    func RTS() {
+        tick(count: 3)
+        cpu.PC = pullStack() &+ 1
+    }
+
+    /// returnFromInterrupt
+    func RTI() {
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        tick(count: 2)
+        cpu.P = CPU.Status(rawValue: pullStack() & ~CPU.Status.B.rawValue | CPU.Status.R.rawValue)
+        cpu.PC = pullStack()
+    }
+
+    // MARK: - Branch instructions
+    /// branchIfCarryClear
+    func BCC(operand: Operand) {
+
+        branch(operand: operand, test: !cpu.P.contains(.C))
+    }
+
+    /// branchIfCarrySet
+    func BCS(operand: Operand) {
+        branch(operand: operand, test: cpu.P.contains(.C))
+    }
+
+    /// branchIfEqual
+    func BEQ(operand: Operand) {
+        branch(operand: operand, test: cpu.P.contains(.Z))
+    }
+
+    /// branchIfMinus
+    func BMI(operand: Operand) {
+        branch(operand: operand, test: cpu.P.contains(.N))
+    }
+
+    /// branchIfNotEqual
+    func BNE(operand: Operand) {
+        branch(operand: operand, test: !cpu.P.contains(.Z))
+    }
+
+    /// branchIfPlus
+    func BPL(operand: Operand) {
+
+        branch(operand: operand, test: !cpu.P.contains(.N))
+    }
+
+    /// branchIfOverflowClear
+    func BVC(operand: Operand) {
+
+        branch(operand: operand, test: !cpu.P.contains(.V))
+    }
+
+    /// branchIfOverflowSet
+    func BVS(operand: Operand) {
+
+        branch(operand: operand, test: cpu.P.contains(.V))
+    }
+
+    // MARK: - Flag control instructions
+    /// clearCarry
+    func CLC() {
+        cpu.P.remove(.C)
+        tick()
+    }
+
+    /// clearDecimal
+    func CLD() {
+        cpu.P.remove(.D)
+        tick()
+    }
+
+    /// clearInterrupt
+    func CLI() {
+        cpu.P.remove(.I)
+        tick()
+    }
+
+    /// clearOverflow
+    func CLV() {
+        cpu.P.remove(.V)
+        tick()
+    }
+
+    /// setCarryFlag
+    func SEC() {
+        cpu.P.formUnion(.C)
+        tick()
+    }
+
+    /// setDecimalFlag
+    func SED() {
+        cpu.P.formUnion(.D)
+        tick()
+    }
+
+    /// setInterruptDisable
+    func SEI() {
+        cpu.P.formUnion(.I)
+        tick()
+    }
+
+    // MARK: - Misc
+    /// forceInterrupt
+    func BRK() {
+        pushStack(word: cpu.PC)
+        // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+        // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
+        pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue)
+        tick()
+        cpu.PC = readWord(at: 0xFFFE)
+    }
+
+    /// doNothing
+    func NOP() {
+        tick()
+    }
+
+    // MARK: - Unofficial
+    /// loadAccumulatorAndX
+    func LAX(operand: Operand) {
+
+        let data = read(at: operand)
+        cpu.A = data
+        cpu.X = data
+    }
+
+    /// storeAccumulatorAndX
+    func SAX(operand: Operand) {
+
+        write(cpu.A & cpu.X, at: operand)
+    }
+
+    /// decrementMemoryAndCompareAccumulator
+    func DCP(operand: Operand) {
+
+        // decrementMemory excluding tick
+        let result = read(at: operand) &- 1
+        cpu.P.setZN(result)
+        write(result, at: operand)
+
+        executeCMP(operand: operand)
+    }
+
+    /// incrementMemoryAndSubtractWithCarry
+    func ISB(operand: Operand) {
+
+        // incrementMemory excluding tick
+        let result = read(at: operand) &+ 1
+        cpu.P.setZN(result)
+        write(result, at: operand)
+
+        executeSBC(operand: operand)
+    }
+
+    /// arithmeticShiftLeftAndBitwiseORwithAccumulator
+    func SLO(operand: Operand) {
+
+        // arithmeticShiftLeft excluding tick
+        var data = read(at: operand)
+        cpu.P.remove([.C, .Z, .N])
+        if data[7] == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        data <<= 1
+        cpu.P.setZN(data)
+        write(data, at: operand)
+
+        executeORA(operand: operand)
+    }
+
+    /// rotateLeftAndBitwiseANDwithAccumulator
+    func RLA(operand: Operand) {
+
+        // rotateLeft excluding tick
+        var data = read(at: operand)
+        let c = data & 0x80
+
+        data <<= 1
+        if cpu.P.contains(.C) {
+            data |= 0x01
+        }
+
+        cpu.P.remove([.C, .Z, .N])
+        if c == 0x80 {
+            cpu.P.formUnion(.C)
+        }
+
+        cpu.P.setZN(data)
+        write(data, at: operand)
+
+        executeAND(operand: operand)
+    }
+
+    /// logicalShiftRightAndBitwiseExclusiveOR
+    func SRE(operand: Operand) {
+
+        // logicalShiftRight excluding tick
+        var data = read(at: operand)
+        cpu.P.remove([.C, .Z, .N])
+        if data[0] == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        data >>= 1
+
+        cpu.P.setZN(data)
+        write(data, at: operand)
+
+        executeEOR(operand: operand)
+    }
+
+    /// rotateRightAndAddWithCarry
+    func RRA(operand: Operand) {
+
+        // rotateRight excluding tick
+        var data = read(at: operand)
+        let c = data & 0x01
+
+        data >>= 1
+        if cpu.P.contains(.C) {
+            data |= 0x80
+        }
+
+        cpu.P.remove([.C, .Z, .N])
+        if c == 1 {
+            cpu.P.formUnion(.C)
+        }
+
+        cpu.P.setZN(data)
+        write(data, at: operand)
+
+        executeAOR(operand: operand)
+    }
+
+    func branch(operand: Operand, test: Bool) {
+        if test {
+            tick()
+            let pc = Int(cpu.PC)
+            let offset = Int(operand.i8)
+            if pageCrossed(value: pc, operand: offset) {
+                tick()
+            }
+            cpu.PC = UInt16(pc &+ offset)
+        }
+    }
+}
+
 struct CPUInstruction {
     var mnemonic: Mnemonic
     var addressingMode: AddressingMode
-
-    func execute(cpu: inout CPU) {
-        let operand = addressingMode.getOperand(from: &cpu)
-
-        switch (self.mnemonic, self.addressingMode) {
-        case (.LDA, _): LDA(cpu: &cpu, operand: operand)
-        case (.LDX, _): LDX(cpu: &cpu, operand: operand)
-        case (.LDY, _): LDY(cpu: &cpu, operand: operand)
-        case (.STA, .indirectIndexed):
-            STA(cpu: &cpu, operand: operand)
-            cpu.tick()
-        case (.STA, _): STA(cpu: &cpu, operand: operand)
-        case (.STX, _): STX(cpu: &cpu, operand: operand)
-        case (.STY, _): STY(cpu: &cpu, operand: operand)
-        case (.TAX, _): TAX(cpu: &cpu)
-        case (.TSX, _): TSX(cpu: &cpu)
-        case (.TAY, _): TAY(cpu: &cpu)
-        case (.TXA, _): TXA(cpu: &cpu)
-        case (.TXS, _): TXS(cpu: &cpu)
-        case (.TYA, _): TYA(cpu: &cpu)
-        case (.PHA, _): PHA(cpu: &cpu)
-        case (.PHP, _): PHP(cpu: &cpu)
-        case (.PLA, _): PLA(cpu: &cpu)
-        case (.PLP, _): PLP(cpu: &cpu)
-        case (.AND, _): AND(cpu: &cpu, operand: operand)
-        case (.EOR, _): EOR(cpu: &cpu, operand: operand)
-        case (.ORA, _): ORA(cpu: &cpu, operand: operand)
-        case (.BIT, _): BIT(cpu: &cpu, operand: operand)
-        case (.ADC, _): ADC(cpu: &cpu, operand: operand)
-        case (.SBC, _): SBC(cpu: &cpu, operand: operand)
-        case (.CMP, _): CMP(cpu: &cpu, operand: operand)
-        case (.CPX, _): CPX(cpu: &cpu, operand: operand)
-        case (.CPY, _): CPY(cpu: &cpu, operand: operand)
-        case (.INC, _): INC(cpu: &cpu, operand: operand)
-        case (.INX, _): INX(cpu: &cpu)
-        case (.INY, _): INY(cpu: &cpu)
-        case (.DEC, _): DEC(cpu: &cpu, operand: operand)
-        case (.DEX, _): DEX(cpu: &cpu)
-        case (.DEY, _): DEY(cpu: &cpu)
-        case (.ASL, .accumulator): ASLForAccumulator(cpu: &cpu)
-        case (.ASL, _): ASL(cpu: &cpu, operand: operand)
-        case (.LSR, .accumulator): LSRForAccumulator(cpu: &cpu)
-        case (.LSR, _): LSR(cpu: &cpu, operand: operand)
-        case (.ROL, .accumulator): ROLForAccumulator(cpu: &cpu)
-        case (.ROL, _): ROL(cpu: &cpu, operand: operand)
-        case (.ROR, .accumulator): RORForAccumulator(cpu: &cpu)
-        case (.ROR, _): ROR(cpu: &cpu, operand: operand)
-        case (.JMP, _): JMP(cpu: &cpu, operand: operand)
-        case (.JSR, _): JSR(cpu: &cpu, operand: operand)
-        case (.RTS, _): RTS(cpu: &cpu)
-        case (.RTI, _): RTI(cpu: &cpu)
-        case (.BCC, _): BCC(cpu: &cpu, operand: operand)
-        case (.BCS, _): BCS(cpu: &cpu, operand: operand)
-        case (.BEQ, _): BEQ(cpu: &cpu, operand: operand)
-        case (.BMI, _): BMI(cpu: &cpu, operand: operand)
-        case (.BNE, _): BNE(cpu: &cpu, operand: operand)
-        case (.BPL, _): BPL(cpu: &cpu, operand: operand)
-        case (.BVC, _): BVC(cpu: &cpu, operand: operand)
-        case (.BVS, _): BVS(cpu: &cpu, operand: operand)
-        case (.CLC, _): CLC(cpu: &cpu)
-        case (.CLD, _): CLD(cpu: &cpu)
-        case (.CLI, _): CLI(cpu: &cpu)
-        case (.CLV, _): CLV(cpu: &cpu)
-        case (.SEC, _): SEC(cpu: &cpu)
-        case (.SED, _): SED(cpu: &cpu)
-        case (.SEI, _): SEI(cpu: &cpu)
-        case (.BRK, _): BRK(cpu: &cpu)
-        case (.NOP, _): NOP(cpu: &cpu)
-        case (.LAX, _): LAX(cpu: &cpu, operand: operand)
-        case (.SAX, _): SAX(cpu: &cpu, operand: operand)
-        case (.DCP, _): DCP(cpu: &cpu, operand: operand)
-        case (.ISB, _): ISB(cpu: &cpu, operand: operand)
-        case (.SLO, _): SLO(cpu: &cpu, operand: operand)
-        case (.RLA, _): RLA(cpu: &cpu, operand: operand)
-        case (.SRE, _): SRE(cpu: &cpu, operand: operand)
-        case (.RRA, _): RRA(cpu: &cpu, operand: operand)
-        }
-    }
-}
-
-// MARK: - Operations
-
-// Implements for Load/Store Operations
-
-/// loadAccumulator
-func LDA(cpu: inout CPU, operand: Operand) {
-    cpu.A = cpu.read(at: operand)
-}
-
-/// loadXRegister
-func LDX(cpu: inout CPU, operand: Operand) {
-    cpu.X = cpu.read(at: operand)
-}
-
-/// loadYRegister
-func LDY(cpu: inout CPU, operand: Operand) {
-    cpu.Y = cpu.read(at: operand)
-}
-
-/// storeAccumulator
-func STA(cpu: inout CPU, operand: Operand) {
-    cpu.write(cpu.A, at: operand)
-}
-
-func STAWithTick(cpu: inout CPU, operand: Operand) {
-    cpu.write(cpu.A, at: operand)
-    cpu.tick()
-}
-
-/// storeXRegister
-func STX(cpu: inout CPU, operand: Operand) {
-    cpu.write(cpu.X, at: operand)
-}
-
-/// storeYRegister
-func STY(cpu: inout CPU, operand: Operand) {
-    cpu.write(cpu.Y, at: operand)
-}
-
-// MARK: - cpu Operations
-/// transferAccumulatorToX
-func TAX(cpu: inout CPU) {
-    cpu.X = cpu.A
-    cpu.tick()
-}
-
-/// transferStackPointerToX
-func TSX(cpu: inout CPU) {
-    cpu.X = cpu.S
-    cpu.tick()
-}
-
-/// transferAccumulatorToY
-func TAY(cpu: inout CPU) {
-    cpu.Y = cpu.A
-    cpu.tick()
-}
-
-/// transferXtoAccumulator
-func TXA(cpu: inout CPU) {
-    cpu.A = cpu.X
-    cpu.tick()
-}
-
-/// transferXtoStackPointer
-func TXS(cpu: inout CPU) {
-    cpu.S = cpu.X
-    cpu.tick()
-}
-
-/// transferYtoAccumulator
-func TYA(cpu: inout CPU) {
-    cpu.A = cpu.Y
-    cpu.tick()
-}
-
-// MARK: - Stack instructions
-/// pushAccumulator
-func PHA(cpu: inout CPU) {
-    cpu.pushStack(cpu.A)
-    cpu.tick()
-}
-
-/// pushProcessorStatus
-func PHP(cpu: inout CPU) {
-    // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
-    // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    cpu.pushStack(cpu.P.rawValue | CPU.Status.operatedB.rawValue)
-    cpu.tick()
-}
-
-/// pullAccumulator
-func PLA(cpu: inout CPU) {
-    cpu.A = cpu.pullStack()
-    cpu.tick(count: 2)
-}
-
-/// pullProcessorStatus
-func PLP(cpu: inout CPU) {
-    // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
-    // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    cpu.P = CPU.Status(rawValue: cpu.pullStack() & ~CPU.Status.B.rawValue | CPU.Status.R.rawValue)
-    cpu.tick(count: 2)
-}
-
-// MARK: - Logical instructions
-/// bitwiseANDwithAccumulator
-func AND(cpu: inout CPU, operand: Operand) {
-    cpu.A &= cpu.read(at: operand)
-}
-
-func executeAND(operand: Operand, cpu: inout CPU) {
-    cpu.A &= cpu.read(at: operand)
-}
-
-/// bitwiseExclusiveOR
-func EOR(cpu: inout CPU, operand: Operand) {
-    executeEOR(operand: operand, cpu: &cpu)
-}
-
-func executeEOR(operand: Operand, cpu: inout CPU) {
-    cpu.A ^= cpu.read(at: operand)
-}
-
-/// bitwiseORwithAccumulator
-func ORA(cpu: inout CPU, operand: Operand) {
-    executeORA(operand: operand, cpu: &cpu)
-}
-
-func executeORA(operand: Operand, cpu: inout CPU) {
-    cpu.A |= cpu.read(at: operand)
-}
-
-/// testBits
-func BIT(cpu: inout CPU, operand: Operand) {
-
-    let value = cpu.read(at: operand)
-    let data = cpu.A & value
-    cpu.P.remove([.Z, .V, .N])
-    if data == 0 {
-        cpu.P.formUnion(.Z)
-    } else {
-        cpu.P.remove(.Z)
-    }
-    if value[6] == 1 {
-        cpu.P.formUnion(.V)
-    } else {
-        cpu.P.remove(.V)
-    }
-    if value[7] == 1 {
-        cpu.P.formUnion(.N)
-    } else {
-        cpu.P.remove(.N)
-    }
-}
-
-// MARK: - Arithmetic instructions
-/// addWithCarry
-func ADC(cpu: inout CPU, operand: Operand) {
-    executeAOR(operand: operand, cpu: &cpu)
-}
-
-func executeAOR(operand: Operand, cpu: inout CPU) {
-    let a = cpu.A
-    let val = cpu.read(at: operand)
-    var result = a &+ val
-
-    if cpu.P.contains(.C) {
-        result &+= 1
-    }
-
-    cpu.P.remove([.C, .Z, .V, .N])
-
-    // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-    let a7 = a[7]
-    let v7 = val[7]
-    let c6 = a7 ^ v7 ^ result[7]
-    let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
-
-    if c7 == 1 {
-        cpu.P.formUnion(.C)
-    }
-    if c6 ^ c7 == 1 {
-        cpu.P.formUnion(.V)
-    }
-
-    cpu.A = result
-}
-
-/// subtractWithCarry
-func SBC(cpu: inout CPU, operand: Operand) {
-
-    let a = cpu.A
-    let val = ~cpu.read(at: operand)
-    var result = a &+ val
-
-    if cpu.P.contains(.C) {
-        result &+= 1
-    }
-
-    cpu.P.remove([.C, .Z, .V, .N])
-
-    // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-    let a7 = a[7]
-    let v7 = val[7]
-    let c6 = a7 ^ v7 ^ result[7]
-    let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
-
-    if c7 == 1 {
-        cpu.P.formUnion(.C)
-    }
-    if c6 ^ c7 == 1 {
-        cpu.P.formUnion(.V)
-    }
-
-    cpu.A = result
-}
-
-func executeSBC(operand: Operand, cpu: inout CPU) {
-    let a = cpu.A
-    let val = ~cpu.read(at: operand)
-    var result = a &+ val
-
-    if cpu.P.contains(.C) {
-        result &+= 1
-    }
-
-    cpu.P.remove([.C, .Z, .V, .N])
-
-    // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-    let a7 = a[7]
-    let v7 = val[7]
-    let c6 = a7 ^ v7 ^ result[7]
-    let c7 = (a7 & v7) | (a7 & c6) | (v7 & c6)
-
-    if c7 == 1 {
-        cpu.P.formUnion(.C)
-    }
-    if c6 ^ c7 == 1 {
-        cpu.P.formUnion(.V)
-    }
-
-    cpu.A = result
-}
-
-/// compareAccumulator
-func CMP(cpu: inout CPU, operand: Operand) {
-
-    executeCMP(operand: operand, cpu: &cpu)
-}
-
-func executeCMP(operand: Operand, cpu: inout CPU) {
-    let cmp = Int16(cpu.A) &- Int16(cpu.read(at: operand))
-
-    cpu.P.remove([.C, .Z, .N])
-    cpu.P.setZN(cmp)
-    if 0 <= cmp {
-        cpu.P.formUnion(.C)
-    } else {
-        cpu.P.remove(.C)
-    }
-}
-
-/// compareXRegister
-func CPX(cpu: inout CPU, operand: Operand) {
-
-    let value = cpu.read(at: operand)
-    let cmp = cpu.X &- value
-
-    cpu.P.remove([.C, .Z, .N])
-    cpu.P.setZN(cmp)
-    if cpu.X >= value {
-        cpu.P.formUnion(.C)
-    } else {
-        cpu.P.remove(.C)
-    }
-}
-
-/// compareYRegister
-func CPY(cpu: inout CPU, operand: Operand) {
-
-    let value = cpu.read(at: operand)
-    let cmp = cpu.Y &- value
-
-    cpu.P.remove([.C, .Z, .N])
-    cpu.P.setZN(cmp)
-    if cpu.Y >= value {
-        cpu.P.formUnion(.C)
-    } else {
-        cpu.P.remove(.C)
-    }
-}
-
-// MARK: - Increment/Decrement instructions
-/// incrementMemory
-func INC(cpu: inout CPU, operand: Operand) {
-
-    let result = cpu.read(at: operand) &+ 1
-
-    cpu.P.setZN(result)
-    cpu.write(result, at: operand)
-
-    cpu.tick()
-}
-
-/// incrementX
-func INX(cpu: inout CPU) {
-    cpu.X = cpu.X &+ 1
-    cpu.tick()
-}
-
-/// incrementY
-func INY(cpu: inout CPU) {
-    cpu.Y = cpu.Y &+ 1
-    cpu.tick()
-}
-
-/// decrementMemory
-func DEC(cpu: inout CPU, operand: Operand) {
-
-    let result = cpu.read(at: operand) &- 1
-    cpu.P.setZN(result)
-
-    cpu.write(result, at: operand)
-    cpu.tick()
-}
-
-/// decrementX
-func DEX(cpu: inout CPU) {
-    cpu.X = cpu.X &- 1
-    cpu.tick()
-}
-
-/// decrementY
-func DEY(cpu: inout CPU) {
-    cpu.Y = cpu.Y &- 1
-    cpu.tick()
-}
-
-// MARK: - Shift instructions
-/// arithmeticShiftLeft
-func ASL(cpu: inout CPU, operand: Operand) {
-
-    var data = cpu.read(at: operand)
-
-    cpu.P.remove([.C, .Z, .N])
-    if data[7] == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    data <<= 1
-
-    cpu.P.setZN(data)
-
-    cpu.write(data, at: operand)
-
-    cpu.tick()
-}
-
-func ASLForAccumulator(cpu: inout CPU) {
-    cpu.P.remove([.C, .Z, .N])
-    if cpu.A[7] == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    cpu.A <<= 1
-
-    cpu.tick()
-}
-
-/// logicalShiftRight
-func LSR(cpu: inout CPU, operand: Operand) {
-
-    var data = cpu.read(at: operand)
-
-    cpu.P.remove([.C, .Z, .N])
-    if data[0] == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    data >>= 1
-
-    cpu.P.setZN(data)
-
-    cpu.write(data, at: operand)
-
-    cpu.tick()
-}
-
-func LSRForAccumulator(cpu: inout CPU) {
-    cpu.P.remove([.C, .Z, .N])
-    if cpu.A[0] == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    cpu.A >>= 1
-
-    cpu.tick()
-}
-
-/// rotateLeft
-func ROL(cpu: inout CPU, operand: Operand) {
-
-    var data = cpu.read(at: operand)
-    let c = data & 0x80
-
-    data <<= 1
-    if cpu.P.contains(.C) {
-        data |= 0x01
-    }
-
-    cpu.P.remove([.C, .Z, .N])
-    if c == 0x80 {
-        cpu.P.formUnion(.C)
-    }
-
-    cpu.P.setZN(data)
-
-    cpu.write(data, at: operand)
-
-    cpu.tick()
-}
-
-func ROLForAccumulator(cpu: inout CPU) {
-    let c = cpu.A & 0x80
-
-    var a = cpu.A << 1
-    if cpu.P.contains(.C) {
-        a |= 0x01
-    }
-
-    cpu.P.remove([.C, .Z, .N])
-    if c == 0x80 {
-        cpu.P.formUnion(.C)
-    }
-
-    cpu.A = a
-
-    cpu.tick()
-}
-
-/// rotateRight
-func ROR(cpu: inout CPU, operand: Operand) {
-
-    var data = cpu.read(at: operand)
-    let c = data & 0x01
-
-    data >>= 1
-    if cpu.P.contains(.C) {
-        data |= 0x80
-    }
-
-    cpu.P.remove([.C, .Z, .N])
-    if c == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    cpu.P.setZN(data)
-
-    cpu.write(data, at: operand)
-
-    cpu.tick()
-}
-
-func RORForAccumulator(cpu: inout CPU) {
-    let c = cpu.A & 0x01
-
-    var a = cpu.A >> 1
-    if cpu.P.contains(.C) {
-        a |= 0x80
-    }
-
-    cpu.P.remove([.C, .Z, .N])
-    if c == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    cpu.A = a
-
-    cpu.tick()
-}
-
-// MARK: - Jump instructions
-/// jump
-func JMP(cpu: inout CPU, operand: Operand) {
-
-    cpu.PC = operand
-}
-
-/// jumpToSubroutine
-func JSR(cpu: inout CPU, operand: Operand) {
-
-    cpu.pushStack(word: cpu.PC &- 1)
-    cpu.tick()
-    cpu.PC = operand
-}
-
-/// returnFromSubroutine
-func RTS(cpu: inout CPU) {
-    cpu.tick(count: 3)
-    cpu.PC = cpu.pullStack() &+ 1
-}
-
-/// returnFromInterrupt
-func RTI(cpu: inout CPU) {
-    // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
-    // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    cpu.tick(count: 2)
-    cpu.P = CPU.Status(rawValue: cpu.pullStack() & ~CPU.Status.B.rawValue | CPU.Status.R.rawValue)
-    cpu.PC = cpu.pullStack()
-}
-
-// MARK: - Branch instructions
-/// branchIfCarryClear
-func BCC(cpu: inout CPU, operand: Operand) {
-
-    branch(operand: operand, test: !cpu.P.contains(.C), cpu: &cpu)
-}
-
-/// branchIfCarrySet
-func BCS(cpu: inout CPU, operand: Operand) {
-
-    branch(operand: operand, test: cpu.P.contains(.C), cpu: &cpu)
-}
-
-/// branchIfEqual
-func BEQ(cpu: inout CPU, operand: Operand) {
-
-    branch(operand: operand, test: cpu.P.contains(.Z), cpu: &cpu)
-}
-
-/// branchIfMinus
-func BMI(cpu: inout CPU, operand: Operand) {
-
-    branch(operand: operand, test: cpu.P.contains(.N), cpu: &cpu)
-}
-
-/// branchIfNotEqual
-func BNE(cpu: inout CPU, operand: Operand) {
-
-    branch(operand: operand, test: !cpu.P.contains(.Z), cpu: &cpu)
-}
-
-/// branchIfPlus
-func BPL(cpu: inout CPU, operand: Operand) {
-
-    branch(operand: operand, test: !cpu.P.contains(.N), cpu: &cpu)
-}
-
-/// branchIfOverflowClear
-func BVC(cpu: inout CPU, operand: Operand) {
-
-    branch(operand: operand, test: !cpu.P.contains(.V), cpu: &cpu)
-}
-
-/// branchIfOverflowSet
-func BVS(cpu: inout CPU, operand: Operand) {
-
-    branch(operand: operand, test: cpu.P.contains(.V), cpu: &cpu)
-}
-
-// MARK: - Flag control instructions
-/// clearCarry
-func CLC(cpu: inout CPU) {
-    cpu.P.remove(.C)
-    cpu.tick()
-}
-
-/// clearDecimal
-func CLD(cpu: inout CPU) {
-    cpu.P.remove(.D)
-    cpu.tick()
-}
-
-/// clearInterrupt
-func CLI(cpu: inout CPU) {
-    cpu.P.remove(.I)
-    cpu.tick()
-}
-
-/// clearOverflow
-func CLV(cpu: inout CPU) {
-    cpu.P.remove(.V)
-    cpu.tick()
-}
-
-/// setCarryFlag
-func SEC(cpu: inout CPU) {
-    cpu.P.formUnion(.C)
-    cpu.tick()
-}
-
-/// setDecimalFlag
-func SED(cpu: inout CPU) {
-    cpu.P.formUnion(.D)
-    cpu.tick()
-}
-
-/// setInterruptDisable
-func SEI(cpu: inout CPU) {
-    cpu.P.formUnion(.I)
-    cpu.tick()
-}
-
-// MARK: - Misc
-/// forceInterrupt
-func BRK(cpu: inout CPU) {
-    cpu.pushStack(word: cpu.PC)
-    // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
-    // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-    cpu.pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue)
-    cpu.tick()
-    cpu.PC = cpu.readWord(at: 0xFFFE)
-}
-
-/// doNothing
-func NOP(cpu: inout CPU) {
-    cpu.tick()
-}
-
-// MARK: - Unofficial
-/// loadAccumulatorAndX
-func LAX(cpu: inout CPU, operand: Operand) {
-
-    let data = cpu.read(at: operand)
-    cpu.A = data
-    cpu.X = data
-}
-
-/// storeAccumulatorAndX
-func SAX(cpu: inout CPU, operand: Operand) {
-
-    cpu.write(cpu.A & cpu.X, at: operand)
-}
-
-/// decrementMemoryAndCompareAccumulator
-func DCP(cpu: inout CPU, operand: Operand) {
-
-    // decrementMemory excluding tick
-    let result = cpu.read(at: operand) &- 1
-    cpu.P.setZN(result)
-    cpu.write(result, at: operand)
-
-    executeCMP(operand: operand, cpu: &cpu)
-}
-
-/// incrementMemoryAndSubtractWithCarry
-func ISB(cpu: inout CPU, operand: Operand) {
-
-    // incrementMemory excluding tick
-    let result = cpu.read(at: operand) &+ 1
-    cpu.P.setZN(result)
-    cpu.write(result, at: operand)
-
-    executeSBC(operand: operand, cpu: &cpu)
-}
-
-/// arithmeticShiftLeftAndBitwiseORwithAccumulator
-func SLO(cpu: inout CPU, operand: Operand) {
-
-    // arithmeticShiftLeft excluding tick
-    var data = cpu.read(at: operand)
-    cpu.P.remove([.C, .Z, .N])
-    if data[7] == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    data <<= 1
-    cpu.P.setZN(data)
-    cpu.write(data, at: operand)
-
-    executeORA(operand: operand, cpu: &cpu)
-}
-
-/// rotateLeftAndBitwiseANDwithAccumulator
-func RLA(cpu: inout CPU, operand: Operand) {
-
-    // rotateLeft excluding tick
-    var data = cpu.read(at: operand)
-    let c = data & 0x80
-
-    data <<= 1
-    if cpu.P.contains(.C) {
-        data |= 0x01
-    }
-
-    cpu.P.remove([.C, .Z, .N])
-    if c == 0x80 {
-        cpu.P.formUnion(.C)
-    }
-
-    cpu.P.setZN(data)
-    cpu.write(data, at: operand)
-
-    executeAND(operand: operand, cpu: &cpu)
-}
-
-/// logicalShiftRightAndBitwiseExclusiveOR
-func SRE(cpu: inout CPU, operand: Operand) {
-
-    // logicalShiftRight excluding tick
-    var data = cpu.read(at: operand)
-    cpu.P.remove([.C, .Z, .N])
-    if data[0] == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    data >>= 1
-
-    cpu.P.setZN(data)
-    cpu.write(data, at: operand)
-
-    executeEOR(operand: operand, cpu: &cpu)
-}
-
-/// rotateRightAndAddWithCarry
-func RRA(cpu: inout CPU, operand: Operand) {
-
-    // rotateRight excluding tick
-    var data = cpu.read(at: operand)
-    let c = data & 0x01
-
-    data >>= 1
-    if cpu.P.contains(.C) {
-        data |= 0x80
-    }
-
-    cpu.P.remove([.C, .Z, .N])
-    if c == 1 {
-        cpu.P.formUnion(.C)
-    }
-
-    cpu.P.setZN(data)
-    cpu.write(data, at: operand)
-
-    executeAOR(operand: operand, cpu: &cpu)
-}
-
-func branch(operand: Operand, test: Bool, cpu: inout CPU) {
-    if test {
-        cpu.tick()
-        let pc = Int(cpu.PC)
-        let offset = Int(operand.i8)
-        if pageCrossed(value: pc, operand: offset) {
-            cpu.tick()
-        }
-        cpu.PC = UInt16(pc &+ offset)
-    }
 }

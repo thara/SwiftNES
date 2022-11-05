@@ -13,11 +13,11 @@ struct NESTest {
         self.interruptLine = interruptLine
     }
 
-    mutating func before(cpu: inout CPU) {
+    mutating func before(nes: NES) {
         enabled = !interruptLine.interrupted
         if enabled {
-            (machineCode, assemblyCode) = Disassembler.disassemble(cpu: &cpu)
-            self.cpu = cpu
+            (machineCode, assemblyCode) = Disassembler.disassemble(emu: nes)
+            self.cpu = nes.cpu
         }
     }
 
@@ -35,15 +35,15 @@ struct NESTest {
     public func nestest(romPath: String) throws {
         let cartridge = try Cartridge(file: try NESFile(path: romPath))
 
-        let nes = NES()
-        nes.insert(cartridge: cartridge)
-
         let renderer = DummyLineRenderer()
         let audioBuffer = DummyAudioBuffer()
 
+        let nes = NES(withRenderer: renderer, withAudio: audioBuffer)
+        nes.insert(cartridge: cartridge)
+
         while true {
-            nes.step(withRenderer: renderer, withAudio: audioBuffer)
-            if 26554 < nes.cycles {
+            nes.step()
+            if 26554 < nes.cpu.cycles {
                 break
             }
         }

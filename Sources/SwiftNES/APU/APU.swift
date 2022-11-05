@@ -490,7 +490,7 @@ extension DMC {
 
             // Memory Reader
             if sampleBufferEmpty && bytesRemainingCounter != 0 {
-                sampleBuffer = memoryReader.read(at: addressCounter)
+                sampleBuffer = memoryReader.readDMC(at: addressCounter)
                 addressCounter &+= 1
                 if addressCounter == 0 {
                     addressCounter = 0x8000
@@ -569,6 +569,6 @@ public protocol AudioBuffer {
     func write(_ sample: Float)
 }
 
-public protocol DMCMemoryReader {
-    func read(at address: UInt16) -> UInt8
+protocol DMCMemoryReader: AnyObject {
+    func readDMC(at address: UInt16) -> UInt8
 }

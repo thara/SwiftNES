@@ -1,48 +1,47 @@
-extension CPU {
-    /// Reset registers & memory state
-    mutating func reset() {
+extension CPUEmulator {
+    func reset() {
         tick(count: 5)
         #if nestest
-            PC = 0xC000
+            cpu.PC = 0xC000
             tick(count: 2)
         #else
-            PC = readWord(at: 0xFFFC)
-            P.formUnion(.I)
-            S -= 3
+            cpu.PC = readWord(at: 0xFFFC)
+            cpu.P.formUnion(.I)
+            cpu.S -= 3
         #endif
     }
 
-    mutating func handleNMI() {
+    func handleNMI() {
         tick(count: 2)
 
-        pushStack(word: PC)
+        pushStack(word: cpu.PC)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.interruptedB.rawValue)
-        P.formUnion(.I)
-        PC = readWord(at: 0xFFFA)
+        pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue)
+        cpu.P.formUnion(.I)
+        cpu.PC = readWord(at: 0xFFFA)
     }
 
-    mutating func handleIRQ() {
+    func handleIRQ() {
         tick(count: 2)
 
-        pushStack(word: PC)
+        pushStack(word: cpu.PC)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.interruptedB.rawValue)
-        P.formUnion(.I)
-        PC = readWord(at: 0xFFFE)
+        pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue)
+        cpu.P.formUnion(.I)
+        cpu.PC = readWord(at: 0xFFFE)
     }
 
-    mutating func handleBRK() {
+    func handleBRK() {
         tick(count: 2)
 
-        PC &+= 1
-        pushStack(word: PC)
+        cpu.PC &+= 1
+        pushStack(word: cpu.PC)
         // https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         // http://visual6502.org/wiki/index.php?title=6502_BRK_and_B_bit
-        pushStack(P.rawValue | Status.interruptedB.rawValue)
-        P.formUnion(.I)
-        PC = readWord(at: 0xFFFE)
+        pushStack(cpu.P.rawValue | CPU.Status.interruptedB.rawValue)
+        cpu.P.formUnion(.I)
+        cpu.PC = readWord(at: 0xFFFE)
     }
 }

@@ -1,9 +1,12 @@
 public final class NES {
-    private var cpu: CPU
+    var cpu: CPU
+    private var wram: [UInt8]
+
     private let ppu: PPU
     var apu: APUPort
 
-    private let cpuBus = CPUBus()
+    var cartridge: Cartridge?
+
     private let ppuBus = PPUBus()
 
     private let controllerPort = ControllerPort()
@@ -18,93 +21,67 @@ public final class NES {
 
     private var nestest: NESTest
 
-    private(set) var cycles: UInt = 0
-
     private var lineBuffer = LineBuffer()
+
+    var lineRenderer: LineRenderer
+    var audioBuffer: AudioBuffer
 
     let samplingFrequency: UInt = 1_789_772
     let downSamplingRate: UInt = 44100
 
-    public init() {
+    public init(withRenderer lineRenderer: LineRenderer, withAudio audioBuffer: AudioBuffer) {
+        self.wram = [UInt8](repeating: 0x00, count: 32767)
+
         interruptLine = InterruptLine()
 
-        cpu = CPU(bus: cpuBus)
+        cpu = CPU()
         ppu = PPU(bus: ppuBus)
-        cpuBus.ppuPort = ppu
-        cpuBus.controllerPort = controllerPort
 
         let apu = APU(sampleRate: samplingFrequency / downSamplingRate, framePeriod: 7458)
         self.apu = APUPort(apu: apu)
-        cpuBus.apuPort = self.apu
 
         nestest = NESTest(interruptLine: interruptLine)
+
+        self.lineRenderer = lineRenderer
+        self.audioBuffer = audioBuffer
     }
 
-    public func runFrame<L: LineRenderer, A: AudioBuffer>(
-        withRenderer renderer: L, withAudio audioBuffer: A
-    ) {
+    public func runFrame() {
         let currentFrame = ppu.frames
 
         repeat {
-            step(withRenderer: renderer, withAudio: audioBuffer)
+            step()
         } while currentFrame == ppu.frames
     }
 
-    public func step<L: LineRenderer, A: AudioBuffer>(
-        withRenderer renderer: L, withAudio audioBuffer: A
-    ) {
+    public func step() {
         #if nestest
             if !interruptLine.interrupted {
-                nestest.before(cpu: &cpu)
+                nestest.before(nes: self)
             }
         #endif
 
-        let cpuCycles = cpu.step(interruptLine: interruptLine)
-        cycles &+= cpuCycles
-
-        for _ in 0..<cpuCycles {
-            let cpuSteel = apu.step(audioBuffer: audioBuffer, memoryReader: cpuBus)
-            if cpuSteel {
-                cycles &+= 4
-            }
-        }
-
-        // FIXME
-        // if apu.frameInterrupted {
-        //     interruptLine.send(.IRQ)
-        // }
+        cpuStep(interruptLine: interruptLine)
 
         #if nestest
-            nestest.print(ppu: ppu, cycles: cycles)
+            nestest.print(ppu: ppu, cycles: cpu.cycles)
             if interruptLine.interrupted {
                 return
             }
         #endif
-
-        var ppuCycles = cpuCycles &* 3
-        while 0 < ppuCycles {
-            let currentLine = ppu.line
-
-            ppu.step(writeTo: &lineBuffer, interruptLine: interruptLine)
-
-            if currentLine != ppu.line {
-                renderer.newLine(at: currentLine, by: &lineBuffer)
-            }
-
-            ppuCycles &-= 1
-        }
     }
 
     public func insert(cartridge: Cartridge) {
-        cpuBus.cartridge = cartridge
+        self.cartridge = cartridge
         ppuBus.cartridge = cartridge
 
-        cpu.powerOn()
+        cpuPowerOn()
 
         interruptLine.clear([.NMI, .IRQ])
         interruptLine.send(.RESET)
 
-        cpu.bus.clear()
+        wram = [UInt8](repeating: 0x00, count: 32767)
+
         ppu.reset()
         lineBuffer.clear()
 
@@ -117,8 +94,79 @@ public final class NES {
     }
 }
 
+extension NES: CPUEmulator {
+    func cpuRead(at address: UInt16) -> UInt8 {
+        switch address {
+        case 0x0000...0x1FFF:
+            return wram.read(at: address)
+        case 0x2000...0x3FFF:
+            return ppu.read(from: ppuAddress(address))
+        case 0x4000...0x4013, 0x4015:
+            return apu.read(from: address)
+        case 0x4016, 0x4017:
+            return controllerPort.read(at: address)
+        case 0x4020...0xFFFF:
+            return cartridge?.read(at: address) ?? 0x00
+        default:
+            return 0x00
+        }
+    }
+
+    /// Write the given `value` at the `address` into this memory
+    func cpuWrite(_ value: UInt8, at address: UInt16) {
+        switch address {
+        case 0x0000...0x07FF:
+            wram.write(value, at: address)
+        case 0x2000...0x3FFF:
+            ppu.write(value, to: ppuAddress(address))
+        case 0x4000...0x4013, 0x4015:
+            apu.write(value, to: address)
+        case 0x4016:
+            controllerPort.write(value)
+        case 0x4017:
+            controllerPort.write(value)
+            apu.write(value, to: address)
+        case 0x4020...0xFFFF:
+            cartridge?.write(value, at: address)
+        default:
+            break
+        }
+    }
+
+    func cpuTick() {
+        cpu.cycles += 1
+
+        let cpuSteel = apu.step(audioBuffer: audioBuffer, memoryReader: self)
+        if cpuSteel {
+            cpu.cycles &+= 4
+        }
+
+        var ppuCycles = 3
+        while 0 < ppuCycles {
+            let currentLine = ppu.line
+
+            ppu.step(writeTo: &lineBuffer, interruptLine: interruptLine)
+
+            if currentLine != ppu.line {
+                lineRenderer.newLine(at: currentLine, by: &lineBuffer)
+            }
+
+            ppuCycles &-= 1
+        }
+    }
+
+    private func ppuAddress(_ address: UInt16) -> UInt16 {
+        // repears every 8 bytes
+        return 0x2000 &+ address % 8
+    }
+}
+
 public protocol LineRenderer {
     func newLine(at: Int, by: inout LineBuffer)
 }
 
-extension CPUBus: DMCMemoryReader {}
+extension NES: DMCMemoryReader {
+    func readDMC(at address: UInt16) -> UInt8 {
+        return cpuRead(at: address)
+    }
+}

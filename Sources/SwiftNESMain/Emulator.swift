@@ -53,13 +53,14 @@ final class Emulator {
 
         controller = VirtualStandardController()
 
-        nes = NES()
+        audioBuffer = SDLAudioBuffer(sampleRate: 44100, channels: 1, bufferSize: 4096)
+
+        nes = NES(withRenderer: frameRenderer, withAudio: audioBuffer)
         nes.connect(controller1: controller.nesController, controller2: nil)
 
         event = SDL_Event()
 
         // audioBuffer = SDLAudioBuffer(sampleRate: 96000, channels: 2, bufferSize: 4096)
-        audioBuffer = SDLAudioBuffer(sampleRate: 44100, channels: 1, bufferSize: 4096)
     }
 
     deinit {
@@ -103,7 +104,7 @@ final class Emulator {
 
             controller.update(keys: currentKeys)
 
-            nes.runFrame(withRenderer: frameRenderer, withAudio: audioBuffer)
+            nes.runFrame()
 
             let endPerf = SDL_GetPerformanceCounter()
 
