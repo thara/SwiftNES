@@ -87,18 +87,18 @@ final class Emulator {
         }
 
         while isRunning {
+            SDL_PollEvent(&event)
+
             let startTicks = SDL_GetTicks()
             let startPerf = SDL_GetPerformanceCounter()
 
             let eventType = SDL_EventType(rawValue: event.type)
 
-            while SDL_PollEvent(&event) != 0 {
-                switch eventType {
-                case SDL_QUIT, SDL_APP_TERMINATING:
-                    isRunning = false
-                default:
-                    break
-                }
+            switch eventType {
+            case SDL_QUIT, SDL_APP_TERMINATING:
+                isRunning = false
+            default:
+                break
             }
 
             controller.update(keys: currentKeys)
